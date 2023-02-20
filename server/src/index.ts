@@ -1,3 +1,4 @@
+// TODO comments
 import express from "express";
 import useRoutes from "./routes/use_routes";
 import cors from "cors";
@@ -8,7 +9,6 @@ const port = 3456;
 // Routes
 app.use(cors());
 app.use("/", useRoutes);
-app.use(express.static("../../data"));
 
 // handle undefined Routes
 // app.use("*", (req, res, next) => {

@@ -5,36 +5,31 @@ import path from "path";
 const prisma = new PrismaClient();
 
 const main = async () => {
-  // NOTE path.resolve
-  const filePath = path.resolve("../../data/geojson/polygon.json");
-  // await prisma.data.create({
+  const info = await prisma.data.findMany();
+  const keys = info.map((value) => value.id);
+
+  // await prisma.case.create({
   //   data: {
   //     author: "孔潇涵",
-  //     data: filePath,
-  //     description: "示例数据",
+  //     description: "示例案例",
   //     id: crypto.randomUUID(),
   //     image: "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png",
-  //     time: new Date("2023-02-18"),
-  //     title: "面要素示例数据",
-  //     tags: ["示例数据"],
+  //     time: new Date("2023-2-20"),
+  //     title: "示例案例",
+  //     tags: "示例案例",
+  //     data: keys,
   //   },
   // });
 
-  await prisma.data.updateMany({
-    where: {
-      author: "孔潇涵",
-    },
-    data: {
-      time: new Date("2023-02-18"),
-    },
-  });
-
-  const info = await prisma.data.findMany({
-    where: {
-      author: "孔潇涵",
-    },
-  });
-  console.log(info);
+  // await prisma.data.updateMany({
+  //   where: {
+  //     author: "孔潇涵",
+  //   },
+  //   data: {
+  //     time: new Date("2023-02-18"),
+  //   },
+  // });
+  console.log(await prisma.case.findMany());
 };
 
 main()

@@ -1,0 +1,11 @@
+{
+  "name": "001_model_interaction_platform",
+  "version": "1.0.0",
+  "private":"true",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "nodemon src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "ISC"
+}

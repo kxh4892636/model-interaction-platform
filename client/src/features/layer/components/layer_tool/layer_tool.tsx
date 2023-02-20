@@ -33,7 +33,7 @@ type AppProps = { title: string; icon: JSX.Element; action: Function };
  * @param icon tool icon
  * @param action tool's click event
  */
-const PanelTool = ({ title, icon, action }: AppProps) => {
+const LayerTool = ({ title, icon, action }: AppProps) => {
   return (
     <Tooltip placement="bottom" title={title}>
       <StyledDiv
@@ -48,4 +48,4 @@ const PanelTool = ({ title, icon, action }: AppProps) => {
   );
 };
 
-export default PanelTool;
+export default LayerTool;

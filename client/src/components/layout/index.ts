@@ -4,4 +4,4 @@ export {
   PanelTitleContainer,
   PanelToolsContainer,
   PanelToolContainer,
-} from "./panel_layout";
+} from "./layout";

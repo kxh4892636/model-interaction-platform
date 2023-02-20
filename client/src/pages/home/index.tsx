@@ -9,12 +9,14 @@
  */
 
 import styled from "styled-components";
-import { CloudUploadOutlined, AppstoreOutlined, DatabaseOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, DatabaseOutlined } from "@ant-design/icons";
 import { LayerOutlined } from "../../components/icons";
 import Sidebar from "../../features/sidebar";
 import useMapPositionStore from "../../stores/map_postion_store";
 import { MapView, MapStatus } from "../../features/map";
-import { UploadPanel, LayerPanel, DataPanel } from "../../features/panelbox";
+import { LayerPanel } from "../../features/layer";
+import { CasePanel } from "../../features/case";
+import { DataPanel } from "../../features/data";
 
 // TitleBar container
 // NOTE 使用变量 ${}
@@ -49,28 +51,22 @@ const Home: React.FC = () => {
   // 侧边栏数据
   const sidebarItemsLeft = [
     {
-      title: "上传",
-      id: "upload",
-      icon: <CloudUploadOutlined style={{ color: "#fafafa", fontSize: "26px" }} />,
-      panel: <UploadPanel />,
+      title: "DatabaseOutlined",
+      id: "data",
+      icon: <DatabaseOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
+      panel: <DataPanel />,
     },
     {
       title: "图层",
       id: "layer",
-      icon: <LayerOutlined style={{ color: "#fafafa", fontSize: "26px" }} />,
+      icon: <LayerOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
       panel: <LayerPanel />,
     },
     {
       title: "案例",
       id: "case",
-      icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "26px" }} />,
-      panel: <DataPanel title="案例面板" url={""} />,
-    },
-    {
-      title: "数据",
-      id: "data",
-      icon: <DatabaseOutlined style={{ color: "#fafafa", fontSize: "26px" }} />,
-      panel: <DataPanel title="数据面板" url={"/data/list"} />,
+      icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
+      panel: <CasePanel url={"/case/list"} />,
     },
   ];
 

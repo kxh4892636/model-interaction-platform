@@ -3,7 +3,7 @@
  * @Date: 2023-02-10
  * @LastEditors: xiaohan kong
  * @LastEditTime: 2023-02-10
- * @Description: Panel 组件布局样式
+ * @Description: Panel layout
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */

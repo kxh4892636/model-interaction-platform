@@ -1,5 +1,5 @@
 /*
- * @File: DataList component
+ * @File: CaseList component
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
@@ -9,8 +9,10 @@
  */
 import styled from "styled-components";
 import { List, Button } from "antd";
-import useAddData from "../../../../hooks/use_add_data";
-import { DataListData } from "../../types";
+import { useAddData } from "../../../../hooks";
+import { CaseListData } from "../../types";
+import { ServerData } from "../../../../types";
+import axios from "axios";
 
 // modify sytle of antd list component
 const StyledList = styled(List)`
@@ -18,7 +20,7 @@ const StyledList = styled(List)`
     margin-block-end: 12px;
   }
 `;
-// DataList title Style
+// CaseList title Style
 const StyledTitle = styled.div`
   :hover {
     color: #4096ff;
@@ -27,21 +29,30 @@ const StyledTitle = styled.div`
 `;
 
 type AppProps = {
-  data: DataListData[];
+  data: CaseListData[];
   setShowDetail: React.Dispatch<React.SetStateAction<boolean>>;
   setselectedItem: React.Dispatch<React.SetStateAction<string>>;
 };
 
 /**
- * @description DataList component
- * @module DataList
+ * @description CaseList component
+ * @module CaseList
  * @Author xiaohan kong
- * @param data datalist's data
- * @param setShowDetail click event for the datalist title, enter the data detail page
- * @export module: DataList
+ * @param data CaseList's data
+ * @param setShowDetail click event for the CaseList title, enter the case detail page
+ * @export module: CaseList
  */
-const DataList = ({ data, setShowDetail, setselectedItem }: AppProps) => {
+const CaseList = ({ data, setShowDetail, setselectedItem }: AppProps) => {
   const addData = useAddData();
+
+  const handleClick = (data: CaseListData) => {
+    data.data.forEach((id) => {
+      axios.get("http://localhost:3456/data/detail?id=" + id).then((res) => {
+        const data: ServerData = res.data;
+        addData(data.id, data.title);
+      });
+    });
+  };
 
   return (
     <>
@@ -56,11 +67,17 @@ const DataList = ({ data, setShowDetail, setselectedItem }: AppProps) => {
             key={item.key}
             // button click event
             actions={[
-              <Button size="small" onClick={() => addData(item.key)}>
-                <span id={item.key}>添加至项目</span>
+              <Button
+                type="primary"
+                size="small"
+                onClick={() => {
+                  handleClick(item);
+                }}
+              >
+                添加至地图
               </Button>,
             ]}
-            extra={<img width={120} height={90} alt="logo" src={item.image} />}
+            extra={<img width={130} height={90} alt="logo" src={item.image} />}
           >
             <List.Item.Meta
               // title click event
@@ -84,4 +101,4 @@ const DataList = ({ data, setShowDetail, setselectedItem }: AppProps) => {
   );
 };
 
-export default DataList;
+export default CaseList;

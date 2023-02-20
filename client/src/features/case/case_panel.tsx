@@ -1,5 +1,5 @@
 /*
- * @File: DataPanel component
+ * @File: CasePanel component
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
@@ -17,37 +17,42 @@ import {
   PanelTitleContainer,
   PanelToolsContainer,
   PanelToolContainer,
-} from "./components/panel_layout";
-import DataList from "./components/data_list";
-import DataDetailPage from "./components/data_detail_page";
-import { DataListData } from "./types";
+} from "../../components/layout";
+import CaseList from "./components/case_list";
+import CaseDetailPage from "./components/case_detail_page";
+import { CaseListData } from "./types";
 
 // modify style of antd search component
 const { Search } = Input;
-const DataSearch = styled(Search)`
+const CaseSearch = styled(Search)`
   padding: 0px 8px;
 `;
 
-type AppProps = { title: string; url: string };
+type AppProps = { url: string };
 
 /**
- * @description DataPanel components
- * @module DataPanel
+ * @description CasePanel components
+ * @module CasePanel
  * @author xiaohan kong
- * @param title title of DataPanel
- * @param data data of DataList
- * @export module: DataPanel
+ * @param the url that get case list
+ * @export module: CasePanel
  */
-const DataPanel = ({ title, url }: AppProps) => {
+const CasePanel = ({ url }: AppProps) => {
   const [showDetail, setShowDetail] = useState(false);
   const [selectedItem, setselectedItem] = useState("");
   // NOTE
-  const [data, setData] = useState<DataListData[]>([]);
+  const [data, setData] = useState<CaseListData[]>([]);
 
   useEffect(() => {
     axios.get("http://localhost:3456" + url).then((res) => {
       const data = (res.data as { [props: string]: any }[]).map((value) => {
-        return { key: value.id, title: value.title, image: value.image, author: value.author };
+        return {
+          key: value.id,
+          title: value.title,
+          image: value.image,
+          author: value.author,
+          data: value.data,
+        };
       });
 
       setData(data);
@@ -57,14 +62,17 @@ const DataPanel = ({ title, url }: AppProps) => {
   return (
     <PanelContainer>
       {showDetail ? (
-        <DataDetailPage url={"/data/data?id=" + selectedItem} setShowDetail={setShowDetail} />
+        <CaseDetailPage
+          url={url.split("/list")[0] + "/detail?id=" + selectedItem}
+          setShowDetail={setShowDetail}
+        />
       ) : (
         <></>
       )}
-      <PanelTitleContainer>{title}</PanelTitleContainer>
+      <PanelTitleContainer>案例面板</PanelTitleContainer>
       <PanelToolsContainer>
         <PanelToolContainer>
-          <DataSearch
+          <CaseSearch
             placeholder="input search text"
             // TODO 方法要加
             onSearch={() => {}}
@@ -73,14 +81,14 @@ const DataPanel = ({ title, url }: AppProps) => {
       </PanelToolsContainer>
       <PanelToolsContainer>占位符, 此处为筛选功能</PanelToolsContainer>
       <PanelContentContainer>
-        <DataList
+        <CaseList
           data={data}
           setShowDetail={setShowDetail}
           setselectedItem={setselectedItem}
-        ></DataList>
+        ></CaseList>
       </PanelContentContainer>
     </PanelContainer>
   );
 };
 
-export default DataPanel;
+export default CasePanel;

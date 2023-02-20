@@ -21,14 +21,14 @@ import styled from "styled-components";
 import useMapStore from "../../stores/map_store";
 import useLayersStore from "../../stores/layers_store";
 import useLayersStatusStore from "../../stores/layers_status_store";
-import useGetKeys from "../../hooks/use_get_keys";
+import { useGetKeys } from "../../hooks";
 import {
   PanelContainer,
   PanelContentContainer,
   PanelTitleContainer,
   PanelToolsContainer,
-} from "./components/panel_layout";
-import PanelTool from "./components/panel_tool";
+} from "../../components/layout";
+import LayerTool from "./components/layer_tool";
 import LayersTree from "./components/layer_tree/layer_tree";
 import LayerTreeMenu from "./components/layer_tree_menu";
 import { Layer } from "../../types";
@@ -124,42 +124,42 @@ const LayerPanel = () => {
     <PanelContainer>
       <PanelTitleContainer>图层面板</PanelTitleContainer>
       <PanelToolsContainer>
-        <PanelTool
+        <LayerTool
           title={"创建图层集合"}
           icon={<FolderAddOutlined />}
           action={() => {
             createLayerGroup();
           }}
         />
-        <PanelTool
+        <LayerTool
           title={"显示所有图层"}
           icon={<EyeOutlined />}
           action={() => {
             showAllLayers(true);
           }}
         />
-        <PanelTool
+        <LayerTool
           title={"隐藏所有图层"}
           icon={<EyeInvisibleOutlined />}
           action={() => {
             showAllLayers(false);
           }}
         />
-        <PanelTool
+        <LayerTool
           title={"展开所有图层"}
           icon={<VerticalAlignBottomOutlined />}
           action={() => {
             expandAllLayers(true);
           }}
         />
-        <PanelTool
+        <LayerTool
           title={"折叠所有图层"}
           icon={<VerticalAlignTopOutlined />}
           action={() => {
             expandAllLayers(false);
           }}
         />
-        <PanelTool
+        <LayerTool
           title={"删除所有图层"}
           icon={<DeleteOutlined />}
           action={() => {
@@ -297,7 +297,6 @@ const useLayerActions = (action: string) => {
     const layerGroup: Layer = {
       title: "group",
       key: key,
-      src: "",
       group: true,
       children: [],
     };
