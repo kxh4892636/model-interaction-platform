@@ -1,6 +1,6 @@
 // TODO comments
 import express from "express";
-import useRoutes from "./routes/use_routes";
+import useRoutes from "./use_routes";
 import cors from "cors";
 
 const app = express();

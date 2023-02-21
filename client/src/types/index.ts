@@ -20,4 +20,11 @@ export type ServerCase = {
   time: string;
   description: string;
   data: string[];
+  count: number;
+};
+
+export type ServerTemp = {
+  id: string;
+  title: string;
+  data: string;
 };

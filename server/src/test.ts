@@ -5,31 +5,26 @@ import path from "path";
 const prisma = new PrismaClient();
 
 const main = async () => {
-  const info = await prisma.data.findMany();
-  const keys = info.map((value) => value.id);
-
-  // await prisma.case.create({
-  //   data: {
-  //     author: "孔潇涵",
-  //     description: "示例案例",
-  //     id: crypto.randomUUID(),
-  //     image: "https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png",
-  //     time: new Date("2023-2-20"),
-  //     title: "示例案例",
-  //     tags: "示例案例",
-  //     data: keys,
-  //   },
-  // });
-
-  // await prisma.data.updateMany({
+  // await prisma.data.update({
   //   where: {
-  //     author: "孔潇涵",
+  //     id: "ef05f77a-f125-4da8-a771-f6e3a6d3099a",
   //   },
   //   data: {
-  //     time: new Date("2023-02-18"),
+  //     data: "/case/test/line_string.json",
   //   },
   // });
-  console.log(await prisma.case.findMany());
+
+  // await prisma.data.update({
+  //   where: {
+  //     id: "8ff73376-e877-47e6-94c3-09e6a2598f28",
+  //   },
+  //   data: {
+  //     data: "/case/test/polygon.json",
+  //   },
+  // });
+
+  const info = await prisma.case.findMany();
+  console.log(info);
 };
 
 main()
