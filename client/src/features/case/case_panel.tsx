@@ -64,7 +64,9 @@ const CasePanel = ({ url }: AppProps) => {
       {showDetail ? (
         <CaseDetailPage
           url={url.split("/list")[0] + "/detail?id=" + selectedItem}
-          setShowDetail={setShowDetail}
+          onClose={() => {
+            setShowDetail(false);
+          }}
         />
       ) : (
         <></>
@@ -83,8 +85,10 @@ const CasePanel = ({ url }: AppProps) => {
       <PanelContentContainer>
         <CaseList
           data={data}
-          setShowDetail={setShowDetail}
-          setselectedItem={setselectedItem}
+          onShow={(id) => {
+            setselectedItem(id);
+            setShowDetail(true);
+          }}
         ></CaseList>
       </PanelContentContainer>
     </PanelContainer>

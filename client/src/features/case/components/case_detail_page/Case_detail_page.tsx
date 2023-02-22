@@ -14,7 +14,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { ServerCase, ServerData } from "../../../../types";
-import { useAddData } from "../../../../hooks";
+import { useData } from "../../../../hooks";
 
 // CaseDetailPage Container sytle
 const CaseDetailContainer = styled.div`
@@ -84,7 +84,7 @@ const CaseDetailDataActionContainer = styled.div`
 
 type AppProps = {
   url: string;
-  setShowDetail: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
 };
 
 /**
@@ -95,9 +95,9 @@ type AppProps = {
  * @param setShowDetail click event for the top left close symbol, close CaseDetailPage component
  * @export module: CaseDetailPage
  */
-const CaseDetailPage = ({ url, setShowDetail }: AppProps) => {
+const CaseDetailPage = ({ url, onClose }: AppProps) => {
   const [data, setData] = useState<ServerCase>();
-  const addData = useAddData();
+  const addData = useData("add");
 
   useEffect(() => {
     axios.get("http://localhost:3456" + url).then((res) => {
@@ -108,7 +108,7 @@ const CaseDetailPage = ({ url, setShowDetail }: AppProps) => {
   return data ? (
     <CaseDetailContainer>
       <CaseDetailTitleContainer>{data.title}</CaseDetailTitleContainer>
-      <StyledCloseOutlined onClick={() => setShowDetail(false)} />
+      <StyledCloseOutlined onClick={onClose} />
       <CaseDetailImageContainer>
         <img alt="view" className="view" src={data.image} />
       </CaseDetailImageContainer>
@@ -128,7 +128,7 @@ const CaseDetailPage = ({ url, setShowDetail }: AppProps) => {
             data.data.forEach((id) => {
               axios.get("http://localhost:3456/data/detail?id=" + id).then((res) => {
                 const data: ServerData = res.data;
-                addData(data.id, data.title);
+                addData(data.id);
               });
             });
           }}

@@ -9,7 +9,7 @@
  */
 import styled from "styled-components";
 import { List, Button } from "antd";
-import { useAddData } from "../../../../hooks";
+import { useData } from "../../../../hooks";
 import { CaseListData } from "../../types";
 import { ServerData } from "../../../../types";
 import axios from "axios";
@@ -30,8 +30,7 @@ const StyledTitle = styled.div`
 
 type AppProps = {
   data: CaseListData[];
-  setShowDetail: React.Dispatch<React.SetStateAction<boolean>>;
-  setselectedItem: React.Dispatch<React.SetStateAction<string>>;
+  onShow: (id: string) => void;
 };
 
 /**
@@ -42,15 +41,12 @@ type AppProps = {
  * @param setShowDetail click event for the CaseList title, enter the case detail page
  * @export module: CaseList
  */
-const CaseList = ({ data, setShowDetail, setselectedItem }: AppProps) => {
-  const addData = useAddData();
+const CaseList = ({ data, onShow }: AppProps) => {
+  const addData = useData("add");
 
   const handleClick = (data: CaseListData) => {
     data.data.forEach((id) => {
-      axios.get("http://localhost:3456/data/detail?id=" + id).then((res) => {
-        const data: ServerData = res.data;
-        addData(data.id, data.title);
-      });
+      addData(id);
     });
   };
 
@@ -85,8 +81,7 @@ const CaseList = ({ data, setShowDetail, setselectedItem }: AppProps) => {
                 <StyledTitle
                   id={item.key}
                   onClick={(e) => {
-                    setselectedItem((e.target as any).id);
-                    setShowDetail(true);
+                    onShow((e.target as any).id);
                   }}
                 >
                   {item.title}

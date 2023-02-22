@@ -23,7 +23,7 @@ const main = async () => {
   //   },
   // });
 
-  const info = await prisma.case.findMany();
+  const info = await prisma.data.findMany();
   console.log(info);
 };
 

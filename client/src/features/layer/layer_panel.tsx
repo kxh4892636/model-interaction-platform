@@ -21,7 +21,7 @@ import styled from "styled-components";
 import useMapStore from "../../stores/map_store";
 import useLayersStore from "../../stores/layers_store";
 import useLayersStatusStore from "../../stores/layers_status_store";
-import { useGetKeys } from "../../hooks";
+import { useKeys } from "../../hooks";
 import {
   PanelContainer,
   PanelContentContainer,
@@ -188,9 +188,9 @@ const useLayerActions = (action: string) => {
   const addLayer = useLayersStore((state) => state.addLayer);
   const deleteLayerBykey = useLayersStore((state) => state.deleteLayer);
   const updateLayer = useLayersStore((state) => state.updateLayer);
-  const getLayerKeys = useGetKeys("layer");
-  const getGroupKeys = useGetKeys("group");
-  const getAllKeys = useGetKeys("all");
+  const getLayerKeys = useKeys("layer");
+  const getGroupKeys = useKeys("group");
+  const getAllKeys = useKeys("all");
   const setLayersChecked = useLayersStatusStore((state) => state.setLayersChecked);
   const setLayersExpanded = useLayersStatusStore((state) => state.setLayersExpanded);
   const addLayersExpanded = useLayersStatusStore((state) => state.addLayersExpanded);
@@ -217,9 +217,9 @@ const useLayerActions = (action: string) => {
    * @param expand true: expand; false: collapse
    */
   const expandAllLayers = (expand: boolean) => {
-    const keys = getGroupKeys(layers);
+    const groupKeys = getGroupKeys(layers);
     if (expand) {
-      setLayersExpanded(keys!);
+      setLayersExpanded(groupKeys);
     } else {
       setLayersExpanded([]);
     }

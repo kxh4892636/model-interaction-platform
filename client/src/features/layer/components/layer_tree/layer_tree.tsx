@@ -13,7 +13,7 @@ import { Tree } from "antd";
 import useMapStore from "../../../../stores/map_store";
 import useLayersStore from "../../../../stores/layers_store";
 import useLayersStatusStore from "../../../../stores/layers_status_store";
-import { useGetKeys } from "../../../../hooks";
+import { useKeys } from "../../../../hooks";
 import { Layer } from "../../../../types";
 
 // modify sytle of antd tree component
@@ -106,7 +106,7 @@ const useLayerActions = (action: Action) => {
   const map = useMapStore((state) => state.map);
   const layers = useLayersStore((state) => state.layers);
   const setLayers = useLayersStore((state) => state.setLayers);
-  const getLayerKeys = useGetKeys("layer");
+  const getLayerKeys = useKeys("layer");
 
   /**
    * show and hide layer
@@ -119,8 +119,8 @@ const useLayerActions = (action: Action) => {
       map.setLayoutProperty(info.node.key, "visibility", info.checked ? "visible" : "none");
     } else {
       // show and hide layer group and it's son layer
-      const keys = getLayerKeys([info.node]);
-      for (const key of keys!) {
+      const layerKeys = getLayerKeys([info.node]);
+      for (const key of layerKeys!) {
         map.setLayoutProperty(key, "visibility", info.checked ? "visible" : "none");
       }
     }

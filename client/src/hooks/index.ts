@@ -1,2 +1,2 @@
-export { default as useAddData } from "./use_add_data";
-export { default as useGetKeys } from "./use_get_keys";
+export { default as useData } from "./use_data";
+export { default as useKeys } from "./use_keys";

@@ -9,6 +9,8 @@ export type ServerData = {
   id: string;
   title: string;
   data: string;
+  type: string;
+  temp: boolean;
 };
 
 export type ServerCase = {
@@ -21,10 +23,4 @@ export type ServerCase = {
   description: string;
   data: string[];
   count: number;
-};
-
-export type ServerTemp = {
-  id: string;
-  title: string;
-  data: string;
 };

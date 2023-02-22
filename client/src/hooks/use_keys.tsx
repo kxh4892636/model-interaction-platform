@@ -1,5 +1,5 @@
 /*
- * @File: useGetKeys hook
+ * @File: useKeys hook
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
@@ -13,11 +13,11 @@ import { Layer } from "../types";
 type Type = "all" | "layer" | "group";
 
 /**
- * @description get function that return keys of a speculiar type of layers
+ * @description return function that return keys of a speculiar type of layers
  * @autor xiaohan kong
  * @param type return funciton according to type, have getAllKeys, getLayerKeys and getGroupkeys
  */
-const useGetKeys = (type: Type) => {
+const useKeys = (type: Type): ((layers: Layer[]) => string[]) => {
   /**
    * get keys of layer and layer group
    * @param layers layers
@@ -86,11 +86,9 @@ const useGetKeys = (type: Type) => {
     return getAllKeys;
   } else if (type === "group") {
     return getGroupKeys;
-  } else if (type === "layer") {
-    return getLayerKeys;
   } else {
-    return () => console.log("useGetKeys args error");
+    return getLayerKeys;
   }
 };
 
-export default useGetKeys;
+export default useKeys;
