@@ -30,63 +30,55 @@ const useData = (type: Type) => {
   const getLayerKeys = useKeys("layer");
 
   /**
-   * get data by url
-   * @param url data url
+   * get data by key
+   * @param key data key
    */
-  const getData = (key: string) => {
-    const layerKeys = getLayerKeys(layers);
+  const getData = async (key: string) => {
     const urlData = "http://localhost:3456/data/data?id=" + key;
-    let data;
-
-    if (layerKeys!.includes(key)) {
-      return;
-    } else {
-      axios.get(urlData).then((res) => {
-        console.log("res", res.data);
-        data = res.data;
-      });
-    }
+    const data = await axios.get(urlData).then((res) => {
+      return res.data as string;
+    });
     return data;
   };
 
   /**
-   * add data by url
-   * @param url data url
+   * add data to map by key
+   * @param key data key
    */
   const addData = (key: string) => {
-    if (!map) return;
+    if (!map || getLayerKeys(layers)!.includes(key)) {
+      return;
+    } else {
+      const urlDetail = "http://localhost:3456/data/detail?id=" + key;
+      axios.get(urlDetail).then((res) => {
+        const dataDetail: ServerData = res.data;
+        const treeData: Layer = {
+          title: dataDetail.title,
+          key: key,
+          group: false,
+          children: [],
+        };
 
-    const urlData = "http://localhost:3456/data/data?id=" + key;
-    const urlDetail = "http://localhost:3456/data/detail?id=" + key;
-    axios.get(urlDetail).then((res) => {
-      const dataDetail: ServerData = res.data;
-      const treeData: Layer = {
-        title: dataDetail.title,
-        key: key,
-        group: false,
-        children: [],
-      };
-      addLayer(treeData);
-      addLayersChecked(key);
-      addLayersExpanded(key);
+        getData(key).then((res) => {
+          addLayer(treeData);
+          addLayersChecked(key);
+          addLayersExpanded(key);
 
-      axios.get(urlData).then((res) => {
-        const data = res.data;
-
-        map.addSource(key, {
-          type: "geojson",
-          data: data as any,
-        });
-        map.addLayer({
-          id: key,
-          type: dataDetail.type as any,
-          source: key,
-          layout: {
-            visibility: "visible",
-          },
+          map.addSource(key, {
+            type: "geojson",
+            data: res,
+          });
+          map.addLayer({
+            id: key,
+            type: dataDetail.type as any,
+            source: key,
+            layout: {
+              visibility: "visible",
+            },
+          });
         });
       });
-    });
+    }
   };
 
   if (type === "get") {

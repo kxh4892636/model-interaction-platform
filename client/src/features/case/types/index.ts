@@ -1,3 +1,4 @@
+// 自定义类型语法格式
 export type CaseListData = {
   key: string;
   title: string;

@@ -65,7 +65,6 @@ const LayerTree = ({ children }: AppProps) => {
       icon={children}
       checkable
       onCheck={(checkedKeys, info) => {
-        // NOTE 用法
         // show or hide layer
         setLayersChecked(checkedKeys as string[]);
         showLayer(info);
@@ -93,7 +92,6 @@ const LayerTree = ({ children }: AppProps) => {
   );
 };
 
-// NOTE 语法
 type Action = "show" | "drag";
 
 /**
@@ -115,6 +113,7 @@ const useLayerActions = (action: Action) => {
   const showLayer = (info: any) => {
     if (!map) return;
     if (!info.node.group) {
+      // NOTE mapbox 方法
       // show and hide single layer
       map.setLayoutProperty(info.node.key, "visibility", info.checked ? "visible" : "none");
     } else {
@@ -126,6 +125,7 @@ const useLayerActions = (action: Action) => {
     }
   };
 
+  // TODO 有时间可以重构一下
   /**
    * drag layer
    * @param info suggest console.log(info)
@@ -153,6 +153,7 @@ const useLayerActions = (action: Action) => {
     };
 
     // deep copy layers
+    // NOTE 学习深拷贝方法
     const data: Layer[] = JSON.parse(JSON.stringify(layers));
 
     // if drop and drag layer are both layer group, the action is invalid

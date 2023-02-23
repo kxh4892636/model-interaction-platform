@@ -1,12 +1,23 @@
 // TODO comments
 import express from "express";
 import fs from "fs";
-import path from "path";
 import { PrismaClient } from "@prisma/client";
-import { count } from "console";
+import multer from "multer";
+import { dataFoldURL } from "../config/global_data";
 
 const prisma = new PrismaClient();
 const router = express.Router();
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, dataFoldURL + "/temp");
+    },
+    filename: (req, file, cb) => {
+      cb(null, file.originalname);
+    },
+  }),
+});
 
 router.get("/case/list", async (req, res) => {
   try {
@@ -72,7 +83,7 @@ router.get("/data/data", async (req, res) => {
     });
 
     if (info) {
-      const filePath = path.resolve("../data" + info.data);
+      const filePath = dataFoldURL + info.data;
       const buffer = fs.readFileSync(filePath).toString();
       const json = JSON.parse(buffer);
       res.json(json);
@@ -82,6 +93,15 @@ router.get("/data/data", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+});
+
+router.post("/temp/data", upload.single("file"), async (req, res) => {
+  const file = req.file;
+  if (file) {
+    const filePath: string = file.path;
+  }
+
+  res.json("success");
 });
 
 export default router;

@@ -7,6 +7,8 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
+
+// NOTE 布局组件的心得, 只设置高度
 import styled from "styled-components";
 
 /**

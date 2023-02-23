@@ -20,7 +20,6 @@ const StyledDiv = styled.div`
   border: 1px solid #d9d9d9;
 `;
 
-// NOTE 函数式组件的 ts 写法
 /**
  * @description MapStatus component, accept map center position and display it
  * @module MapStatus

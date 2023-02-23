@@ -23,7 +23,7 @@ mapboxgl.accessToken =
  * @export module: Mapview
  */
 const MapView = () => {
-  // NOTE 注意下面两个的写法
+  // NOTE 如何创建 mapbox map 对象
   const mapContainerRef = useRef<HTMLDivElement>(document.createElement("div"));
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const setMap = useMapStore((state) => state.setMap);
@@ -45,7 +45,7 @@ const MapView = () => {
     // update map center position
     mapRef.current.on("move", () => {
       setPosition([
-        // NOTE 非空断言的使用
+        // NOTE ts ! 和 ? 的使用
         Number(mapRef.current!.getCenter().lng.toFixed(4)),
         Number(mapRef.current!.getCenter().lat.toFixed(4)),
         Number(mapRef.current!.getZoom().toFixed(2)),

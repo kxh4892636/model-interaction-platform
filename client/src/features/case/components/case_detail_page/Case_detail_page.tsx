@@ -105,6 +105,7 @@ const CaseDetailPage = ({ url, onClose }: AppProps) => {
     });
   }, [url]);
 
+  // NOTE marginInlineEnd: "auto" 的机制
   return data ? (
     <CaseDetailContainer>
       <CaseDetailTitleContainer>{data.title}</CaseDetailTitleContainer>

@@ -9,7 +9,7 @@
  */
 
 import styled from "styled-components";
-import { AppstoreOutlined, DatabaseOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, CloudUploadOutlined } from "@ant-design/icons";
 import { LayerOutlined } from "../../components/icons";
 import Sidebar from "../../features/sidebar";
 import useMapPositionStore from "../../stores/map_postion_store";
@@ -53,7 +53,7 @@ const Home: React.FC = () => {
     {
       title: "DatabaseOutlined",
       id: "data",
-      icon: <DatabaseOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
+      icon: <CloudUploadOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
       panel: <DataPanel />,
     },
     {

@@ -11,8 +11,6 @@ import styled from "styled-components";
 import { List, Button } from "antd";
 import { useData } from "../../../../hooks";
 import { CaseListData } from "../../types";
-import { ServerData } from "../../../../types";
-import axios from "axios";
 
 // modify sytle of antd list component
 const StyledList = styled(List)`

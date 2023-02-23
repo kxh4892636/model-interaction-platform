@@ -1,3 +1,4 @@
+/* NOTE 全局 css 的思路 */
 :where(:root) {
   cursor: default; /* 1 */
   overflow-wrap: break-word; /* 3 */
