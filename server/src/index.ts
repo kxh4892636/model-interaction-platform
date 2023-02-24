@@ -2,17 +2,18 @@
 import express from "express";
 import useRoutes from "./use_routes";
 import cors from "cors";
-import bodyParse from "body-parser";
 
 const app = express();
 const port = 3456;
 
-// Routes
+// cors
 app.use(cors());
+// Routes
 app.use("/", useRoutes);
-app.use(bodyParse.urlencoded({ extended: false }));
-app.use(bodyParse.json());
-
+// parse application/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: false }));
+// parse application/json
+app.use(express.json());
 // handle undefined Routes
 // app.use("*", (req, res, next) => {
 //   const err = new AppError(404, "fail", "undefined route");

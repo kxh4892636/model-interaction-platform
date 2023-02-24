@@ -14,12 +14,12 @@ import useLayersStatusStore from "../stores/layers_status_store";
 import { useKeys } from ".";
 import { Layer, ServerData } from "../types";
 
-type Type = "get" | "add";
+type Type = "get" | "add" | "detail";
 
 /**
  * @description return the function that curd data
  * @autor xiaohankong
- * @param type return the function according to type, now have get and add
+ * @param type return the function according to type, now have get, add, detail
  */
 const useData = (type: Type) => {
   const map = useMapStore((state) => state.map);
@@ -30,52 +30,66 @@ const useData = (type: Type) => {
   const getLayerKeys = useKeys("layer");
 
   /**
-   * get data by key
-   * @param key data key
+   * get data by id
+   * @param id data id
    */
-  const getData = async (key: string) => {
-    const urlData = "http://localhost:3456/data/data?id=" + key;
-    const data = await axios.get(urlData).then((res) => {
-      return res.data as string;
+  const getDataDetail = async (id: string): Promise<ServerData> => {
+    const data = await axios.get("http://localhost:3456/data/detail?id=" + id).then((res) => {
+      return res.data as ServerData;
+    });
+    return data;
+  };
+  /**
+   * get data by id
+   * @param id data id
+   */
+  const getData = async (id: string) => {
+    const data = await axios.get("http://localhost:3456/data/data?id=" + id).then((res) => {
+      return res.data;
     });
     return data;
   };
 
   /**
-   * add data to map by key
-   * @param key data key
+   * add data to map by id
+   * @param id data id
    */
-  const addData = (key: string) => {
-    if (!map || getLayerKeys(layers)!.includes(key)) {
+  const addData = (id: string) => {
+    if (!map || getLayerKeys(layers)!.includes(id)) {
       return;
     } else {
-      const urlDetail = "http://localhost:3456/data/detail?id=" + key;
-      axios.get(urlDetail).then((res) => {
-        const dataDetail: ServerData = res.data;
+      getDataDetail(id).then((res) => {
+        const dataDetail: ServerData = res;
         const treeData: Layer = {
           title: dataDetail.title,
-          key: key,
+          key: id,
           group: false,
           children: [],
         };
 
-        getData(key).then((res) => {
-          addLayer(treeData);
-          addLayersChecked(key);
-          addLayersExpanded(key);
+        const type = dataDetail.type;
 
-          map.addSource(key, {
-            type: "geojson",
-            data: res,
-          });
-          map.addLayer({
-            id: key,
-            type: dataDetail.type as any,
-            source: key,
-            layout: {
-              visibility: "visible",
-            },
-          });
+        getData(id).then((res) => {
+          addLayer(treeData);
+          addLayersChecked(id);
+          addLayersExpanded(id);
+
+          const geomType = ["line", "fill"];
+
+          if (geomType.includes(type)) {
+            map.addSource(id, {
+              type: "geojson",
+              data: res,
+            });
+            map.addLayer({
+              id: id,
+              type: type as any,
+              source: id,
+              layout: {
+                visibility: "visible",
+              },
+            });
+          }
         });
       });
     }
@@ -83,6 +97,8 @@ const useData = (type: Type) => {
 
   if (type === "get") {
     return getData;
+  } else if (type === "detail") {
+    return getDataDetail;
   } else {
     return addData;
   }

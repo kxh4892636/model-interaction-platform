@@ -23,8 +23,21 @@ const main = async () => {
   //   },
   // });
 
+  // await prisma.data.deleteMany({
+  //   where: {
+  //     type: "unknown",
+  //   },
+  // });
+
+  // await prisma.data.deleteMany({
+  //   where: {
+  //     type: "mesh",
+  //   },
+  // });
+
   const info = await prisma.data.findMany();
   console.log(info);
+  // npx ts-node test.ts
 };
 
 main()

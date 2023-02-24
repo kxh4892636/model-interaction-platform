@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-16
+ * @LastEditTime: 2023-02-23
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -63,7 +63,7 @@ const CasePanel = ({ url }: AppProps) => {
     <PanelContainer>
       {showDetail ? (
         <CaseDetailPage
-          url={url.split("/list")[0] + "/detail?id=" + selectedItem}
+          id={selectedItem}
           onClose={() => {
             setShowDetail(false);
           }}

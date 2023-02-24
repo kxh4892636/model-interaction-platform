@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-20
+ * @LastEditTime: 2023-02-23
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -83,7 +83,7 @@ const CaseDetailDataActionContainer = styled.div`
 `;
 
 type AppProps = {
-  url: string;
+  id: string;
   onClose: () => void;
 };
 
@@ -91,19 +91,19 @@ type AppProps = {
  * @description CaseDetailPage
  * @module CaseDetailPage
  * @Author xiaohan kong
- * @param data data
- * @param setShowDetail click event for the top left close symbol, close CaseDetailPage component
+ * @param id data id
+ * @param onClose click event for the top left close symbol, close CaseDetailPage component
  * @export module: CaseDetailPage
  */
-const CaseDetailPage = ({ url, onClose }: AppProps) => {
+const CaseDetailPage = ({ id, onClose }: AppProps) => {
   const [data, setData] = useState<ServerCase>();
   const addData = useData("add");
 
   useEffect(() => {
-    axios.get("http://localhost:3456" + url).then((res) => {
+    axios.get("http://localhost:3456/case/detail?id=" + id).then((res) => {
       if (typeof res.data === "object") setData(res.data);
     });
-  }, [url]);
+  }, [id]);
 
   // NOTE marginInlineEnd: "auto" 的机制
   return data ? (
