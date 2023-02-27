@@ -1,0 +1,7 @@
+    colors.SetColorEntry(int(min), (48, 18, 59))
+    colors.SetColorEntry(int(mean-2*std), (70, 134, 251))
+    colors.SetColorEntry(int(mean-std), (27, 229, 181))
+    colors.SetColorEntry(int(mean), (164, 252, 60))
+    colors.SetColorEntry(int(mean+std), (251, 185, 56))
+    colors.SetColorEntry(int(mean+2*std), (227, 68, 10))
+    colors.SetColorEntry(int(max), (122, 4, 3))
