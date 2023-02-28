@@ -43,10 +43,14 @@ const useData = (type: Type) => {
    * get data by id
    * @param id data id
    */
-  const getData = async (id: string) => {
-    const data = await axios.get("http://localhost:3456/data/data?id=" + id).then((res) => {
-      return res.data;
-    });
+  const getData = async (id: string, type: string = "json") => {
+    const data = await axios
+      .get("http://localhost:3456/data/data?id=" + id, {
+        responseType: type as any,
+      })
+      .then((res) => {
+        return res.data;
+      });
     return data;
   };
 
@@ -66,31 +70,74 @@ const useData = (type: Type) => {
           group: false,
           children: [],
         };
-
         const type = dataDetail.type;
+        const style = dataDetail.style;
+        const extent = dataDetail.extent;
+        addLayer(treeData);
+        addLayersChecked(id);
+        addLayersExpanded(id);
 
-        getData(id).then((res) => {
-          addLayer(treeData);
-          addLayersChecked(id);
-          addLayersExpanded(id);
-
-          const geomType = ["line", "fill"];
-
-          if (geomType.includes(type)) {
+        if (type === "mesh" && dataDetail.transform) {
+          getData(id, "blob").then((res) => {
+            const blob = new Blob([res]);
+            const url = window.URL.createObjectURL(blob);
             map.addSource(id, {
-              type: "geojson",
-              data: res,
+              type: "image",
+              url: url,
+              coordinates: [
+                [extent[0], extent[3]],
+                [extent[1], extent[3]],
+                [extent[1], extent[2]],
+                [extent[0], extent[2]],
+              ],
             });
             map.addLayer({
               id: id,
-              type: type as any,
+              type: "raster",
               source: id,
-              layout: {
-                visibility: "visible",
+              paint: {
+                "raster-fade-duration": 0,
               },
             });
-          }
-        });
+          });
+        }
+        // if (type === "image" || type === "video") {
+        //   const blob = new Blob([res]);
+        //   const url = window.URL.createObjectURL(blob);
+        //   map.addSource(id, {
+        //     type: "image",
+        //     url: url,
+        //     coordinates: [
+        //       [-80.425, 46.437],
+        //       [-71.516, 46.437],
+        //       [-71.516, 37.936],
+        //       [-80.425, 37.936],
+        //     ],
+        //   });
+        //   map.addLayer({
+        //     id: id,
+        //     type: "raster",
+        //     source: id,
+        //     paint: {
+        //       "raster-fade-duration": 0,
+        //     },
+        //   });
+        // }
+
+        // if (type === "geojson") {
+        //   map.addSource(id, {
+        //     type: "geojson",
+        //     data: res,
+        //   });
+        //   map.addLayer({
+        //     id: id,
+        //     type: style as any,
+        //     source: id,
+        //     layout: {
+        //       visibility: "visible",
+        //     },
+        //   });
+        // }
       });
     }
   };

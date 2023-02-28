@@ -13,7 +13,6 @@ const main = async () => {
   //     data: "/case/test/line_string.json",
   //   },
   // });
-
   // await prisma.data.update({
   //   where: {
   //     id: "8ff73376-e877-47e6-94c3-09e6a2598f28",
@@ -22,19 +21,12 @@ const main = async () => {
   //     data: "/case/test/polygon.json",
   //   },
   // });
-
   // await prisma.data.deleteMany({
   //   where: {
   //     type: "unknown",
   //   },
   // });
-
-  // await prisma.data.deleteMany({
-  //   where: {
-  //     type: "mesh",
-  //   },
-  // });
-
+  // await prisma.data.deleteMany({});
   const info = await prisma.data.findMany();
   console.log(info);
   // npx ts-node test.ts

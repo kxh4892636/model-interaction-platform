@@ -12,6 +12,8 @@ export type ServerData = {
   style: string;
   type: string;
   temp: boolean;
+  extent: number[];
+  transform: string;
 };
 
 export type ServerCase = {

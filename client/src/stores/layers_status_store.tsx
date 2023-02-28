@@ -24,7 +24,6 @@ interface LayerStatusStore {
   setLayersSelected: (value: Layer) => void;
 }
 
-// NOTE ts zotero 的写法以及如何指定存储类型
 /**
  * @description 储存图层列表状态信息及其cur操作
  * @module useLayerStatusStore

@@ -1,31 +1,58 @@
 import os
+import struct
 from osgeo import gdal, ogr, osr
+import traceback
 
 
 def resolveMesh(path: str) -> dict:
     info: dict[str, list] = {'num': [], 'data': []}
     with open(path, 'r', encoding='utf8')as f:
         for line in f:
-            # NOTE split() 用法
             content = line.split()
             splitNum = len(content)
             if splitNum == 2:
                 info['num'] = content
             elif splitNum == 4:
-                info['data'].append(content)
+                info['data'].append(content[0:3])
             elif splitNum == 5:
                 break
 
     return info
 
 
-def Mesh2PNG(info: dict[str, list]) -> None:
+def resolveUVET(num: int, position: list[list[list[float]]], path: str) -> list:
+    # NOTE 二进制读取
+    data = []
+    with open(path, 'rb')as f:
+        buffer = f.read(4)
+        suffix = 0
+        while (buffer):
+            id = struct.unpack('i', buffer)
+            print(id)
+            temp = []
+            for i in range(0, num):
+                petak = struct.unpack('d', f.read(8))
+                uu2k = struct.unpack('d', f.read(8))
+                vv2k = struct.unpack('d', f.read(8))
+                temp.append(
+                    [position[i][0], position[i][1], position[i][2], petak[0], uu2k[0], vv2k[0]])
+            buffer = f.read(4)
+            data.append(temp)
+            dst = r"d:\project\001_model_interaction_platform\data\png\test.png"
+            UVET2PNG(temp, f"{dst.split('.png')[0]}_{suffix}.png")
+            suffix += 1
+
+    return data
+
+
+def UVET2PNG(dataList: list[list[float]], dstPath: str) -> None:
     # 生成 shp 文件
     driver: ogr.Driver = ogr.GetDriverByName('ESRI Shapefile')
     ds: ogr.DataSource = driver.CreateDataSource('/vsimem/temp.shp')
     srs: osr.SpatialReference = osr.SpatialReference()
     srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-    srs.ImportFromEPSG(3857)
+    srs.ImportFromEPSG(2437)
+    srs.SetTM(clat=0, clong=120, scale=1, fe=500000, fn=0)
     dst: osr.SpatialReference = osr.SpatialReference()
     dst.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
     dst.ImportFromEPSG(4326)
@@ -37,7 +64,6 @@ def Mesh2PNG(info: dict[str, list]) -> None:
     layer.CreateField(ogr.FieldDefn('Y', ogr.OFTReal))
     layer.CreateField(ogr.FieldDefn('Z', ogr.OFTReal))
 
-    dataList = info['data']
     featureDefn: ogr.FeatureDefn = layer.GetLayerDefn()
     ct: osr.CoordinateTransformation = osr.CoordinateTransformation(srs, dst)
     for data in dataList:
@@ -60,29 +86,38 @@ def Mesh2PNG(info: dict[str, list]) -> None:
         layer.CreateFeature(feature)
         del feature
 
-    extent = layer.GetExtent()
+    extent: tuple = layer.GetExtent()
+    print(extent)
     ratio = abs(((extent[3]-extent[2])/(extent[1]-extent[0])))
     del driver, ds
-
-    # shp2tiff
-    gridOptions = gdal.GridOptions(format="GTiff", outputType=gdal.GDT_Int32,
+    # shp2tif
+    gridOptions = gdal.GridOptions(format="GTiff", outputType=gdal.GDT_Float32,
                                    algorithm="invdist:power=2.0:smoothing=0.0:radius1=0.0:radius2=0.0:angle=0.0:max_points=100:min_points=30:nodata=-9999", zfield="Z",
-                                   width=1000, height=ratio*1000,)
-    gdal.Grid('/vsimem/temp.tiff', '/vsimem/temp.shp', options=gridOptions)
-    ds: gdal.Dataset = gdal.Open('/vsimem/temp.tiff')
+                                   width=1000, height=ratio*1000,
+                                   )
+    # NOTE grid 的坑, 需要使用 warp
+    gdal.Grid('/vsimem/temp_grid.tif',
+              '/vsimem/temp.shp', options=gridOptions)
+    # gdal.Grid(r"d:\project\001_model_interaction_platform\data\temp\uvet.tif",
+    #           '/vsimem/temp.shp', options=gridOptions)
+    ds: gdal.Dataset = gdal.Open('/vsimem/temp_grid.tif')
     band: gdal.Band = ds.GetRasterBand(1)
     minmax = band.ComputeRasterMinMax()
-    translateOptions = gdal.TranslateOptions(format='Gtiff',
+    warpOptions = gdal.WarpOptions(
+        srcSRS=dst, dstSRS=dst, format='GTiff')
+    gdal.Warp('/vsimem/temp_warp.tif',
+              '/vsimem/temp_grid.tif', options=warpOptions)
+    translateOptions = gdal.TranslateOptions(format='GTiff',
                                              outputType=gdal.GDT_Byte,
                                              scaleParams=[
                                                  [minmax[0], minmax[1], 1, 255]],
                                              )
-    gdal.Translate('/vsimem/temp2.tiff',
-                   '/vsimem/temp.tiff',
+    gdal.Translate('/vsimem/temp_normalize.tif',
+                   '/vsimem/temp_warp.tif',
                    options=translateOptions
                    )
     del band, ds
-    ds: gdal.Dataset = gdal.Open('/vsimem/temp2.tiff')
+    ds: gdal.Dataset = gdal.Open('/vsimem/temp_normalize.tif')
     band: gdal.Band = ds.GetRasterBand(1)
     minmax = band.ComputeRasterMinMax()
     [min, max, mean, std] = band.ComputeStatistics(0)
@@ -107,14 +142,27 @@ def Mesh2PNG(info: dict[str, list]) -> None:
     translateOptions = gdal.TranslateOptions(format='PNG',
                                              outputType=gdal.GDT_Byte,
                                              )
-    gdal.Translate('./test.png',
-                   '/vsimem/temp2.tiff',
+    gdal.Translate(dstPath,
+                   '/vsimem/temp_normalize.tif',
                    options=translateOptions
                    )
 
 
 if __name__ == '__main__':
-    os.environ['PROJ_LIB'] = r'C:\Users\kxh48\AppData\Roaming\Python\Python39\site-packages\osgeo\data\proj'
-    path = r"D:\project\001_model_interaction_platform\data\mesh31.gr3"
-    data = resolveMesh(path)
-    Mesh2PNG(data)
+    try:
+        os.environ['PROJ_LIB'] = r'C:\Users\kxh48\AppData\Roaming\Python\Python39\site-packages\osgeo\data\proj'
+        # sys.argv
+        # [src, dst] = sys.argv[1:3]
+        src = r"d:\project\001_model_interaction_platform\data\origin\uvet.dat"
+        dst = r"d:\project\001_model_interaction_platform\data\png\test.png"
+        info = resolveMesh(
+            r"D:\project\001_model_interaction_platform\data\temp\mesh31.gr3")
+        num = int(info['num'][1])
+        position = info['data']
+        dataList = resolveUVET(num, position, src)
+        for i in range(0, len(dataList)):
+            UVET2PNG(dataList[i], f"{dst.split('.png')[0]}_{i}.png")
+    except:
+        traceback.print_exc()
+        print('输入参数错误, 请输入文件 url')
+    # TODO

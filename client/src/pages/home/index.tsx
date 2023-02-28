@@ -19,7 +19,6 @@ import { CasePanel } from "../../features/case";
 import { DataPanel } from "../../features/data";
 
 // TitleBar container
-// NOTE 使用变量 ${}
 const TitleBarContainer = styled.div`
   height: 6vh;
   line-height: 6vh;

@@ -40,7 +40,6 @@ type AppProps = { url: string };
 const CasePanel = ({ url }: AppProps) => {
   const [showDetail, setShowDetail] = useState(false);
   const [selectedItem, setselectedItem] = useState("");
-  // NOTE
   const [data, setData] = useState<CaseListData[]>([]);
 
   useEffect(() => {

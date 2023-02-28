@@ -21,7 +21,7 @@ interface MapPositionStore {
  * @export module: useMapPositionStore
  */
 const useMapPositionStore = create<MapPositionStore>((set) => ({
-  position: [119.4558, 34.8111, 10.5],
+  position: [119.8618, 26.7011, 9],
   setPosition: (value) => set({ position: value }),
 }));
 

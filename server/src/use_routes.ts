@@ -5,7 +5,8 @@ import { PrismaClient } from "@prisma/client";
 import multer from "multer";
 import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
-import { getDataType } from "../utils/get_data_type";
+import { execSync } from "child_process";
+import { resolve } from "path";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -90,10 +91,33 @@ router.get("/data/data", async (req, res) => {
     });
 
     if (info) {
-      const filePath = dataFoldURL + info.data;
-      const buffer = fs.readFileSync(filePath).toString();
-      const json = JSON.parse(buffer);
-      res.json(json);
+      const type = info.type;
+      if (type === "geojson") {
+        const filePath = dataFoldURL + info.data;
+        const buffer = fs.readFileSync(filePath).toString();
+        const json = JSON.parse(buffer);
+        res.json(json);
+      } else if (type === "mesh" && info.transform) {
+        const filePath = dataFoldURL + info.transform;
+        const cs = fs.createReadStream(filePath);
+        cs.on("data", (chunk) => {
+          res.write(chunk);
+        });
+        cs.on("end", () => {
+          res.status(200).end();
+        });
+      } else if (type === "image" || type == "video") {
+        const filePath = dataFoldURL + info.data;
+        const cs = fs.createReadStream(filePath);
+        cs.on("data", (chunk) => {
+          res.write(chunk);
+        });
+        cs.on("end", () => {
+          res.status(200).end();
+        });
+      } else if (type === "model") {
+        res.status(200).json("this data need not to send");
+      }
     } else {
       res.json("can't find data by id");
     }
@@ -113,14 +137,43 @@ router.post("/temp/data", upload.single("file"), async (req, res) => {
   if (file) {
     const filePath: string = file.path;
     const id = crypto.randomUUID();
+    const output = execSync(
+      `python ${resolve("./") + "/utils/python/get_data_type_and_style.py"} ${filePath}`
+    );
+    const [type, style] = output.toString().trimEnd().split(",");
+    let transform = "";
+    let extent: number[] = [];
 
+    if (type === "mesh" || type === "shp") {
+      if (filePath.includes(".gr3")) {
+        const fileName = file.filename.split(".")[0];
+        transform = filePath.replace(file.filename, `${fileName}_transform.png`);
+        const output = execSync(
+          `python ${
+            resolve("./") + "/utils/python/mesh_transform.py" + " " + filePath + " " + transform
+          }`
+        );
+        extent = output
+          .toString()
+          .trim()
+          .replace("(", "")
+          .replace(")", "")
+          .split(",")
+          .map((value) => Number(value));
+      }
+    }
+
+    // TODO image don't conside, extent filed is ignored
     await prisma.data.create({
       data: {
         data: filePath.replaceAll("\\", "/").split(dataFoldURL)[1],
         id: id,
         temp: true,
         title: file.filename.split(".")[0],
-        type: getDataType(filePath),
+        type: type,
+        style: style,
+        extent: extent,
+        transform: transform.replaceAll("\\", "/").split(dataFoldURL)[1],
       },
     });
 
