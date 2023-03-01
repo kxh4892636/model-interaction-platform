@@ -15,6 +15,7 @@ import useLayersStore from "../../../../stores/layers_store";
 import useLayersStatusStore from "../../../../stores/layers_status_store";
 import { useKeys } from "../../../../hooks";
 import { Layer } from "../../../../types";
+import useAdimate from "../../../../hooks/use_adimate";
 
 // modify sytle of antd tree component
 const StyledTree = styled(Tree)`
@@ -105,22 +106,31 @@ const useLayerActions = (action: Action) => {
   const layers = useLayersStore((state) => state.layers);
   const setLayers = useLayersStore((state) => state.setLayers);
   const getLayerKeys = useKeys("layer");
+  const continueAdimate = useAdimate("continue");
+  const pauseAdimate = useAdimate("pause");
 
   /**
    * show and hide layer
    * @param info suggest console.log(info)
    */
+  // TODO 分辨是否显示要修改
   const showLayer = (info: any) => {
     if (!map) return;
     if (!info.node.group) {
       // NOTE mapbox 方法
       // show and hide single layer
-      map.setLayoutProperty(info.node.key, "visibility", info.checked ? "visible" : "none");
+      if (map.getLayer(info.node.key)) {
+        map.setLayoutProperty(info.node.key, "visibility", info.checked ? "visible" : "none");
+        info.checked ? continueAdimate(info.node.key) : pauseAdimate(info.node.key);
+      }
     } else {
       // show and hide layer group and it's son layer
       const layerKeys = getLayerKeys([info.node]);
+      console.log(info.node.key);
+
       for (const key of layerKeys!) {
         map.setLayoutProperty(key, "visibility", info.checked ? "visible" : "none");
+        info.checked ? continueAdimate(key) : pauseAdimate(key);
       }
     }
   };

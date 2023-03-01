@@ -21,7 +21,7 @@ import styled from "styled-components";
 import useMapStore from "../../stores/map_store";
 import useLayersStore from "../../stores/layers_store";
 import useLayersStatusStore from "../../stores/layers_status_store";
-import { useKeys } from "../../hooks";
+import { useAdimate, useKeys } from "../../hooks";
 import {
   PanelContainer,
   PanelContentContainer,
@@ -198,6 +198,9 @@ const useLayerActions = (action: string) => {
   const removeLayersChecked = useLayersStatusStore((state) => state.removeLayersChecked);
   const removeLayersExpanded = useLayersStatusStore((state) => state.removeLayersExpanded);
   const layersSelected = useLayersStatusStore((state) => state.layersSelected);
+  const continueAdimate = useAdimate("continue");
+  const pauseAdimate = useAdimate("pause");
+  const removeAdimate = useAdimate("remove");
 
   /**
    * show or hide all layers by show
@@ -209,7 +212,10 @@ const useLayerActions = (action: string) => {
 
     setLayersChecked(show ? allKeys! : []);
     for (const key of layerKeys!) {
-      map!.setLayoutProperty(key, "visibility", show ? "visible" : "none");
+      if (map!.getLayer(key)) {
+        map!.setLayoutProperty(key, "visibility", show ? "visible" : "none");
+        show ? continueAdimate(key) : pauseAdimate(key);
+      }
     }
   };
 
@@ -233,13 +239,15 @@ const useLayerActions = (action: string) => {
     if (!map || !layersSelected) return;
 
     if (!layersSelected!.group) {
+      removeLayersChecked(layersSelected.key);
+      removeLayersExpanded(layersSelected.key);
+      deleteLayerBykey(layersSelected.key);
       // delete single layer
+      // NOTE getlayer 的妙用
       if (map.getLayer(layersSelected.key)) {
-        removeLayersChecked(layersSelected.key);
-        removeLayersExpanded(layersSelected.key);
-        deleteLayerBykey(layersSelected.key);
         map.removeLayer(layersSelected.key);
         map.removeSource(layersSelected.key);
+        removeAdimate(layersSelected.key);
       }
     } else {
       // delete layer group
@@ -249,8 +257,11 @@ const useLayerActions = (action: string) => {
         removeLayersChecked(layersSelected.key);
         removeLayersExpanded(layersSelected.key);
         deleteLayerBykey(key);
-        map.removeLayer(key);
-        map.removeSource(key);
+        if (map.getLayer(key)) {
+          map.removeLayer(key);
+          map.removeSource(key);
+          removeAdimate(key);
+        }
       });
       groupKeys!.forEach((key: string) => {
         removeLayersChecked(layersSelected.key);
@@ -271,8 +282,11 @@ const useLayerActions = (action: string) => {
       removeLayersChecked(key);
       removeLayersExpanded(key);
       deleteLayerBykey(key);
-      map.removeLayer(key);
-      map.removeSource(key);
+      if (map.getLayer(key)) {
+        map.removeLayer(key);
+        map.removeSource(key);
+        removeAdimate(key);
+      }
     });
     groupKeys!.forEach((key: string) => {
       removeLayersChecked(key);

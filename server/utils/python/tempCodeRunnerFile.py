@@ -1,0 +1,1 @@
+        type = getDataType(path)

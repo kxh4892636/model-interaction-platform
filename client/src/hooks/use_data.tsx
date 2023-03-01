@@ -13,6 +13,8 @@ import useLayersStore from "../stores/layers_store";
 import useLayersStatusStore from "../stores/layers_status_store";
 import { useKeys } from ".";
 import { Layer, ServerData } from "../types";
+import { ImageSource } from "mapbox-gl";
+import useLayersAnimatedStore from "../stores/layers_animated_store";
 
 type Type = "get" | "add" | "detail";
 
@@ -28,6 +30,8 @@ const useData = (type: Type) => {
   const addLayersChecked = useLayersStatusStore((state) => state.addLayersChecked);
   const addLayersExpanded = useLayersStatusStore((state) => state.addLayersExpanded);
   const getLayerKeys = useKeys("layer");
+  const addLayersAnimated = useLayersAnimatedStore((state) => state.addLayersAnimated);
+  const updateLayersAnimated = useLayersAnimatedStore((state) => state.updateLayersAnimated);
 
   /**
    * get data by id
@@ -43,9 +47,11 @@ const useData = (type: Type) => {
    * get data by id
    * @param id data id
    */
-  const getData = async (id: string, type: string = "json") => {
+  // NOTE get params responsetype
+  const getData = async (id: string, params: object = {}, type: string = "json") => {
     const data = await axios
       .get("http://localhost:3456/data/data?id=" + id, {
+        params: params,
         responseType: type as any,
       })
       .then((res) => {
@@ -77,8 +83,8 @@ const useData = (type: Type) => {
         addLayersChecked(id);
         addLayersExpanded(id);
 
-        if (type === "mesh" && dataDetail.transform) {
-          getData(id, "blob").then((res) => {
+        if ((type === "mesh" && dataDetail.transform) || type === "image") {
+          getData(id, {}, "blob").then((res) => {
             const blob = new Blob([res]);
             const url = window.URL.createObjectURL(blob);
             map.addSource(id, {
@@ -100,44 +106,69 @@ const useData = (type: Type) => {
               },
             });
           });
-        }
-        // if (type === "image" || type === "video") {
-        //   const blob = new Blob([res]);
-        //   const url = window.URL.createObjectURL(blob);
-        //   map.addSource(id, {
-        //     type: "image",
-        //     url: url,
-        //     coordinates: [
-        //       [-80.425, 46.437],
-        //       [-71.516, 46.437],
-        //       [-71.516, 37.936],
-        //       [-80.425, 37.936],
-        //     ],
-        //   });
-        //   map.addLayer({
-        //     id: id,
-        //     type: "raster",
-        //     source: id,
-        //     paint: {
-        //       "raster-fade-duration": 0,
-        //     },
-        //   });
-        // }
+        } else if (type === "geojson") {
+          if (type === "geojson") {
+            getData(id).then((res) => {
+              map.addSource(id, {
+                type: "geojson",
+                data: res,
+              });
+              map.addLayer({
+                id: id,
+                type: style as any,
+                source: id,
+                layout: {
+                  visibility: "visible",
+                },
+              });
+            });
+          }
+        } else if (type === "uvet" && dataDetail.transform && style === "raster") {
+          const imageCount: number = Number(res.transform[1]);
 
-        // if (type === "geojson") {
-        //   map.addSource(id, {
-        //     type: "geojson",
-        //     data: res,
-        //   });
-        //   map.addLayer({
-        //     id: id,
-        //     type: style as any,
-        //     source: id,
-        //     layout: {
-        //       visibility: "visible",
-        //     },
-        //   });
-        // }
+          let currentCount = 0;
+          getData(id, { currentImage: currentCount }, "blob").then((res) => {
+            const blob = new Blob([res]);
+            const url = window.URL.createObjectURL(blob);
+            map.addSource(id, {
+              type: "image",
+              url: url,
+              coordinates: [
+                [extent[0], extent[3]],
+                [extent[1], extent[3]],
+                [extent[1], extent[2]],
+                [extent[0], extent[2]],
+              ],
+            });
+            map.addLayer({
+              id: id,
+              type: "raster",
+              source: id,
+              paint: {
+                "raster-fade-duration": 0,
+              },
+            });
+          });
+          // NOTE node.timer type
+          const intervalFunc = setInterval(() => {
+            currentCount = (currentCount + 1) % imageCount;
+            updateLayersAnimated(id, "currentCount", currentCount);
+            // NOTE
+            getData(id, { type: "petak", currentImage: currentCount }, "blob")!.then((res) => {
+              const blob = new Blob([res]);
+              const url = window.URL.createObjectURL(blob);
+              (map!.getSource(id) as ImageSource).updateImage({ url: url });
+            });
+          }, 200);
+          addLayersAnimated({
+            key: id,
+            currentCount: currentCount,
+            imageCount: imageCount,
+            intervalFunction: intervalFunc,
+          });
+        } else {
+          console.log("no");
+        }
       });
     }
   };

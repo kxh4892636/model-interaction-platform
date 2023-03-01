@@ -5,28 +5,51 @@ import path from "path";
 const prisma = new PrismaClient();
 
 const main = async () => {
-  // await prisma.data.update({
+  // const id = crypto.randomUUID();
+  // const data = await prisma.data.findMany({
   //   where: {
-  //     id: "ef05f77a-f125-4da8-a771-f6e3a6d3099a",
-  //   },
-  //   data: {
-  //     data: "/case/test/line_string.json",
+  //     temp: false,
   //   },
   // });
-  // await prisma.data.update({
-  //   where: {
-  //     id: "8ff73376-e877-47e6-94c3-09e6a2598f28",
-  //   },
+  // const keys = data.map((value) => value.id);
+  // await prisma.case.create({
   //   data: {
-  //     data: "/case/test/polygon.json",
+  //     author: "kxh",
+  //     count: 0,
+  //     description: "示例数据描述",
+  //     id: id,
+  //     image: "",
+  //     time: new Date("2023-3-1"),
+  //     title: "示例案例",
+  //     data: keys,
+  //     tags: ["示例数据"],
+  //   },
+  // });
+  // await prisma.data.create({
+  //   data: {
+  //     data: "/case/test/output/uvet.dat",
+  //     id: id,
+  //     temp: false,
+  //     title: "uvet",
+  //     type: "uvet",
+  //     extent: [119.5498985092223, 120.21745091964257, 26.34525050928077, 26.972279065373204],
+  //     style: "uvet",
+  //     transform: ["/case/test/transform/uvet_transform.png", "1440"],
   //   },
   // });
   // await prisma.data.deleteMany({
   //   where: {
-  //     type: "unknown",
+  //     temp: true,
   //   },
   // });
-  // await prisma.data.deleteMany({});
+  await prisma.data.update({
+    where: {
+      id: "ba0a03ef-db2e-458e-a652-fc3799e62051",
+    },
+    data: {
+      style: "raster",
+    },
+  });
   const info = await prisma.data.findMany();
   console.log(info);
   // npx ts-node test.ts

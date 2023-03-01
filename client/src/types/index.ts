@@ -8,7 +8,7 @@ export type Layer = {
 export type ServerData = {
   id: string;
   title: string;
-  data: string;
+  data: string[];
   style: string;
   type: string;
   temp: boolean;

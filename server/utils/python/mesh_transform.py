@@ -128,9 +128,7 @@ if __name__ == '__main__':
     try:
         os.environ['PROJ_LIB'] = r'C:\Users\kxh48\AppData\Roaming\Python\Python39\site-packages\osgeo\data\proj'
         # sys.argv
-        # [src, dst] = sys.argv[1:3]
-        src = r"d:\project\001_model_interaction_platform\data\temp\mesh31.gr3"
-        dst = r"d:\project\001_model_interaction_platform\data\temp\mesh31_transform.png"
+        [src, dst] = sys.argv[1:3]
         data = resolveMesh(src)
         extent: tuple = Mesh2PNG(data, dst)
         print(extent)

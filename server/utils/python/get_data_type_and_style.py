@@ -1,33 +1,59 @@
 from osgeo import ogr
 from typing import Union, Callable
 import sys
+import os
+import sqlite3
 # NOTE python 类型注释如何表示一个函数
 # geojson, image, video, mesh, uvet, model
 
 
 def getDataType(filePath: str) -> str:
     suffix: str = filePath.split('.')[-1]
-
     suffix2Type: dict[str, str] = {
-        'gr3': 'mesh', 'dat': 'model', 'in': 'model', 'th': 'model', 'json': 'geojson', 'png': 'image'}
+        'gr3': 'mesh', 'dat': 'others', 'in': 'others', 'th': 'others', 'json': 'geojson', 'png': 'image'}
 
-    if (suffix in suffix2Type):
+    if ('uvet' in filePath):
+        return 'uvet'
+    elif (suffix in suffix2Type):
         return suffix2Type[suffix]
     else:
-        return 'unknown'
+        return 'others'
 
 
 def getDataStyle(filePath: str) -> str:
     suffix: str = filePath.split('.')[-1]
-    if suffix != 'json':
-        return ''
+    suffix2Type: dict[str, str] = {
+        'gr3': 'raster', 'dat': 'text', 'in': 'text', 'th': 'text', 'json': 'text', 'png': 'raster'}
+    if suffix == 'json' or suffix == 'shp':
+        return getVectorStyle(filePath)
+    elif ('uvet' in filePath):
+        return 'uvet'
+    elif (suffix in suffix2Type):
+        return suffix2Type[suffix]
     else:
-        style: str = ''
+        return 'text'
+
+
+def getVectorStyle(filePath: str) -> str:
+    try:
+        style = 'text'
+        ds: ogr.DataSource = ogr.Open(filePath)
+        layer: ogr.Layer = ds.GetLayer()
+        geomTypecode = layer.GetGeomType()
+        # TODO 0 和 100 以后或许会处理
+        # NOTE code 对应意义yiji getGeomtype funciton
+        code2Style = {0: 'text', 1: 'symbol', 2: 'line', 3: 'fill',
+                      4: 'symbol', 5: 'line', 6: 'fill', 100: 'text'}
+        if (geomTypecode in code2Style):
+            style = code2Style[geomTypecode]
         return style
+    except:
+        return 'text'
 
 
 if __name__ == '__main__':
     try:
+        os.environ['PROJ_LIB'] = r'C:\Users\kxh48\AppData\Roaming\Python\Python39\site-packages\osgeo\data\proj'
         # sys.argv
         path = sys.argv[1]
         type = getDataType(path)

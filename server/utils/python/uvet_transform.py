@@ -156,12 +156,12 @@ if __name__ == '__main__':
         src = r"d:\project\001_model_interaction_platform\data\origin\uvet.dat"
         dst = r"d:\project\001_model_interaction_platform\data\png\test.png"
         info = resolveMesh(
-            r"D:\project\001_model_interaction_platform\data\temp\mesh31.gr3")
+            r"D:\project\001_model_interaction_platform\data\temp\input\mesh31.gr3")
         num = int(info['num'][1])
         position = info['data']
         dataList = resolveUVET(num, position, src)
-        for i in range(0, len(dataList)):
-            UVET2PNG(dataList[i], f"{dst.split('.png')[0]}_{i}.png")
+        # for i in range(0, len(dataList)):
+        #     UVET2PNG(dataList[i], f"{dst.split('.png')[0]}_{i}.png")
     except:
         traceback.print_exc()
         print('输入参数错误, 请输入文件 url')

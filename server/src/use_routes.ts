@@ -15,7 +15,7 @@ router.use(express.json());
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, dataFoldURL + "/temp");
+      cb(null, dataFoldURL + "/temp/input");
     },
     filename: (req, file, cb) => {
       // NOTE 解决中文名乱码
@@ -92,13 +92,31 @@ router.get("/data/data", async (req, res) => {
 
     if (info) {
       const type = info.type;
+      const style = info.style;
       if (type === "geojson") {
         const filePath = dataFoldURL + info.data;
         const buffer = fs.readFileSync(filePath).toString();
         const json = JSON.parse(buffer);
         res.json(json);
       } else if (type === "mesh" && info.transform) {
-        const filePath = dataFoldURL + info.transform;
+        const filePath = dataFoldURL + info.transform[0];
+        const cs = fs.createReadStream(filePath);
+        cs.on("data", (chunk) => {
+          res.write(chunk);
+        });
+        cs.on("end", () => {
+          res.status(200).end();
+        });
+      } else if (type === "uvet" && info.transform && style === "raster") {
+        // TODO uvet
+        const currentImage = Number(req.query.currentImage);
+
+        const filePath =
+          dataFoldURL +
+          info.transform[0].replace(
+            "uvet_petak_transform.png",
+            `uvet_petak_transform_${currentImage}.png`
+          );
         const cs = fs.createReadStream(filePath);
         cs.on("data", (chunk) => {
           res.write(chunk);
@@ -115,7 +133,12 @@ router.get("/data/data", async (req, res) => {
         cs.on("end", () => {
           res.status(200).end();
         });
-      } else if (type === "model") {
+      } else if (type === "shp" && info.transform) {
+        const filePath = dataFoldURL + info.transform[0];
+        const buffer = fs.readFileSync(filePath).toString();
+        const json = JSON.parse(buffer);
+        res.json(json);
+      } else {
         res.status(200).json("this data need not to send");
       }
     } else {
@@ -141,16 +164,21 @@ router.post("/temp/data", upload.single("file"), async (req, res) => {
       `python ${resolve("./") + "/utils/python/get_data_type_and_style.py"} ${filePath}`
     );
     const [type, style] = output.toString().trimEnd().split(",");
-    let transform = "";
+    let transform: string[] = [];
     let extent: number[] = [];
 
     if (type === "mesh" || type === "shp") {
-      if (filePath.includes(".gr3")) {
+      if (type === "mesh") {
         const fileName = file.filename.split(".")[0];
-        transform = filePath.replace(file.filename, `${fileName}_transform.png`);
+        const transformPath = filePath
+          .replace(file.filename, `${fileName}_transform.png`)
+          .replace("\\temp\\input", "\\temp\\transform");
+        console.log(transformPath);
+
+        transform.push(transformPath.replaceAll("\\", "/").split(dataFoldURL)[1]);
         const output = execSync(
           `python ${
-            resolve("./") + "/utils/python/mesh_transform.py" + " " + filePath + " " + transform
+            resolve("./") + "/utils/python/mesh_transform.py" + " " + filePath + " " + transformPath
           }`
         );
         extent = output
@@ -160,10 +188,11 @@ router.post("/temp/data", upload.single("file"), async (req, res) => {
           .replace(")", "")
           .split(",")
           .map((value) => Number(value));
+      } else {
+        // TODO 以后写
       }
     }
 
-    // TODO image don't conside, extent filed is ignored
     await prisma.data.create({
       data: {
         data: filePath.replaceAll("\\", "/").split(dataFoldURL)[1],
@@ -173,7 +202,7 @@ router.post("/temp/data", upload.single("file"), async (req, res) => {
         type: type,
         style: style,
         extent: extent,
-        transform: transform.replaceAll("\\", "/").split(dataFoldURL)[1],
+        transform: transform,
       },
     });
 
@@ -181,17 +210,6 @@ router.post("/temp/data", upload.single("file"), async (req, res) => {
   } else {
     res.status(500).json("upload failed");
   }
-
-  // {
-  //   fieldname: 'file',
-  //   originalname: 'äº\x8Cæ\x9C\x88æ\x8A¥è´¦.xlsx',
-  //   encoding: '7bit',
-  //   mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  //   destination: 'D:/project/001_model_interaction_platform/data/temp',
-  //   filename: '二月报账.xlsx',
-  //   path: 'D:\\project\\001_model_interaction_platform\\data\\temp\\二月报账.xlsx',
-  //   size: 15161
-  // }
 });
 
 export default router;

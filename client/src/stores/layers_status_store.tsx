@@ -17,11 +17,11 @@ interface LayerStatusStore {
   layersSelected: Layer | undefined;
   setLayersChecked: (value: string[]) => void;
   setLayersExpanded: (value: string[]) => void;
+  setLayersSelected: (value: Layer) => void;
   addLayersChecked: (key: string) => void;
   addLayersExpanded: (key: string) => void;
   removeLayersChecked: (key: string) => void;
   removeLayersExpanded: (key: string) => void;
-  setLayersSelected: (value: Layer) => void;
 }
 
 /**
@@ -36,19 +36,19 @@ const useLayersStatusStore = create<LayerStatusStore>((set) => ({
   layersSelected: undefined,
   setLayersChecked: (value) => set({ layersChecked: value }),
   setLayersExpanded: (value) => set({ layersExpanded: value }),
+  setLayersSelected: (value) => set({ layersSelected: value }),
   addLayersChecked: (key) =>
     set(
-      produce((draft) => {
+      produce((draft: LayerStatusStore) => {
         draft.layersChecked.push(key);
       })
     ),
   addLayersExpanded: (key) =>
     set(
-      produce((draft) => {
+      produce((draft: LayerStatusStore) => {
         draft.layersExpanded.push(key);
       })
     ),
-
   removeLayersChecked: (key) =>
     set(
       produce((draft: LayerStatusStore) => {
@@ -65,7 +65,6 @@ const useLayersStatusStore = create<LayerStatusStore>((set) => ({
         });
       })
     ),
-  setLayersSelected: (value) => set({ layersSelected: value }),
 }));
 
 export default useLayersStatusStore;
