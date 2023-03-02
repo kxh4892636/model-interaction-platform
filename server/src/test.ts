@@ -42,14 +42,6 @@ const main = async () => {
   //     temp: true,
   //   },
   // });
-  await prisma.data.update({
-    where: {
-      id: "ba0a03ef-db2e-458e-a652-fc3799e62051",
-    },
-    data: {
-      style: "raster",
-    },
-  });
   const info = await prisma.data.findMany();
   console.log(info);
   // npx ts-node test.ts

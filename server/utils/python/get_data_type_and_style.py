@@ -2,7 +2,6 @@ from osgeo import ogr
 from typing import Union, Callable
 import sys
 import os
-import sqlite3
 # NOTE python 类型注释如何表示一个函数
 # geojson, image, video, mesh, uvet, model
 

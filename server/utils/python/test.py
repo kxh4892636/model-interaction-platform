@@ -1,12 +1,9 @@
-from osgeo import osr
+from osgeo import osr, gdal
 import os
+import cv2
+import numpy as np
 
-path = r"D:\project\001_model_interaction_platform\data\case\test\transform"
-num = 0
-
-for cur_dir, folds, files in os.walk(path):
-    for file in files:
-        if file.endswith('.xml'):
-            num += 1
-
-print(num)
+os.environ['PROJ_LIB'] = r'C:\Users\kxh48\AppData\Roaming\Python\Python39\site-packages\osgeo\data\proj'
+img = cv2.imread(
+    r"d:\project\001_model_interaction_platform\data\var_ugrd-var_vgrd.png")
+print(img)

@@ -28,7 +28,6 @@ def resolveUVET(num: int, position: list[list[list[float]]], path: str) -> list:
         suffix = 0
         while (buffer):
             id = struct.unpack('i', buffer)
-            print(id)
             temp = []
             for i in range(0, num):
                 petak = struct.unpack('d', f.read(8))
@@ -87,13 +86,12 @@ def UVET2PNG(dataList: list[list[float]], dstPath: str) -> None:
         del feature
 
     extent: tuple = layer.GetExtent()
-    print(extent)
     ratio = abs(((extent[3]-extent[2])/(extent[1]-extent[0])))
     del driver, ds
     # shp2tif
     gridOptions = gdal.GridOptions(format="GTiff", outputType=gdal.GDT_Float32,
                                    algorithm="invdist:power=2.0:smoothing=0.0:radius1=0.0:radius2=0.0:angle=0.0:max_points=100:min_points=30:nodata=-9999", zfield="Z",
-                                   width=1000, height=ratio*1000,
+                                   width=500, height=ratio*500,
                                    )
     # NOTE grid 的坑, 需要使用 warp
     gdal.Grid('/vsimem/temp_grid.tif',
@@ -137,7 +135,6 @@ def UVET2PNG(dataList: list[list[float]], dstPath: str) -> None:
                            int(max), (122, 4, 3))
     # set color table and color interpretation
     band.SetRasterColorTable(colors)
-    # band.SetRasterColorInterpretation(gdal.GCI_PaletteIndex)
     del band, ds
     translateOptions = gdal.TranslateOptions(format='PNG',
                                              outputType=gdal.GDT_Byte,
@@ -146,6 +143,7 @@ def UVET2PNG(dataList: list[list[float]], dstPath: str) -> None:
                    '/vsimem/temp_normalize.tif',
                    options=translateOptions
                    )
+    print(dstPath)
 
 
 if __name__ == '__main__':
