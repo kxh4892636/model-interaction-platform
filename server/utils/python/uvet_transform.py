@@ -28,6 +28,7 @@ def resolveUVET(num: int, position: list[list[list[float]]], path: str) -> list:
         suffix = 0
         while (buffer):
             id = struct.unpack('i', buffer)
+            print(id)
             temp = []
             for i in range(0, num):
                 petak = struct.unpack('d', f.read(8))
@@ -38,7 +39,7 @@ def resolveUVET(num: int, position: list[list[list[float]]], path: str) -> list:
             buffer = f.read(4)
             data.append(temp)
             dst = r"d:\project\001_model_interaction_platform\data\png\test.png"
-            UVET2PNG(temp, f"{dst.split('.png')[0]}_{suffix}.png")
+            # UVET2PNG(temp, f"{dst.split('.png')[0]}_{suffix}.png")
             suffix += 1
 
     return data
@@ -148,7 +149,6 @@ def UVET2PNG(dataList: list[list[float]], dstPath: str) -> None:
 
 if __name__ == '__main__':
     try:
-        os.environ['PROJ_LIB'] = r'C:\Users\kxh48\AppData\Roaming\Python\Python39\site-packages\osgeo\data\proj'
         # sys.argv
         # [src, dst] = sys.argv[1:3]
         src = r"d:\project\001_model_interaction_platform\data\origin\uvet.dat"

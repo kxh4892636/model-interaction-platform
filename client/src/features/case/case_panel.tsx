@@ -19,7 +19,7 @@ import {
   PanelToolContainer,
 } from "../../components/layout";
 import CaseList from "./components/case_list";
-import CaseDetailPage from "./components/case_detail_page";
+import CasePage from "./components/case_detail_page";
 import { CaseListData } from "./types";
 
 // modify style of antd search component
@@ -61,7 +61,7 @@ const CasePanel = ({ url }: AppProps) => {
   return (
     <PanelContainer>
       {showDetail ? (
-        <CaseDetailPage
+        <CasePage
           id={selectedItem}
           onClose={() => {
             setShowDetail(false);

@@ -48,11 +48,16 @@ const useData = (type: Type) => {
    * @param id data id
    */
   // NOTE get params responsetype
-  const getData = async (id: string, params: object = {}, type: string = "json") => {
+  const getData = async (
+    id: string,
+    dataType: string = "data",
+    params: object = {},
+    responseType: string = "json"
+  ) => {
     const data = await axios
-      .get("http://localhost:3456/data/data?id=" + id, {
+      .get(`http://localhost:3456/data/${dataType}?id=` + id, {
         params: params,
-        responseType: type as any,
+        responseType: responseType as any,
       })
       .then((res) => {
         return res.data;
@@ -73,7 +78,7 @@ const useData = (type: Type) => {
       const dataDetail: ServerData = res;
       const style = dataDetail.style;
 
-      getData(id).then((res) => {
+      getData(id, "json").then((res) => {
         map.addSource(id, {
           type: "geojson",
           data: res,
@@ -91,10 +96,10 @@ const useData = (type: Type) => {
   };
 
   /**
-   * add image to map by id
+   * add mesh to map by id
    * @param id data id
    */
-  const addImage = (id: string, animate: boolean = false) => {
+  const addMesh = (id: string) => {
     if (!map || getLayerKeys(layers)!.includes(id)) {
       return;
     } else {
@@ -104,73 +109,125 @@ const useData = (type: Type) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
 
-      if (animate) {
-        const imageCount: number = Number(res.transform[1]);
-        let currentCount = 0;
+      getData(id, "mesh", {}, "blob").then((res) => {
+        const blob = new Blob([res]);
+        const url = window.URL.createObjectURL(blob);
+        map.addSource(id, {
+          type: "image",
+          url: url,
+          coordinates: [
+            [extent[0], extent[3]],
+            [extent[1], extent[3]],
+            [extent[1], extent[2]],
+            [extent[0], extent[2]],
+          ],
+        });
+        map.addLayer({
+          id: id,
+          type: "raster",
+          source: id,
+          paint: {
+            "raster-fade-duration": 0,
+          },
+        });
+      });
+    });
+  };
 
-        getData(id, { currentImage: currentCount }, "blob").then((res) => {
+  /**
+   * add image to map by id
+   * @param id data id
+   */
+  const addUVET = (id: string, style = "raster") => {
+    if (!map || getLayerKeys(layers)!.includes(id)) {
+      return;
+    } else {
+    }
+
+    getDataDetail(id).then((res) => {
+      const dataDetail: ServerData = res;
+      const extent = dataDetail.extent;
+      const imageCount: number = Number(res.transform[1]);
+      let currentCount = 0;
+
+      getData(id, "uvet", { currentImage: currentCount }, "blob").then((res) => {
+        const blob = new Blob([res]);
+        const url = window.URL.createObjectURL(blob);
+        map.addSource(id, {
+          type: "image",
+          url: url,
+          coordinates: [
+            [extent[0], extent[3]],
+            [extent[1], extent[3]],
+            [extent[1], extent[2]],
+            [extent[0], extent[2]],
+          ],
+        });
+        map.addLayer({
+          id: id,
+          type: "raster",
+          source: id,
+          paint: {
+            "raster-fade-duration": 0,
+          },
+        });
+      });
+      // NOTE node.timer type
+      const intervalFunc = setInterval(() => {
+        currentCount = (currentCount + 1) % imageCount;
+        updateLayersAnimated(id, "currentCount", currentCount);
+        // NOTE
+        getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
           const blob = new Blob([res]);
           const url = window.URL.createObjectURL(blob);
-          map.addSource(id, {
-            type: "image",
-            url: url,
-            coordinates: [
-              [extent[0], extent[3]],
-              [extent[1], extent[3]],
-              [extent[1], extent[2]],
-              [extent[0], extent[2]],
-            ],
-          });
-          map.addLayer({
-            id: id,
-            type: "raster",
-            source: id,
-            paint: {
-              "raster-fade-duration": 0,
-            },
-          });
+          (map!.getSource(id) as ImageSource).updateImage({ url: url });
         });
-        // NOTE node.timer type
-        const intervalFunc = setInterval(() => {
-          currentCount = (currentCount + 1) % imageCount;
-          updateLayersAnimated(id, "currentCount", currentCount);
-          // NOTE
-          getData(id, { type: "petak", currentImage: currentCount }, "blob")!.then((res) => {
-            const blob = new Blob([res]);
-            const url = window.URL.createObjectURL(blob);
-            (map!.getSource(id) as ImageSource).updateImage({ url: url });
-          });
-        }, 200);
-        addLayersAnimated({
-          key: id,
-          currentCount: currentCount,
-          imageCount: imageCount,
-          intervalFunction: intervalFunc,
+      }, 200);
+      addLayersAnimated({
+        key: id,
+        currentCount: currentCount,
+        imageCount: imageCount,
+        intervalFunction: intervalFunc,
+      });
+    });
+  };
+
+  /**
+   * add image to map by id
+   * @param id data id
+   */
+  const addImage = (id: string) => {
+    if (!map || getLayerKeys(layers)!.includes(id)) {
+      return;
+    } else {
+    }
+
+    getDataDetail(id).then((res) => {
+      const dataDetail: ServerData = res;
+      const extent = dataDetail.extent;
+
+      getData(id, "image", {}, "blob").then((res) => {
+        const blob = new Blob([res]);
+        const url = window.URL.createObjectURL(blob);
+        map.addSource(id, {
+          type: "image",
+          url: url,
+          coordinates: [
+            [extent[0], extent[3]],
+            [extent[1], extent[3]],
+            [extent[1], extent[2]],
+            [extent[0], extent[2]],
+          ],
         });
-      } else {
-        getData(id, {}, "blob").then((res) => {
-          const blob = new Blob([res]);
-          const url = window.URL.createObjectURL(blob);
-          map.addSource(id, {
-            type: "image",
-            url: url,
-            coordinates: [
-              [extent[0], extent[3]],
-              [extent[1], extent[3]],
-              [extent[1], extent[2]],
-              [extent[0], extent[2]],
-            ],
-          });
-          map.addLayer({
-            id: id,
-            type: "raster",
-            source: id,
-            paint: {
-              "raster-fade-duration": 0,
-            },
-          });
+        map.addLayer({
+          id: id,
+          type: "raster",
+          source: id,
+          paint: {
+            "raster-fade-duration": 0,
+          },
         });
-      }
+      });
     });
   };
 
@@ -197,18 +254,21 @@ const useData = (type: Type) => {
       addLayersChecked(id);
       addLayersExpanded(id);
 
-      if ((type === "mesh" && dataDetail.transform) || type === "image") {
-        addImage(id);
-      } else if (type === "geojson") {
+      if (type === "geojson") {
         addJSON(id);
+      } else if (type === "mesh" && dataDetail.transform) {
+        addMesh(id);
       } else if (type === "uvet" && dataDetail.transform) {
         if (style === "raster") {
-          addImage(id, true);
+          addUVET(id);
         } else if (style === "flow") {
+          // TODO addUVET should be add style props to distinguish raster and flow
+          addUVET(id);
         } else {
           console.error("the style of uvet is wrong");
         }
-      } else if (type === "others") {
+      } else if (type === "image") {
+        addImage(id);
       } else {
         console.error("the type of data is unknown");
       }

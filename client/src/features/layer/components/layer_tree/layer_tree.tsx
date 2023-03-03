@@ -117,7 +117,6 @@ const useLayerActions = (action: Action) => {
   const showLayer = (info: any) => {
     if (!map) return;
     if (!info.node.group) {
-      // NOTE mapbox 方法
       // show and hide single layer
       if (map.getLayer(info.node.key)) {
         map.setLayoutProperty(info.node.key, "visibility", info.checked ? "visible" : "none");

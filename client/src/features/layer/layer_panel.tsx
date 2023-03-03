@@ -243,7 +243,6 @@ const useLayerActions = (action: string) => {
       removeLayersExpanded(layersSelected.key);
       deleteLayerBykey(layersSelected.key);
       // delete single layer
-      // NOTE getlayer 的妙用
       if (map.getLayer(layersSelected.key)) {
         map.removeLayer(layersSelected.key);
         map.removeSource(layersSelected.key);

@@ -3,20 +3,19 @@ from typing import Union, Callable
 import sys
 import os
 # NOTE python 类型注释如何表示一个函数
-# geojson, image, video, mesh, uvet, model
 
 
 def getDataType(filePath: str) -> str:
     suffix: str = filePath.split('.')[-1]
     suffix2Type: dict[str, str] = {
-        'gr3': 'mesh', 'dat': 'others', 'in': 'others', 'th': 'others', 'json': 'geojson', 'png': 'image'}
+        'gr3': 'mesh', 'dat': 'text', 'in': 'text', 'th': 'text', 'json': 'geojson', 'png': 'image'}
 
     if ('uvet' in filePath):
         return 'uvet'
     elif (suffix in suffix2Type):
         return suffix2Type[suffix]
     else:
-        return 'others'
+        return 'text'
 
 
 def getDataStyle(filePath: str) -> str:
@@ -52,7 +51,6 @@ def getVectorStyle(filePath: str) -> str:
 
 if __name__ == '__main__':
     try:
-        os.environ['PROJ_LIB'] = r'C:\Users\kxh48\AppData\Roaming\Python\Python39\site-packages\osgeo\data\proj'
         # sys.argv
         path = sys.argv[1]
         type = getDataType(path)

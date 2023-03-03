@@ -32,7 +32,7 @@ const useAdimate = (type: Type) => {
       currentCount = (currentCount + 1) % imageCount;
       updateLayersAnimated(id, "currentCount", currentCount);
       // NOTE
-      getData(id, { type: "petak", currentImage: currentCount }, "blob")!.then((res) => {
+      getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
         const blob = new Blob([res]);
         const url = window.URL.createObjectURL(blob);
         (map!.getSource(id) as ImageSource).updateImage({ url: url });
@@ -67,7 +67,7 @@ const useAdimate = (type: Type) => {
           currentCount = (currentCount + 1) % imageCount;
           updateLayersAnimated(id, "currentCount", currentCount);
           // NOTE
-          getData(id, { type: "petak", currentImage: currentCount }, "blob")!.then((res) => {
+          getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
             const blob = new Blob([res]);
             const url = window.URL.createObjectURL(blob);
             (map!.getSource(id) as ImageSource).updateImage({ url: url });

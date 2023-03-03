@@ -1,5 +1,5 @@
 /*
- * @File: CaseDetailPage component
+ * @File: CasePage component
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
@@ -16,23 +16,23 @@ import styled from "styled-components";
 import { ServerCase, ServerData } from "../../../../types";
 import { useData } from "../../../../hooks";
 
-// CaseDetailPage Container sytle
-const CaseDetailContainer = styled.div`
+// CasePage Container sytle
+const CaseContainer = styled.div`
   position: absolute;
   height: 94vh;
   width: 340px;
   background-color: #fff;
   z-index: 9;
 `;
-// CaseDetailPage title container
-const CaseDetailTitleContainer = styled.div`
+// CasePage title container
+const CaseTitleContainer = styled.div`
   height: 5vh;
   line-height: 5vh;
   font-size: 18px;
   font-weight: bold;
   padding: 0px 12px;
 `;
-// CaseDetailPage close symbol style
+// CasePage close symbol style
 const StyledCloseOutlined = styled(CloseOutlined)`
   position: absolute;
   top: 10px;
@@ -43,8 +43,8 @@ const StyledCloseOutlined = styled(CloseOutlined)`
     background: #f0f0f0;
   }
 `;
-// CaseDetailPage Image container
-const CaseDetailImageContainer = styled.div`
+// CasePage Image container
+const CaseImageContainer = styled.div`
   height: 25vh;
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #d9d9d9;
@@ -56,26 +56,26 @@ const CaseDetailImageContainer = styled.div`
     outline-offset: -8px;
   }
 `;
-// CaseDetailPage tags container
-const CaseDetailTagsContainer = styled.div`
+// CasePage tags container
+const CaseTagsContainer = styled.div`
   height: 4vh;
   border-bottom: 1px solid #d9d9d9;
 `;
-// CaseDetailPage meta container
-const CaseDetailMetaContainer = styled.div`
+// CasePage meta container
+const CaseMetaContainer = styled.div`
   height: 4vh;
   border-bottom: 1px solid #d9d9d9;
   display: flex;
   align-items: center;
   justify-content: center;
 `;
-// CaseDetailPage description container
-const CaseDetailDescriptionContainer = styled.div`
+// CasePage description container
+const CaseDescriptionContainer = styled.div`
   height: 51vh;
   border-bottom: 1px solid #d9d9d9;
 `;
 
-const CaseDetailDataActionContainer = styled.div`
+const CaseDataActionContainer = styled.div`
   height: 5vh;
   display: flex;
   align-items: center;
@@ -88,46 +88,46 @@ type AppProps = {
 };
 
 /**
- * @description CaseDetailPage
- * @module CaseDetailPage
+ * @description CasePage
+ * @module CasePage
  * @Author xiaohan kong
  * @param id data id
- * @param onClose click event for the top left close symbol, close CaseDetailPage component
- * @export module: CaseDetailPage
+ * @param onClose click event for the top left close symbol, close CasePage component
+ * @export module: CasePage
  */
-const CaseDetailPage = ({ id, onClose }: AppProps) => {
+const CasePage = ({ id, onClose }: AppProps) => {
   const [data, setData] = useState<ServerCase>();
   const addData = useData("add");
 
   useEffect(() => {
-    axios.get("http://localhost:3456/case/detail?id=" + id).then((res) => {
+    axios.get("http://localhost:3456/case/case?id=" + id).then((res) => {
       if (typeof res.data === "object") setData(res.data);
     });
   }, [id]);
 
   // NOTE marginInlineEnd: "auto" 的机制
   return data ? (
-    <CaseDetailContainer>
-      <CaseDetailTitleContainer>{data.title}</CaseDetailTitleContainer>
+    <CaseContainer>
+      <CaseTitleContainer>{data.title}</CaseTitleContainer>
       <StyledCloseOutlined onClick={onClose} />
-      <CaseDetailImageContainer>
+      <CaseImageContainer>
         <img alt="view" className="view" src={data.image} />
-      </CaseDetailImageContainer>
-      <CaseDetailTagsContainer>{data.tags}</CaseDetailTagsContainer>
-      <CaseDetailMetaContainer>
+      </CaseImageContainer>
+      <CaseTagsContainer>{data.tags}</CaseTagsContainer>
+      <CaseMetaContainer>
         <div style={{ marginInlineEnd: "auto", paddingInlineStart: "10px" }}>
           作者: {data.author}
         </div>
         <div style={{ paddingInlineEnd: "10px" }}>上传时间: {data.time.split("T")[0]}</div>
-      </CaseDetailMetaContainer>
-      <CaseDetailDescriptionContainer>{data.description}</CaseDetailDescriptionContainer>
-      <CaseDetailDataActionContainer>
+      </CaseMetaContainer>
+      <CaseDescriptionContainer>{data.description}</CaseDescriptionContainer>
+      <CaseDataActionContainer>
         <Button
           type="primary"
           style={{ marginInlineStart: "auto", marginInlineEnd: "10px" }}
           onClick={() => {
             data.data.forEach((id) => {
-              axios.get("http://localhost:3456/data/detail?id=" + id).then((res) => {
+              axios.get("http://localhost:3456/data/?id=" + id).then((res) => {
                 const data: ServerData = res.data;
                 addData(data.id);
               });
@@ -136,11 +136,11 @@ const CaseDetailPage = ({ id, onClose }: AppProps) => {
         >
           添加至地图
         </Button>
-      </CaseDetailDataActionContainer>
-    </CaseDetailContainer>
+      </CaseDataActionContainer>
+    </CaseContainer>
   ) : (
     <></>
   );
 };
 
-export default CaseDetailPage;
+export default CasePage;
