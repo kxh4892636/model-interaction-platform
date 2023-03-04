@@ -72,8 +72,6 @@ def Mesh2PNG(info: dict[str, list], dstPath: str) -> tuple:
                                    width=1000, height=ratio*1000,
                                    )
     gdal.Grid('/vsimem/temp_grid.tif', '/vsimem/temp.shp', options=gridOptions)
-    # gdal.Grid(r"d:\project\001_model_interaction_platform\data\temp\uvet.tif",
-    #           '/vsimem/temp.shp', options=gridOptions)
     ds: gdal.Dataset = gdal.Open('/vsimem/temp_grid.tif')
     band: gdal.Band = ds.GetRasterBand(1)
     minmax = band.ComputeRasterMinMax()
@@ -126,9 +124,10 @@ def Mesh2PNG(info: dict[str, list], dstPath: str) -> tuple:
 
 if __name__ == '__main__':
     try:
-        os.environ['PROJ_LIB'] = r'C:\Users\kxh48\AppData\Roaming\Python\Python39\site-packages\osgeo\data\proj'
         # sys.argv
         [src, dst] = sys.argv[1:3]
+        # src = r"D:\project\001_model_interaction_platform\data\case\test\input\mesh31.gr3"
+        # dst = r"D:\project\001_model_interaction_platform\data\case\test\input\mesh31.png"
         data = resolveMesh(src)
         extent: tuple = Mesh2PNG(data, dst)
         print(extent)

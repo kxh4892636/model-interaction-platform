@@ -10,14 +10,12 @@
 
 import { Layer } from "../types";
 
-type Type = "all" | "layer" | "group";
-
 /**
  * @description return function that return keys of a speculiar type of layers
  * @autor xiaohan kong
  * @param type return funciton according to type, have getAllKeys, getLayerKeys and getGroupkeys
  */
-const useKeys = (type: Type): ((layers: Layer[]) => string[]) => {
+const useKeys = () => {
   /**
    * get keys of layer and layer group
    * @param layers layers
@@ -82,13 +80,11 @@ const useKeys = (type: Type): ((layers: Layer[]) => string[]) => {
     return keys;
   }
 
-  if (type === "all") {
-    return getAllKeys;
-  } else if (type === "group") {
-    return getGroupKeys;
-  } else {
-    return getLayerKeys;
-  }
+  return {
+    getAllKeys,
+    getGroupKeys,
+    getLayerKeys,
+  };
 };
 
 export default useKeys;

@@ -1,5 +1,5 @@
 /*
- * @File: use_adimate hook
+ * @File: use_Animate hook
  * @Author: xiaohan kong
  * @Date: 2023-03-01
  * @LastEditors: xiaohan kong
@@ -15,24 +15,22 @@ import useLayersAnimatedStore from "../stores/layers_animated_store";
 import useMapStore from "../stores/map_store";
 import useData from "./use_data";
 
-type Type = "create" | "pause" | "continue" | "remove";
-
 // TODO can't alert each other between hooks
-const useAdimate = (type: Type) => {
+const useAnimate = () => {
   const map = useMapStore((state) => state.map);
-  const getData = useData("get");
+  const dataAction = useData();
   const layersAnimated = useLayersAnimatedStore((state) => state.layersAnimated);
   const updateLayersAnimated = useLayersAnimatedStore((state) => state.updateLayersAnimated);
   const addLayersAnimated = useLayersAnimatedStore((state) => state.addLayersAnimated);
   const removeLayersAnimated = useLayersAnimatedStore((state) => state.removeLayersAnimated);
 
-  const createAdimate = (id: string, imageCount: number = 0) => {
+  const createAnimate = (id: string, imageCount: number = 0) => {
     let currentCount = 0;
     const intervalFunc = setInterval(() => {
       currentCount = (currentCount + 1) % imageCount;
       updateLayersAnimated(id, "currentCount", currentCount);
       // NOTE
-      getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
+      dataAction.getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
         const blob = new Blob([res]);
         const url = window.URL.createObjectURL(blob);
         (map!.getSource(id) as ImageSource).updateImage({ url: url });
@@ -46,7 +44,7 @@ const useAdimate = (type: Type) => {
     });
   };
 
-  const pauseAdimate = (id: string) => {
+  const pauseAnimate = (id: string) => {
     layersAnimated.forEach((value) => {
       if (value.key === id) {
         clearInterval(value.intervalFunction);
@@ -54,7 +52,7 @@ const useAdimate = (type: Type) => {
     });
   };
 
-  const continueAdimate = (id: string) => {
+  const continueAnimate = (id: string) => {
     layersAnimated.forEach((value) => {
       if (value.key === id) {
         const info = layersAnimated.filter((value) => {
@@ -62,23 +60,22 @@ const useAdimate = (type: Type) => {
         });
         let currentCount = info[0].currentCount;
         const imageCount = info[0].imageCount;
-        console.log(layersAnimated);
         const intervalFunc = setInterval(() => {
           currentCount = (currentCount + 1) % imageCount;
           updateLayersAnimated(id, "currentCount", currentCount);
           // NOTE
-          getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
+          dataAction.getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
             const blob = new Blob([res]);
             const url = window.URL.createObjectURL(blob);
             (map!.getSource(id) as ImageSource).updateImage({ url: url });
           });
-        }, 100);
+        }, 150);
         updateLayersAnimated(id, "intervalFunction", intervalFunc);
       }
     });
   };
 
-  const removeAdimate = (id: string) => {
+  const removeAnimate = (id: string) => {
     layersAnimated.forEach((value) => {
       if (value.key === id) {
         removeLayersAnimated(id);
@@ -87,15 +84,12 @@ const useAdimate = (type: Type) => {
     });
   };
 
-  if (type === "continue") {
-    return continueAdimate;
-  } else if (type === "create") {
-    return createAdimate;
-  } else if (type === "pause") {
-    return pauseAdimate;
-  } else {
-    return removeAdimate;
-  }
+  return {
+    continueAnimate,
+    createAnimate,
+    pauseAnimate,
+    removeAnimate,
+  };
 };
 
-export default useAdimate;
+export default useAnimate;

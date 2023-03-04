@@ -3,7 +3,7 @@
  * @Date: 2023-02-10
  * @LastEditors: xiaohan kong
  * @LastEditTime: 2023-02-10
- * @Description: sidebar 组件
+ * @Description: sidebar component
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -13,7 +13,7 @@ import React, { useState } from "react";
 import { Tooltip } from "antd";
 import { SidebarItem } from "./types";
 
-// 侧边栏样式
+// aside style
 const Aside = styled.aside`
   display: flex;
   flex-direction: column;
@@ -22,7 +22,7 @@ const Aside = styled.aside`
   background: #434343;
   border-right: 1px solid #262626;
 `;
-// 侧边栏图标样式
+// aside item style
 const AsideItem = styled.div`
   padding: 14px 0;
   height: auto;
@@ -36,7 +36,7 @@ const AsideItem = styled.div`
     border-color: rgba(0, 0, 0, 0);
   }
 `;
-// 展开 Panel 样式
+// panel style
 const PanelContainer = styled.div`
   position: relative;
   display: flex;
@@ -47,35 +47,36 @@ const PanelContainer = styled.div`
   border-right: 1px solid #d9d9d9;
 `;
 
+type Position = "left" | "right";
+
+type AppProps = {
+  items: SidebarItem[];
+  position?: Position;
+  style?: React.CSSProperties;
+};
+
 /**
- * @description: 传入 item, 渲染 Sidebar 组件
+ * @description: sidebar component
  * @module Sidebar
  * @Author xiaohan kong
- * @param items SidebarItem 类型
- * @param position 侧边栏位置, 有 left 和 right 两种参数
- * @param style 侧边栏子项的样式
+ * @param items sidebar items
+ * @param position sidebar position
+ * @param style style item style
  * @export module: Sidebar
  */
-const Sidebar: React.FC<{
-  items: SidebarItem[];
-  position?: string;
-  style?: React.CSSProperties;
-}> = ({ items, position = "left", style }) => {
+const Sidebar = ({ items, position = "left", style }: AppProps) => {
   const [showPanelID, setShowPanelID] = useState("");
   const [showItem, setshowItem] = useState(false);
-  // 渲染侧边栏
   const sidebarItems = items.map((value): JSX.Element => {
     return (
       <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
         <AsideItem
           id={value.id}
           onClick={(e) => {
-            // panel 展开状态下切换 panel 禁止关闭 panel
             if (showItem && e.currentTarget.id !== showPanelID) {
             } else {
               setshowItem(!showItem);
             }
-            // 多次点击同一面板, 切换面板状态
             if (showPanelID === e.currentTarget.id) {
               setShowPanelID("");
             } else {
@@ -111,13 +112,15 @@ const Sidebar: React.FC<{
   );
 };
 
+type AppProps2 = { selectID: string; items: SidebarItem[] };
+
 /**
- * @description 返回对应的面板组件
+ * @description the panel of item
  * @Author xiaohan kong
- * @param selectID 面板 ID
- * @param items SidebarItem 类型
+ * @param selectID panel id
+ * @param items items
  */
-const Item: React.FC<{ selectID: string; items: SidebarItem[] }> = ({ selectID, items }) => {
+const Item = ({ selectID, items }: AppProps2) => {
   const panel = items.filter((value) => {
     if (value.id !== selectID) {
       return false;

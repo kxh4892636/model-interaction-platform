@@ -10,12 +10,9 @@
 
 import styled from "styled-components";
 import { Tree } from "antd";
-import useMapStore from "../../../../stores/map_store";
 import useLayersStore from "../../../../stores/layers_store";
 import useLayersStatusStore from "../../../../stores/layers_status_store";
-import { useKeys } from "../../../../hooks";
-import { Layer } from "../../../../types";
-import useAdimate from "../../../../hooks/use_adimate";
+import useLayerActions from "../../hooks/use_layer_actions";
 
 // modify sytle of antd tree component
 const StyledTree = styled(Tree)`
@@ -57,8 +54,7 @@ const LayerTree = ({ children }: AppProps) => {
   const setLayersChecked = useLayersStatusStore((state) => state.setLayersChecked);
   const setLayersExpanded = useLayersStatusStore((state) => state.setLayersExpanded);
   const setLayersSelected = useLayersStatusStore((state) => state.setLayersSelected);
-  const showLayer = useLayerActions("show");
-  const dragLayer = useLayerActions("drag");
+  const layerActions = useLayerActions();
 
   return (
     <StyledTree
@@ -68,7 +64,7 @@ const LayerTree = ({ children }: AppProps) => {
       onCheck={(checkedKeys, info) => {
         // show or hide layer
         setLayersChecked(checkedKeys as string[]);
-        showLayer(info);
+        layerActions.showLayer(info);
       }}
       checkedKeys={layersChecked}
       onExpand={(expandedKeys) => {
@@ -80,7 +76,7 @@ const LayerTree = ({ children }: AppProps) => {
       blockNode
       onDrop={(info) => {
         // drag Layer
-        dragLayer(info);
+        layerActions.dragLayer(info);
       }}
       onSelect={(key, e) => {
         // get selected layer node data
@@ -91,125 +87,6 @@ const LayerTree = ({ children }: AppProps) => {
       treeData={layers}
     />
   );
-};
-
-type Action = "show" | "drag";
-
-/**
- * @description LayerPanel action
- * @autor xiaohan kong
- * @param action return function corresponding to action, have showLayer and dragLayer
- */
-
-const useLayerActions = (action: Action) => {
-  const map = useMapStore((state) => state.map);
-  const layers = useLayersStore((state) => state.layers);
-  const setLayers = useLayersStore((state) => state.setLayers);
-  const getLayerKeys = useKeys("layer");
-  const continueAdimate = useAdimate("continue");
-  const pauseAdimate = useAdimate("pause");
-
-  /**
-   * show and hide layer
-   * @param info suggest console.log(info)
-   */
-  // TODO 分辨是否显示要修改
-  const showLayer = (info: any) => {
-    if (!map) return;
-    if (!info.node.group) {
-      // show and hide single layer
-      if (map.getLayer(info.node.key)) {
-        map.setLayoutProperty(info.node.key, "visibility", info.checked ? "visible" : "none");
-        info.checked ? continueAdimate(info.node.key) : pauseAdimate(info.node.key);
-      }
-    } else {
-      // show and hide layer group and it's son layer
-      const layerKeys = getLayerKeys([info.node]);
-      console.log(info.node.key);
-
-      for (const key of layerKeys!) {
-        map.setLayoutProperty(key, "visibility", info.checked ? "visible" : "none");
-        info.checked ? continueAdimate(key) : pauseAdimate(key);
-      }
-    }
-  };
-
-  // TODO 有时间可以重构一下
-  /**
-   * drag layer
-   * @param info suggest console.log(info)
-   */
-  const dragLayer = (info: any) => {
-    const dropKey = info.node.key;
-    const dragKey = info.dragNode.key;
-    const dropPos = info.node.pos.split("-");
-    const dropPosition = info.dropPosition - Number(dropPos[dropPos.length - 1]);
-
-    // NOTE study
-    const loop = (
-      data: Layer[],
-      key: string,
-      callback: (value: Layer, index: number, data: Layer[]) => void
-    ) => {
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].key === key) {
-          return callback(data[i], i, data);
-        }
-        if (data[i].children) {
-          loop(data[i].children, key, callback);
-        }
-      }
-    };
-
-    // deep copy layers
-    // NOTE 学习深拷贝方法
-    const data: Layer[] = JSON.parse(JSON.stringify(layers));
-
-    // if drop and drag layer are both layer group, the action is invalid
-    if (info.dragNode.group) {
-      const pos = info.node.pos.split("-");
-      if (pos.length > 2) return;
-    }
-
-    // Find dragObject
-    let dragObj: Layer;
-    loop(data, dragKey, (item, index, arr) => {
-      arr.splice(index, 1);
-      dragObj = item;
-    });
-    // if drop layer is layer group and drag layer is not, drag layer become its son layer
-    if (!info.dropToGap && info.node.group && !info.dragNode.group) {
-      // Drop on the content
-      loop(data, dropKey, (item) => {
-        item.children = item.children || [];
-        item.children.unshift(dragObj);
-      });
-    } else {
-      // NOTE Typescript variable used before being assigned  solution
-      let ar: Layer[];
-      let i: number;
-      loop(data, dropKey, (_item, index, arr) => {
-        ar = arr;
-        i = index;
-      });
-      if (dropPosition === -1) {
-        ar!.splice(i!, 0, dragObj!);
-      } else {
-        ar!.splice(i! + 1, 0, dragObj!);
-      }
-    }
-    setLayers(data);
-  };
-
-  if (action === "show") {
-    return showLayer;
-  } else if (action === "drag") {
-    return dragLayer;
-  } else {
-    return () => {
-      console.log("useLayerAction args error");
-    };
-  }
 };
 
 export default LayerTree;

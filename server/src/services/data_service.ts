@@ -2,7 +2,7 @@ import { Response, Request, request } from "express";
 import fs from "fs";
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
-import { dataFoldURL } from "../../config/global_data";
+import { dataFoldURL, condaEnv } from "../../config/global_data";
 import { execSync } from "child_process";
 import { resolve } from "path";
 
@@ -111,7 +111,9 @@ const uploadData = async (file: Express.Multer.File) => {
   const filePath: string = file.path;
   const id = crypto.randomUUID();
   const output = execSync(
-    `python ${resolve("./") + "/utils/python/get_data_type_and_style.py"} ${filePath}`
+    `python ${
+      resolve("./").split("\\").join("/") + "/utils/python/get_data_type_and_style.py"
+    } ${filePath}`
   );
   const [type, style] = output.toString().trimEnd().split(",");
   let transform: string[] = [];
@@ -122,14 +124,19 @@ const uploadData = async (file: Express.Multer.File) => {
     const transformPath = filePath
       .replace(file.filename, `${fileName}_transform.png`)
       .replace("\\temp\\input", "\\temp\\transform");
-    console.log(transformPath);
 
-    transform.push(transformPath.replaceAll("\\", "/").split(dataFoldURL)[1]);
+    transform.push(transformPath.split("\\").join("/").split(dataFoldURL)[1]);
     const output = execSync(
       `python ${
-        resolve("./") + "/utils/python/mesh_transform.py" + " " + filePath + " " + transformPath
+        resolve("./").split("\\").join("/") +
+        "/utils/python/mesh_transform.py" +
+        " " +
+        filePath +
+        " " +
+        transformPath
       }`
     );
+
     extent = output
       .toString()
       .trim()
@@ -139,11 +146,13 @@ const uploadData = async (file: Express.Multer.File) => {
       .map((value) => Number(value));
   } else if (type === "shp") {
     // TODO 以后写
-  } else;
+  } else if (type === "uvet") {
+    // TODO 以后写
+  }
 
   await prisma.data.create({
     data: {
-      data: filePath.replaceAll("\\", "/").split(dataFoldURL)[1],
+      data: filePath.split("\\").join("/").split(dataFoldURL)[1],
       id: id,
       temp: true,
       title: file.filename.split(".")[0],

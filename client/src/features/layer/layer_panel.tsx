@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-16
+ * @LastEditTime: 2023-03-04
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -18,10 +18,6 @@ import {
 import React, { useState } from "react";
 import { Button, Input } from "antd";
 import styled from "styled-components";
-import useMapStore from "../../stores/map_store";
-import useLayersStore from "../../stores/layers_store";
-import useLayersStatusStore from "../../stores/layers_status_store";
-import { useAdimate, useKeys } from "../../hooks";
 import {
   PanelContainer,
   PanelContentContainer,
@@ -31,7 +27,7 @@ import {
 import LayerTool from "./components/layer_tool";
 import LayersTree from "./components/layer_tree/layer_tree";
 import LayerTreeMenu from "./components/layer_tree_menu";
-import { Layer } from "../../types";
+import useLayerActions from "./hooks/use_layer_actions";
 
 // RenameInput style
 const StyledDiv = styled.div`
@@ -59,7 +55,7 @@ type AppProps = {
  */
 const RenameInput = ({ setshowRenameInput }: AppProps) => {
   const [inputValue, setInputValue] = useState("");
-  const renameLayer = useLayerActions("rename");
+  const layerActions = useLayerActions();
 
   return (
     <StyledDiv>
@@ -77,7 +73,7 @@ const RenameInput = ({ setshowRenameInput }: AppProps) => {
         type="default"
         style={{ marginBlockEnd: "10px" }}
         onClick={() => {
-          renameLayer(inputValue);
+          layerActions.renameLayer(inputValue);
           setshowRenameInput(false);
         }}
       >
@@ -95,10 +91,7 @@ const RenameInput = ({ setshowRenameInput }: AppProps) => {
  */
 const LayerPanel = () => {
   const [showRenameInput, setshowRenameInput] = useState(false);
-  const createLayerGroup = useLayerActions("group");
-  const showAllLayers = useLayerActions("showAll");
-  const expandAllLayers = useLayerActions("expandAll");
-  const deleteAllLayers = useLayerActions("deleteAll");
+  const layerActions = useLayerActions();
 
   const layerMenuItems = [
     {
@@ -116,7 +109,7 @@ const LayerPanel = () => {
     {
       key: "delete",
       label: "删除该图层",
-      action: useLayerActions("delete"),
+      action: layerActions.deleteLayer,
     },
   ];
 
@@ -128,42 +121,42 @@ const LayerPanel = () => {
           title={"创建图层集合"}
           icon={<FolderAddOutlined />}
           action={() => {
-            createLayerGroup();
+            layerActions.createLayerGroup();
           }}
         />
         <LayerTool
           title={"显示所有图层"}
           icon={<EyeOutlined />}
           action={() => {
-            showAllLayers(true);
+            layerActions.showAllLayers(true);
           }}
         />
         <LayerTool
           title={"隐藏所有图层"}
           icon={<EyeInvisibleOutlined />}
           action={() => {
-            showAllLayers(false);
+            layerActions.showAllLayers(false);
           }}
         />
         <LayerTool
           title={"展开所有图层"}
           icon={<VerticalAlignBottomOutlined />}
           action={() => {
-            expandAllLayers(true);
+            layerActions.expandAllLayers(true);
           }}
         />
         <LayerTool
           title={"折叠所有图层"}
           icon={<VerticalAlignTopOutlined />}
           action={() => {
-            expandAllLayers(false);
+            layerActions.expandAllLayers(false);
           }}
         />
         <LayerTool
           title={"删除所有图层"}
           icon={<DeleteOutlined />}
           action={() => {
-            deleteAllLayers();
+            layerActions.deleteAllLayers();
           }}
         />
       </PanelToolsContainer>
@@ -175,161 +168,6 @@ const LayerPanel = () => {
       {showRenameInput ? <RenameInput setshowRenameInput={setshowRenameInput} /> : <></>}
     </PanelContainer>
   );
-};
-
-// TODO 有时间可以重构一下
-/**
- * @description LayerPanel action
- * @autor xiaohan kong
- * @param action return function corresponding to the action, now actions have showAll, expandAll, delete, reanme and group
- */
-const useLayerActions = (action: string) => {
-  const map = useMapStore((state) => state.map);
-  const layers = useLayersStore((state) => state.layers);
-  const addLayer = useLayersStore((state) => state.addLayer);
-  const deleteLayerBykey = useLayersStore((state) => state.deleteLayer);
-  const updateLayer = useLayersStore((state) => state.updateLayer);
-  const getLayerKeys = useKeys("layer");
-  const getGroupKeys = useKeys("group");
-  const getAllKeys = useKeys("all");
-  const setLayersChecked = useLayersStatusStore((state) => state.setLayersChecked);
-  const setLayersExpanded = useLayersStatusStore((state) => state.setLayersExpanded);
-  const addLayersExpanded = useLayersStatusStore((state) => state.addLayersExpanded);
-  const removeLayersChecked = useLayersStatusStore((state) => state.removeLayersChecked);
-  const removeLayersExpanded = useLayersStatusStore((state) => state.removeLayersExpanded);
-  const layersSelected = useLayersStatusStore((state) => state.layersSelected);
-  const continueAdimate = useAdimate("continue");
-  const pauseAdimate = useAdimate("pause");
-  const removeAdimate = useAdimate("remove");
-
-  /**
-   * show or hide all layers by show
-   * @param show true: show; false: hide
-   */
-  const showAllLayers = (show: boolean) => {
-    const layerKeys = getLayerKeys(layers);
-    const allKeys = getAllKeys(layers);
-
-    setLayersChecked(show ? allKeys! : []);
-    for (const key of layerKeys!) {
-      if (map!.getLayer(key)) {
-        map!.setLayoutProperty(key, "visibility", show ? "visible" : "none");
-        show ? continueAdimate(key) : pauseAdimate(key);
-      }
-    }
-  };
-
-  /**
-   * expand or collapse all layers by expand
-   * @param expand true: expand; false: collapse
-   */
-  const expandAllLayers = (expand: boolean) => {
-    const groupKeys = getGroupKeys(layers);
-    if (expand) {
-      setLayersExpanded(groupKeys);
-    } else {
-      setLayersExpanded([]);
-    }
-  };
-
-  /**
-   * delete layer that is selected now
-   */
-  const deleteLayer = () => {
-    if (!map || !layersSelected) return;
-
-    if (!layersSelected!.group) {
-      removeLayersChecked(layersSelected.key);
-      removeLayersExpanded(layersSelected.key);
-      deleteLayerBykey(layersSelected.key);
-      // delete single layer
-      if (map.getLayer(layersSelected.key)) {
-        map.removeLayer(layersSelected.key);
-        map.removeSource(layersSelected.key);
-        removeAdimate(layersSelected.key);
-      }
-    } else {
-      // delete layer group
-      const layerKeys = getLayerKeys([layersSelected]);
-      const groupKeys = getGroupKeys([layersSelected]);
-      layerKeys!.forEach((key: string) => {
-        removeLayersChecked(layersSelected.key);
-        removeLayersExpanded(layersSelected.key);
-        deleteLayerBykey(key);
-        if (map.getLayer(key)) {
-          map.removeLayer(key);
-          map.removeSource(key);
-          removeAdimate(key);
-        }
-      });
-      groupKeys!.forEach((key: string) => {
-        removeLayersChecked(layersSelected.key);
-        removeLayersExpanded(layersSelected.key);
-        deleteLayerBykey(key);
-      });
-    }
-  };
-
-  /**
-   * delete all layers
-   */
-  const deleteAllLayers = () => {
-    const layerKeys = getLayerKeys(layers);
-    const groupKeys = getGroupKeys(layers);
-    if (!map) return;
-    layerKeys!.forEach((key: string) => {
-      removeLayersChecked(key);
-      removeLayersExpanded(key);
-      deleteLayerBykey(key);
-      if (map.getLayer(key)) {
-        map.removeLayer(key);
-        map.removeSource(key);
-        removeAdimate(key);
-      }
-    });
-    groupKeys!.forEach((key: string) => {
-      removeLayersChecked(key);
-      removeLayersExpanded(key);
-      deleteLayerBykey(key);
-    });
-  };
-
-  /**
-   * rename layer by name
-   * @param name name
-   */
-  const renameLayer = (name: string) => {
-    if (!layersSelected) return;
-    updateLayer(layersSelected.key, "title", name);
-  };
-
-  /**
-   * create layer group
-   */
-  const createLayerGroup = () => {
-    const key = crypto.randomUUID();
-    const layerGroup: Layer = {
-      title: "group",
-      key: key,
-      group: true,
-      children: [],
-    };
-
-    addLayer(layerGroup);
-    addLayersExpanded(key);
-  };
-
-  // store all funciton in hook
-  const layerActions = {
-    showAll: showAllLayers,
-    expandAll: expandAllLayers,
-    delete: deleteLayer,
-    deleteAll: deleteAllLayers,
-    rename: renameLayer,
-    group: createLayerGroup,
-  };
-
-  return (layerActions as any)[action];
 };
 
 export default LayerPanel;

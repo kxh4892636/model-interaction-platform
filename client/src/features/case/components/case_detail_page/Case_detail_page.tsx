@@ -97,7 +97,7 @@ type AppProps = {
  */
 const CasePage = ({ id, onClose }: AppProps) => {
   const [data, setData] = useState<ServerCase>();
-  const addData = useData("add");
+  const dataAction = useData();
 
   useEffect(() => {
     axios.get("http://localhost:3456/case/case?id=" + id).then((res) => {
@@ -129,7 +129,7 @@ const CasePage = ({ id, onClose }: AppProps) => {
             data.data.forEach((id) => {
               axios.get("http://localhost:3456/data/?id=" + id).then((res) => {
                 const data: ServerData = res.data;
-                addData(data.id);
+                dataAction.addData(data.id);
               });
             });
           }}

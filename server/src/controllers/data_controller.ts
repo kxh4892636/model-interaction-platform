@@ -91,8 +91,6 @@ const getText = async (req: Request, res: Response) => {
 
 const uploadData = async (req: Request, res: Response) => {
   try {
-    console.log(req.file);
-
     res.status(200).json(await dataService.uploadData(req.file!));
   } catch (error) {
     console.error(error);

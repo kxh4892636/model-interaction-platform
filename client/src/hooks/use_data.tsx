@@ -16,20 +16,18 @@ import { Layer, ServerData } from "../types";
 import { ImageSource } from "mapbox-gl";
 import useLayersAnimatedStore from "../stores/layers_animated_store";
 
-type Type = "get" | "add" | "detail";
-
 /**
  * @description return the function that curd data
  * @autor xiaohankong
  * @param type return the function according to type, now have get, add, detail
  */
-const useData = (type: Type) => {
+const useData = () => {
   const map = useMapStore((state) => state.map);
   const layers = useLayersStore((state) => state.layers);
   const addLayer = useLayersStore((state) => state.addLayer);
   const addLayersChecked = useLayersStatusStore((state) => state.addLayersChecked);
   const addLayersExpanded = useLayersStatusStore((state) => state.addLayersExpanded);
-  const getLayerKeys = useKeys("layer");
+  const getKeys = useKeys();
   const addLayersAnimated = useLayersAnimatedStore((state) => state.addLayersAnimated);
   const updateLayersAnimated = useLayersAnimatedStore((state) => state.updateLayersAnimated);
 
@@ -70,20 +68,16 @@ const useData = (type: Type) => {
    * @param id data id
    */
   const addJSON = (id: string) => {
-    if (!map || getLayerKeys(layers)!.includes(id)) {
-      return;
-    } else {
-    }
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const style = dataDetail.style;
 
       getData(id, "json").then((res) => {
-        map.addSource(id, {
+        map!.addSource(id, {
           type: "geojson",
           data: res,
         });
-        map.addLayer({
+        map!.addLayer({
           id: id,
           type: style as any,
           source: id,
@@ -100,11 +94,6 @@ const useData = (type: Type) => {
    * @param id data id
    */
   const addMesh = (id: string) => {
-    if (!map || getLayerKeys(layers)!.includes(id)) {
-      return;
-    } else {
-    }
-
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
@@ -112,7 +101,7 @@ const useData = (type: Type) => {
       getData(id, "mesh", {}, "blob").then((res) => {
         const blob = new Blob([res]);
         const url = window.URL.createObjectURL(blob);
-        map.addSource(id, {
+        map!.addSource(id, {
           type: "image",
           url: url,
           coordinates: [
@@ -122,7 +111,7 @@ const useData = (type: Type) => {
             [extent[0], extent[2]],
           ],
         });
-        map.addLayer({
+        map!.addLayer({
           id: id,
           type: "raster",
           source: id,
@@ -139,11 +128,6 @@ const useData = (type: Type) => {
    * @param id data id
    */
   const addUVET = (id: string, style = "raster") => {
-    if (!map || getLayerKeys(layers)!.includes(id)) {
-      return;
-    } else {
-    }
-
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
@@ -153,7 +137,7 @@ const useData = (type: Type) => {
       getData(id, "uvet", { currentImage: currentCount }, "blob").then((res) => {
         const blob = new Blob([res]);
         const url = window.URL.createObjectURL(blob);
-        map.addSource(id, {
+        map!.addSource(id, {
           type: "image",
           url: url,
           coordinates: [
@@ -163,7 +147,7 @@ const useData = (type: Type) => {
             [extent[0], extent[2]],
           ],
         });
-        map.addLayer({
+        map!.addLayer({
           id: id,
           type: "raster",
           source: id,
@@ -197,11 +181,6 @@ const useData = (type: Type) => {
    * @param id data id
    */
   const addImage = (id: string) => {
-    if (!map || getLayerKeys(layers)!.includes(id)) {
-      return;
-    } else {
-    }
-
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
@@ -209,7 +188,7 @@ const useData = (type: Type) => {
       getData(id, "image", {}, "blob").then((res) => {
         const blob = new Blob([res]);
         const url = window.URL.createObjectURL(blob);
-        map.addSource(id, {
+        map!.addSource(id, {
           type: "image",
           url: url,
           coordinates: [
@@ -219,7 +198,7 @@ const useData = (type: Type) => {
             [extent[0], extent[2]],
           ],
         });
-        map.addLayer({
+        map!.addLayer({
           id: id,
           type: "raster",
           source: id,
@@ -236,7 +215,7 @@ const useData = (type: Type) => {
    * @param id data id
    */
   const addData = (id: string) => {
-    if (!map || getLayerKeys(layers)!.includes(id)) {
+    if (!map || getKeys.getLayerKeys(layers)!.includes(id)) {
       return;
     } else {
     }
@@ -269,19 +248,18 @@ const useData = (type: Type) => {
         }
       } else if (type === "image") {
         addImage(id);
+      } else if (type === "text") {
       } else {
         console.error("the type of data is unknown");
       }
     });
   };
 
-  if (type === "get") {
-    return getData;
-  } else if (type === "detail") {
-    return getDataDetail;
-  } else {
-    return addData;
-  }
+  return {
+    getData,
+    getDataDetail,
+    addData,
+  };
 };
 
 export default useData;

@@ -40,11 +40,11 @@ type AppProps = {
  * @export module: CaseList
  */
 const CaseList = ({ data, onShow }: AppProps) => {
-  const addData = useData("add");
+  const dataAction = useData();
 
   const handleClick = (data: CaseListData) => {
     data.data.forEach((id) => {
-      addData(id);
+      dataAction.addData(id);
     });
   };
 

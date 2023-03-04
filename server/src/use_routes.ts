@@ -29,7 +29,7 @@ router.get("/case/list", async (req, res) => {
     const data = await prisma.case.findMany();
     res.json(data);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json(error);
   }
 });
@@ -57,7 +57,7 @@ router.get("/case/detail", async (req, res) => {
       res.json("can't find data by id");
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json(error);
   }
 });
@@ -76,7 +76,7 @@ router.get("/data/detail", async (req, res) => {
       res.json("can't find data by id");
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json(error);
   }
 });
@@ -145,7 +145,7 @@ router.get("/data/data", async (req, res) => {
       res.json("can't find data by id");
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json(error);
   }
 });
@@ -173,9 +173,8 @@ router.post("/temp/data", upload.single("file"), async (req, res) => {
         const transformPath = filePath
           .replace(file.filename, `${fileName}_transform.png`)
           .replace("\\temp\\input", "\\temp\\transform");
-        console.log(transformPath);
 
-        transform.push(transformPath.replaceAll("\\", "/").split(dataFoldURL)[1]);
+        transform.push(transformPath.split("\\").join("/").split(dataFoldURL)[1]);
         const output = execSync(
           `python ${
             resolve("./") + "/utils/python/mesh_transform.py" + " " + filePath + " " + transformPath
@@ -195,7 +194,7 @@ router.post("/temp/data", upload.single("file"), async (req, res) => {
 
     await prisma.data.create({
       data: {
-        data: filePath.replaceAll("\\", "/").split(dataFoldURL)[1],
+        data: filePath.split("\\").join("/").split(dataFoldURL)[1],
         id: id,
         temp: true,
         title: file.filename.split(".")[0],
