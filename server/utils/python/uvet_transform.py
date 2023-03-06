@@ -20,29 +20,35 @@ def resolveMesh(path: str) -> dict:
     return info
 
 
-def resolveUVET(num: int, position: list[list[list[float]]], path: str) -> list:
+def resolveUVET(num: int, position: list[list[str]], path: str):
     # NOTE 二进制读取
-    data = []
     with open(path, 'rb')as f:
         buffer = f.read(4)
         suffix = 0
         while (buffer):
             id = struct.unpack('i', buffer)
-            print(id)
-            temp = []
+            temp: list[str] = []
             for i in range(0, num):
-                petak = struct.unpack('d', f.read(8))
-                uu2k = struct.unpack('d', f.read(8))
-                vv2k = struct.unpack('d', f.read(8))
-                temp.append(
-                    [position[i][0], position[i][1], position[i][2], petak[0], uu2k[0], vv2k[0]])
+                petak: tuple = struct.unpack('d', f.read(8))
+                uu2k: tuple = struct.unpack('d', f.read(8))
+                vv2k: tuple = struct.unpack('d', f.read(8))
+                temp.append(' '.join(
+                    [position[i][0], position[i][1], position[i][2], str(round(petak[0], 4)), str(round(uu2k[0], 4)), str(round(vv2k[0], 4))])+'\n')
             buffer = f.read(4)
-            data.append(temp)
-            dst = r"d:\project\001_model_interaction_platform\data\png\uvet_petak_transform.png"
-            UVET2PNG(temp, f"{dst.split('.png')[0]}_{suffix}.png")
+
+    # NOTE suffix:04d
+            with open(os.path.join(
+                    r"D:\project\001_model_interaction_platform\data\txt", f'uvet_{suffix:04d}.txt'), 'w', encoding='utf8') as ff:
+                ff.write(f'{num}\n')
+                ff.write("id x y p u v\n")
+                ff.writelines(temp)
+            # dst = r"d:\project\001_model_interaction_platform\data\png\uvet_petak_transform.png"
+            # UVET2PNG(temp, f"{dst.split('.png')[0]}_{suffix}.png")
+
+            print(suffix)
             suffix += 1
 
-    return data
+    # return data
 
 
 def UVET2PNG(dataList: list[list[float]], dstPath: str) -> None:
@@ -177,7 +183,7 @@ if __name__ == '__main__':
             r"D:\project\001_model_interaction_platform\data\temp\input\mesh31.gr3")
         num = int(info['num'][1])
         position = info['data']
-        dataList = resolveUVET(num, position, src)
+        resolveUVET(num, position, src)
         # for i in range(0, len(dataList)):
         #     UVET2PNG(dataList[i], f"{dst.split('.png')[0]}_{i}.png")
     except:

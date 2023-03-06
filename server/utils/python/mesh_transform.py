@@ -69,6 +69,7 @@ def Mesh2PNG(dataList: list[list[str]], dstPath: str) -> tuple:
     ds: ogr.DataSource = driver.CreateDataSource('/vsimem/mask.shp')
     layer: ogr.Layer = ds.CreateLayer(
         'mask', dst, ogr.wkbPolygon, options=["ENCODING=UTF-8"])
+    layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))
     featureDefn: ogr.FeatureDefn = layer.GetLayerDefn()
     feature: ogr.Feature = ogr.Feature(featureDefn)
     multiPoint: ogr.Geometry = ogr.Geometry(ogr.wkbMultiPoint)
@@ -83,6 +84,7 @@ def Mesh2PNG(dataList: list[list[str]], dstPath: str) -> tuple:
         multiPoint.AddGeometry(point)
         del point
 
+    feature.SetField('id', 0)
     feature.SetGeometry(multiPoint.ConcaveHull(0.01, True))
     layer.CreateFeature(feature)
 
