@@ -71,8 +71,11 @@ const useData = () => {
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const style = dataDetail.style;
+      console.log(style);
 
       getData(id, "json").then((res) => {
+        console.log(res);
+
         map!.addSource(id, {
           type: "geojson",
           data: res,

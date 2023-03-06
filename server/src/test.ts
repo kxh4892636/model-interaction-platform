@@ -43,11 +43,8 @@ const main = async () => {
   //   },
   // });
   // await prisma.data.updateMany({
-  //   where: {
-  //     type: "uvet",
-  //   },
+  //   where: {},
   //   data: {
-  //     transform: ["/case/test/transform/uvet_petak_transform.png", "1440"],
   //   },
   // });
   const info = await prisma.data.findMany();

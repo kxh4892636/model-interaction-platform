@@ -38,8 +38,8 @@ def resolveUVET(num: int, position: list[list[list[float]]], path: str) -> list:
                     [position[i][0], position[i][1], position[i][2], petak[0], uu2k[0], vv2k[0]])
             buffer = f.read(4)
             data.append(temp)
-            dst = r"d:\project\001_model_interaction_platform\data\png\test.png"
-            # UVET2PNG(temp, f"{dst.split('.png')[0]}_{suffix}.png")
+            dst = r"d:\project\001_model_interaction_platform\data\png\uvet_petak_transform.png"
+            UVET2PNG(temp, f"{dst.split('.png')[0]}_{suffix}.png")
             suffix += 1
 
     return data
@@ -89,21 +89,39 @@ def UVET2PNG(dataList: list[list[float]], dstPath: str) -> None:
     extent: tuple = layer.GetExtent()
     ratio = abs(((extent[3]-extent[2])/(extent[1]-extent[0])))
     del driver, ds
+
+    driver: ogr.Driver = ogr.GetDriverByName('ESRI Shapefile')
+    ds: ogr.DataSource = driver.CreateDataSource('/vsimem/mask.shp')
+    layer: ogr.Layer = ds.CreateLayer(
+        'mask', dst, ogr.wkbPolygon, options=["ENCODING=UTF-8"])
+    featureDefn: ogr.FeatureDefn = layer.GetLayerDefn()
+    feature: ogr.Feature = ogr.Feature(featureDefn)
+    multiPoint: ogr.Geometry = ogr.Geometry(ogr.wkbMultiPoint)
+    for data in dataList:
+        x = float(data[1])
+        y = float(data[2])
+        coords = ct.TransformPoint(x, y)
+        # 生成 geometry
+        point = ogr.Geometry(ogr.wkbPoint)
+        point.AddPoint(coords[0], coords[1])
+        # 赋值给矢量图层
+        multiPoint.AddGeometry(point)
+        del point
+
+    feature.SetGeometry(multiPoint.ConcaveHull(0.01, True))
+    layer.CreateFeature(feature)
+
     # shp2tif
     gridOptions = gdal.GridOptions(format="GTiff", outputType=gdal.GDT_Float32,
                                    algorithm="invdist:power=2.0:smoothing=0.0:radius1=0.0:radius2=0.0:angle=0.0:max_points=100:min_points=30:nodata=-9999", zfield="Z",
-                                   width=500, height=ratio*500,
+                                   width=1000, height=ratio*1000,
                                    )
-    # NOTE grid 的坑, 需要使用 warp
-    gdal.Grid('/vsimem/temp_grid.tif',
-              '/vsimem/temp.shp', options=gridOptions)
-    # gdal.Grid(r"d:\project\001_model_interaction_platform\data\temp\uvet.tif",
-    #           '/vsimem/temp.shp', options=gridOptions)
+    gdal.Grid('/vsimem/temp_grid.tif', '/vsimem/temp.shp', options=gridOptions)
     ds: gdal.Dataset = gdal.Open('/vsimem/temp_grid.tif')
     band: gdal.Band = ds.GetRasterBand(1)
     minmax = band.ComputeRasterMinMax()
     warpOptions = gdal.WarpOptions(
-        srcSRS=dst, dstSRS=dst, format='GTiff')
+        srcSRS=dst, dstSRS=dst, format='GTiff', cutlineDSName='/vsimem/mask.shp', cropToCutline=True)
     gdal.Warp('/vsimem/temp_warp.tif',
               '/vsimem/temp_grid.tif', options=warpOptions)
     translateOptions = gdal.TranslateOptions(format='GTiff',
@@ -119,23 +137,25 @@ def UVET2PNG(dataList: list[list[float]], dstPath: str) -> None:
     ds: gdal.Dataset = gdal.Open('/vsimem/temp_normalize.tif')
     band: gdal.Band = ds.GetRasterBand(1)
     minmax = band.ComputeRasterMinMax()
+    # NOTE std 的真实值
     [min, max, mean, std] = band.ComputeStatistics(0)
     # create color table
     colors = gdal.ColorTable()
     colors.CreateColorRamp(int(min), (48, 18, 59),
-                           int(mean-2*std), (70, 134, 251))
-    colors.CreateColorRamp(int(mean-2*std), (70, 134, 251),
+                           int(mean-1.5*std), (70, 134, 251))
+    colors.CreateColorRamp(int(mean-1.5*std), (70, 134, 251),
                            int(mean-std), (27, 229, 181))
     colors.CreateColorRamp(int(mean-std), (27, 229, 181),
                            int(mean), (164, 252, 60))
     colors.CreateColorRamp(int(mean), (164, 252, 60),
                            int(mean+std), (251, 185, 56))
     colors.CreateColorRamp(int(mean+std), (251, 185, 56),
-                           int(mean+2*std), (227, 68, 10))
-    colors.CreateColorRamp(int(mean+2*std), (227, 68, 10),
+                           int(mean+1.5*std), (227, 68, 10))
+    colors.CreateColorRamp(int(mean+1.5*std), (227, 68, 10),
                            int(max), (122, 4, 3))
     # set color table and color interpretation
     band.SetRasterColorTable(colors)
+    # band.SetRasterColorInterpretation(gdal.GCI_PaletteIndex)
     del band, ds
     translateOptions = gdal.TranslateOptions(format='PNG',
                                              outputType=gdal.GDT_Byte,

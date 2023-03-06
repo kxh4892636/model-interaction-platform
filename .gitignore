@@ -3,21 +3,21 @@
 # 自定义
 package-lock.json
 .vscode
-data
-docs
+/data
+/docs
 .env
-**/prisma
+prisma
 
 # dependencies
-**/node_modules
-**/.pnp
+node_modules
+.pnp
 .pnp.js
 
 # testing
-**/coverage
+coverage
 
 # production
-**/build
+build
 
 # misc
 .DS_Store

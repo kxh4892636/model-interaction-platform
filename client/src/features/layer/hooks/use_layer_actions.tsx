@@ -258,8 +258,3 @@ const useLayerActions = () => {
 };
 
 export default useLayerActions;
-
-git config --global user.name "kxh4892636" 
-git config --global user.email "kxh4892636@gmail.com" 
-ssh-keygen -t rsa -C "kxh4892636@gmail.com" 
-git remote add origin git@github.com:kxh4892636/model_interaction_platform.git

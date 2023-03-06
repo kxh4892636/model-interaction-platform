@@ -40,8 +40,8 @@ def getVectorStyle(filePath: str) -> str:
         geomTypecode = layer.GetGeomType()
         # TODO 0 和 100 以后或许会处理
         # NOTE code 对应意义yiji getGeomtype funciton
-        code2Style = {0: 'text', 1: 'symbol', 2: 'line', 3: 'fill',
-                      4: 'symbol', 5: 'line', 6: 'fill', 100: 'text'}
+        code2Style = {0: 'text', 1: 'circle', 2: 'line', 3: 'fill',
+                      4: 'circle', 5: 'line', 6: 'fill', 100: 'text'}
         if (geomTypecode in code2Style):
             style = code2Style[geomTypecode]
         return style
@@ -53,6 +53,7 @@ if __name__ == '__main__':
     try:
         # sys.argv
         path = sys.argv[1]
+        # path = r"D:\project\001_model_interaction_platform\data\case\test\input\mesh31.json"
         type = getDataType(path)
         style = getDataStyle(path)
         print(type, ',', style, sep='')

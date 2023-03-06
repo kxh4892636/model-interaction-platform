@@ -108,6 +108,7 @@ const uploadData = async (file: Express.Multer.File) => {
   if (!file) return "upload failed";
   else;
 
+  console.log(file);
   const filePath: string = file.path;
   const id = crypto.randomUUID();
   const output = execSync(
@@ -118,6 +119,7 @@ const uploadData = async (file: Express.Multer.File) => {
   const [type, style] = output.toString().trimEnd().split(",");
   let transform: string[] = [];
   let extent: number[] = [];
+  console.log(type, style);
 
   if (type === "mesh") {
     const fileName = file.filename.split(".")[0];
