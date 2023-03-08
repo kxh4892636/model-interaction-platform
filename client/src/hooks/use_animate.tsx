@@ -27,7 +27,7 @@ const useAnimate = () => {
   const createAnimate = (id: string, imageCount: number = 0) => {
     let currentCount = 0;
     const intervalFunc = setInterval(() => {
-      currentCount = (currentCount + 1) % imageCount;
+      currentCount = (currentCount + 1) % (imageCount - 1);
       updateLayersAnimated(id, "currentCount", currentCount);
       // NOTE
       dataAction.getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
@@ -61,7 +61,7 @@ const useAnimate = () => {
         let currentCount = info[0].currentCount;
         const imageCount = info[0].imageCount;
         const intervalFunc = setInterval(() => {
-          currentCount = (currentCount + 1) % imageCount;
+          currentCount = (currentCount + 1) % (imageCount - 1);
           updateLayersAnimated(id, "currentCount", currentCount);
           // NOTE
           dataAction.getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {

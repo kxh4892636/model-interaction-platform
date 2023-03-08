@@ -89,7 +89,6 @@ const useLayerActions = () => {
     const dropPos = info.node.pos.split("-");
     const dropPosition = info.dropPosition - Number(dropPos[dropPos.length - 1]);
 
-    // NOTE study
     const loop = (
       data: Layer[],
       key: string,

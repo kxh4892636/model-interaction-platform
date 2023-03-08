@@ -15,6 +15,8 @@ import { useKeys } from ".";
 import { Layer, ServerData } from "../types";
 import { ImageSource } from "mapbox-gl";
 import useLayersAnimatedStore from "../stores/layers_animated_store";
+import { FlowFieldManager } from "../features/map/utils/customLayer/flowfield";
+import { FlowLayer } from "../features/map/utils/customLayer/flowLayer";
 
 /**
  * @description return the function that curd data
@@ -44,6 +46,9 @@ const useData = () => {
   /**
    * get data by id
    * @param id data id
+   * @param dataType the type of data, image, json, etc...
+   * @param params the params of get request
+   * @param responseType the type of response
    */
   // NOTE get params responsetype
   const getData = async (
@@ -72,6 +77,8 @@ const useData = () => {
       const dataDetail: ServerData = res;
       const style = dataDetail.style;
       console.log(style);
+      if (style === "text") return;
+      else;
 
       getData(id, "json").then((res) => {
         console.log(res);
@@ -129,53 +136,64 @@ const useData = () => {
   /**
    * add image to map by id
    * @param id data id
+   * @param style the style of uvet, raster and flow
    */
-  const addUVET = (id: string, style = "raster") => {
+  const addUVET = (id: string, style: string) => {
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
       const imageCount: number = Number(res.transform[1]);
       let currentCount = 0;
 
-      getData(id, "uvet", { currentImage: currentCount }, "blob").then((res) => {
-        const blob = new Blob([res]);
-        const url = window.URL.createObjectURL(blob);
-        map!.addSource(id, {
-          type: "image",
-          url: url,
-          coordinates: [
-            [extent[0], extent[3]],
-            [extent[1], extent[3]],
-            [extent[1], extent[2]],
-            [extent[0], extent[2]],
-          ],
-        });
-        map!.addLayer({
-          id: id,
-          type: "raster",
-          source: id,
-          paint: {
-            "raster-fade-duration": 0,
-          },
-        });
-      });
-      // NOTE node.timer type
-      const intervalFunc = setInterval(() => {
-        currentCount = (currentCount + 1) % imageCount;
-        updateLayersAnimated(id, "currentCount", currentCount);
-        // NOTE
-        getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
+      if (style === "raster") {
+        getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob").then((res) => {
           const blob = new Blob([res]);
           const url = window.URL.createObjectURL(blob);
-          (map!.getSource(id) as ImageSource).updateImage({ url: url });
+          map!.addSource(id, {
+            type: "image",
+            url: url,
+            coordinates: [
+              [extent[0], extent[3]],
+              [extent[1], extent[3]],
+              [extent[1], extent[2]],
+              [extent[0], extent[2]],
+            ],
+          });
+          map!.addLayer({
+            id: id,
+            type: "raster",
+            source: id,
+            paint: {
+              "raster-fade-duration": 0,
+            },
+          });
         });
-      }, 200);
-      addLayersAnimated({
-        key: id,
-        currentCount: currentCount,
-        imageCount: imageCount,
-        intervalFunction: intervalFunc,
-      });
+        // NOTE node.timer type
+        const intervalFunc = setInterval(() => {
+          currentCount = (currentCount + 1) % (imageCount - 1);
+          updateLayersAnimated(id, "currentCount", currentCount);
+          // NOTE
+          getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!.then(
+            (res) => {
+              const blob = new Blob([res]);
+              const url = window.URL.createObjectURL(blob);
+              (map!.getSource(id) as ImageSource).updateImage({ url: url });
+            }
+          );
+        }, 200);
+        addLayersAnimated({
+          key: id,
+          currentCount: currentCount,
+          imageCount: imageCount,
+          intervalFunction: intervalFunc,
+        });
+      } else if (style === "flow") {
+        let flowFieldManager = new FlowFieldManager(
+          process.env.PUBLIC_URL + "/json/flow_field_description_120.json"
+        );
+        const flowLayer = new FlowLayer("flow", "2d", flowFieldManager);
+        map!.addLayer(flowLayer);
+      }
     });
   };
 
@@ -236,16 +254,13 @@ const useData = () => {
       addLayersChecked(id);
       addLayersExpanded(id);
 
-      if (type === "geojson") {
+      if (type.includes("json")) {
         addJSON(id);
       } else if (type === "mesh" && dataDetail.transform) {
         addMesh(id);
       } else if (type === "uvet" && dataDetail.transform) {
-        if (style === "raster") {
-          addUVET(id);
-        } else if (style === "flow") {
-          // TODO addUVET should be add style props to distinguish raster and flow
-          addUVET(id);
+        if (style === "raster" || style === "flow") {
+          addUVET(id, style);
         } else {
           console.error("the style of uvet is wrong");
         }

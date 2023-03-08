@@ -1,4 +1,12 @@
-import { Request } from "express";
+/*
+ * @file: case service
+ * @Author: xiaohan kong
+ * @Date: 2023-03-02
+ * @LastEditors: xiaohan kong
+ * @LastEditTime: 2023-03-02
+ *
+ * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
+ */
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();

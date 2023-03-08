@@ -12,6 +12,8 @@ import { useRef, useEffect } from "react";
 import mapboxgl from "mapbox-gl";
 import useMapPositionStore from "../../stores/map_postion_store";
 import useMapStore from "../../stores/map_store";
+import { GetMap } from "./utils/customLayer/cusLayer";
+
 
 mapboxgl.accessToken =
   "pk.eyJ1Ijoia3hoNDg5MjYzNiIsImEiOiJjbGFhcWYyNmcwNHF3M25vNXJqaW95bDZsIn0.ID03BpkSU7-I0OcehcrvlQ";
@@ -34,12 +36,15 @@ const MapView = () => {
     // init map
     if (mapRef.current) return;
 
-    mapRef.current = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/streets-v12",
-      center: [position[0], position[1]],
-      zoom: position[2],
-    });
+    mapRef.current = GetMap(
+      "pk.eyJ1Ijoia3hoNDg5MjYzNiIsImEiOiJjbGFhcWYyNmcwNHF3M25vNXJqaW95bDZsIn0.ID03BpkSU7-I0OcehcrvlQ",
+      {
+        container: mapContainerRef.current,
+        style: "mapbox://styles/mapbox/streets-v12",
+        center: [position[0], position[1]],
+        zoom: position[2],
+      }
+    );
     setMap(mapRef.current);
 
     // update map center position
