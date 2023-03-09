@@ -8,7 +8,7 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import styled from "styled-components";
+import styled from "styled-components/macro";
 import { Tree } from "antd";
 import useLayersStore from "../../../../stores/layers_store";
 import useLayersStatusStore from "../../../../stores/layers_status_store";

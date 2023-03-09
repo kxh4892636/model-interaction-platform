@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-22
+ * @LastEditTime: 2023-03-09
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -72,7 +72,7 @@ const useData = () => {
    * add json to map by id
    * @param id data id
    */
-  const addJSON = (id: string) => {
+  const addJSONToMap = (id: string) => {
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const style = dataDetail.style;
@@ -103,7 +103,7 @@ const useData = () => {
    * add mesh to map by id
    * @param id data id
    */
-  const addMesh = (id: string) => {
+  const addMeshToMap = (id: string) => {
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
@@ -138,7 +138,7 @@ const useData = () => {
    * @param id data id
    * @param style the style of uvet, raster and flow
    */
-  const addUVET = (id: string, style: string) => {
+  const addUVETToMap = (id: string, style: string) => {
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
@@ -149,6 +149,7 @@ const useData = () => {
         getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob").then((res) => {
           const blob = new Blob([res]);
           const url = window.URL.createObjectURL(blob);
+          // NOTE source type
           map!.addSource(id, {
             type: "image",
             url: url,
@@ -159,6 +160,7 @@ const useData = () => {
               [extent[0], extent[2]],
             ],
           });
+          // NOTE layer type
           map!.addLayer({
             id: id,
             type: "raster",
@@ -177,6 +179,7 @@ const useData = () => {
             (res) => {
               const blob = new Blob([res]);
               const url = window.URL.createObjectURL(blob);
+              // NOTE updateImage and ImageSource
               (map!.getSource(id) as ImageSource).updateImage({ url: url });
             }
           );
@@ -188,10 +191,8 @@ const useData = () => {
           intervalFunction: intervalFunc,
         });
       } else if (style === "flow") {
-        let flowFieldManager = new FlowFieldManager(
-          process.env.PUBLIC_URL + "/json/flow_field_description_120.json"
-        );
-        const flowLayer = new FlowLayer("flow", "2d", flowFieldManager);
+        let flowFieldManager = new FlowFieldManager(id, dataDetail);
+        const flowLayer = new FlowLayer(id, "2d", flowFieldManager);
         map!.addLayer(flowLayer);
       }
     });
@@ -201,7 +202,7 @@ const useData = () => {
    * add image to map by id
    * @param id data id
    */
-  const addImage = (id: string) => {
+  const addImageToMap = (id: string) => {
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
@@ -235,15 +236,48 @@ const useData = () => {
    * add data to map by id
    * @param id data id
    */
-  const addData = (id: string) => {
+  const addDataToMap = (id: string) => {
     if (!map || getKeys.getLayerKeys(layers)!.includes(id)) {
       return;
     } else {
     }
+    const layerKeys = getKeys.getLayerKeys(layers);
+    if (layerKeys.includes(id)) return;
+    else;
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const type = res.type;
       const style = res.style;
+
+      if (type.includes("json")) {
+        addJSONToMap(id);
+      } else if (type === "mesh" && dataDetail.transform) {
+        addMeshToMap(id);
+      } else if (type === "uvet" && dataDetail.transform) {
+        if (style === "raster" || style === "flow") {
+          addUVETToMap(id, style);
+        } else {
+          console.error("the style of uvet is wrong");
+        }
+      } else if (type === "image") {
+        addImageToMap(id);
+      } else if (type === "text") {
+      } else {
+        console.error("the type of data is unknown");
+      }
+    });
+  };
+
+  const addDataToLayerTree = (id: string) => {
+    if (!map || getKeys.getLayerKeys(layers)!.includes(id)) {
+      return;
+    } else {
+    }
+    const layerKeys = getKeys.getLayerKeys(layers);
+    if (layerKeys.includes(id)) return;
+    else;
+    getDataDetail(id).then((res) => {
+      const dataDetail: ServerData = res;
       const treeData: Layer = {
         title: dataDetail.title,
         key: id,
@@ -253,30 +287,14 @@ const useData = () => {
       addLayer(treeData);
       addLayersChecked(id);
       addLayersExpanded(id);
-
-      if (type.includes("json")) {
-        addJSON(id);
-      } else if (type === "mesh" && dataDetail.transform) {
-        addMesh(id);
-      } else if (type === "uvet" && dataDetail.transform) {
-        if (style === "raster" || style === "flow") {
-          addUVET(id, style);
-        } else {
-          console.error("the style of uvet is wrong");
-        }
-      } else if (type === "image") {
-        addImage(id);
-      } else if (type === "text") {
-      } else {
-        console.error("the type of data is unknown");
-      }
     });
   };
 
   return {
     getData,
     getDataDetail,
-    addData,
+    addDataToMap: addDataToMap,
+    addDataToLayerTree: addDataToLayerTree,
   };
 };
 

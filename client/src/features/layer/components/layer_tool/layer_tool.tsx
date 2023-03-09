@@ -8,12 +8,12 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import styled from "styled-components";
+import styled from "styled-components/macro";
 import { Tooltip } from "antd";
 
 // LayerPanel Style
 const StyledDiv = styled.div`
-  height: 4vh;
+  height: 40px;
   display: flex;
   flex: 1 1 auto;
   align-items: center;

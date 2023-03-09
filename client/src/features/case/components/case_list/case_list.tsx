@@ -3,14 +3,15 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-16
+ * @LastEditTime: 2023-03-09
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import styled from "styled-components";
+import styled from "styled-components/macro";
 import { List, Button } from "antd";
 import { useData } from "../../../../hooks";
 import { CaseListData } from "../../types";
+import useCase from "../../hooks/use_case";
 
 // modify sytle of antd list component
 const StyledList = styled(List)`
@@ -41,11 +42,11 @@ type AppProps = {
  */
 const CaseList = ({ data, onShow }: AppProps) => {
   const dataAction = useData();
+  const caseAction = useCase();
 
   const handleClick = (data: CaseListData) => {
-    data.data.forEach((id) => {
-      dataAction.addData(id);
-    });
+    // useCase
+    caseAction.addCase(data.key);
   };
 
   return (

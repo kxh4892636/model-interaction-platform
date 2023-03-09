@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import styled from "styled-components";
+import styled from "styled-components/macro";
 import axios from "axios";
 import { Input } from "antd";
 import { useEffect, useState } from "react";
@@ -25,7 +25,7 @@ import { CaseListData } from "./types";
 // modify style of antd search component
 const { Search } = Input;
 const CaseSearch = styled(Search)`
-  padding: 0px 8px;
+  padding: 0 8px;
 `;
 
 type AppProps = { url: string };
@@ -39,7 +39,7 @@ type AppProps = { url: string };
  */
 const CasePanel = ({ url }: AppProps) => {
   const [showDetail, setShowDetail] = useState(false);
-  const [selectedItem, setselectedItem] = useState("");
+  const [selectedItem, setselectedItem] = useState("s");
   const [data, setData] = useState<CaseListData[]>([]);
 
   useEffect(() => {
@@ -53,7 +53,6 @@ const CasePanel = ({ url }: AppProps) => {
           data: value.data,
         };
       });
-
       setData(data);
     });
   }, [url]);

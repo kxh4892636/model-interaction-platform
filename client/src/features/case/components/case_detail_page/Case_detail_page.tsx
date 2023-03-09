@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-23
+ * @LastEditTime: 2023-03-09
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -12,25 +12,27 @@ import { CloseOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import styled from "styled-components";
-import { ServerCase, ServerData } from "../../../../types";
-import { useData } from "../../../../hooks";
+import styled from "styled-components/macro";
+import { ServerCase } from "../../../../types";
+import useCase from "../../hooks/use_case";
 
 // CasePage Container sytle
 const CaseContainer = styled.div`
+  display: flex;
+  flex-flow: column;
   position: absolute;
-  height: 94vh;
   width: 340px;
+  height: 100%;
   background-color: #fff;
   z-index: 9;
 `;
 // CasePage title container
 const CaseTitleContainer = styled.div`
-  height: 5vh;
-  line-height: 5vh;
+  height: 48px;
+  line-height: 48px;
   font-size: 18px;
   font-weight: bold;
-  padding: 0px 12px;
+  padding: 0 12px;
 `;
 // CasePage close symbol style
 const StyledCloseOutlined = styled(CloseOutlined)`
@@ -45,7 +47,7 @@ const StyledCloseOutlined = styled(CloseOutlined)`
 `;
 // CasePage Image container
 const CaseImageContainer = styled.div`
-  height: 25vh;
+  height: 240px;
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #d9d9d9;
   .view {
@@ -58,12 +60,12 @@ const CaseImageContainer = styled.div`
 `;
 // CasePage tags container
 const CaseTagsContainer = styled.div`
-  height: 4vh;
+  height: 40px;
   border-bottom: 1px solid #d9d9d9;
 `;
 // CasePage meta container
 const CaseMetaContainer = styled.div`
-  height: 4vh;
+  height: 40px;
   border-bottom: 1px solid #d9d9d9;
   display: flex;
   align-items: center;
@@ -71,12 +73,12 @@ const CaseMetaContainer = styled.div`
 `;
 // CasePage description container
 const CaseDescriptionContainer = styled.div`
-  height: 51vh;
+  flex: 1 1 0;
   border-bottom: 1px solid #d9d9d9;
 `;
 
 const CaseDataActionContainer = styled.div`
-  height: 5vh;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,7 +99,7 @@ type AppProps = {
  */
 const CasePage = ({ id, onClose }: AppProps) => {
   const [data, setData] = useState<ServerCase>();
-  const dataAction = useData();
+  const caseActions = useCase();
 
   useEffect(() => {
     axios.get("http://localhost:3456/case/case?id=" + id).then((res) => {
@@ -124,14 +126,9 @@ const CasePage = ({ id, onClose }: AppProps) => {
       <CaseDataActionContainer>
         <Button
           type="primary"
-          style={{ marginInlineStart: "auto", marginInlineEnd: "10px" }}
+          style={{ marginInlineStart: "auto", marginInlineEnd: "10px", fontSize: "14px" }}
           onClick={() => {
-            data.data.forEach((id) => {
-              axios.get("http://localhost:3456/data/?id=" + id).then((res) => {
-                const data: ServerData = res.data;
-                dataAction.addData(data.id);
-              });
-            });
+            caseActions.addCase(id);
           }}
         >
           添加至地图

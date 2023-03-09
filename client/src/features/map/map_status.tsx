@@ -8,7 +8,7 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import styled from "styled-components";
+import styled from "styled-components/macro";
 
 const StyledDiv = styled.div`
   background-color: #fff;

@@ -10,6 +10,7 @@
 import { create } from "zustand";
 import produce from "immer";
 import { Layer } from "../types";
+import { title } from "process";
 
 interface LayersStore {
   layers: Layer[];

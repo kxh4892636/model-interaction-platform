@@ -30,11 +30,13 @@ const useAnimate = () => {
       currentCount = (currentCount + 1) % (imageCount - 1);
       updateLayersAnimated(id, "currentCount", currentCount);
       // NOTE
-      dataAction.getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
-        const blob = new Blob([res]);
-        const url = window.URL.createObjectURL(blob);
-        (map!.getSource(id) as ImageSource).updateImage({ url: url });
-      });
+      dataAction
+        .getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!
+        .then((res) => {
+          const blob = new Blob([res]);
+          const url = window.URL.createObjectURL(blob);
+          (map!.getSource(id) as ImageSource).updateImage({ url: url });
+        });
     }, 200);
     addLayersAnimated({
       key: id,
@@ -64,11 +66,13 @@ const useAnimate = () => {
           currentCount = (currentCount + 1) % (imageCount - 1);
           updateLayersAnimated(id, "currentCount", currentCount);
           // NOTE
-          dataAction.getData(id, "uvet", { currentImage: currentCount }, "blob")!.then((res) => {
-            const blob = new Blob([res]);
-            const url = window.URL.createObjectURL(blob);
-            (map!.getSource(id) as ImageSource).updateImage({ url: url });
-          });
+          dataAction
+            .getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!
+            .then((res) => {
+              const blob = new Blob([res]);
+              const url = window.URL.createObjectURL(blob);
+              (map!.getSource(id) as ImageSource).updateImage({ url: url });
+            });
         }, 150);
         updateLayersAnimated(id, "intervalFunction", intervalFunc);
       }

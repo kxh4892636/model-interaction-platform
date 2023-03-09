@@ -14,7 +14,6 @@ import useMapPositionStore from "../../stores/map_postion_store";
 import useMapStore from "../../stores/map_store";
 import { GetMap } from "./utils/customLayer/cusLayer";
 
-
 mapboxgl.accessToken =
   "pk.eyJ1Ijoia3hoNDg5MjYzNiIsImEiOiJjbGFhcWYyNmcwNHF3M25vNXJqaW95bDZsIn0.ID03BpkSU7-I0OcehcrvlQ";
 

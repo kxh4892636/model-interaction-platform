@@ -1,5 +1,6 @@
 import axios from "axios";
 import mapboxgl from "mapbox-gl";
+import { ServerData } from "../../../../types";
 import { Shader } from "../renderUtils/shader";
 
 // create random positions and velocities.
@@ -135,7 +136,8 @@ interface TextureOffset {
 }
 
 export class FlowFieldManager {
-  private descriptionUrl: string;
+  private id: string;
+  private dataDetail: ServerData | undefined;
   private fieldSequence: Array<WebGLTexture>;
   private maskSequence: Array<WebGLTexture>;
   private validSequence: Array<WebGLTexture>;
@@ -181,8 +183,9 @@ export class FlowFieldManager {
   private ffTextureInfo: Array<WebGLTexture> = [];
   private maskTextureInfo: Array<WebGLTexture> = [];
 
-  constructor(descriptionUrl: string) {
-    this.descriptionUrl = descriptionUrl;
+  constructor(id: string, dataDetail: ServerData | undefined = undefined) {
+    this.id = id;
+    this.dataDetail = dataDetail;
     this.fieldSequence = []; // store all the flow textures
     this.maskSequence = []; // store all the mask textures
     this.validSequence = [];
@@ -223,47 +226,85 @@ export class FlowFieldManager {
   async Prepare(gl: WebGL2RenderingContext) {
     console.log("prepare");
 
-    await axios.get(this.descriptionUrl).then((response) => {
-      // Get boundaries of flow speed
-      this.flowBoundary[0] = response.data["flow_boundary"]["u_min"];
-      this.flowBoundary[1] = response.data["flow_boundary"]["v_min"];
-      this.flowBoundary[2] = response.data["flow_boundary"]["u_max"];
-      this.flowBoundary[3] = response.data["flow_boundary"]["v_max"];
+    await axios
+      .get(`http://localhost:3456/data/uvet?id=` + this.id, {
+        params: { type: "description" },
+      })
+      .then(async (response) => {
+        // Get boundaries of flow speed
+        this.flowBoundary[0] = response.data["flow_boundary"]["u_min"];
+        this.flowBoundary[1] = response.data["flow_boundary"]["v_min"];
+        this.flowBoundary[2] = response.data["flow_boundary"]["u_max"];
+        this.flowBoundary[3] = response.data["flow_boundary"]["v_max"];
 
-      // Set uniform buffer object data (something will not change)
-      this.uboMapBuffer[8] = this.flowBoundary[0];
-      this.uboMapBuffer[9] = this.flowBoundary[1];
-      this.uboMapBuffer[10] = this.flowBoundary[2];
-      this.uboMapBuffer[11] = this.flowBoundary[3];
+        // Set uniform buffer object data (something will not change)
+        this.uboMapBuffer[8] = this.flowBoundary[0];
+        this.uboMapBuffer[9] = this.flowBoundary[1];
+        this.uboMapBuffer[10] = this.flowBoundary[2];
+        this.uboMapBuffer[11] = this.flowBoundary[3];
 
-      // Get constraints
-      const constraints: FlowFieldConstraints = {
-        MAX_TEXTURE_SIZE: response.data["constraints"]["max_texture_size"],
-        MAX_STREAMLINE_NUM: response.data["constraints"]["max_streamline_num"],
-        MAX_SEGMENT_NUM: response.data["constraints"]["max_segment_num"],
-        MAX_DORP_RATE: response.data["constraints"]["max_drop_rate"],
-        MAX_DORP_RATE_BUMP: response.data["constraints"]["max_drop_rate_bump"],
-      };
+        // Get constraints
+        const constraints: FlowFieldConstraints = {
+          MAX_TEXTURE_SIZE: response.data["constraints"]["max_texture_size"],
+          MAX_STREAMLINE_NUM: response.data["constraints"]["max_streamline_num"],
+          MAX_SEGMENT_NUM: response.data["constraints"]["max_segment_num"],
+          MAX_DORP_RATE: response.data["constraints"]["max_drop_rate"],
+          MAX_DORP_RATE_BUMP: response.data["constraints"]["max_drop_rate_bump"],
+        };
 
-      this.geoBbox = this.TransMercator(response.data["geo_bbox"]);
+        const extent: [number, number, number, number] = [
+          this.dataDetail!.extent[0],
+          this.dataDetail!.extent[3],
+          this.dataDetail!.extent[1],
+          this.dataDetail!.extent[2],
+        ];
+        const imageCount = Number(this.dataDetail!.transform[1]);
 
-      this.controller = new FlowFieldController(constraints)!;
+        // this.geoBbox = this.TransMercator(extent);
+        this.geoBbox = this.TransMercator(extent);
 
-      // Load textures of flow fields
-      for (const url of response.data["flow_fields"]) {
-        this.fieldSequence.push(loadTexture(gl, url, gl.NEAREST)!);
-      }
+        this.controller = new FlowFieldController(constraints)!;
 
-      // Load textures of area masks
-      for (const url of response.data["area_masks"]) {
-        this.maskSequence.push(loadTexture(gl, url, gl.NEAREST)!);
-      }
-
-      // Load textures of valid address
-      for (const url of response.data["valid_address"]) {
-        this.validSequence.push(loadTexture(gl, url, gl.NEAREST)!);
-      }
-    });
+        // Load textures of flow fields
+        for (let i = 0; i < imageCount; i++) {
+          axios
+            .get(`http://localhost:3456/data/uvet?id=` + this.id, {
+              params: { currentImage: i, type: "uv" },
+              responseType: "blob",
+            })
+            .then((res) => {
+              const blob = new Blob([res.data]);
+              const url = window.URL.createObjectURL(blob);
+              this.fieldSequence.push(loadTexture(gl, url, gl.NEAREST)!);
+            });
+        }
+        // Load textures of area masks
+        for (let i = 0; i < imageCount; i++) {
+          axios
+            .get(`http://localhost:3456/data/uvet?id=` + this.id, {
+              params: { currentImage: i, type: "mask" },
+              responseType: "blob",
+            })
+            .then((res) => {
+              const blob = new Blob([res.data]);
+              const url = window.URL.createObjectURL(blob);
+              this.maskSequence.push(loadTexture(gl, url, gl.NEAREST)!);
+            });
+        }
+        // Load textures of valid address
+        for (let i = 0; i < imageCount; i++) {
+          axios
+            .get(`http://localhost:3456/data/uvet?id=` + this.id, {
+              params: { currentImage: i, type: "valid" },
+              responseType: "blob",
+            })
+            .then((res) => {
+              const blob = new Blob([res.data]);
+              const url = window.URL.createObjectURL(blob);
+              this.validSequence.push(loadTexture(gl, url, gl.NEAREST)!);
+            });
+        }
+      });
 
     // Prepare descriptive variables
     const MAX_TEXTURE_SIZE = this.controller!.constraints["MAX_TEXTURE_SIZE"];

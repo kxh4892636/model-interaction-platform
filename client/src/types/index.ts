@@ -13,7 +13,7 @@ export type ServerData = {
   type: string;
   temp: boolean;
   extent: number[];
-  transform: string;
+  transform: string[];
 };
 
 export type ServerCase = {

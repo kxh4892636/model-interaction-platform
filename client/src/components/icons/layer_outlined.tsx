@@ -11,7 +11,13 @@
 const LayerOutlined: React.FC<{ style: React.CSSProperties }> = ({ style }) => {
   return (
     <span
-      style={{ padding: "0px", lineHeight: "0px", fontSize: "14px", color: "#595959", ...style }}
+      style={{
+        padding: "0px",
+        lineHeight: "0px",
+        fontSize: "14px",
+        color: "#595959",
+        ...style,
+      }}
     >
       <svg
         className="icon"

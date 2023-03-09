@@ -8,7 +8,7 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import styled from "styled-components";
+import styled from "styled-components/macro";
 import { AppstoreOutlined, CloudUploadOutlined } from "@ant-design/icons";
 import { LayerOutlined } from "../../components/icons";
 import Sidebar from "../../features/sidebar";
@@ -18,10 +18,18 @@ import { LayerPanel } from "../../features/layer";
 import { CasePanel } from "../../features/case";
 import { DataPanel } from "../../features/data";
 
+const View = styled.div`
+  position: relative;
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  flex-flow: column;
+`;
+
 // TitleBar container
 const TitleBarContainer = styled.div`
-  height: 6vh;
-  line-height: 6vh;
+  height: 56px;
+  line-height: 56px;
   font-size: 20px;
   background: #fff;
   padding-left: 20px;
@@ -30,11 +38,11 @@ const TitleBarContainer = styled.div`
 // conent container
 const ContentContainer = styled.div`
   display: flex;
+  flex: 1 1 0;
 `;
 // MapContainer 样式
 const MapContainer = styled.div`
   position: relative;
-  height: 94vh;
   flex: 1 1 0;
 `;
 
@@ -69,8 +77,9 @@ const Home: React.FC = () => {
     },
   ];
 
+  // NOTE 弹窗设计思想
   return (
-    <>
+    <View>
       <TitleBarContainer>港口水环境与生态动力学精细化模拟平台</TitleBarContainer>
       <ContentContainer>
         <Sidebar items={sidebarItemsLeft} />
@@ -80,7 +89,7 @@ const Home: React.FC = () => {
         </MapContainer>
         <Sidebar items={[]} position="right" style={{ background: "#fff" }}></Sidebar>
       </ContentContainer>
-    </>
+    </View>
   );
 };
 

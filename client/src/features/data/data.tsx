@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import styled from "styled-components";
+import styled from "styled-components/macro";
 import { UploadOutlined } from "@ant-design/icons";
 import { Button, message, Upload } from "antd";
 import { PanelContainer, PanelTitleContainer } from "../../components/layout";
@@ -37,7 +37,8 @@ const DataPanel = () => {
           if (info.file.status === "done") {
             message.success(`${info.file.name} file uploaded successfully`);
             // TODO 添加案例时相同案例数据放置于一个图层组内
-            dataActions.addData(info.file.response);
+            dataActions.addDataToMap(info.file.response);
+            dataActions.addDataToLayerTree(info.file.response);
           }
         }}
         method="post"

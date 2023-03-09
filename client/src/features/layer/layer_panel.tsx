@@ -17,7 +17,7 @@ import {
 } from "@ant-design/icons";
 import React, { useState } from "react";
 import { Button, Input } from "antd";
-import styled from "styled-components";
+import styled from "styled-components/macro";
 import {
   PanelContainer,
   PanelContentContainer,
@@ -39,8 +39,8 @@ const StyledDiv = styled.div`
   width: 180px;
   border: 1px solid #d9d9d9;
   border-radius: 6px;
-  left: 4vw;
-  top: 16vh;
+  left: 100px;
+  top: 200px;
   z-index: 9;
 `;
 

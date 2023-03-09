@@ -8,7 +8,7 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import styled from "styled-components";
+import styled from "styled-components/macro";
 import React, { useState } from "react";
 import { Tooltip } from "antd";
 import { SidebarItem } from "./types";
@@ -17,7 +17,6 @@ import { SidebarItem } from "./types";
 const Aside = styled.aside`
   display: flex;
   flex-direction: column;
-  height: 94vh;
   width: 60px;
   background: #434343;
   border-right: 1px solid #262626;
@@ -41,7 +40,6 @@ const PanelContainer = styled.div`
   position: relative;
   display: flex;
   flex-flow: column;
-  height: 94vh;
   width: 340px;
   background: #fff;
   border-right: 1px solid #d9d9d9;
