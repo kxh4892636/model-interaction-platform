@@ -143,6 +143,8 @@ def Mesh2PNG(dataList: list[list[str]], dstPath: str) -> tuple:
 
 
 if __name__ == '__main__':
+    os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
+
     try:
         # sys.argv
         [src, dst] = sys.argv[1:3]

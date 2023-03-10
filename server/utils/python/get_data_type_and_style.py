@@ -1,5 +1,6 @@
 from osgeo import ogr
 import sys
+import os
 # NOTE python 类型注释如何表示一个函数
 
 
@@ -47,6 +48,7 @@ def getVectorStyle(filePath: str) -> str:
 
 
 if __name__ == '__main__':
+    os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
     try:
         # sys.argv
         path = sys.argv[1]

@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { dataFoldURL } from "../../config/global_data";
 import { execSync } from "child_process";
 import { resolve } from "path";
+import { title } from "process";
 
 const prisma = new PrismaClient();
 
@@ -52,8 +53,9 @@ const getUVET = async (id: string, type: string, currentImage: number) => {
     },
   });
   if (!info) return "can't find data by id";
-  const filePath = dataFoldURL + info.transform[0] + `/${type}_${currentImage}.png`;
-  return filePath;
+  else if (type === "description")
+    return dataFoldURL + info.transform[0] + "/flow_field_description.json";
+  else return dataFoldURL + info.transform[0] + `/${type}_${currentImage}.png`;
 };
 
 const getImage = async (id: string) => {
@@ -132,6 +134,7 @@ const uploadData = async (file: Express.Multer.File) => {
   } else if (type === "uvet") {
     // TODO 以后写
   }
+
   // write data into database
   await prisma.data.create({
     data: {

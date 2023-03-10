@@ -9,7 +9,7 @@
  */
 
 import styled from "styled-components/macro";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Tooltip } from "antd";
 import { SidebarItem } from "./types";
 
@@ -18,8 +18,7 @@ const Aside = styled.aside`
   display: flex;
   flex-direction: column;
   width: 60px;
-  background: #434343;
-  border-right: 1px solid #262626;
+  background: ${(props) => (props.theme === "black" ? "#434343" : "#fff")};
 `;
 // aside item style
 const AsideItem = styled.div`
@@ -31,7 +30,7 @@ const AsideItem = styled.div`
   background: rgba(0, 0, 0, 0);
   text-align: center;
   &&:hover {
-    background: #262626;
+    background: ${(props) => (props.theme === "black" ? "#262626" : "#f0f0f0")};
     border-color: rgba(0, 0, 0, 0);
   }
 `;
@@ -42,15 +41,15 @@ const PanelContainer = styled.div`
   flex-flow: column;
   width: 340px;
   background: #fff;
-  border-right: 1px solid #d9d9d9;
 `;
 
 type Position = "left" | "right";
+type Theme = "black" | "white";
 
 type AppProps = {
   items: SidebarItem[];
   position?: Position;
-  style?: React.CSSProperties;
+  theme?: Theme;
 };
 
 /**
@@ -59,10 +58,10 @@ type AppProps = {
  * @Author xiaohan kong
  * @param items sidebar items
  * @param position sidebar position
- * @param style style item style
+ * @param theme the theme of sidebar
  * @export module: Sidebar
  */
-const Sidebar = ({ items, position = "left", style }: AppProps) => {
+const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
   const [showPanelID, setShowPanelID] = useState("");
   const [showItem, setshowItem] = useState(false);
   const sidebarItems = items.map((value): JSX.Element => {
@@ -70,6 +69,7 @@ const Sidebar = ({ items, position = "left", style }: AppProps) => {
       <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
         <AsideItem
           id={value.id}
+          theme={theme}
           onClick={(e) => {
             if (showItem && e.currentTarget.id !== showPanelID) {
             } else {
@@ -81,7 +81,6 @@ const Sidebar = ({ items, position = "left", style }: AppProps) => {
               setShowPanelID(e.currentTarget.id);
             }
           }}
-          style={{ background: showPanelID === value.id ? "#262626" : "" }}
         >
           {value.icon}
         </AsideItem>
@@ -92,15 +91,25 @@ const Sidebar = ({ items, position = "left", style }: AppProps) => {
   return (
     <>
       {showItem && position === "right" ? (
-        <PanelContainer>
+        // TODO react html props
+        <PanelContainer style={{ borderLeft: "1px solid #d9d9d9" }}>
           <Item selectID={showPanelID} items={items} />
         </PanelContainer>
       ) : (
         <></>
       )}
-      <Aside style={style}>{sidebarItems}</Aside>
+      <Aside
+        theme={theme}
+        style={
+          position === "left"
+            ? { borderRight: "1px solid #d9d9d9" }
+            : { borderLeft: "1px solid #d9d9d9" }
+        }
+      >
+        {sidebarItems}
+      </Aside>
       {showItem && position === "left" ? (
-        <PanelContainer>
+        <PanelContainer style={{ borderRight: "1px solid #d9d9d9" }}>
           <Item selectID={showPanelID} items={items} />
         </PanelContainer>
       ) : (

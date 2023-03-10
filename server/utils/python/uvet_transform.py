@@ -38,7 +38,7 @@ def resolveUVET(num: int, position: list[list[str]], path: str):
 
     # NOTE suffix:04d
             with open(os.path.join(
-                    r"D:\project\001_model_interaction_platform\data\txt", f'uvet_{suffix:04d}.txt'), 'w', encoding='utf8') as ff:
+                    r"D:\project\001_model_interaction_platform\data\case\test\txt", f'uvet_{suffix}.txt'), 'w', encoding='utf8') as ff:
                 ff.write(f'{num}\n')
                 ff.write("id x y p u v\n")
                 ff.writelines(temp)
@@ -174,6 +174,7 @@ def UVET2PNG(dataList: list[list[float]], dstPath: str) -> None:
 
 
 if __name__ == '__main__':
+    os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
     try:
         # sys.argv
         # [src, dst] = sys.argv[1:3]

@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-03-01
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-03-01
+ * @LastEditTime: 2023-03-10
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -11,7 +11,7 @@
 // TODO comments
 
 import { ImageSource } from "mapbox-gl";
-import useLayersAnimatedStore from "../stores/layers_animated_store";
+import useLayersAnimatedStore from "../stores/animated_status_store";
 import useMapStore from "../stores/map_store";
 import useData from "./use_data";
 
@@ -19,52 +19,22 @@ import useData from "./use_data";
 const useAnimate = () => {
   const map = useMapStore((state) => state.map);
   const dataAction = useData();
-  const layersAnimated = useLayersAnimatedStore((state) => state.layersAnimated);
-  const updateLayersAnimated = useLayersAnimatedStore((state) => state.updateLayersAnimated);
-  const addLayersAnimated = useLayersAnimatedStore((state) => state.addLayersAnimated);
-  const removeLayersAnimated = useLayersAnimatedStore((state) => state.removeLayersAnimated);
+  const animatedStatus = useLayersAnimatedStore((state) => state.animatedStatus);
+  const updateAnimatedStatus = useLayersAnimatedStore((state) => state.updateAnimatedStatus);
+  const addAnimatedStatus = useLayersAnimatedStore((state) => state.addAnimatedStatus);
+  const removeAnimatedStatus = useLayersAnimatedStore((state) => state.removeAnimatedStatus);
 
-  const createAnimate = (id: string, imageCount: number = 0) => {
-    let currentCount = 0;
-    const intervalFunc = setInterval(() => {
-      currentCount = (currentCount + 1) % (imageCount - 1);
-      updateLayersAnimated(id, "currentCount", currentCount);
-      // NOTE
-      dataAction
-        .getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!
-        .then((res) => {
-          const blob = new Blob([res]);
-          const url = window.URL.createObjectURL(blob);
-          (map!.getSource(id) as ImageSource).updateImage({ url: url });
-        });
-    }, 200);
-    addLayersAnimated({
-      key: id,
-      currentCount: currentCount,
-      imageCount: imageCount,
-      intervalFunction: intervalFunc,
-    });
-  };
-
-  const pauseAnimate = (id: string) => {
-    layersAnimated.forEach((value) => {
-      if (value.key === id) {
-        clearInterval(value.intervalFunction);
-      }
-    });
-  };
-
-  const continueAnimate = (id: string) => {
-    layersAnimated.forEach((value) => {
-      if (value.key === id) {
-        const info = layersAnimated.filter((value) => {
-          return value.key === id;
-        });
-        let currentCount = info[0].currentCount;
-        const imageCount = info[0].imageCount;
-        const intervalFunc = setInterval(() => {
-          currentCount = (currentCount + 1) % (imageCount - 1);
-          updateLayersAnimated(id, "currentCount", currentCount);
+  const createAnimate = (
+    id: string,
+    imageCount: number,
+    startValue: number = 0,
+    endValue: number,
+    isInterval: boolean = true
+  ) => {
+    let currentCount = startValue;
+    const intervalFunc = isInterval
+      ? setInterval(() => {
+          updateAnimatedStatus(id, "currentCount", currentCount);
           // NOTE
           dataAction
             .getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!
@@ -73,16 +43,66 @@ const useAnimate = () => {
               const url = window.URL.createObjectURL(blob);
               (map!.getSource(id) as ImageSource).updateImage({ url: url });
             });
-        }, 150);
-        updateLayersAnimated(id, "intervalFunction", intervalFunc);
+          currentCount =
+            (currentCount + 1) % (endValue + 1) === 0
+              ? startValue
+              : (currentCount + 1) % (endValue + 1);
+        }, 200)
+      : null;
+    addAnimatedStatus({
+      key: id,
+      currentCount: currentCount,
+      imageCount: imageCount,
+      intervalFunction: intervalFunc,
+      startValue: startValue,
+      endValue: endValue,
+      isInterval: isInterval,
+    });
+  };
+
+  const pauseAnimate = (id: string) => {
+    animatedStatus.forEach((value) => {
+      if (value.key === id && value.intervalFunction) {
+        clearInterval(value.intervalFunction);
       }
     });
   };
 
+  // NOTE 可选参数的思想, 如何实时更新
+  const continueAnimate = (id: string, current?: number, start?: number, end?: number) => {
+    animatedStatus.forEach((value) => {
+      if (value.key === id && value.isInterval) {
+        const info = animatedStatus.filter((value) => {
+          return value.key === id;
+        });
+        let currentCount = current ? current : info[0].currentCount;
+        const endValue = end ? end : info[0].endValue;
+        const startValue = start ? start : info[0].startValue;
+
+        const intervalFunc = setInterval(() => {
+          updateAnimatedStatus(id, "currentCount", currentCount);
+          // NOTE
+          dataAction
+            .getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!
+            .then((res) => {
+              const blob = new Blob([res]);
+              const url = window.URL.createObjectURL(blob);
+              (map!.getSource(id) as ImageSource).updateImage({ url: url });
+            });
+          currentCount =
+            (currentCount + 1) % (endValue + 1) === 0
+              ? startValue
+              : (currentCount + 1) % (endValue + 1);
+        }, 150);
+        updateAnimatedStatus(id, "intervalFunction", intervalFunc);
+      } else;
+    });
+  };
+
   const removeAnimate = (id: string) => {
-    layersAnimated.forEach((value) => {
-      if (value.key === id) {
-        removeLayersAnimated(id);
+    animatedStatus.forEach((value) => {
+      if (value.key === id && value.intervalFunction) {
+        removeAnimatedStatus(id);
         clearInterval(value.intervalFunction);
       }
     });

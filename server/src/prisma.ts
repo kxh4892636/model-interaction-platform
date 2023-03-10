@@ -42,14 +42,22 @@ const main = async () => {
   //     temp: true,
   //   },
   // });
-  // await prisma.data.updateMany({
-  //   where: {},
+  // await prisma.case.updateMany({
+  //   where: { id: "3c2af655-bb70-472a-9f83-97bbe163e4fa" },
   //   data: {
+  //     data: [
+  //       "d1e7f07e-93ea-47dc-af53-33dcfdf1e167",
+  //       "0659274e-9dbb-4e14-891a-bec7e47bfd13",
+  //       "a07ad02e-a96c-4e6b-9de2-ca2ec85a4157",
+  //       "e73599fb-fa3f-4816-ae28-a45f0570eabe",
+  //       "35b0d729-2322-4fd4-b959-2ba10250d6f6",
+  //       "e4e3849b-2cee-4ef9-81ae-293a3ab7f48b",
+  //     ],
   //   },
   // });
-  const info = await prisma.case.findMany();
+  const info = await prisma.data.findMany();
   console.log(info);
-  // npx ts-node test.ts
+  // npx ts-node prisma.ts
 };
 
 main()

@@ -9,7 +9,7 @@
  */
 
 import styled from "styled-components/macro";
-import { AppstoreOutlined, CloudUploadOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, CloudUploadOutlined, BgColorsOutlined } from "@ant-design/icons";
 import { LayerOutlined } from "../../components/icons";
 import Sidebar from "../../features/sidebar";
 import useMapPositionStore from "../../stores/map_postion_store";
@@ -17,6 +17,7 @@ import { MapView, MapStatus } from "../../features/map";
 import { LayerPanel } from "../../features/layer";
 import { CasePanel } from "../../features/case";
 import { DataPanel } from "../../features/data";
+import { StylePanel } from "../../features/style";
 
 const View = styled.div`
   position: relative;
@@ -58,22 +59,31 @@ const Home: React.FC = () => {
   // 侧边栏数据
   const sidebarItemsLeft = [
     {
-      title: "DatabaseOutlined",
+      title: "上传",
       id: "data",
-      icon: <CloudUploadOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
+      icon: <CloudUploadOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <DataPanel />,
     },
     {
       title: "图层",
       id: "layer",
-      icon: <LayerOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
+      icon: <LayerOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <LayerPanel />,
     },
     {
       title: "案例",
       id: "case",
-      icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
+      icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <CasePanel url={"/case/list"} />,
+    },
+  ];
+
+  const sidebarItemsRight = [
+    {
+      title: "样式",
+      id: "style",
+      icon: <BgColorsOutlined style={{ color: "#262626", fontSize: "24px" }} />,
+      panel: <StylePanel />,
     },
   ];
 
@@ -82,12 +92,12 @@ const Home: React.FC = () => {
     <View>
       <TitleBarContainer>港口水环境与生态动力学精细化模拟平台</TitleBarContainer>
       <ContentContainer>
-        <Sidebar items={sidebarItemsLeft} />
+        <Sidebar items={sidebarItemsLeft} key="left" />
         <MapContainer>
           <MapView />
           <MapStatus position={position} />
         </MapContainer>
-        <Sidebar items={[]} position="right" style={{ background: "#fff" }}></Sidebar>
+        <Sidebar items={sidebarItemsRight} position="right" key="right" theme="white"></Sidebar>
       </ContentContainer>
     </View>
   );

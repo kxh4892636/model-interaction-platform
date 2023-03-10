@@ -10,12 +10,12 @@
 import { create } from "zustand";
 import produce from "immer";
 import { Layer } from "../types";
-import { title } from "process";
 
 interface LayersStore {
   layers: Layer[];
   setLayers: (value: Layer[]) => void;
   addLayer: (info: Layer) => void;
+  getLayer: (key: string) => Layer | undefined;
   deleteLayer: (key: string) => void;
   updateLayer: (key: string, prop: string, value: string | boolean | Layer) => void;
 }
@@ -26,7 +26,8 @@ interface LayersStore {
  * @Author xiaohan kong
  * @export module: useLayerStore
  */
-const useLayersStore = create<LayersStore>((set) => ({
+// NOTE get
+const useLayersStore = create<LayersStore>((set, get) => ({
   layers: [],
   setLayers: (value) => set({ layers: value }),
   addLayer: (info) =>
@@ -35,6 +36,28 @@ const useLayersStore = create<LayersStore>((set) => ({
         draft.layers.push(info);
       })
     ),
+  getLayer: (key) => {
+    const loop = (
+      data: Layer[],
+      key: string,
+      callback: (value: Layer, index: number, data: Layer[]) => void
+    ) => {
+      data.forEach((value, index) => {
+        if (value.key === key) {
+          return callback(value, index, data);
+        }
+        if (value.children) {
+          loop(value.children!, key, callback);
+        }
+      });
+    };
+    const layers = get().layers;
+    let layer: Layer | undefined = undefined;
+    loop(layers, key, (value, index, data) => {
+      layer = value;
+    });
+    return layer ? layer : undefined;
+  },
   deleteLayer: (key) =>
     set(
       produce((draft: LayersStore) => {
@@ -48,7 +71,7 @@ const useLayersStore = create<LayersStore>((set) => ({
               return callback(value, index, data);
             }
             if (value.children) {
-              loop(value.children!, key, callback);
+              loop(value.children, key, callback);
             }
           });
         };

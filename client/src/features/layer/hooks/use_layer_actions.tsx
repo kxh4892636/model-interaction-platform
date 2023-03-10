@@ -78,7 +78,6 @@ const useLayerActions = () => {
     }
   };
 
-  // TODO 有时间可以重构一下
   /**
    * drag layer
    * @param info suggest console.log(info)
@@ -108,12 +107,12 @@ const useLayerActions = () => {
     // NOTE 学习深拷贝方法
     const data: Layer[] = JSON.parse(JSON.stringify(layers));
 
+    // TODO 限制 tree drag 行为的思路
     // if drop and drag layer are both layer group, the action is invalid
     if (info.dragNode.group) {
       const pos = info.node.pos.split("-");
       if (pos.length > 2) return;
     }
-
     // Find dragObject
     let dragObj: Layer;
     loop(data, dragKey, (item, index, arr) => {
@@ -238,6 +237,8 @@ const useLayerActions = () => {
     const layerGroup: Layer = {
       title: title,
       key: key,
+      type: "text",
+      layerStyle: "text",
       group: true,
       children: [],
     };

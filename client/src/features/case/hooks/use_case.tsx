@@ -29,11 +29,12 @@ const useCase = () => {
         dataActions.addDataToMap(key);
       });
       const id = crypto.randomUUID();
-      console.log(id);
 
       let groupLayer: Layer = {
         title: caseData.title,
         key: id,
+        type: "text",
+        layerStyle: "text",
         group: true,
         children: [],
       };
@@ -45,6 +46,8 @@ const useCase = () => {
           const layer: Layer = {
             title: res.title,
             key: key,
+            type: res.type,
+            layerStyle: res.style,
             group: false,
             children: [],
           };
@@ -53,7 +56,6 @@ const useCase = () => {
           groupLayer.children.push(layer);
         });
         if (index === caseData.data.length - 1) {
-          console.log(groupLayer);
           addLayer(groupLayer);
         }
       }

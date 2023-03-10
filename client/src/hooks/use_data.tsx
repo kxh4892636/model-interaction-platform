@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-03-09
+ * @LastEditTime: 2023-03-10
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -14,7 +14,7 @@ import useLayersStatusStore from "../stores/layers_status_store";
 import { useKeys } from ".";
 import { Layer, ServerData } from "../types";
 import { ImageSource } from "mapbox-gl";
-import useLayersAnimatedStore from "../stores/layers_animated_store";
+import useLayersAnimatedStore from "../stores/animated_status_store";
 import { FlowFieldManager } from "../features/map/utils/customLayer/flowfield";
 import { FlowLayer } from "../features/map/utils/customLayer/flowLayer";
 
@@ -30,8 +30,8 @@ const useData = () => {
   const addLayersChecked = useLayersStatusStore((state) => state.addLayersChecked);
   const addLayersExpanded = useLayersStatusStore((state) => state.addLayersExpanded);
   const getKeys = useKeys();
-  const addLayersAnimated = useLayersAnimatedStore((state) => state.addLayersAnimated);
-  const updateLayersAnimated = useLayersAnimatedStore((state) => state.updateLayersAnimated);
+  const addAnimatedStatus = useLayersAnimatedStore((state) => state.addAnimatedStatus);
+  const updateAnimatedStatus = useLayersAnimatedStore((state) => state.updateAnimatedStatus);
 
   /**
    * get data by id
@@ -76,13 +76,10 @@ const useData = () => {
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const style = dataDetail.style;
-      console.log(style);
       if (style === "text") return;
       else;
 
       getData(id, "json").then((res) => {
-        console.log(res);
-
         map!.addSource(id, {
           type: "geojson",
           data: res,
@@ -143,7 +140,9 @@ const useData = () => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
       const imageCount: number = Number(res.transform[1]);
-      let currentCount = 0;
+      const startValue = 0;
+      const endValue = imageCount - 1;
+      let currentCount = startValue;
 
       if (style === "raster") {
         getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob").then((res) => {
@@ -172,8 +171,7 @@ const useData = () => {
         });
         // NOTE node.timer type
         const intervalFunc = setInterval(() => {
-          currentCount = (currentCount + 1) % (imageCount - 1);
-          updateLayersAnimated(id, "currentCount", currentCount);
+          updateAnimatedStatus(id, "currentCount", currentCount);
           // NOTE
           getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!.then(
             (res) => {
@@ -183,17 +181,33 @@ const useData = () => {
               (map!.getSource(id) as ImageSource).updateImage({ url: url });
             }
           );
+          currentCount = (currentCount + 1) % (endValue + 1);
         }, 200);
-        addLayersAnimated({
+        addAnimatedStatus({
           key: id,
           currentCount: currentCount,
           imageCount: imageCount,
           intervalFunction: intervalFunc,
+          startValue: 0,
+          endValue: endValue,
+          isInterval: true,
         });
       } else if (style === "flow") {
         let flowFieldManager = new FlowFieldManager(id, dataDetail);
         const flowLayer = new FlowLayer(id, "2d", flowFieldManager);
         map!.addLayer(flowLayer);
+        getDataDetail(id).then((res) => {
+          // flow don't have intervalFunction
+          addAnimatedStatus({
+            key: id,
+            currentCount: currentCount,
+            imageCount: res.transform[1] ? Number(res.transform[1]) - 1 : 100,
+            intervalFunction: null,
+            startValue: 0,
+            endValue: res.transform[1] ? Number(res.transform[1]) - 1 : 100,
+            isInterval: false,
+          });
+        });
       }
     });
   };
@@ -281,6 +295,8 @@ const useData = () => {
       const treeData: Layer = {
         title: dataDetail.title,
         key: id,
+        type: dataDetail.type,
+        layerStyle: dataDetail.style,
         group: false,
         children: [],
       };

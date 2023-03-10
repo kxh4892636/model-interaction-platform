@@ -53,7 +53,10 @@ export const PanelToolContainer = styled.div`
 `;
 
 // panel content container
+// NOTE flex 布局详解
 export const PanelContentContainer = styled.div`
   background: #fff;
-  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 `;
