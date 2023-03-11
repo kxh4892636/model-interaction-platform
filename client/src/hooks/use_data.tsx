@@ -139,7 +139,7 @@ const useData = () => {
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
-      const imageCount: number = Number(res.transform[1]);
+      const imageCount: number = Number(res.transform[1]) ? Number(res.transform[1]) : 100;
       const startValue = 0;
       const endValue = imageCount - 1;
       let currentCount = startValue;
@@ -193,7 +193,10 @@ const useData = () => {
           isInterval: true,
         });
       } else if (style === "flow") {
-        let flowFieldManager = new FlowFieldManager(id, dataDetail);
+        let flowFieldManager = new FlowFieldManager(id, dataDetail, {
+          startValue: 0,
+          endValue: 59,
+        });
         const flowLayer = new FlowLayer(id, "2d", flowFieldManager);
         map!.addLayer(flowLayer);
         getDataDetail(id).then((res) => {
@@ -201,10 +204,10 @@ const useData = () => {
           addAnimatedStatus({
             key: id,
             currentCount: currentCount,
-            imageCount: res.transform[1] ? Number(res.transform[1]) - 1 : 100,
+            imageCount: res.transform[1] ? Number(res.transform[1]) : 100,
             intervalFunction: null,
             startValue: 0,
-            endValue: res.transform[1] ? Number(res.transform[1]) - 1 : 100,
+            endValue: res.transform[1] ? Number(res.transform[1]) - 1 : 99,
             isInterval: false,
           });
         });

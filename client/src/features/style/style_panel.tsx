@@ -16,12 +16,15 @@ import {
   PanelToolContainer,
   PanelToolsContainer,
 } from "../../components/layout";
-import { useAnimate } from "../../hooks";
+import { useAnimate, useData } from "../../hooks";
 import useAnimatedStatusStore from "../../stores/animated_status_store";
 import useLayersAnimatedStore from "../../stores/animated_status_store";
 import useLayersStatusStore from "../../stores/layers_status_store";
 import useLayersStore from "../../stores/layers_store";
+import useMapStore from "../../stores/map_store";
 import { Layer } from "../../types";
+import { FlowFieldManager } from "../../features/map/utils/customLayer/flowfield";
+import { FlowLayer } from "../../features/map/utils/customLayer/flowLayer";
 
 /**
  * @description StylePanel
@@ -41,6 +44,8 @@ const StylePanel = () => {
   const getAnimatedStatus = useAnimatedStatusStore((state) => state.getAnimatedStatus);
   const updateAnimatedStatus = useAnimatedStatusStore((state) => state.updateAnimatedStatus);
   const animateActions = useAnimate();
+  const map = useMapStore((state) => state.map);
+  const dataActions = useData();
 
   return (
     <PanelContainer>
@@ -92,6 +97,7 @@ const StylePanel = () => {
           <Button
             type="primary"
             onClick={() => {
+              const style = layerSelected!.layerStyle;
               const startValue = sliderValue[0];
               const endValue = sliderValue[1];
               const key = layerSelected!.key;
@@ -102,11 +108,23 @@ const StylePanel = () => {
                   : currentCount < startValue
                   ? startValue
                   : endValue;
-              animateActions.pauseAnimate(key);
-              updateAnimatedStatus(key, "startValue", startValue);
-              updateAnimatedStatus(key, "endValue", endValue);
-              updateAnimatedStatus(key, "currentCount", currentCountNow);
-              animateActions.continueAnimate(key, currentCountNow, startValue, endValue);
+              if (style === "raster") {
+                animateActions.pauseAnimate(key);
+                updateAnimatedStatus(key, "startValue", startValue);
+                updateAnimatedStatus(key, "endValue", endValue);
+                updateAnimatedStatus(key, "currentCount", currentCountNow);
+                animateActions.continueAnimate(key, currentCountNow, startValue, endValue);
+              } else if (style === "flow") {
+                dataActions.getDataDetail(key).then((res) => {
+                  map!.removeLayer(key);
+                  let flowFieldManager = new FlowFieldManager(key, res, {
+                    startValue: startValue,
+                    endValue: endValue,
+                  });
+                  const flowLayer = new FlowLayer(key, "2d", flowFieldManager);
+                  map!.addLayer(flowLayer);
+                });
+              } else;
             }}
           >
             确认
@@ -140,12 +158,12 @@ const createSelectOptions = (layers: Layer[]) => {
 const useSliderRange = () => {
   const getAnimatedStatus = useLayersAnimatedStore((state) => state.getAnimatedStatus);
   const getSliderRange = (layerSelected: Layer | undefined): [number, number] => {
-    if (!layerSelected) return [0, 100];
+    if (!layerSelected) return [0, 99];
     else;
     const key = layerSelected.key;
     const animatedStatus = getAnimatedStatus(key);
     if (animatedStatus) return [0, animatedStatus.imageCount - 1];
-    else return [0, 100];
+    else return [0, 99];
   };
 
   return getSliderRange;

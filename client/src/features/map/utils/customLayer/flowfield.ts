@@ -135,9 +135,16 @@ interface TextureOffset {
   offsetY: number;
 }
 
+type ParamsType = {
+  startValue?: number;
+  endValue?: number;
+};
+
 export class FlowFieldManager {
   private id: string;
   private dataDetail: ServerData | undefined;
+  private params: ParamsType | undefined;
+
   private fieldSequence: Array<WebGLTexture>;
   private maskSequence: Array<WebGLTexture>;
   private validSequence: Array<WebGLTexture>;
@@ -183,9 +190,14 @@ export class FlowFieldManager {
   private ffTextureInfo: Array<WebGLTexture> = [];
   private maskTextureInfo: Array<WebGLTexture> = [];
 
-  constructor(id: string, dataDetail: ServerData | undefined = undefined) {
+  constructor(
+    id: string,
+    dataDetail: ServerData | undefined = undefined,
+    params: ParamsType | undefined = undefined
+  ) {
     this.id = id;
     this.dataDetail = dataDetail;
+    this.params = params;
     this.fieldSequence = []; // store all the flow textures
     this.maskSequence = []; // store all the mask textures
     this.validSequence = [];
@@ -258,15 +270,19 @@ export class FlowFieldManager {
           this.dataDetail!.extent[1],
           this.dataDetail!.extent[2],
         ];
-        const imageCount = Number(this.dataDetail!.transform[1]);
 
-        // this.geoBbox = this.TransMercator(extent);
+        const startValue = this.params?.startValue ? this.params.startValue : 0;
+        const endValue = this.params?.endValue
+          ? this.params?.endValue
+          : Number(this.dataDetail!.transform[1]);
         this.geoBbox = this.TransMercator(extent);
-
+        // Set constraints
         this.controller = new FlowFieldController(constraints)!;
 
         // Load textures of flow fields
-        for (let i = 0; i < imageCount; i++) {
+        for (let i = startValue; i <= endValue; i++) {
+          console.log(i);
+
           axios
             .get(`http://localhost:3456/data/uvet?id=` + this.id, {
               params: { currentImage: i, type: "uv" },
@@ -279,7 +295,7 @@ export class FlowFieldManager {
             });
         }
         // Load textures of area masks
-        for (let i = 0; i < imageCount; i++) {
+        for (let i = startValue; i <= endValue; i++) {
           axios
             .get(`http://localhost:3456/data/uvet?id=` + this.id, {
               params: { currentImage: i, type: "mask" },
@@ -292,7 +308,7 @@ export class FlowFieldManager {
             });
         }
         // Load textures of valid address
-        for (let i = 0; i < imageCount; i++) {
+        for (let i = startValue; i <= endValue; i++) {
           axios
             .get(`http://localhost:3456/data/uvet?id=` + this.id, {
               params: { currentImage: i, type: "valid" },
