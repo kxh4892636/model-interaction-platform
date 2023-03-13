@@ -34,6 +34,7 @@ const useLayerActions = () => {
   const removeLayersChecked = useLayersStatusStore((state) => state.removeLayersChecked);
   const removeLayersExpanded = useLayersStatusStore((state) => state.removeLayersExpanded);
   const layersSelected = useLayersStatusStore((state) => state.layersSelected);
+  const setLayersSelected = useLayersStatusStore((state) => state.setLayersSelected);
   const animate = useAnimate();
 
   /**
@@ -172,27 +173,29 @@ const useLayerActions = () => {
       else;
       if (map.getSource(layersSelected.key)) map.removeSource(layersSelected.key);
       else;
-
       animate.removeAnimate(layersSelected.key);
+      setLayersSelected(undefined);
     } else {
       // delete layer group
       const layerKeys = getKeys.getLayerKeys([layersSelected]);
       const groupKeys = getKeys.getGroupKeys([layersSelected]);
       layerKeys!.forEach((key: string) => {
-        removeLayersChecked(layersSelected.key);
-        removeLayersExpanded(layersSelected.key);
+        removeLayersChecked(key);
+        removeLayersExpanded(key);
         deleteLayerByKey(key);
         if (map.getLayer(key)) map.removeLayer(key);
         else;
         if (map.getSource(key)) map.removeSource(key);
         else;
         animate.removeAnimate(key);
+        setLayersSelected(undefined);
       });
       groupKeys!.forEach((key: string) => {
-        removeLayersChecked(layersSelected.key);
-        removeLayersExpanded(layersSelected.key);
+        removeLayersChecked(key);
+        removeLayersExpanded(key);
         deleteLayerByKey(key);
       });
+      setLayersSelected(undefined);
     }
   };
 
@@ -218,6 +221,7 @@ const useLayerActions = () => {
       removeLayersExpanded(key);
       deleteLayerByKey(key);
     });
+    setLayersSelected(undefined);
   };
 
   /**

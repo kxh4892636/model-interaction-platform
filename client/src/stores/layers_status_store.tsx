@@ -17,7 +17,7 @@ interface LayerStatusStore {
   layersSelected: Layer | undefined;
   setLayersChecked: (value: string[]) => void;
   setLayersExpanded: (value: string[]) => void;
-  setLayersSelected: (value: Layer) => void;
+  setLayersSelected: (value: Layer | undefined) => void;
   addLayersChecked: (key: string) => void;
   addLayersExpanded: (key: string) => void;
   removeLayersChecked: (key: string) => void;

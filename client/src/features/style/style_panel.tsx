@@ -51,38 +51,47 @@ const StylePanel = () => {
     <PanelContainer>
       <PanelTitleContainer>样式面板</PanelTitleContainer>
       <PanelContentContainer>
-        <div style={{ padding: "10px 12px" }}>选择图层</div>
-        <Select
-          defaultValue={layerSelected ? layerSelected.title : undefined}
-          style={{ margin: "6px 12px" }}
-          onChange={(key) => {
-            // TODO
-            const layer = getLayer(key);
-            if (layer) {
-              setLayersSelected(layer);
-              if (layer.type !== "uvet") return;
-              else;
-              const range = getSlideRange(layer);
-              setRange(range);
-              setSliderValue(range);
-            }
-          }}
-          options={selectOptions}
-        />
-        <div style={{ padding: "10px 12px" }}>时间范围</div>
-        <Slider
-          range
-          min={range[0]}
-          max={range[1]}
-          step={10}
-          defaultValue={range}
-          value={sliderValue}
-          tooltip={{ open: true, placement: "bottom" }}
-          style={{ margin: "6px 18px" }}
-          onChange={(value) => {
-            setSliderValue(value);
-          }}
-        />
+        <>
+          <div style={{ padding: "10px 12px" }}>选择图层</div>
+          <Select
+            defaultValue={layerSelected ? layerSelected.title : undefined}
+            value={layerSelected ? layerSelected.title : undefined}
+            style={{ margin: "6px 12px" }}
+            onChange={(key) => {
+              // TODO
+              const layer = getLayer(key);
+              if (layer) {
+                setLayersSelected(layer);
+                if (layer.type !== "uvet") return;
+                else;
+                const range = getSlideRange(layer);
+                setRange(range);
+                setSliderValue(range);
+              }
+            }}
+            options={selectOptions}
+          />
+        </>
+        {layerSelected?.type === "uvet" ? (
+          <>
+            <div style={{ padding: "10px 12px" }}>时间范围</div>
+            <Slider
+              range
+              min={range[0]}
+              max={range[1]}
+              step={10}
+              defaultValue={range}
+              value={sliderValue}
+              tooltip={{ open: true, placement: "bottom" }}
+              style={{ margin: "6px 18px" }}
+              onChange={(value) => {
+                setSliderValue(value);
+              }}
+            />
+          </>
+        ) : (
+          <></>
+        )}
       </PanelContentContainer>
       <PanelToolsContainer>
         <PanelToolContainer>
@@ -91,7 +100,14 @@ const StylePanel = () => {
           </Button>
         </PanelToolContainer>
         <PanelToolContainer>
-          <Button type="primary">应用</Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              console.log(layerSelected);
+            }}
+          >
+            应用
+          </Button>
         </PanelToolContainer>
         <PanelToolContainer>
           <Button
