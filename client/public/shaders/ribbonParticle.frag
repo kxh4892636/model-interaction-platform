@@ -20,7 +20,7 @@ int rampColors[6] = int[](
     0xffffbf,
     0xe31a1c,
     0xbd0026,
-    0xcb181d
+    0xa3001f
 );
 
 vec3 colorFromInt(int color)
