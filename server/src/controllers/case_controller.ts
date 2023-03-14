@@ -7,7 +7,6 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-// NOTE ts type
 import { Request, Response } from "express";
 import caseService from "../services/case_service";
 

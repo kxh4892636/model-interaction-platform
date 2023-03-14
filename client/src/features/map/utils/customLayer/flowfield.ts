@@ -281,8 +281,6 @@ export class FlowFieldManager {
 
         // Load textures of flow fields
         for (let i = startValue; i <= endValue; i++) {
-          console.log(i);
-
           axios
             .get(`http://localhost:3456/data/uvet?id=` + this.id, {
               params: { currentImage: i, type: "uv" },

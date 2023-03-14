@@ -13,14 +13,12 @@ import dataController from "../controllers/data_controller";
 import { dataFoldURL } from "../../config/global_data";
 
 const router = express.Router();
-// NOTE multer
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, dataFoldURL + "/temp/input");
     },
     filename: (req, file, cb) => {
-      // NOTE 解决中文名乱码
       cb(null, Buffer.from(file.originalname, "latin1").toString("utf8"));
     },
   }),

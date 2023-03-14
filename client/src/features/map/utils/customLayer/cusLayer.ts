@@ -59,7 +59,7 @@ function SetRenderingContext(gl: WebGL2RenderingContext) {
 }
 
 function changeRenderingContext(): void {
-  if (mapboxgl.Map.prototype._setupPainter.toString().indexOf("webgl2") == -1) {
+  if (mapboxgl.Map.prototype._setupPainter.toString().indexOf("webgl2") === -1) {
     const _setupPainter_old = mapboxgl.Map.prototype._setupPainter;
     mapboxgl.Map.prototype._setupPainter = function () {
       const getContext_old = this._canvas.getContext;
