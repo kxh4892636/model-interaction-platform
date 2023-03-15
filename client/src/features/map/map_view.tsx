@@ -24,7 +24,6 @@ mapboxgl.accessToken =
  * @export module: Mapview
  */
 const MapView = ({ display }: { display: boolean }) => {
-  // NOTE 如何创建 mapbox map 对象
   const mapContainerRef = useRef<HTMLDivElement>(document.createElement("div"));
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const setMap = useMapStore((state) => state.setMap);
