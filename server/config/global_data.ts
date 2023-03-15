@@ -1,1 +1,1 @@
-export const dataFoldURL: string = "d:/dev/model_interaction_platform/data";
+export const dataFoldURL: string = "d:/project/001_model_interaction_platform/data";

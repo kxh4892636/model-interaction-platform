@@ -23,7 +23,7 @@ mapboxgl.accessToken =
  * @author xiaohan kong
  * @export module: Mapview
  */
-const MapView = () => {
+const MapView = ({ display }: { display: boolean }) => {
   // NOTE 如何创建 mapbox map 对象
   const mapContainerRef = useRef<HTMLDivElement>(document.createElement("div"));
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -57,7 +57,13 @@ const MapView = () => {
     });
   });
 
-  return <div ref={mapContainerRef} style={{ height: "100%" }} className="map-container" />;
+  return (
+    <div
+      ref={mapContainerRef}
+      style={{ height: "100%", position: display ? "absolute" : "relative" }}
+      className="map-container"
+    />
+  );
 };
 
 export default MapView;
