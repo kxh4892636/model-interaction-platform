@@ -37,25 +37,6 @@ const main = async () => {
   //     transform: ["/case/test/transform/uvet/uv", "120"],
   //   },
   // });
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> e723bd12748b98efd6ef086d30642093c029c133
-  await prisma.data.deleteMany({
-    where: {
-      temp: true,
-    },
-  });
-<<<<<<< HEAD
-=======
-  // await prisma.data.deleteMany({
-  //   where: {
-  //     temp: true,
-  //   },
-  // });
->>>>>>> f40abf0 (提交信息日志记录在这里)
-=======
->>>>>>> e723bd12748b98efd6ef086d30642093c029c133
   // await prisma.case.updateMany({
   //   where: { id: "3c2af655-bb70-472a-9f83-97bbe163e4fa" },
   //   data: {

@@ -7,7 +7,8 @@ library(rjson)
 #setwd(getwd())
 #print(getwd())
 
-source(str_c(getwd(),"/utils/R/MyFunction.R",seq="",collapse = NULL))
+
+source(str_c(getwd(),"./utils/R/MyFunction.R",seq="",collapse = NULL))
 # 携带参数
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -26,7 +27,7 @@ new.function <- function(DetritusID,rawlength,Data) {
 	return(returndata)
 }
  
-
+# Rscript EcoPath.R CZCY
 
 
 conn = dbDriver("PostgreSQL") 
@@ -36,7 +37,7 @@ con <- dbConnect(conn ,
                  port = '5432', #端口号，默认5432
                  dbname = 'postgres',  #数据库
                  user = 'postgres', #用户名
-                 password = '123456') #安装的时候设的postgresql的密码
+                 password = '1216') #安装的时候设的postgresql的密码
 
 #SQL操作: 这里引号里写SQL代码  GroupBasic
 re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathgroup%s",args[1]))
