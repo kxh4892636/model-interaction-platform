@@ -4,6 +4,8 @@ import crypto from "crypto";
 import { dataFoldURL } from "../../config/global_data";
 import { execSync } from "child_process";
 import { resolve } from "path";
+import { title } from "process";
+
 
 const prisma = new PrismaClient();
 
@@ -27,6 +29,7 @@ const getJSON = async (id: string) => {
     },
   });
   if (!info) return "can't find data by id";
+  // NOTE how to resolve json
   const filePath = dataFoldURL + info.data;
   const buffer = fs.readFileSync(filePath).toString();
   const json = JSON.parse(buffer);

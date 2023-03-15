@@ -13,6 +13,9 @@ import { useState } from "react";
 import { Tooltip } from "antd";
 import { SidebarItem } from "./types";
 
+import { ExchangeFlag } from "../../stores/model";
+import { useNavigate } from 'react-router-dom';
+
 // aside style
 const Aside = styled.aside`
   display: flex;
@@ -62,6 +65,10 @@ type AppProps = {
  * @export module: Sidebar
  */
 const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
+  const navigate = useNavigate()
+  const Flag = ExchangeFlag((state) => state.Flag)
+  const setFlag = ExchangeFlag((state) => state.setFlag)
+  
   const [showPanelID, setShowPanelID] = useState("");
   const [showItem, setshowItem] = useState(false);
   const sidebarItems = items.map((value): JSX.Element => {
@@ -71,14 +78,27 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
           id={value.id}
           theme={theme}
           onClick={(e) => {
-            if (showItem && e.currentTarget.id !== showPanelID) {
-            } else {
-              setshowItem(!showItem);
+            // model模块大切换
+            if(e.currentTarget.id === "model"){
+              setFlag(Flag)
+              if(Flag===false){
+                navigate("/model/EWEfish")
+              }
+              else{
+                navigate("/")
+              }
             }
-            if (showPanelID === e.currentTarget.id) {
-              setShowPanelID("");
-            } else {
-              setShowPanelID(e.currentTarget.id);
+            else{
+              if (showItem && e.currentTarget.id !== showPanelID) {
+              } else {
+                setshowItem(!showItem);
+              }
+              if (showPanelID === e.currentTarget.id) {
+                setShowPanelID("");
+              } else {
+                setShowPanelID(e.currentTarget.id);
+              }
+
             }
           }}
         >
