@@ -37,6 +37,17 @@ const main = async () => {
   //     transform: ["/case/test/transform/uvet/uv", "120"],
   //   },
   // });
+  await prisma.data.deleteMany({
+    where: {
+      temp: true,
+    },
+  });
+
+  // await prisma.data.deleteMany({
+  //   where: {
+  //     temp: true,
+  //   },
+  // });
   // await prisma.case.updateMany({
   //   where: { id: "3c2af655-bb70-472a-9f83-97bbe163e4fa" },
   //   data: {

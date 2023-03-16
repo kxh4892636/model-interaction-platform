@@ -2,7 +2,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-10
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-03-15
+ * @LastEditTime: 2023-02-10
  * @Description: sidebar component
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
@@ -12,11 +12,9 @@ import styled from "styled-components/macro";
 import { useState } from "react";
 import { Tooltip } from "antd";
 import { SidebarItem } from "./types";
+
 import { ExchangeFlag } from "../../stores/model";
-import { useNavigate } from "react-router-dom";
-import { useKeys } from "../../hooks";
-import useMapStore from "../../stores/map_store";
-import useLayersStore from "../../stores/layers_store";
+import { useNavigate } from 'react-router-dom';
 
 // aside style
 const Aside = styled.aside`
@@ -67,14 +65,12 @@ type AppProps = {
  * @export module: Sidebar
  */
 const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
-  const navigate = useNavigate();
-  const Flag = ExchangeFlag((state) => state.Flag);
-  const setFlag = ExchangeFlag((state) => state.setFlag);
+  const navigate = useNavigate()
+  const Flag = ExchangeFlag((state) => state.Flag)
+  const setFlag = ExchangeFlag((state) => state.setFlag)
+  
   const [showPanelID, setShowPanelID] = useState("");
   const [showItem, setshowItem] = useState(false);
-  const getKeys = useKeys();
-  const map = useMapStore((state) => state.map);
-  const layers = useLayersStore((state) => state.layers);
   const sidebarItems = items.map((value): JSX.Element => {
     return (
       <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
@@ -83,23 +79,16 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
           theme={theme}
           onClick={(e) => {
             // model模块大切换
-            if (e.currentTarget.id === "model") {
-              setFlag(Flag);
-              const layerKeys = getKeys.getLayerKeys(layers);
-              if (Flag === false) {
-                layerKeys.forEach((key) => {
-                  if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "none");
-                  else;
-                });
-                navigate("/model/EWEfish");
-              } else {
-                layerKeys.forEach((key) => {
-                  if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "visible");
-                  else;
-                });
-                navigate("/");
+            if(e.currentTarget.id === "model"){
+              setFlag(Flag)
+              if(Flag===false){
+                navigate("/model/EWEfish")
               }
-            } else {
+              else{
+                navigate("/")
+              }
+            }
+            else{
               if (showItem && e.currentTarget.id !== showPanelID) {
               } else {
                 setshowItem(!showItem);
@@ -109,6 +98,7 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
               } else {
                 setShowPanelID(e.currentTarget.id);
               }
+
             }
           }}
         >

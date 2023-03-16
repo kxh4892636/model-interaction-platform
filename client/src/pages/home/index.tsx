@@ -9,12 +9,7 @@
  */
 
 import styled from "styled-components/macro";
-import {
-  AppstoreOutlined,
-  CloudUploadOutlined,
-  BgColorsOutlined,
-  MediumOutlined,
-} from "@ant-design/icons";
+import { AppstoreOutlined, CloudUploadOutlined, BgColorsOutlined,MediumOutlined } from "@ant-design/icons";
 import { LayerOutlined } from "../../components/icons";
 import Sidebar from "../../features/sidebar";
 import useMapPositionStore from "../../stores/map_postion_store";
@@ -23,8 +18,9 @@ import { LayerPanel } from "../../features/layer";
 import { CasePanel } from "../../features/case";
 import { DataPanel } from "../../features/data";
 import { StylePanel } from "../../features/style";
+
 import { ExchangeFlag } from "../../stores/model";
-import Model from "../../features/model/App";
+import Model from "../../features/model/App"
 
 const View = styled.div`
   position: relative;
@@ -62,7 +58,8 @@ const MapContainer = styled.div`
  */
 const Home: React.FC = () => {
   const position = useMapPositionStore((state) => state.position);
-  const Flag = ExchangeFlag((state) => state.Flag);
+
+  const Flag = ExchangeFlag((state) => state.Flag)
 
   // 侧边栏数据
   const sidebarItemsLeft = [
@@ -88,7 +85,7 @@ const Home: React.FC = () => {
       title: "模型",
       id: "model",
       icon: <MediumOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
-      panel: <div></div>,
+      panel: <div></div>
     },
   ];
 
@@ -107,11 +104,14 @@ const Home: React.FC = () => {
       <TitleBarContainer>港口水环境与生态动力学精细化模拟平台</TitleBarContainer>
       <ContentContainer>
         <Sidebar items={sidebarItemsLeft} key="left" />
-        <MapContainer>
-          <MapView display={Flag} />
-          <MapStatus position={position} />
-          {Flag === true ? <Model></Model> : <></>}
-        </MapContainer>
+        {
+        Flag===false? 
+          <MapContainer>
+            <MapView />
+            <MapStatus position={position} />
+          </MapContainer>
+          :<Model></Model>
+        }
         <Sidebar items={sidebarItemsRight} position="right" key="right" theme="white"></Sidebar>
       </ContentContainer>
     </View>
