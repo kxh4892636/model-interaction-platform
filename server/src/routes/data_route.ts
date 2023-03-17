@@ -25,6 +25,8 @@ const upload = multer({
   }),
 });
 
+// /data/list
+router.get("/list", dataController.getList);
 // /data/detail
 router.get("/detail", dataController.getDetail);
 // /data/json

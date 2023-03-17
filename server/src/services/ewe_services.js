@@ -240,15 +240,15 @@ exports.R_test2 = (req, res) => {
         data.InputFlag = JSON.parse(data.InputFlag);
         data.link = JSON.parse(data.link);
         data.prenode = JSON.parse(data.prenode);
-        console.log(data.status,data.statusname)
+        console.log(data.status, data.statusname);
         // data.status = JSON.parse(data.status);
         // data.statusname = JSON.parse(data.statusname);
         // res.send(data)
         res.send({
           BasicEst: HandleReturn(data.Basic, data.InputFlag),
           Graph: FlowDiagram(data.prenode, data.link),
-          status:data.status,
-          statusname:data.statusname
+          status: data.status,
+          statusname: data.statusname,
         });
         // res.send(data)
       });
@@ -279,8 +279,8 @@ exports.R_test3 = (req, res) => {
 };
 
 // 水动力模型计算接口
-exports.Hydrodynamic = (req,res) =>{
+exports.Hydrodynamic = (req, res) => {
   // req.body 前端传输过来的keys数组
-  console.log(req.body)
-  res.send(req.body)
-}
+  console.log(req.body);
+  res.send(req.body);
+};

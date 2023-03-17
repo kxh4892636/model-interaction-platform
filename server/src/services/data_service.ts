@@ -4,9 +4,13 @@ import crypto from "crypto";
 import { dataFoldURL } from "../../config/global_data";
 import { execSync } from "child_process";
 import { resolve } from "path";
-import { title } from "process";
 
 const prisma = new PrismaClient();
+
+const getList = async () => {
+  const data = await prisma.data.findMany();
+  return data;
+};
 
 const getDetail = async (id: string) => {
   const info = await prisma.data.findUnique({
@@ -94,14 +98,13 @@ const uploadData = async (file: Express.Multer.File) => {
   const id = crypto.randomUUID();
   // get type and style of data
   const output = execSync(
-    `python ${
+    `conda activate gis && python ${
       resolve("./").split("\\").join("/") + "/utils/python/get_data_type_and_style.py"
     } ${filePath}`
   );
   const [type, style] = output.toString().trimEnd().split(",");
   let transform: string[] = [];
   let extent: number[] = [];
-  console.log(type, style);
   // generate transform filed
   if (type === "mesh") {
     const fileName = file.filename.split(".")[0];
@@ -110,8 +113,9 @@ const uploadData = async (file: Express.Multer.File) => {
       .replace("\\temp\\input", "\\temp\\transform\\mesh");
     transform.push(transformPath.split("\\").join("/").split(dataFoldURL)[1]);
     // generate transformed png of mesh
+    // NOTE cmd &&
     const output = execSync(
-      `python ${
+      `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
         "/utils/python/mesh_transform.py" +
         " " +
@@ -120,6 +124,7 @@ const uploadData = async (file: Express.Multer.File) => {
         transformPath
       }`
     );
+
     // get extent of mesh
     extent = output
       .toString()
@@ -151,4 +156,14 @@ const uploadData = async (file: Express.Multer.File) => {
   return id;
 };
 
-export default { getDetail, getImage, getJSON, getMesh, getShp, getUVET, getText, uploadData };
+export default {
+  getList,
+  getDetail,
+  getImage,
+  getJSON,
+  getMesh,
+  getShp,
+  getUVET,
+  getText,
+  uploadData,
+};
