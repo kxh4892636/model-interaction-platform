@@ -1,1 +1,1 @@
-export const dataFoldURL: string = "d:/project/001_model_interaction_platform/data";
+export const dataFoldURL: string = "G:/fhm/postgraduate/yanyi_down/GitUse/model_interaction_platform2/data";

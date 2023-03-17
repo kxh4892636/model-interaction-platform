@@ -211,6 +211,7 @@ exports.R_Ecopath = (req, res) => {
   });
 };
 
+// 计算结果
 exports.R_test2 = (req, res) => {
   const Group = req.body.Group;
   const Diet = req.body.Diet;
@@ -223,10 +224,9 @@ exports.R_test2 = (req, res) => {
 
   // 全部封到exportEWE中去
   const database = CRUDdatabase(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num);
-
   database
     .then(() => {
-      cs.exec(`Rscript ./utils/R/EcoPath.R ${num}`, (error, stdout, stderr) => {
+      cs.exec(`Rscript ./utils/ewe/EcoPath.R ${num}`, (error, stdout, stderr) => {
         if (error) {
           console.error("error:", error);
         }
@@ -240,10 +240,15 @@ exports.R_test2 = (req, res) => {
         data.InputFlag = JSON.parse(data.InputFlag);
         data.link = JSON.parse(data.link);
         data.prenode = JSON.parse(data.prenode);
+        console.log(data.status,data.statusname)
+        // data.status = JSON.parse(data.status);
+        // data.statusname = JSON.parse(data.statusname);
         // res.send(data)
         res.send({
           BasicEst: HandleReturn(data.Basic, data.InputFlag),
           Graph: FlowDiagram(data.prenode, data.link),
+          status:data.status,
+          statusname:data.statusname
         });
         // res.send(data)
       });
@@ -251,6 +256,7 @@ exports.R_test2 = (req, res) => {
     .catch((err) => console.log(err));
 };
 
+// 从模型文件按中导入
 exports.R_test3 = (req, res) => {
   console.log("触发了Upload函数");
   // console.log(req)
@@ -271,3 +277,10 @@ exports.R_test3 = (req, res) => {
     }
   });
 };
+
+// 水动力模型计算接口
+exports.Hydrodynamic = (req,res) =>{
+  // req.body 前端传输过来的keys数组
+  console.log(req.body)
+  res.send(req.body)
+}

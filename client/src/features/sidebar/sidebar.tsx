@@ -94,7 +94,7 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
                 navigate("/model/EWEfish");
               } else {
                 layerKeys.forEach((key) => {
-                  if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "visible");
+                  if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "none");
                   else;
                 });
                 navigate("/");

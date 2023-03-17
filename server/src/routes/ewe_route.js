@@ -16,8 +16,8 @@ const storage = multer.diskStorage({
         case "ewemdb":
         case "accdb":
         case "mdb":
-          console.log("./src/services/uploadfile");
-          cb(null, "./src/services/uploadfile"); // 上传文件的目录
+          console.log("../../data/temp/model");
+          cb(null, "../data/temp/model"); // 上传文件的目录
           break;
         default:
           console.log("上传文件类型出错,请检查文件类型与后缀");
@@ -50,5 +50,5 @@ router.post("/R_EcoSim", Handler.R_EcoSim);
 router.post("/R_Ecopath", Handler.R_Ecopath);
 router.post("/R_test2", Handler.R_test2);
 router.post("/R_test3", upload.single("file"), Handler.R_test3);
-
+router.post("/Hydrodynamic", Handler.Hydrodynamic);
 module.exports = router;

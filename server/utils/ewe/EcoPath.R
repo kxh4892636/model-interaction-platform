@@ -8,7 +8,7 @@ library(rjson)
 #print(getwd())
 
 
-source(str_c(getwd(),"./utils/R/MyFunction.R",seq="",collapse = NULL))
+source(str_c(getwd(),"/utils/ewe/MyFunction.R",seq="",collapse = NULL))
 # 携带参数
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -295,7 +295,15 @@ InputFlagJson = toJSON(InputFlag)
 
 Myplot = Mywebplot(REco)
 
-out = list(Basic=REcoJson,InputFlag=InputFlagJson,prenode=Myplot$prenode,link=Myplot$link)
+statusname = names(which(REco$EE>1))
+{
+	if(length(statusname)==0){
+		out = list(Basic=REcoJson,InputFlag=InputFlagJson,prenode=Myplot$prenode,link=Myplot$link,status="Balanced",statusname="Balanced")
+	}
+	else{
+		out = list(Basic=REcoJson,InputFlag=InputFlagJson,prenode=Myplot$prenode,link=Myplot$link,status="UnBalanced",statusname=statusname)
+	}
+}
 print(toJSON(out))
 
 
