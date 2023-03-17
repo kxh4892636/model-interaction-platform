@@ -14,9 +14,8 @@ import { Tooltip } from "antd";
 import { SidebarItem } from "./types";
 import { ExchangeFlag } from "../../stores/model";
 import { useNavigate } from "react-router-dom";
-import { useKeys } from "../../hooks";
 import useMapStore from "../../stores/map_store";
-import useLayersStore from "../../stores/layers_store";
+import useLayersStatusStore from "../../stores/layers_status_store";
 
 // aside style
 const Aside = styled.aside`
@@ -72,9 +71,8 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
   const setFlag = ExchangeFlag((state) => state.setFlag);
   const [showPanelID, setShowPanelID] = useState("");
   const [showItem, setshowItem] = useState(false);
-  const getKeys = useKeys();
   const map = useMapStore((state) => state.map);
-  const layers = useLayersStore((state) => state.layers);
+  const layerChecked = useLayersStatusStore((state) => state.layersChecked);
   const sidebarItems = items.map((value): JSX.Element => {
     return (
       <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
@@ -85,16 +83,15 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
             // model模块大切换
             if (e.currentTarget.id === "model") {
               setFlag(Flag);
-              const layerKeys = getKeys.getLayerKeys(layers);
               if (Flag === false) {
-                layerKeys.forEach((key) => {
+                layerChecked.forEach((key) => {
                   if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "none");
                   else;
                 });
                 navigate("/model/EWEfish");
               } else {
-                layerKeys.forEach((key) => {
-                  if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "none");
+                layerChecked.forEach((key) => {
+                  if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "visible");
                   else;
                 });
                 navigate("/");
