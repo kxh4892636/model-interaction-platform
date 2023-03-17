@@ -14,7 +14,9 @@ import { Tooltip } from "antd";
 import { SidebarItem } from "./types";
 
 import { ExchangeFlag } from "../../stores/model";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import useMapStore from "../../stores/map_store";
+import useLayersStatusStore from "../../stores/layers_status_store";
 
 // aside style
 const Aside = styled.aside`
@@ -71,6 +73,8 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
   
   const [showPanelID, setShowPanelID] = useState("");
   const [showItem, setshowItem] = useState(false);
+  const map = useMapStore((state) => state.map);
+  const layerChecked = useLayersStatusStore((state) => state.layersChecked);
   const sidebarItems = items.map((value): JSX.Element => {
     return (
       <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
@@ -79,13 +83,20 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
           theme={theme}
           onClick={(e) => {
             // model模块大切换
-            if(e.currentTarget.id === "model"){
-              setFlag(Flag)
-              if(Flag===false){
-                navigate("/model/EWEfish")
-              }
-              else{
-                navigate("/")
+            if (e.currentTarget.id === "model") {
+              setFlag(Flag);
+              if (Flag === false) {
+                layerChecked.forEach((key) => {
+                  if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "none");
+                  else;
+                });
+                navigate("/model/EWEfish");
+              } else {
+                layerChecked.forEach((key) => {
+                  if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "visible");
+                  else;
+                });
+                navigate("/");
               }
             }
             else{

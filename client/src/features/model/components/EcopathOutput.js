@@ -1,7 +1,10 @@
 import React from 'react'
-import { Table,Button,message } from 'antd';
+import { Table,Button,message,Alert } from 'antd';
 import {Basic,Diet,FleetModal,Detritus,FisheryDiscardFate,FisheryLand,FisheryDiscard,EcopathOutput,FlowDiagram} from "../store"
 import axios from 'axios';
+// 模型平衡与否 已极不平衡时的功能组名称
+let status = ""
+let statusname = ""
 export default function App() {
     // 在这定义将由计算的出的值，标记为红色与蓝色
     const EcocolumnsModal = [
@@ -82,7 +85,6 @@ export default function App() {
     const EcopathData = EcopathOutput((state) => state.EcopathOutputData );
     const setEcopathOutputData = EcopathOutput((state)=>state.setEcopathOutputData)
     const setGraphData = FlowDiagram((state)=>state.setGraphData)
-
     // Run Ecopath
     const RunEcopath = ()=>{
       // console.log(GroupTData,DietData)
@@ -93,7 +95,10 @@ export default function App() {
         data:{Group:GroupTData,Diet:DietData,Fleet:Fleet,Detritus:DetritusData,DiscardFate:FDiscardFateData,Land:FLandData,Discard:FDiscardData,singleID:sessionStorage.getItem('key').slice(10,14)}
       }).then(response=>{ 
         message.destroy("Mloading")
-        // console.log(response)
+        console.log(response)
+        // 模型平衡与否 已极不平衡时的功能组名称
+        status = response.data.status
+        statusname = response.data.statusname.toString()
         message.success(`计算完成！！！`);
         setEcopathOutputData(response.data.BasicEst)
         setGraphData(response.data.Graph)
@@ -101,6 +106,9 @@ export default function App() {
     }
     return (
       <>
+        {status==="Balanced"?<Alert message="Success 模型平衡" type="success" showIcon />:<></>}
+        {status==="UnBalanced"?<Alert message="Error" description={<>模型不平衡 以下功能组的EE大于1:<b>{statusname}</b></>} type="error"showIcon/>:<></>}
+        <br/>
         <Table
           // components={components}
           // rowClassName={() => 'editable-row'}

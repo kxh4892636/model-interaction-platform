@@ -147,9 +147,9 @@ if __name__ == '__main__':
 
     try:
         # sys.argv
-        [src, dst] = sys.argv[1:3]
-        # src = r"D:\project\001_model_interaction_platform\data\case\test\input\mesh31.gr3"
-        # dst = r"D:\project\001_model_interaction_platform\data\case\test\input\mesh31.png"
+        # [src, dst] = sys.argv[1:3]
+        src = r"D:\project\001_model_interaction_platform\data\case\test\input\mesh31.gr3"
+        dst = r"D:\project\001_model_interaction_platform\data\case\test\input\mesh31.png"
         dataList = resolveMesh(src)
         extent: tuple = Mesh2PNG(dataList, dst)
         print(extent)
