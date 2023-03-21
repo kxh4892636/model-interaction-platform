@@ -548,7 +548,7 @@ export class FlowFieldManager {
     this.uboMapBuffer[5] = this.controller!.speedFactor * this.renderCount * 100;
   }
   tickLogicCount() {
-    // this.step(0.001);
+    this.step(0.001);
     this.beginBlock = (this.beginBlock + 1) % this.controller!.constraints["MAX_SEGMENT_NUM"];
     // console.log(this.beginBlock);
 
