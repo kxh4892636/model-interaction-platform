@@ -13,7 +13,7 @@ import { useState } from "react";
 import { Tooltip } from "antd";
 import { SidebarItem } from "./types";
 import { ExchangeFlag } from "../../stores/model";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useMapStore from "../../stores/map_store";
 import useLayersStatusStore from "../../stores/layers_status_store";
 
@@ -49,6 +49,7 @@ const PanelContainer = styled.div`
 
 type Position = "left" | "right";
 type Theme = "black" | "white";
+
 type AppProps = {
   items: SidebarItem[];
   position?: Position;
@@ -65,70 +66,18 @@ type AppProps = {
  * @export module: Sidebar
  */
 const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
-  const [showItem, setShowItem] = useState(false);
-  const sidebarItems = useSidebarItems(items, showItem, setShowItem);
-
-  return (
-    <>
-      {showItem && position === "right" ? (
-        // TODO react html props
-        <PanelContainer style={{ borderLeft: "1px solid #d9d9d9" }}>
-          <Routes>
-            {items
-              .filter((item) => item.path !== "model")
-              .map((item) => {
-                return <Route key={item.path} path={item.path} element={item.panel}></Route>;
-              })}
-          </Routes>
-        </PanelContainer>
-      ) : (
-        <></>
-      )}
-      <Aside
-        theme={theme}
-        style={
-          position === "left"
-            ? { borderRight: "1px solid #d9d9d9" }
-            : { borderLeft: "1px solid #d9d9d9" }
-        }
-      >
-        {sidebarItems}
-      </Aside>
-      {showItem && position === "left" ? (
-        <PanelContainer style={{ borderRight: "1px solid #d9d9d9" }}>
-          <Routes>
-            {items
-              .filter((item) => item.path !== "model")
-              .map((item) => {
-                return <Route key={item.path} path={item.path} element={item.panel}></Route>;
-              })}
-          </Routes>
-        </PanelContainer>
-      ) : (
-        <></>
-      )}
-    </>
-  );
-};
-
-const useSidebarItems = (
-  items: SidebarItem[],
-  showItem: boolean,
-  setShowItem: React.Dispatch<React.SetStateAction<boolean>>,
-  theme: string = "black"
-) => {
-  const map = useMapStore((state) => state.map);
-  const layerChecked = useLayersStatusStore((state) => state.layersChecked);
   const navigate = useNavigate();
-  const [showPanelID, setShowPanelID] = useState("");
   const Flag = ExchangeFlag((state) => state.Flag);
   const setFlag = ExchangeFlag((state) => state.setFlag);
+  const [showPanelID, setShowPanelID] = useState("");
+  const [showItem, setshowItem] = useState(false);
+  const map = useMapStore((state) => state.map);
+  const layerChecked = useLayersStatusStore((state) => state.layersChecked);
   const sidebarItems = items.map((value): JSX.Element => {
-    // NOTE route
     return (
       <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
         <AsideItem
-          id={value.path}
+          id={value.id}
           theme={theme}
           onClick={(e) => {
             // model模块大切换
@@ -148,14 +97,9 @@ const useSidebarItems = (
                 navigate("/");
               }
             } else {
-              if (!showItem) {
-                navigate(`${value.path}`);
-                setShowItem(!showItem);
-              } else if (e.currentTarget.id !== showPanelID) {
-                navigate(`${value.path}`);
+              if (showItem && e.currentTarget.id !== showPanelID) {
               } else {
-                setShowItem(!showItem);
-                navigate(``);
+                setshowItem(!showItem);
               }
               if (showPanelID === e.currentTarget.id) {
                 setShowPanelID("");
@@ -171,7 +115,54 @@ const useSidebarItems = (
     );
   });
 
-  return sidebarItems;
+  return (
+    <>
+      {showItem && position === "right" ? (
+        // TODO react html props
+        <PanelContainer style={{ borderLeft: "1px solid #d9d9d9" }}>
+          <Item selectID={showPanelID} items={items} />
+        </PanelContainer>
+      ) : (
+        <></>
+      )}
+      <Aside
+        theme={theme}
+        style={
+          position === "left"
+            ? { borderRight: "1px solid #d9d9d9" }
+            : { borderLeft: "1px solid #d9d9d9" }
+        }
+      >
+        {sidebarItems}
+      </Aside>
+      {showItem && position === "left" ? (
+        <PanelContainer style={{ borderRight: "1px solid #d9d9d9" }}>
+          <Item selectID={showPanelID} items={items} />
+        </PanelContainer>
+      ) : (
+        <></>
+      )}
+    </>
+  );
+};
+
+type AppProps2 = { selectID: string; items: SidebarItem[] };
+
+/**
+ * @description the panel of item
+ * @Author xiaohan kong
+ * @param selectID panel id
+ * @param items items
+ */
+const Item = ({ selectID, items }: AppProps2) => {
+  const panel = items.filter((value) => {
+    if (value.id !== selectID) {
+      return false;
+    }
+    return true;
+  });
+
+  return panel.length ? panel[0].panel : <></>;
 };
 
 export default Sidebar;

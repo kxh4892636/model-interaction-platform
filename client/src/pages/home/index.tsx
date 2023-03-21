@@ -68,25 +68,25 @@ const Home: React.FC = () => {
   const sidebarItemsLeft = [
     {
       title: "数据",
-      path: "data",
+      id: "data",
       icon: <CloudUploadOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <DataPanel />,
     },
     {
       title: "图层",
-      path: "layer",
+      id: "layer",
       icon: <LayerOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <LayerPanel />,
     },
     {
       title: "项目",
-      path: "case",
+      id: "case",
       icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <CasePanel />,
     },
     {
       title: "模型",
-      path: "model",
+      id: "model",
       icon: <MediumOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
       panel: <Model />,
     },
@@ -95,7 +95,7 @@ const Home: React.FC = () => {
   const sidebarItemsRight = [
     {
       title: "样式",
-      path: "style",
+      id: "style",
       icon: <BgColorsOutlined style={{ color: "#262626", fontSize: "24px" }} />,
       panel: <StylePanel />,
     },
