@@ -67,7 +67,7 @@ const Home: React.FC = () => {
   // 侧边栏数据
   const sidebarItemsLeft = [
     {
-      title: "上传",
+      title: "数据",
       id: "data",
       icon: <CloudUploadOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <DataPanel />,
@@ -79,7 +79,7 @@ const Home: React.FC = () => {
       panel: <LayerPanel />,
     },
     {
-      title: "案例",
+      title: "项目",
       id: "case",
       icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <CasePanel url={"/case/list"} />,

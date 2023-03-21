@@ -105,6 +105,7 @@ const CasePage = ({ id, onClose }: AppProps) => {
     axios.get("http://localhost:3456/case/case?id=" + id).then((res) => {
       if (typeof res.data === "object") setData(res.data);
     });
+    console.log(id);
   }, [id]);
 
   // NOTE marginInlineEnd: "auto" 的机制

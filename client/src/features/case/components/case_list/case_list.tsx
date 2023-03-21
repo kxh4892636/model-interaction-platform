@@ -9,7 +9,6 @@
  */
 import styled from "styled-components/macro";
 import { List, Button } from "antd";
-import { useData } from "../../../../hooks";
 import { CaseListData } from "../../types";
 import useCase from "../../hooks/use_case";
 
@@ -41,7 +40,6 @@ type AppProps = {
  * @export module: CaseList
  */
 const CaseList = ({ data, onShow }: AppProps) => {
-  const dataAction = useData();
   const caseAction = useCase();
 
   const handleClick = (data: CaseListData) => {

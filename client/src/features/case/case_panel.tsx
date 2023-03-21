@@ -69,7 +69,7 @@ const CasePanel = ({ url }: AppProps) => {
       ) : (
         <></>
       )}
-      <PanelTitleContainer>案例面板</PanelTitleContainer>
+      <PanelTitleContainer>项目面板</PanelTitleContainer>
       <PanelToolsContainer>
         <PanelToolContainer>
           <CaseSearch

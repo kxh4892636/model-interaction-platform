@@ -20,41 +20,35 @@ const main = async () => {
   //     id: id,
   //     image: "",
   //     time: new Date("2023-3-8"),
-  //     title: "UVET流场可视化示例",
-  //     data: ["71f67d10-555b-469a-acc0-8cacec14bb67"],
+  //     title: "水动力流场长江示例",
+  //     data: ["10a0253c-e329-4700-b2f9-bf040b5518e7"],
   //     tags: ["示例数据"],
   //   },
   // });
   // await prisma.data.create({
   //   data: {
-  //     data: "/case/test/output/uvet.dat",
+  //     data: "/case/flow_test/model/hydrodynamics/model/uvet.dat",
   //     id: id,
   //     temp: false,
   //     title: "uvet",
   //     type: "uvet",
-  //     extent: [119.5498985092223, 120.21745091964257, 26.34525050928077, 26.972279065373204],
+  //     extent: [120.0437360613468201, 32.0840108580467813, 121.966232401169222, 31.1739019522094871],
   //     style: "flow",
-  //     transform: ["/case/test/transform/uvet/uv", "120"],
+  //     transform: ["/case/flow_test/model/hydrodynamics/transform/uvet/uv", "27"],
   //   },
   // });
-  // await prisma.case.updateMany({
-  //   where: { id: "3c2af655-bb70-472a-9f83-97bbe163e4fa" },
+  // await prisma.data.updateMany({
+  //   where: { id: "10a0253c-e329-4700-b2f9-bf040b5518e7" },
   //   data: {
-  //     data: [
-  //       "d1e7f07e-93ea-47dc-af53-33dcfdf1e167",
-  //       "0659274e-9dbb-4e14-891a-bec7e47bfd13",
-  //       "a07ad02e-a96c-4e6b-9de2-ca2ec85a4157",
-  //       "e73599fb-fa3f-4816-ae28-a45f0570eabe",
-  //       "35b0d729-2322-4fd4-b959-2ba10250d6f6",
-  //       "e4e3849b-2cee-4ef9-81ae-293a3ab7f48b",
-  //     ],
+  //     extent: [120.0437360613468201, 31.1739019522094871, 121.966232401169222, 32.0840108580467813],
   //   },
   // });
-  await prisma.data.deleteMany({
-    where: {
-      temp: true,
-    },
-  });
+  // await prisma.data.deleteMany({
+  //   where: { temp: true },
+  // });
+  // await prisma.case.deleteMany({
+  //   where: {},
+  // });
   const info = await prisma.data.findMany();
   console.log(info);
   // npx ts-node prisma.ts

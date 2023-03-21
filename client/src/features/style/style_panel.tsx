@@ -26,6 +26,9 @@ import { Layer } from "../../types";
 import { FlowFieldManager } from "../../features/map/utils/customLayer/flowfield";
 import { FlowLayer } from "../../features/map/utils/customLayer/flowLayer";
 
+// BUG 切换 select 图层, range 重置;
+// 同名 uvet 无法识别;
+
 /**
  * @description StylePanel
  * @module StylePanel
@@ -83,7 +86,7 @@ const StylePanel = () => {
               range
               min={range[0]}
               max={range[1]}
-              step={10}
+              step={1}
               defaultValue={range}
               value={sliderValue}
               tooltip={{ open: true, placement: "bottom" }}

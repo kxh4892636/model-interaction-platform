@@ -4,6 +4,7 @@
 .vscode
 /data
 /docs
+/server/utils/process
 .env
 prisma
 

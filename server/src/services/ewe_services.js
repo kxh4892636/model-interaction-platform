@@ -281,6 +281,13 @@ exports.R_test3 = (req, res) => {
 // 水动力模型计算接口
 exports.Hydrodynamic = (req, res) => {
   // req.body 前端传输过来的keys数组
-  console.log(req.body);
-  res.send(req.body);
+  const process = cs.exec(
+    "cd D:\\project\\001_model_interaction_platform\\data\\temp\\model && model.exe"
+  );
+  let num = 0;
+  // process.stdout.on("data", (data) => {
+  //   console.log(num);
+  //   num += 1;
+  // });
+  res.status(200).json("test");
 };

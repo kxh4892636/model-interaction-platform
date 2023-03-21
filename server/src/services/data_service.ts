@@ -2,7 +2,7 @@ import fs from "fs";
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import { dataFoldURL } from "../../config/global_data";
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import { resolve } from "path";
 
 const prisma = new PrismaClient();
@@ -99,32 +99,62 @@ const uploadData = async (file: Express.Multer.File) => {
   // get type and style of data
   const output = execSync(
     `conda activate gis && python ${
-      resolve("./").split("\\").join("/") + "/utils/python/get_data_type_and_style.py"
+      resolve("./").split("\\").join("/") + "/utils/get_data_type_and_style.py"
     } ${filePath}`
   );
   const [type, style] = output.toString().trimEnd().split(",");
   let transform: string[] = [];
   let extent: number[] = [];
+
   // generate transform filed
   if (type === "mesh") {
     const fileName = file.filename.split(".")[0];
-    const transformPath = filePath
-      .replace(file.filename, `${fileName}_transform.png`)
-      .replace("\\temp\\input", "\\temp\\transform\\mesh");
-    transform.push(transformPath.split("\\").join("/").split(dataFoldURL)[1]);
-    // generate transformed png of mesh
+    const csvPath = filePath
+      .replace(file.filename, `${fileName}.csv`)
+      .replace("\\temp\\input", "\\temp\\model\\hydrodynamics\\transform\\mesh");
+    const maskPath = filePath
+      .replace(file.filename, `${fileName}.shp`)
+      .replace("\\temp\\input", "\\temp\\model\\hydrodynamics\\transform\\mask");
+    const pngPath = filePath
+      .replace(file.filename, `${fileName}.png`)
+      .replace("\\temp\\input", "\\temp\\model\\hydrodynamics\\transform\\mesh");
+    transform.push(pngPath.split("\\").join("/").split(dataFoldURL)[1]);
     // NOTE cmd &&
-    const output = execSync(
+    // generate csv from mesh
+    execSync(
       `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
-        "/utils/python/mesh_transform.py" +
+        "/utils/hydrodynamics/mesh2csv.py" +
         " " +
         filePath +
         " " +
-        transformPath
+        csvPath
       }`
     );
-
+    // generate mask from csv
+    execSync(
+      `conda activate gis && python ${
+        resolve("./").split("\\").join("/") +
+        "/utils/hydrodynamics/mesh2mask.py" +
+        " " +
+        csvPath +
+        " " +
+        maskPath
+      }`
+    );
+    // generate png from csv and mask
+    const output = execSync(
+      `conda activate gis && python ${
+        resolve("./").split("\\").join("/") +
+        "/utils/hydrodynamics/mesh2png.py" +
+        " " +
+        csvPath +
+        " " +
+        pngPath +
+        " " +
+        maskPath
+      }`
+    );
     // get extent of mesh
     extent = output
       .toString()
@@ -133,8 +163,6 @@ const uploadData = async (file: Express.Multer.File) => {
       .replace(")", "")
       .split(",")
       .map((value) => Number(value));
-  } else if (type === "shp") {
-    // TODO 以后写
   } else if (type === "uvet") {
     // TODO 以后写
   }
