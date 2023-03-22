@@ -42,12 +42,7 @@ const upload = multer({
 });
 
 // 测试get，post请求
-router.get("/", Handler.test_get);
-router.post("/", Handler.test_post);
 
-router.post("/R_test", Handler.R_test);
-router.post("/R_EcoSim", Handler.R_EcoSim);
-router.post("/R_Ecopath", Handler.R_Ecopath);
 router.post("/R_test2", Handler.R_test2);
 router.post("/R_test3", upload.single("file"), Handler.R_test3);
 router.post("/Hydrodynamic", Handler.Hydrodynamic);
