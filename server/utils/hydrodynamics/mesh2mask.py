@@ -22,15 +22,9 @@ def mesh2mask(srcPath, dstPath: str) -> None:
     ds: ogr.DataSource = driver.CreateDataSource(dstPath)
     srs: osr.SpatialReference = osr.SpatialReference()
     srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-    srs.ImportFromEPSG(2437)
-    # TODO srs file should be supplied
-    srs.SetTM(clat=0, clong=120, scale=1, fe=500000, fn=0)
-    dst: osr.SpatialReference = osr.SpatialReference()
-    dst.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-    dst.ImportFromEPSG(4326)
-    ct: osr.CoordinateTransformation = osr.CoordinateTransformation(srs, dst)
+    srs.ImportFromEPSG(4326)
     layer: ogr.Layer = ds.CreateLayer(
-        'mask', dst, ogr.wkbPolygon, options=["ENCODING=UTF-8"])
+        'mask', srs, ogr.wkbPolygon, options=["ENCODING=UTF-8"])
     layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))
     # create feature that type is multiPoint
     featureDefn: ogr.FeatureDefn = layer.GetLayerDefn()
@@ -39,10 +33,9 @@ def mesh2mask(srcPath, dstPath: str) -> None:
     for data in dataList:
         x = float(data[1])
         y = float(data[2])
-        coords = ct.TransformPoint(x, y)
         # create geometry
         point = ogr.Geometry(ogr.wkbPoint)
-        point.AddPoint(coords[0], coords[1])
+        point.AddPoint(x, y)
         # set geometry
         multiPoint.AddGeometry(point)
         del point

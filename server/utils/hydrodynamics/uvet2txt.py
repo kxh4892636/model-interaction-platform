@@ -45,7 +45,10 @@ if __name__ == '__main__':
         # csv = r"d:\project\001_model_interaction_platform\data\test\uvet2txt\mesh31.csv"
         # uvet = r"d:\project\001_model_interaction_platform\data\test\uvet2txt\uvet.dat"
         # dst = r"d:\project\001_model_interaction_platform\data\test\uvet2txt\uvet.txt"
-        # num = 1
+        # for i in range(0, 120):
+        #     dataDict = resolveCSV(csv)
+        #     uvet2txt(uvet, dst.replace(
+        #         'uvet.txt', f"uvet_{i}.txt"), dataDict, i)
         dataDict = resolveCSV(csv)
         uvet2txt(uvet, dst, dataDict, int(num))
     except:

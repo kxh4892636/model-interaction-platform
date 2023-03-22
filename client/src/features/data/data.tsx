@@ -98,7 +98,7 @@ const DataPanel = () => {
           action={"http://localhost:3456/data/upload"}
           onChange={(info) => {
             if (info.file.status === "done") {
-              message.success(`${info.file.name} file uploaded successfully`);
+              message.success(`${info.file.name} 文件上传成功`);
               // TODO 添加案例时相同案例数据放置于一个图层组内
               dataActions.addDataToMap(info.file.response);
               dataActions.addDataToLayerTree(info.file.response);

@@ -167,6 +167,7 @@ const App = () => {
       });
     };
     const mytime = setInterval(increase, 500);
+    console.log(CalData);
     axios({
       method: "post",
       baseURL: "http://localhost:3456/model/Hydrodynamic",

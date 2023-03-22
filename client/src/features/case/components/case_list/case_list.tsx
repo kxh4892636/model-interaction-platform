@@ -8,7 +8,7 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import styled from "styled-components/macro";
-import { List, Button } from "antd";
+import { List, Button, message } from "antd";
 import { CaseListData } from "../../types";
 import useCase from "../../hooks/use_case";
 
@@ -40,11 +40,11 @@ type AppProps = {
  * @export module: CaseList
  */
 const CaseList = ({ data, onShow }: AppProps) => {
-  const caseAction = useCase();
+  const caseActions = useCase();
 
   const handleClick = (data: CaseListData) => {
-    // useCase
-    caseAction.addCase(data.key);
+    caseActions.addCase(data.key);
+    message.success("加载项目完成");
   };
 
   return (

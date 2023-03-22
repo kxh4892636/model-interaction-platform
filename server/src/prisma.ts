@@ -16,13 +16,13 @@ const main = async () => {
   //   data: {
   //     author: "kxh",
   //     count: 0,
-  //     description: "示例数据描述",
+  //     description: "水动力模型示例数据集",
   //     id: id,
   //     image: "",
   //     time: new Date("2023-3-8"),
-  //     title: "水动力流场长江示例",
-  //     data: ["10a0253c-e329-4700-b2f9-bf040b5518e7"],
-  //     tags: ["示例数据"],
+  //     title: "水动力模型示例数据集",
+  //     data: keys,
+  //     tags: ["水动力模型", "数据集"],
   //   },
   // });
   // await prisma.data.create({
@@ -38,18 +38,22 @@ const main = async () => {
   //   },
   // });
   // await prisma.data.updateMany({
-  //   where: { id: "10a0253c-e329-4700-b2f9-bf040b5518e7" },
   //   data: {
-  //     extent: [120.0437360613468201, 31.1739019522094871, 121.966232401169222, 32.0840108580467813],
+  //     transform:
+
   //   },
   // });
+  // NOTE queryraw
+  // NOTE postgresql string should use ''
+  // NOTE postgresql how to input [] and null
+  // await prisma.$queryRaw`UPDATE data SET transform[0] = '/case/hydrodynamics_input/model/hydrodynamics/transform/mesh/mesh31.png' WHERE id = '4656f3e6-726c-41ec-8331-be11319b054b'`;
   // await prisma.data.deleteMany({
-  //   where: { temp: true },
+  //   where: {},
   // });
   // await prisma.case.deleteMany({
   //   where: {},
   // });
-  const info = await prisma.data.findMany();
+  const info = await prisma.case.findMany();
   console.log(info);
   // npx ts-node prisma.ts
 };

@@ -22,15 +22,9 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
     ds: ogr.DataSource = driver.CreateDataSource('/vsimem/temp.shp')
     srs: osr.SpatialReference = osr.SpatialReference()
     srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-    srs.ImportFromEPSG(2437)
-    # TODO srs file should be supplied
-    srs.SetTM(clat=0, clong=120, scale=1, fe=500000, fn=0)
-    dst: osr.SpatialReference = osr.SpatialReference()
-    dst.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-    dst.ImportFromEPSG(4326)
-    ct: osr.CoordinateTransformation = osr.CoordinateTransformation(srs, dst)
+    srs.ImportFromEPSG(4326)
     layer: ogr.Layer = ds.CreateLayer(
-        'mesh', dst, ogr.wkbPoint, options=["ENCODING=UTF-8"])
+        'mesh', srs, ogr.wkbPoint, options=["ENCODING=UTF-8"])
     # create fields of shp
     layer.CreateField(ogr.FieldDefn('ID', ogr.OFTString))
     layer.CreateField(ogr.FieldDefn('X', ogr.OFTReal))
@@ -43,16 +37,15 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
         x = float(data[1])
         y = float(data[2])
         z = float(data[3])
-        coords = ct.TransformPoint(x, y)
         # create feature
         feature: ogr.Feature = ogr.Feature(featureDefn)
         feature.SetField("ID", id)
-        feature.SetField("X", coords[0])
-        feature.SetField("Y", coords[1])
+        feature.SetField("X", x)
+        feature.SetField("Y", y)
         feature.SetField("Z", z)
         # create geometry
         point = ogr.Geometry(ogr.wkbPoint)
-        point.AddPoint(coords[0], coords[1])
+        point.AddPoint(x, y)
         # set geometry
         feature.SetGeometry(point)
         layer.CreateFeature(feature)
@@ -73,7 +66,7 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
     minmax = band.ComputeRasterMinMax(0)
     # fix the error of spatial of gdal.Grid()
     warpOptions = gdal.WarpOptions(
-        srcSRS=dst, dstSRS=dst, format='GTiff', cutlineDSName=maskPath, cropToCutline=True)
+        srcSRS=srs, dstSRS=srs, format='GTiff', cutlineDSName=maskPath, cropToCutline=True)
     gdal.Warp('/vsimem/temp_warp.tif',
               '/vsimem/temp_grid.tif', options=warpOptions)
 
