@@ -124,7 +124,7 @@ if __name__ == '__main__':
         # sys.argv
         [src, dst, mask] = sys.argv[1:4]
         # src = r"d:\project\001_model_interaction_platform\data\test\uvet2png\uvet_0.txt"
-        # dst = r"d:\project\001_model_interaction_platform\data\test\uvet2png\uvet_0.png"
+        # dst = r"d:\project\001_model_interaction_platform\data\test\uvet2png\petak_0.png"
         # mask = r"d:\project\001_model_interaction_platform\data\test\uvet2png\mesh31.shp"
         extent = uvet2png(src, dst, mask)
         print(extent)

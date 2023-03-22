@@ -267,8 +267,8 @@ export class FlowFieldManager {
         const extent: [number, number, number, number] = [
           this.dataDetail!.extent[0],
           this.dataDetail!.extent[3],
-          this.dataDetail!.extent[2],
           this.dataDetail!.extent[1],
+          this.dataDetail!.extent[2],
         ];
 
         const startValue = this.params?.startValue ? this.params.startValue : 0;
@@ -281,8 +281,6 @@ export class FlowFieldManager {
 
         // Load textures of flow fields
         for (let i = startValue; i <= endValue; i++) {
-          console.log(i);
-
           axios
             .get(`http://localhost:3456/data/uvet?id=` + this.id, {
               params: { currentImage: i, type: "uv" },

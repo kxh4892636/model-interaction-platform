@@ -131,7 +131,7 @@ const CasePage = ({ id, onClose }: AppProps) => {
           style={{ marginInlineStart: "auto", marginInlineEnd: "10px", fontSize: "14px" }}
           onClick={async () => {
             await caseActions.addCase(id);
-            messageApi.success("加载项目完成");
+            message.success("加载项目完成");
           }}
         >
           添加至地图

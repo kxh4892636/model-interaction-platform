@@ -42,8 +42,8 @@ type AppProps = {
 const CaseList = ({ data, onShow }: AppProps) => {
   const caseActions = useCase();
 
-  const handleClick = (data: CaseListData) => {
-    caseActions.addCase(data.key);
+  const handleClick = async (data: CaseListData) => {
+    await caseActions.addCase(data.key);
     message.success("加载项目完成");
   };
 

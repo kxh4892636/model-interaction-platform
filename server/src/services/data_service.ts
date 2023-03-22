@@ -56,8 +56,7 @@ const getUVET = async (id: string, type: string, currentImage: number) => {
     },
   });
   if (!info) return "can't find data by id";
-  else if (type === "description")
-    return dataFoldURL + info.transform[0] + "/flow_field_description.json";
+  else if (type === "description") return dataFoldURL + info.transform[0] + "/description.json";
   else return dataFoldURL + info.transform[0] + `/${type}_${currentImage}.png`;
 };
 
@@ -178,6 +177,7 @@ const uploadData = async (file: Express.Multer.File) => {
       style: style,
       extent: extent,
       transform: transform,
+      progress: [1, 1],
     },
   });
 

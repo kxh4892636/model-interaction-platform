@@ -1,9 +1,10 @@
+import { Request, Response } from "express";
 const cs = require("child_process");
 const { query } = require("../../utils/ewe/importEWE");
 const { CRUDdatabase, HandleReturn, FlowDiagram } = require("../../utils/ewe/exportEWE");
 
 // 计算结果
-exports.R_test2 = (req, res) => {
+exports.R_test2 = (req: Request, res: Response) => {
   const Group = req.body.Group;
   const Diet = req.body.Diet;
   const Detritus = req.body.Detritus;
@@ -17,7 +18,7 @@ exports.R_test2 = (req, res) => {
   const database = CRUDdatabase(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num);
   database
     .then(() => {
-      cs.exec(`Rscript ./utils/ewe/EcoPath.R ${num}`, (error, stdout, stderr) => {
+      cs.exec(`Rscript ./utils/ewe/EcoPath.R ${num}`, (error: any, stdout: any, stderr: any) => {
         if (error) {
           console.error("error:", error);
         }
@@ -44,22 +45,22 @@ exports.R_test2 = (req, res) => {
         // res.send(data)
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err: any) => console.log(err));
 };
 
 // 从模型文件按中导入
-exports.R_test3 = (req, res) => {
+exports.R_test3 = (req: Request, res: Response) => {
   console.log("触发了Upload函数");
   // console.log(req)
   // console.log(req.file)
-  console.log(req.file.path);
+  console.log(req.file!.path);
   // console.log(req.file.length)
   const ADODB = require("node-adodb");
   const connection = ADODB.open(
-    `Provider=Microsoft.ACE.OLEDB.12.0;Data Source=./${req.file.path};Persist Security Info=False;`
+    `Provider=Microsoft.ACE.OLEDB.12.0;Data Source=./${req.file!.path};Persist Security Info=False;`
   );
   const result = query(connection);
-  result.then((val, err) => {
+  result.then((val: any, err: any) => {
     if (err) {
       res.send(err);
     } else {
@@ -70,7 +71,7 @@ exports.R_test3 = (req, res) => {
 };
 
 // 水动力模型计算接口
-exports.Hydrodynamic = (req, res) => {
+exports.Hydrodynamic = (req: Request, res: Response) => {
   // req.body 前端传输过来的keys数组
   const process = cs.exec(
     "cd D:\\project\\001_model_interaction_platform\\data\\temp\\model && model.exe"

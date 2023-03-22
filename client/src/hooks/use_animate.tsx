@@ -93,7 +93,7 @@ const useAnimate = () => {
             (currentCount + 1) % (endValue + 1) === 0
               ? startValue
               : (currentCount + 1) % (endValue + 1);
-        }, 150);
+        }, 200);
         updateAnimatedStatus(id, "intervalFunction", intervalFunc);
       } else;
     });
