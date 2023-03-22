@@ -55,9 +55,6 @@ const main = async () => {
   //     temp: true,
   //   },
   // });
-  // NOTE queryraw
-  // NOTE postgresql string should use ''
-  // NOTE postgresql how to input [] and null
   // await prisma.$queryRaw`UPDATE data SET transform[0] = '/case/hydrodynamics_input/model/hydrodynamics/transform/mesh/mesh31.png' WHERE id = '4656f3e6-726c-41ec-8331-be11319b054b'`;
   // await prisma.data.deleteMany({
   //   where: {
@@ -67,6 +64,7 @@ const main = async () => {
   // await prisma.case.deleteMany({
   //   where: {},
   // });
+  prisma.$queryRaw``;
   const info = await prisma.data.findMany({});
   console.log(info);
   // npx ts-node prisma.ts

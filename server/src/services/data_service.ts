@@ -118,7 +118,6 @@ const uploadData = async (file: Express.Multer.File) => {
       .replace(file.filename, `${fileName}.png`)
       .replace("\\temp\\input", "\\temp\\model\\hydrodynamics\\transform\\mesh");
     transform.push(pngPath.split("\\").join("/").split(dataFoldURL)[1]);
-    // NOTE cmd &&
     // generate csv from mesh
     execSync(
       `conda activate gis && python ${

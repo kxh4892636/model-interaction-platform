@@ -50,7 +50,6 @@ const useData = () => {
    * @param params the params of get request
    * @param responseType the type of response
    */
-  // NOTE get params responsetype
   const getData = async (
     id: string,
     dataType: string = "data",
@@ -148,7 +147,6 @@ const useData = () => {
         getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob").then((res) => {
           const blob = new Blob([res]);
           const url = window.URL.createObjectURL(blob);
-          // NOTE source type
           map!.addSource(id, {
             type: "image",
             url: url,
@@ -159,7 +157,6 @@ const useData = () => {
               [extent[0], extent[2]],
             ],
           });
-          // NOTE layer type
           map!.addLayer({
             id: id,
             type: "raster",
@@ -169,15 +166,12 @@ const useData = () => {
             },
           });
         });
-        // NOTE node.timer type
         const intervalFunc = setInterval(() => {
           updateAnimatedStatus(id, "currentCount", currentCount);
-          // NOTE
           getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!.then(
             (res) => {
               const blob = new Blob([res]);
               const url = window.URL.createObjectURL(blob);
-              // NOTE updateImage and ImageSource
               (map!.getSource(id) as ImageSource).updateImage({ url: url });
             }
           );

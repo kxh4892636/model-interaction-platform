@@ -100,7 +100,6 @@ type AppProps = {
 const CasePage = ({ id, onClose }: AppProps) => {
   const [data, setData] = useState<ServerCase>();
   const caseActions = useCase();
-  const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
     axios.get("http://localhost:3456/case/case?id=" + id).then((res) => {
@@ -109,7 +108,6 @@ const CasePage = ({ id, onClose }: AppProps) => {
     console.log(id);
   }, [id]);
 
-  // NOTE marginInlineEnd: "auto" 的机制
   return data ? (
     <CaseContainer>
       <CaseTitleContainer>{data.title}</CaseTitleContainer>

@@ -23,7 +23,6 @@ const useCase = () => {
   const getKeys = useKeys();
 
   const addCase = async (id: string) => {
-    // NOTE promise 套 promise 的执行顺序
     await axios.get("http://localhost:3456/case/case?id=" + id).then(async (res) => {
       const caseData: ServerCase = res.data;
       const id = crypto.randomUUID();

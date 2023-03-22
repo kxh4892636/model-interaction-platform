@@ -14,7 +14,6 @@ import useLayersStatusStore from "../../../stores/layers_status_store";
 import { useAnimate, useKeys } from "../../../hooks";
 import { Layer } from "../../../types";
 
-// NOTE react 最佳实践
 /**
  * @description LayerPanel action
  * @autor xiaohan kong
@@ -41,7 +40,6 @@ const useLayerActions = () => {
    * show and hide layer
    * @param info suggest console.log(info)
    */
-  // TODO 分辨是否显示要修改
   const showLayer = (info: any) => {
     if (!map) return;
     if (!info.node.group) {
@@ -105,10 +103,8 @@ const useLayerActions = () => {
     };
 
     // deep copy layers
-    // NOTE 学习深拷贝方法
     const data: Layer[] = JSON.parse(JSON.stringify(layers));
-
-    // TODO 限制 tree drag 行为的思路
+    // NOTE 限制 tree drag 行为的思路
     // if drop and drag layer are both layer group, the action is invalid
     if (info.dragNode.group) {
       const pos = info.node.pos.split("-");
@@ -128,7 +124,6 @@ const useLayerActions = () => {
         item.children.unshift(dragObj);
       });
     } else {
-      // NOTE Typescript variable used before being assigned  solution
       let ar: Layer[];
       let i: number;
       loop(data, dropKey, (_item, index, arr) => {

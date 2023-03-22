@@ -151,17 +151,22 @@ const StylePanel = () => {
                 updateAnimatedStatus(key, "endValue", endValue);
                 updateAnimatedStatus(key, "currentCount", currentCountNow);
                 dataActions.getDataDetail(key).then((res) => {
-                  map!.removeLayer(key);
                   let flowFieldManager = new FlowFieldManager(key, res, {
                     startValue: startValue,
                     endValue: endValue,
                   });
-                  const flowLayer = new FlowLayer(key, "2d", flowFieldManager);
-                  map!.addLayer(flowLayer);
                   // Hide layer if it isn't showed
-                  if (map!.getLayoutProperty(key, "visibility") !== "none") {
+                  if (map!.getLayoutProperty(key, "visibility") === "none") {
+                    map!.removeLayer(key);
+                    const flowLayer = new FlowLayer(key, "2d", flowFieldManager);
+                    map!.addLayer(flowLayer);
                     map!.setLayoutProperty(key, "visibility", "none");
-                  } else;
+                  } else {
+                    map!.removeLayer(key);
+                    const flowLayer = new FlowLayer(key, "2d", flowFieldManager);
+                    map!.addLayer(flowLayer);
+                    map!.setLayoutProperty(key, "visibility", "visible");
+                  }
                 });
               } else;
             }}
