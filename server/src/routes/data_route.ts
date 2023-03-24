@@ -11,6 +11,7 @@ import express from "express";
 import multer from "multer";
 import dataController from "../controllers/data_controller";
 import { dataFoldURL } from "../../config/global_data";
+import path from "path";
 
 const router = express.Router();
 const upload = multer({
@@ -20,7 +21,10 @@ const upload = multer({
     },
     filename: (req, file, cb) => {
       //  解决中文名乱码
-      cb(null, Buffer.from(file.originalname, "latin1").toString("utf8"));
+      // NOTE extName
+      const fileName = Buffer.from(file.originalname, "latin1").toString("utf8");
+      const extName = path.extname(fileName);
+      cb(null, path.basename(fileName, extName) + "_" + Date.now().toString() + extName);
     },
   }),
 });

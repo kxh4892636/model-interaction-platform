@@ -122,12 +122,17 @@ if __name__ == '__main__':
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
     try:
         # sys.argv
-        [src, dst, mask] = sys.argv[1:4]
-        # src = r"d:\project\001_model_interaction_platform\data\test\uvet2png\uvet_0.txt"
-        # dst = r"d:\project\001_model_interaction_platform\data\test\uvet2png\petak_0.png"
-        # mask = r"d:\project\001_model_interaction_platform\data\test\uvet2png\mesh31.shp"
-        extent = uvet2png(src, dst, mask)
-        print(extent)
+        [uvetFold, uvetTimeStamp, pngFold,
+            pngTimeStamp, maskPath, num] = sys.argv[1:7]
+        # uvetFold = r"d:\project\001_model_interaction_platform\data\test\uvet2png"
+        # uvetTimeStamp = '123456'
+        # pngFold = r"d:\project\001_model_interaction_platform\data\test\uvet2png"
+        # pngTimeStamp = '123456'
+        # maskPath = r"d:\project\001_model_interaction_platform\data\test\uvet2png\mesh31.shp"
+        # num = "120"
+        for i in range(0, int(num)):
+            extent = uvet2png(
+                uvetFold+f'/uvet_{uvetTimeStamp}_{i}.txt', pngFold+f'/petak_{pngTimeStamp}_{i}.png', maskPath)
     except:
         print('输入参数错误, 请输入文件 url')
     # TODO
