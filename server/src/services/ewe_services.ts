@@ -81,13 +81,20 @@ exports.R_test3 = (req: Request, res: Response) => {
 // 水动力模型计算接口
 exports.Hydrodynamic = async (req: Request, res: Response) => {
   try {
-    const keys: string[] = req.body;
-    let meshFileName: string;
-    let extent: number[];
+    const body: [string[], string, string] = req.body;
+    const paramKeys = body[0];
+    const projKeys = body[1];
+    const boundaryKeys = body[2];
+    let keys: string[] = paramKeys;
+    projKeys && keys.push(projKeys);
+    boundaryKeys && keys.push(boundaryKeys);
+    let meshFileName: string | undefined = undefined;
+    let extent: number[] | undefined = undefined;
     // NOTE prisma 如何查找字段 where and select
     // NOTE JavaScript 中的 forEach不支持 promise 感知，也不支持 async 和await，所以不能在 forEach 使用 await 。 读一下 https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
-    for (let index = 0; index < keys.length; index++) {
-      const key = keys[index];
+    // get data by key
+    for (let index = 0; index < paramKeys.length; index++) {
+      const key = paramKeys[index];
       const fileInfo = await prisma.data.findUnique({
         where: {
           id: key,
@@ -99,8 +106,10 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         },
       });
       // NOTE 如何抛出错误
-      if (!fileInfo) throw new Error("the file is not exist");
-      else;
+      if (!fileInfo) {
+        res.status(200).json({ status: "failed", content: "the file is not exist" });
+        return;
+      } else;
 
       const src = dataFoldURL + fileInfo.data;
       const timeStamp = fileInfo.data.match(/(?<=\_)\d*/)?.toString();
@@ -117,6 +126,11 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         extent = fileInfo.extent;
       } else;
     }
+    if (!meshFileName) {
+      res.status(200).json({ status: "failed", content: "the file is not exist" });
+      return;
+    } else;
+
     const petakID = crypto.randomUUID();
     const uvID = crypto.randomUUID();
     const uvetPath = "/temp/model/hydrodynamics/model/uvet.dat";
@@ -129,8 +143,6 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         title: "uvet水深数据",
         type: "uvet",
         extent: extent!,
-        progress: [],
-        transform: [],
       },
     });
     await prisma.data.create({
@@ -142,8 +154,6 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         title: "uvet流场数据",
         type: "uvet",
         extent: extent!,
-        progress: [],
-        transform: [],
       },
     });
 
@@ -165,8 +175,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: uvID,
           },
           data: {
-            transform: ["/temp/model/hydrodynamics/transform/uvet/uv", num.toString()],
-            progress: [0, 4 * Number(num) + 4],
+            progress: [0, 5 * Number(num) + 2],
           },
         });
         await prisma.data.updateMany({
@@ -174,19 +183,18 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: petakID,
           },
           data: {
-            transform: ["/temp/model/hydrodynamics/transform/uvet/petak", num.toString()],
-            progress: [0, 4 * Number(num) + 4],
+            progress: [0, 5 * Number(num) + 2],
           },
         });
       } else;
       if (chunk.includes("nt,it")) {
-        currentCount = currentCount + 2;
+        currentCount = currentCount + 3;
         await prisma.data.updateMany({
           where: {
             id: uvID,
           },
           data: {
-            progress: [currentCount, 4 * Number(num) + 4],
+            progress: [currentCount, 5 * Number(num) + 2],
           },
         });
         await prisma.data.updateMany({
@@ -194,7 +202,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: petakID,
           },
           data: {
-            progress: [currentCount, 4 * Number(num) + 4],
+            progress: [currentCount, 5 * Number(num) + 2],
           },
         });
       }
@@ -226,7 +234,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           " " +
           `${dataFoldURL}/temp/model/hydrodynamics/transform/uvet/txt` +
           " " +
-          `${dataFoldURL}/temp/model/hydrodynamics/transform/mesh/${meshFileName.replace(
+          `${dataFoldURL}/temp/model/hydrodynamics/transform/mesh/${meshFileName!.replace(
             "gr3",
             "csv"
           )}` +
@@ -251,9 +259,9 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           " " +
           `/temp/model/hydrodynamics/transform/uvet/uv/` +
           " " +
-          extent.join(",") +
+          extent!.join(",") +
           " " +
-          `../../mask/${meshFileName.replace("gr3", "shp")}` +
+          `../../mask/${meshFileName!.replace("gr3", "shp")}` +
           " " +
           num
         }`
@@ -285,13 +293,16 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           " " +
           pngTimeStamp +
           " " +
-          `${dataFoldURL}/temp/model/hydrodynamics/transform/mask/${meshFileName.replace(
+          `${dataFoldURL}/temp/model/hydrodynamics/transform/mask/${meshFileName!.replace(
             "gr3",
             "shp"
           )}` +
           " " +
           num
-        }`
+        }`,
+        (err, stdout, stderr) => {
+          console.log("uvet2png succeed");
+        }
       );
       // uvet process
       await prisma.data.updateMany({
@@ -314,30 +325,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         ".json";
       // NOTE 不知道为什么, 加一个 setTImeout 就可以, 而且延时时间要多一点
       setTimeout(() => {
-        const output = exec(processPath + " " + descriptionPath, (err, stdout, stderr) => {});
-        output.stdout?.on("data", async (chunk) => {
-          console.log(chunk);
-          if (chunk.includes("uvet")) {
-            currentCount = currentCount + 1;
-            await prisma.data.updateMany({
-              where: {
-                id: uvID,
-              },
-              data: {
-                progress: [currentCount, 4 * Number(num) + 4],
-              },
-            });
-            await prisma.data.updateMany({
-              where: {
-                id: petakID,
-              },
-              data: {
-                progress: [currentCount, 4 * Number(num) + 4],
-              },
-            });
-          } else;
-        });
-        output.stdout?.on("end", () => {
+        const output = exec(processPath + " " + descriptionPath, (err, stdout, stderr) => {
           const renameFiles = async (timeStamp: string, num: number) => {
             const descriptionPath = `${dataFoldURL}/temp/model/hydrodynamics/transform/uvet/uv/flow_field_description.json`;
             for (let index = 0; index < num; index++) {
@@ -371,13 +359,13 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             );
           };
           renameFiles(txtTimeStamp, num).then(async () => {
-            currentCount = currentCount + 4;
+            currentCount = currentCount + 2;
             await prisma.data.updateMany({
               where: {
                 id: uvID,
               },
               data: {
-                progress: [currentCount, 4 * Number(num) + 4],
+                progress: [currentCount, 5 * Number(num) + 2],
               },
             });
             await prisma.data.updateMany({
@@ -385,10 +373,33 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
                 id: petakID,
               },
               data: {
-                progress: [currentCount, 4 * Number(num) + 4],
+                progress: [currentCount, 5 * Number(num) + 2],
               },
             });
           });
+        });
+
+        output.stdout?.on("data", async (chunk) => {
+          console.log(chunk);
+          if (chunk.includes("uvet")) {
+            currentCount = currentCount + 1;
+            await prisma.data.updateMany({
+              where: {
+                id: uvID,
+              },
+              data: {
+                progress: [currentCount, 5 * Number(num) + 2],
+              },
+            });
+            await prisma.data.updateMany({
+              where: {
+                id: petakID,
+              },
+              data: {
+                progress: [currentCount, 5 * Number(num) + 2],
+              },
+            });
+          } else;
         });
       }, 1000);
     });

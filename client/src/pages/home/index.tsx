@@ -14,6 +14,7 @@ import {
   CloudUploadOutlined,
   BgColorsOutlined,
   MediumOutlined,
+  SlackOutlined,
 } from "@ant-design/icons";
 import { LayerOutlined } from "../../components/icons";
 import Sidebar from "../../features/sidebar";
@@ -24,6 +25,7 @@ import { CasePanel } from "../../features/case";
 import { DataPanel } from "../../features/data";
 import { StylePanel } from "../../features/style";
 import { ExchangeFlag } from "../../stores/model";
+import { ModelPanel } from "../../features/model";
 import Model from "../../features/model/App";
 
 const View = styled.div`
@@ -98,6 +100,12 @@ const Home: React.FC = () => {
       id: "style",
       icon: <BgColorsOutlined style={{ color: "#262626", fontSize: "24px" }} />,
       panel: <StylePanel />,
+    },
+    {
+      title: "水动力模型",
+      id: "hydrodynamics",
+      icon: <SlackOutlined style={{ color: "#262626", fontSize: "24px" }} />,
+      panel: <ModelPanel title="水动力模型面板" model="hydrodynamics" />,
     },
   ];
 

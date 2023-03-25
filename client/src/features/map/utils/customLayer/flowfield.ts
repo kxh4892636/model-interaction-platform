@@ -274,14 +274,17 @@ export class FlowFieldManager {
         const startValue = this.params?.startValue ? this.params.startValue : 0;
         const endValue = this.params?.endValue
           ? this.params?.endValue
-          : Number(this.dataDetail!.transform[1]);
+          : this.params?.endValue === 0
+          ? 0
+          : Number(this.dataDetail!.transform[1]) - 1;
+
         this.geoBbox = this.TransMercator(extent);
         // Set constraints
         this.controller = new FlowFieldController(constraints)!;
 
         // Load textures of flow fields
         for (let i = startValue; i <= endValue; i++) {
-          axios
+          axios 
             .get(`http://localhost:3456/data/uvet?id=` + this.id, {
               params: { currentImage: i, type: "uv" },
               responseType: "blob",

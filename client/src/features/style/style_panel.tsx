@@ -109,7 +109,7 @@ const StylePanel = () => {
       </PanelContentContainer>
       <PanelToolsContainer>
         <PanelToolContainer>
-          <Button type="primary" danger>
+          <Button type="primary" danger style={{ marginBottom: "10px" }}>
             取消
           </Button>
         </PanelToolContainer>
@@ -119,6 +119,7 @@ const StylePanel = () => {
             onClick={() => {
               console.log(layerSelected);
             }}
+            style={{ marginBottom: "10px" }}
           >
             应用
           </Button>
@@ -126,6 +127,7 @@ const StylePanel = () => {
         <PanelToolContainer>
           <Button
             type="primary"
+            style={{ marginBottom: "10px" }}
             onClick={() => {
               // Update the animatedStatus of selected layer
               const style = layerSelected!.layerStyle;
