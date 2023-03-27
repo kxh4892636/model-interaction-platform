@@ -99,7 +99,7 @@ const uploadData = async (file: Express.Multer.File) => {
   const filePath: string = file.path;
   const id = crypto.randomUUID();
   if(file.filename.split(".")[1]==="eweaccdb" || file.filename.split(".")[1]==="ewemdb"){
-    console.log(file.filename)
+    // console.log(file.filename)
     // write data into database
     await prisma.data.create({
       data: {

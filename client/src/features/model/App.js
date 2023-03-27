@@ -18,11 +18,11 @@ export default function App() {
   }
 
   return (
-    <Layout style={{ height: "100%", position: "relative" }}>
+    <Layout style={{ height: "100%", position: "relative"}}>
       {/* <Header className="header" style={{backgroundColor:"black",height:"48px",lineHeight:"48px"}}>
           <MyHeader></MyHeader>
         </Header> */}
-      <Layout style={{ height: "94vh" }}>
+      <Layout style={{ height: "94vh",border: "1px solid rgb(172,172,172)" }}>
         <Sider width={250} style={{ background: "#fff", paddingTop: "10px" }}>
           <MySider routechange={test}></MySider>
         </Sider>
@@ -34,9 +34,7 @@ export default function App() {
               margin: 0,
               minHeight: 280,
               background: "white",
-              border: "1px solid rgb(172,172,172)",
-              // borderRadius:"5px"
-              boxShadow: "inset 2px 2px 5px #838a8c",
+              borderLeft:"1px dotted"
             }}
           >
             {/* 路由注册 */}

@@ -40,7 +40,7 @@ const DataPanel = () => {
             message.success(`${info.file.name} 文件上传成功`);
             if(info.file.name.split(".")[1]==="eweaccdb" || info.file.name.split(".")[1]==="ewemdb")
             {
-              console.log(info.file.response)
+              // console.log(info.file.response)
               setEWEID([...EWEID,info.file.response])
             }
             else{
