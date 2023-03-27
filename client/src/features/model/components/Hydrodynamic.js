@@ -1,19 +1,17 @@
 import React, { useState } from "react";
-import { Select, List, Button, Form, Progress, message } from "antd";
+import { Select, List, Button, Form, Progress } from "antd";
 import { DeleteTwoTone, PlayCircleTwoTone } from "@ant-design/icons";
 import InfiniteScroll from "react-infinite-scroll-component";
 // 图层story
 import useLayersStore from "../../../stores/layers_store";
 // import { useKeys } from "../../../hooks";
 import axios from "axios";
-import { useData } from "../../../hooks";
 // 用来记录边界与投影之前所选的一项，选择另一个后，将之前的设为可选
 let TpreIndex = -1;
 let BpreIndex = -1;
 const App = () => {
   // 处理选择的数据
   const layers = useLayersStore((state) => state.layers);
-  const dataActions = useData();
   // const getKeys = useKeys();
   // const allKeys = getKeys.getLayerKeys(layers);
   // console.log("水动力",layers,allKeys)
@@ -44,10 +42,6 @@ const App = () => {
   const [MyList, setMyList] = useState([]);
   // List 可选数据的List表
   const [MyList2, setMyList2] = useState([]);
-  // Judging the running status of the model
-  const [isRunning, setIsRunning] = useState(false);
-  // store the keys of uvet
-  const [uvetKeys, setUvetKeys] = useState([]);
   // select框onChange点击事件
   const handleChange = (value, item) => {
     // 将已经选过的数据置为不可选
@@ -157,48 +151,30 @@ const App = () => {
   };
   // 进度条状态
   const [percent, setPercent] = useState(0);
-  const [intervalStore, setIntervalStore] = useState();
   // 运行模型
   const RunModel = () => {
-    const getPercent = (keys) => {
-      intervalStore && clearInterval(intervalStore);
-      const percentInterval = setInterval(async () => {
-        const dataInfo = await dataActions.getDataDetail(keys[0]);
-        const progress = dataInfo.progress;
-        console.log(progress);
-        setPercent(((progress[0] / progress[1]) * 100).toFixed(2));
-        if (progress[0] === progress[1] / 2 && progress[1]) {
-          message.success("模型计算完毕, 开始进行模型可视化处理", 10);
-        } else if (progress[0] === progress[1] && progress[1]) {
-          clearInterval(percentInterval);
-          setIsRunning(false);
-          keys.forEach((key) => {
-            dataActions.addDataToLayerTree(key);
-            dataActions.addDataToMap(key);
-          });
-          message.success("模型运行完毕", 10);
+    const increase = () => {
+      setPercent((prevPercent) => {
+        if (prevPercent === 100) {
+          clearInterval(mytime);
+          console.log("结束计时器");
         }
-      }, 2000);
-      setIntervalStore(percentInterval);
-    };
-    if (isRunning) {
-      getPercent(uvetKeys[0]);
-    } else {
-      axios({
-        method: "post",
-        baseURL: "http://localhost:3456/model/Hydrodynamic",
-        data: CalData,
-      }).then((response) => {
-        if (response.data.status === "success") {
-          setUvetKeys(response.data.content);
-          setIsRunning(true);
-          getPercent(response.data.content);
-          message.success("模型开始运行", 10);
-        } else {
-          message.error("模型输入参数错误", 10);
+        const newPercent = prevPercent + 0.05;
+        if (newPercent > 100) {
+          return 100;
         }
+        return newPercent;
       });
-    }
+    };
+    const mytime = setInterval(increase, 500);
+    console.log(CalData);
+    axios({
+      method: "post",
+      baseURL: "http://localhost:3456/model/Hydrodynamic",
+      data: CalData,
+    }).then((response) => {
+      console.log(response);
+    });
   };
 
   return (

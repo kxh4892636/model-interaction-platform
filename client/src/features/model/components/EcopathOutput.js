@@ -1,6 +1,6 @@
 import React from 'react'
 import { Table,Button,message,Alert } from 'antd';
-import {Basic,Diet,FleetModal,Detritus,FisheryDiscardFate,FisheryLand,FisheryDiscard,EcopathOutput,FlowDiagram} from "../store"
+import {Basic,Diet,FleetModal,Detritus,FisheryDiscardFate,FisheryLand,FisheryDiscard,EcopathOutput,FlowDiagram,RunModelState,ModifyState,selectedEWEModelID} from "../store"
 import axios from 'axios';
 // 模型平衡与否 已极不平衡时的功能组名称
 let status = ""
@@ -85,25 +85,42 @@ export default function App() {
     const EcopathData = EcopathOutput((state) => state.EcopathOutputData );
     const setEcopathOutputData = EcopathOutput((state)=>state.setEcopathOutputData)
     const setGraphData = FlowDiagram((state)=>state.setGraphData)
+    const ModelState = RunModelState((state)=>state.State)
+    const setModelState = RunModelState((state)=>state.setState)
+    const ModifyData  = ModifyState((state)=>state.ModifyData)
+    const selectedEWElID = selectedEWEModelID((state)=>state.selectedEWEModelID)
     // Run Ecopath
     const RunEcopath = ()=>{
       // console.log(GroupTData,DietData)
-      message.loading({content:"数据计算中",key:"Mloading"})
+      if(ModelState==="Start" || ModelState==="Modify"){
+        message.loading({content:"数据计算中",key:"Mloading"})
+      }
       axios({
         method:'post', 
         baseURL: 'http://localhost:3456/model/R_test2',
-        data:{Group:GroupTData,Diet:DietData,Fleet:Fleet,Detritus:DetritusData,DiscardFate:FDiscardFateData,Land:FLandData,Discard:FDiscardData,singleID:sessionStorage.getItem('key').slice(10,14)}
+        // 根据第一次还是修改，传输不同的数据
+        data: ModelState==="Start"?{Group:GroupTData,Diet:DietData,Fleet:Fleet,Detritus:DetritusData,DiscardFate:FDiscardFateData,Land:FLandData,Discard:FDiscardData,singleID:selectedEWElID,ModelState:ModelState}
+        // GroupTData用于后端生成GroupID，数据库中的很多表没有存功能群组的名字，而是ID
+        :{ModelState:ModelState,ModifyData:ModifyData,singleID:selectedEWElID,Group:GroupTData,Fleet:Fleet}
       }).then(response=>{ 
-        message.destroy("Mloading")
-        console.log(response)
-        // 模型平衡与否 已极不平衡时的功能组名称
-        status = response.data.status
-        statusname = response.data.statusname.toString()
-        message.success(`计算完成！！！`);
-        setEcopathOutputData(response.data.BasicEst)
-        setGraphData(response.data.Graph)
+        if(ModelState==="Start" || ModelState==="Modify"){
+          message.destroy("Mloading")
+          // console.log(response)
+          status = response.data.status
+          // [1,2,3,4,5,6,7,8,9,0]  toString()把数组转换为字符串  “1,2,3,4,5,6,7,8,9,0”
+          statusname = response.data.statusname.toString()
+          message.success(`计算完成！！！`);
+          setEcopathOutputData(response.data.BasicEst)
+          setGraphData(response.data.Graph)
+        }
+        else{
+          message.warning("请勿重复点击",0.5)
+        }
+        // 无论如何，执行完一次后将模型状态设为“end”结束
+        setModelState("End")
       })
     }
+
     return (
       <>
         {status==="Balanced"?<Alert message="Success 模型平衡" type="success" showIcon />:<></>}

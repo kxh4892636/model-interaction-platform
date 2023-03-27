@@ -7,7 +7,7 @@ import FisheryDiscard from "./components/FisheryDiscard";
 import EcopathOutput from "./components/EcopathOutput";
 import FlowDiagram from "./components/FlowDiagram";
 import Hydrodynamic from "./components/Hydrodynamic";
-import EWEfish from "./components/EWEfish";
+import EWEModel from "./components/EWEfish";
 import { Navigate } from "react-router-dom";
 
 const routes = [
@@ -48,12 +48,12 @@ const routes = [
     element: <FlowDiagram />,
   },
   {
-    path: "/model/EWEfish",
-    element: <EWEfish />,
+    path: "/model/EWEModel",
+    element: <EWEModel />,
   },
   {
     path: "/",
-    element: <Navigate to="/model/EWEfish" />,
+    element: <Navigate to="/model/EWEModel" />,
   },
 ];
 export default routes;

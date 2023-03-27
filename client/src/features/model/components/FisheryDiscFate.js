@@ -1,7 +1,7 @@
-import { Button,Form, Input, Table } from 'antd';
+import {Form, Input, Table } from 'antd';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { FisheryDiscardFate } from '../store';
-import { FishDiscFateExample } from '../exampledata';
+import { FisheryDiscardFate,RunModelState,ModifyState } from '../store';
+
 // 可编辑表格
 const EditableContext = React.createContext(null);
 const EditableRow = ({ index, ...props }) => {
@@ -20,6 +20,9 @@ const EditableCell = ({
   children,
   dataIndex,
   record,
+  ModifyData,
+  ModifyFuc,
+  ModelState,
   handleSave,
   ...restProps
 }) => {
@@ -40,10 +43,14 @@ const EditableCell = ({
   };
   const save = async () => {
     try {
-      console.log(form.validateFields())
+      // console.log(form.validateFields())
       const values = await form.validateFields();
       // values就是更改后的值
-      console.log(values)
+      // console.log(record,values)
+      const newModifyData = [...ModifyData]
+      newModifyData.push({tablename:"ecopathdiscardfate",attribute:'discardfate',value:parseInt(Object.values(values)[0]),attrgroup:"fleetid",groupname:record.name})
+      ModifyFuc(newModifyData)
+      ModelState("Modify")
       toggleEdit();
       handleSave({
         ...record,
@@ -87,6 +94,10 @@ const EditableCell = ({
 export default function App() {
     const DiscardFateData = FisheryDiscardFate((state) => state.DiscardFateData );
     const setDiscardFateData = FisheryDiscardFate((state) => state.setDiscardFateData );
+    // 与数据库联动的Modify操作
+    const ModifyData = ModifyState((state)=>state.ModifyData)
+    const setModifyData = ModifyState((state)=>state.setModifyData)
+    const setModelState = RunModelState((state)=>state.setState)
     const defaultColumns =[
         {
             title: 'Fleet Name',
@@ -124,12 +135,15 @@ export default function App() {
             editable: col.editable, 
             dataIndex: col.dataIndex,
             title: col.title,
+            ModifyData:ModifyData,
+            ModifyFuc:setModifyData,
+            ModelState:setModelState,
             handleSave,
           }),
         };
       });
     const handleSave = (row) => {
-        console.log("row",row)
+        // console.log("row",row)
         const newData = [...DiscardFateData];
         const index = newData.findIndex((item) => row.key === item.key);
         const item = newData[index];
@@ -148,7 +162,6 @@ export default function App() {
       };
   return (
     <>
-        <Button onClick={()=>{setDiscardFateData(FishDiscFateExample)}} type="primary" style={{marginBottom: 16}}>Add Example</Button>
         <Table
         components={components}
         rowClassName={() => 'editable-row'}

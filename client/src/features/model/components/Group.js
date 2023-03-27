@@ -1,7 +1,7 @@
-import { Form, Input, Table, Button } from 'antd';
+import { Form, Input, Table } from 'antd';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import {Basic} from "../store"
-import { GroupExample } from '../exampledata';
+import {Basic,RunModelState,ModifyState} from "../store"
+
 const EditableContext = React.createContext(null);
 const EditableRow = ({ index, ...props }) => {
   const [form] = Form.useForm();
@@ -19,6 +19,9 @@ const EditableCell = ({
   children,
   dataIndex,
   record,
+  ModifyData,
+  ModifyFuc,
+  ModelState,
   handleSave,
   ...restProps
 }) => {
@@ -42,7 +45,11 @@ const EditableCell = ({
       // console.log(form.validateFields(),"record",record)
       const values = await form.validateFields();
       // values就是更改后的值
-      console.log(values)
+      // console.log(record)
+      const newModifyData = [...ModifyData]
+      newModifyData.push({tablename:"ecopathgroup",attribute:Object.keys(values)[0],value:parseInt(Object.values(values)[0]),attrgroup:"groupname",groupname:record.name})
+      ModifyFuc(newModifyData)
+      ModelState("Modify")
       toggleEdit();
       handleSave({
         ...record,
@@ -87,6 +94,10 @@ const EditableCell = ({
 export default function Group() {
   const GroupTData = Basic((state) => state.GroupTData);
   const setGroupTData = Basic((state) => state.setGroupTData);
+  // 与数据库联动的Modify操作
+  const ModifyData = ModifyState((state)=>state.ModifyData)
+  const setModifyData = ModifyState((state)=>state.setModifyData)
+  const setModelState = RunModelState((state)=>state.setState)
   // const [GroupTData, setGroupTData] = useState([
   //   {
   //     BioAcc: 0,
@@ -132,19 +143,19 @@ export default function Group() {
     },
     {
       title: 'PB', 
-      dataIndex: 'PB',
+      dataIndex: 'prodbiom',
       key: 'PB',
       editable:true
     },
     {
       title: 'QB',
-      dataIndex: 'QB',
+      dataIndex: 'consbiom',
       key: 'QB',
       editable:true
     },
     {
       title: 'EE',
-      dataIndex: 'EE',
+      dataIndex: 'ecoefficiency',
       key: 'EE',
       editable:true
     },
@@ -180,10 +191,10 @@ export default function Group() {
     }
   ];
   const handleSave = (row) => {
-    console.log("row",row)
+    // console.log("row",row)
     const newData = [...GroupTData];
-    console.log("newdata",newData)
-    console.log("GroupTData",GroupTData)
+    // console.log("newdata",newData)
+    // console.log("GroupTData",GroupTData)
     const index = newData.findIndex((item) => row.key === item.key);
     const item = newData[index];
     newData.splice(index, 1, {
@@ -209,22 +220,15 @@ export default function Group() {
         editable: col.editable, 
         dataIndex: col.dataIndex,
         title: col.title,
+        ModifyData:ModifyData,
+        ModifyFuc:setModifyData,
+        ModelState:setModelState,
         handleSave,
       }),
     };
   });
   return (
     <>
-      <Button
-        // onClick={AddFleetExample}
-        type="primary"
-        style={{
-          marginBottom: 16,
-        }}
-        onClick={()=>{setGroupTData(GroupExample)}}
-      >
-        Add Example
-      </Button>
       <Table
         components={components}
         rowClassName={() => 'editable-row'}

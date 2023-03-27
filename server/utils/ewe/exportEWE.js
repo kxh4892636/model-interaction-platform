@@ -3,7 +3,7 @@ var config = {
     host: 'localhost',
     user: 'postgres',
     password:"123456",
-    database:"postgres",
+    database:"model",
     port:5432,
     max: 20,
     idleTimeoutMillis: 30000,
@@ -41,21 +41,23 @@ function deconstruct(Data,dx){
     return {Data:ReturnData,Sql:sqlString.substring(0,sqlString.length-1)}
 }
 // 直接结构了
-function Basic(Group){
+function Basic(Group,singleID){
     let GroupData = []
     let sqlString = ""
     // 解构Group,成[q,w,e,r,t,y,y,u,i,a,d,c,z,'''''''']
     Group.forEach((element,index) => {
         let tmp = []
-        sqlString+=sqlstr(index*10+1,10)
+        sqlString+=sqlstr(index*11+1,11)
         const elKey = Object.keys(element)
+        // 存一个ID，用于全部取出来
+        tmp.push(singleID)
         tmp.push(index+1)
         tmp.push(element.name===null || !elKey.includes('name')?-9999:element.name)
         tmp.push(element.type===null || !elKey.includes('type')?-9999:element.type)
         tmp.push(element.Biomass===null || !elKey.includes('Biomass')?-9999:element.Biomass)
-        tmp.push(element.PB===null || !elKey.includes('PB')?-9999:element.PB)
-        tmp.push(element.QB===null || !elKey.includes('QB')?-9999:element.QB)
-        tmp.push(element.EE===null || !elKey.includes('EE')?-9999:element.EE)
+        tmp.push(element.prodbiom===null || !elKey.includes('prodbiom')?-9999:element.prodbiom)
+        tmp.push(element.consbiom===null || !elKey.includes('consbiom')?-9999:element.consbiom)
+        tmp.push(element.ecoefficiency===null || !elKey.includes('ecoefficiency')?-9999:element.ecoefficiency)
         tmp.push(element.ProdCons===null || !elKey.includes('ProdCons')?-9999:element.ProdCons)
         tmp.push(element.BiomAcc===null || !elKey.includes('BiomAcc')?0:element.BiomAcc)
         tmp.push(element.Unassim===null || !elKey.includes('Unassim')?0.2:element.Unassim)
@@ -64,7 +66,7 @@ function Basic(Group){
     return {Data:GroupData,Sql:sqlString.substring(0,sqlString.length-1)}
 }
 
-function DietComposition(GroupID,Group,Diet,Detritus){
+function DietComposition(GroupID,Group,Diet,Detritus,singleID){
     // 先生成type列表
     let type = []
     Group.forEach(el=>{
@@ -77,6 +79,8 @@ function DietComposition(GroupID,Group,Diet,Detritus){
         // 个循环用的人也很多，但是效率最低（输出的 key 是数组索引），如果遍历的是对象，输出的则是对象的属性名
         for(let key in el){
             let tmp = {}
+            // 存一个ID，用于全部取出来
+            tmp.ID = singleID
             tmp.PredID = PredID
             if(key!="name"&&el[key]!=='NA'&&key!="key"){
                 tmp.RecordID = recordid
@@ -93,7 +97,7 @@ function DietComposition(GroupID,Group,Diet,Detritus){
         // Diet中长度为捕食者的长度，排除了生产者与碎屑
         // 给没有捕食Detritus，强行加一条 diet按数据库设0
         if(!Object.keys(el).includes("Detritus")){
-            Data.push({PredID:PredID,RecordID:recordid,PreyID:GroupID["Detritus"],Diet:0,Detritus:Detritus[GroupID[el.name]-1]["Detritus"]})
+            Data.push({ID:singleID,PredID:PredID,RecordID:recordid,PreyID:GroupID["Detritus"],Diet:0,Detritus:Detritus[GroupID[el.name]-1]["Detritus"]})
             // console.log(recordid)
             // 每push一次，record就加1
             recordid+=1
@@ -106,7 +110,7 @@ function DietComposition(GroupID,Group,Diet,Detritus){
         if(el===1 || el===2){
             // console.log(typeof(el),index)
             // console.log({PredID:GroupID[Detritus[index].name],RecordID:recordid,PreyID:GroupID["Detritus"],Diet:0,Detritus:Detritus[index]["Detritus"]})
-            Data.push({PredID:GroupID[Detritus[index].name],RecordID:recordid,PreyID:GroupID["Detritus"],Diet:0,Detritus:Detritus[index]["Detritus"]})
+            Data.push({ID:singleID,PredID:GroupID[Detritus[index].name],RecordID:recordid,PreyID:GroupID["Detritus"],Diet:0,Detritus:Detritus[index]["Detritus"]})
             // console.log(recordid)
             // 每push一次，record就加1
             recordid+=1
@@ -114,12 +118,14 @@ function DietComposition(GroupID,Group,Diet,Detritus){
     })
     return Data
 }
-function FleetLandDisc(GroupID,FleetID,Land,Discard){
+function FleetLandDisc(GroupID,FleetID,Land,Discard,singleID){
     let Data = []
     let recordid = 0
     for(let i=0;i<Land.length;i++){
         Object.keys(FleetID).forEach(el=>{
             let tmp={}
+            // 存一个ID，用于全部取出来
+            tmp.ID = singleID
             tmp.RecordID = recordid
             tmp.GroupID = GroupID[Land[i].name]
             tmp.FleetID = FleetID[el]
@@ -132,10 +138,12 @@ function FleetLandDisc(GroupID,FleetID,Land,Discard){
     }
     return Data
 }
-function FleetDiscardFate(GroupID,FleetID,DiscardFate){
+function FleetDiscardFate(GroupID,FleetID,DiscardFate,singleID){
     let Data = []
     DiscardFate.forEach(el=>{
         let tmp = {}
+        // 存一个ID，用于全部取出来
+        tmp.ID = singleID
         tmp.GroupID = GroupID["Detritus"]
         tmp.FleetID = FleetID[el.name]
         tmp.FleetName = el.name
@@ -150,163 +158,31 @@ exports.CRUDdatabase = (Group,Fleet,Diet,Detritus,DiscardFate,Land,Discard,num)=
     const GroupID = genID(Group)
     const FleetID = genID(Fleet)
     // 自动解构Group Basic
-    const BasicSql =  Basic(Group)
+    const BasicSql =  Basic(Group,num)
     // Diet (predid,preyid,diet,Detritus) dx 4
-    const DietSql = deconstruct(DietComposition(GroupID,Group,Diet,Detritus),5)
+    const DietSql = deconstruct(DietComposition(GroupID,Group,Diet,Detritus,num),6)
     // FleetLandDisc (Groupid,Fleetid,landing,discards) dx 4
-    const LandDiscSql = deconstruct(FleetLandDisc(GroupID,FleetID,Land,Discard),5)
+    const LandDiscSql = deconstruct(FleetLandDisc(GroupID,FleetID,Land,Discard,num),6)
     // DiscardFate (Groupid,fleetid,Discardfate) dx 3
-    const DiscardFateSql = deconstruct(FleetDiscardFate(GroupID,FleetID,DiscardFate),4)
+    const DiscardFateSql = deconstruct(FleetDiscardFate(GroupID,FleetID,DiscardFate,num),5)
 
     // SQL语句
-    const CGroupTable = `CREATE TABLE IF NOT EXISTS EcopathGroup${num}(
-        GroupID serial NOT NULL PRIMARY KEY,
-        GroupName VARCHAR(50) NOT NULL UNIQUE,
-        Sequence serial NOT NULL,
-        Type NUMERIC NOT NULL,
-        Biomass NUMERIC NOT NULL default -9999,
-        Area NUMERIC NOT NULL default 1,
-        ProdBiom NUMERIC NOT NULL default -9999,
-        ConsBiom NUMERIC NOT NULL default -9999,
-        EcoEfficiency NUMERIC NOT NULL default -9999,
-        OtherMort NUMERIC NOT NULL default -9999,
-        ProdCons NUMERIC NOT NULL default -9999,
-        BiomAcc NUMERIC NOT NULL default 0,
-        BiomAccRate NUMERIC NOT NULL default 0,
-        Unassim NUMERIC NOT NULL default 0.2,
-        DtImports NUMERIC NOT NULL default 0,
-        Export NUMERIC NOT NULL default 0,
-        Catch NUMERIC NOT NULL default 0,
-        ImpVar NUMERIC NOT NULL default 0,
-        GroupIsFish Boolean default True,
-        GroupIsInvert Boolean default True,
-        NonMarketValue NUMERIC NOT NULL default 0,
-        PoolColor VARCHAR(50) NOT NULL default '00000000',
-        Immigration NUMERIC NOT NULL default 0,
-        Emigration NUMERIC NOT NULL default 0,
-        ProdResp NUMERIC NOT NULL default 0,
-        RespCons NUMERIC NOT NULL default 0,
-        RespBiom NUMERIC NOT NULL default 0,
-        Consumption NUMERIC NOT NULL default 0,
-        Production NUMERIC NOT NULL default 0,
-        Unassimilated NUMERIC NOT NULL default 0
-    )`
-    const InsertGroup = `INSERT INTO EcopathGroup${num}(GroupID,GroupName,Type,Biomass,ProdBiom,ConsBiom,EcoEfficiency,ProdCons,BiomAcc,Unassim) VALUES `
-    const CDietTable = `CREATE TABLE IF NOT EXISTS EcopathDiet${num}(
-        PredID integer,
-        RecordID integer PRIMARY KEY,
-        PreyID integer,
-        Diet Numeric,
-        Detritus integer
-    )`
-    const InsertDiet = `INSERT INTO EcopathDiet${num}(PredID,RecordID,PreyID,Diet,Detritus) VALUES `
-    const CCatchTable = `CREATE TABLE IF NOT EXISTS EcopathCatch${num}(
-        RecordID serial NOT NULL PRIMARY KEY,
-        GroupID integer,
-        FleetID integer,
-        Landing Numeric,
-        Discards Numeric
-    )`
-    const InsertCatch = `INSERT INTO EcopathCatch${num}(RecordID,GroupID,FleetID,Landing,Discards) VALUES `
-    const CDFTable = `CREATE TABLE IF NOT EXISTS EcopathDiscardFate${num}(
-        GroupID integer,
-        FleetID integer PRIMARY KEY,
-        FleetName VARCHAR(50),
-        DiscardFate integer
-    )`
-    const InsertDF = `INSERT INTO EcopathDiscardFate${num}(GroupID,FleetID,FleetName,DiscardFate) VALUES `
-
-    // 创建规则，避免重复插入，频繁点击
-    const GroupRule = `
-        create or replace 
-            rule group_insert_ignore as on insert to ecopathgroup${num} 
-        where 
-            exists 
-                (select 1 from ecopathgroup${num} where groupid = new.groupid) 
-            do instead nothing; `
-    const DietRule = `
-        create or replace 
-            rule diet_insert_ignore as on insert to ecopathdiet${num} 
-        where 
-            exists 
-                (select 1 from ecopathdiet${num} where recordid = new.recordid) 
-            do instead nothing; `
-    const CatchRule = `
-        create or replace 
-            rule catch_insert_ignore as on insert to ecopathcatch${num} 
-        where 
-            exists 
-                (select 1 from ecopathcatch${num} where recordid = new.recordid) 
-            do instead nothing; `
-    const DFhRule = `
-        create or replace 
-            rule df_insert_ignore as on insert to ecopathdiscardfate${num} 
-        where 
-            exists 
-                (select 1 from ecopathdiscardfate${num} where fleetid = new.fleetid) 
-            do instead nothing; `
+    const InsertGroup = `INSERT INTO EcopathGroup(ID,GroupID,GroupName,Type,Biomass,ProdBiom,ConsBiom,EcoEfficiency,ProdCons,BiomAcc,Unassim) VALUES `
+    const InsertDiet = `INSERT INTO EcopathDiet(ID,PredID,RecordID,PreyID,Diet,Detritus) VALUES `
+    const InsertCatch = `INSERT INTO EcopathCatch(ID,RecordID,GroupID,FleetID,Landing,Discards) VALUES `
+    const InsertDF = `INSERT INTO EcopathDiscardFate(ID,GroupID,FleetID,FleetName,DiscardFate) VALUES `
 
     const database = pool.connect().then((client) => {
         return client
-        // 创建Group表
-          .query(CGroupTable).
-          then(()=>{
-        // 创建Diet表
-            client.query(CDietTable, (err, res) => {
-                if (err) {console.log(err)};
-                // client.release()
-                console.log("Diet表创建")
-            })
-        // 创建FleetCatch表
-          }).then(()=>{
-            client.query(CCatchTable, (err, res) => {
-                if (err) {console.log(err)};
-                // client.release()
-                console.log("Catch表创建")
-            })
-        // 创建FleetDiscardFate表
-          }).then(()=>{
-            client.query(CDFTable, (err, res) => {
-                if (err) {console.log(err)};
-                // client.release()
-                console.log("Fate表创建")
-            })
-          }).then(()=>{
-            // 加规则Group
-            client.query(GroupRule, (err, res) => {
-                if (err) {console.log(err)};
-                // client.release()
-                console.log("Group规则创建")
-            })
-          }).then(()=>{
-            // 加规则Diet
-            client.query(DietRule, (err, res) => {
-                if (err) {console.log(err)};
-                // client.release()
-                console.log("Diet规则创建")
-            })
-          }).then(()=>{
-            // 加规则Catch
-            client.query(CatchRule, (err, res) => {
-                if (err) {console.log(err)};
-                // client.release()
-                console.log("Catch规则创建")
-            })
-          }).then(()=>{
-            // 加规则DF
-            client.query(DFhRule, (err, res) => {
-                if (err) {console.log(err)};
-                // client.release()
-                console.log("DF规则创建")
-            })
-          }).then(()=>{
-            // 插入Group数据
-            client.query(InsertGroup+BasicSql.Sql,BasicSql.Data, (err, res) => {
-                if (err) {console.log(err)};
-                // client.release()
-                console.log("插入Group数据")
-            })
-          }).then(()=>{
+                // 插入Group数据
+            .query(`INSERT INTO ewecase(ID) VALUES ($1)`,[num])
+            .then(()=>{
+                client.query(InsertGroup+BasicSql.Sql,BasicSql.Data,(err, res) => {
+                    if (err) {console.log(err)};
+                    // client.release()
+                    console.log("插入Group数据")
+                })
+            }).then(()=>{
             // 插入Diet数据
             client.query(InsertDiet+DietSql.Sql,DietSql.Data, (err, res) => {
                 if (err) {console.log(err)};
@@ -337,6 +213,64 @@ exports.CRUDdatabase = (Group,Fleet,Diet,Detritus,DiscardFate,Land,Discard,num)=
     return database
 }
 
+exports.ModifyDatabase = (ModifyData,singleID,Group,Fleet)=>{
+    let returndata
+    let querysql = ""
+    const GroupID = genID(Group)
+    const FleetID = genID(Fleet)
+    ModifyData.forEach((el,index)=>{
+        // 生成不同的插入语句，具体情况具体分析 
+        if(el.tablename==="ecopathcatch"){
+          el.groupname = GroupID[el.groupname]
+          querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`
+        //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`)
+        }
+        else if(el.tablename==="ecopathdiscardfate"){
+          el.groupname = FleetID[el.groupname]
+          querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`
+        //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`)
+        }
+        else if(el.tablename==="ecopathdiet"){
+          el.groupname1 = GroupID[el.groupname1]
+          el.groupname2 = GroupID[el.groupname2]
+          querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup1}='${el.groupname1}' and ${el.attrgroup2}='${el.groupname2}'`
+        //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup1}='${el.groupname1}' and ${el.attrgroup2}='${el.groupname2}'`)
+        }
+        else{
+          // ecopathgroup的情况
+          querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`
+        //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`)
+        }
+
+        // 执行到最后一个sql语句的时候，需要返回一个promise对象用于下一步操作是
+        if(index+1===ModifyData.length){
+            returndata =         
+            pool.query(querysql)
+            .then((res) => {
+                // console.log('user:', Object.keys(res))
+                console.log("")
+            })
+            .catch((err) =>
+                setImmediate(() => {
+                    throw err
+                })
+            )
+        }
+        else{
+            pool.query(querysql)
+            .then((res) => {
+                // console.log('user:', Object.keys(res))
+                console.log("")
+            })
+            .catch((err) =>
+                setImmediate(() => {
+                    throw err
+                })
+            )
+        }
+    })
+    return returndata
+}
 
 // 对结果的处理也放在了后端，前端接收到数据直接设置状态就好了
 exports.HandleReturn = (Basic,InputFlag)=>{

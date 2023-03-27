@@ -9,9 +9,9 @@ function HandleGroup(data){
       tmp.name = element.GroupName
       tmp.type = element.Type
       if(element.Biomass !== -9999){tmp.Biomass = element.Biomass }
-      if(element.ProdBiom !== -9999){tmp.PB = element.ProdBiom }
-      if(element.ConsBiom !== -9999){tmp.QB = element.ConsBiom }
-      if(element.EcoEfficiency !== -9999){tmp.EE = element.EcoEfficiency }
+      if(element.ProdBiom !== -9999){tmp.prodbiom = element.ProdBiom }
+      if(element.ConsBiom !== -9999){tmp.consbiom = element.ConsBiom }
+      if(element.EcoEfficiency !== -9999){tmp.ecoefficiency = element.EcoEfficiency }
       if(element.ProdCons !== -9999){tmp.ProdCons = element.ProdCons }
       tmp.BiomAcc = element.BiomAcc
       tmp.Unassim = element.Unassim

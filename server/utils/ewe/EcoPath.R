@@ -27,7 +27,7 @@ new.function <- function(DetritusID,rawlength,Data) {
 	return(returndata)
 }
  
-
+# Rscript EcoPath.R CZCY
 
 
 conn = dbDriver("PostgreSQL") 
@@ -35,12 +35,12 @@ conn = dbDriver("PostgreSQL")
 con <- dbConnect(conn ,
                  host = "localhost", #主机名，默认localhost
                  port = '5432', #端口号，默认5432
-                 dbname = 'postgres',  #数据库
+                 dbname = 'model',  #数据库
                  user = 'postgres', #用户名
-                 password = '123456') #安装的时候设的postgresql的密码
+                 password = '1216') #安装的时候设的postgresql的密码
 
 #SQL操作: 这里引号里写SQL代码  GroupBasic
-re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathgroup%s",args[1]))
+re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathgroup where id=%s",args[1]))
 #保存数据
 Group <- dbFetch(re) 
 #diag是列表，其中的一列是连成一条的数据，需要unlist解开，并转成vector
@@ -48,14 +48,14 @@ Group <- dbFetch(re)
 #清空re值，以便下次使用
 dbClearResult(re)
 
-groups = as.vector(unlist(Group[2]))
+groups = as.vector(unlist(Group[3]))
 # 用于判断是否需要对Detritus的顺序进行调整，Rpath这个库对Detritus的顺序还有要求，要处于 生物+detritus+discard+舰船(Fleet)
 # Flag在basic diet catch中用到了
 Flag = groups[length(groups)] != "Detritus"
 FlagID = which(groups=="Detritus")
 GroupNum = length(groups)
-type = as.vector(unlist(Group[4]))
-GroupID = as.vector(unlist(Group[1]))
+type = as.vector(unlist(Group[5]))
+GroupID = as.vector(unlist(Group[2]))
 # 使用which这种方法将捕食者的名字全跳出来
 PredName = groups[which(type==0)]
 PredNameIndex = GroupID[which(type==0)]
@@ -65,70 +65,69 @@ PreyNum = length(groups[which(type==1)])
 InputFlag = list()
 
 # SQL操作 Basic属性
-biomass = as.vector(unlist(Group[5]))
+biomass = as.vector(unlist(Group[6]))
 #NA在R语言中好像是不可以进行比较的，因此要放在前头
 InputFlag[[1]] = groups[which(biomass == -9999)]
 biomass[which(biomass == -9999)] <- NA
-pb = as.vector(unlist(Group[7]))
+pb = as.vector(unlist(Group[8]))
 InputFlag[[2]] = groups[which(pb == -9999)]
 pb[which(pb == -9999)] <- NA
-qb = as.vector(unlist(Group[8]))
+qb = as.vector(unlist(Group[9]))
 InputFlag[[3]] = groups[which(qb == -9999)]
 qb[which(qb == -9999)] <- NA
-ee = as.vector(unlist(Group[9]))
+ee = as.vector(unlist(Group[10]))
 InputFlag[[4]] = groups[which(ee == -9999)]
 ee[which(ee == -9999)] <- NA
-prodcons = as.vector(unlist(Group[11]))
+prodcons = as.vector(unlist(Group[12]))
 InputFlag[[5]] = groups[which(prodcons == -9999)]
 prodcons[which(prodcons == -9999)] <- NA
-bioacc = as.vector(unlist(Group[12]))
-unassim = as.vector(unlist(Group[14]))
+bioacc = as.vector(unlist(Group[13]))
+unassim = as.vector(unlist(Group[15]))
 # 赋予名字，方便之后变json对象
 names(InputFlag) = c("biomassInputFlag","pbInputFlag","qbInputFlag","eeInputFlag","prodconsInputFlag")
 
 # SQL操作 Diet
-re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathdiet%s",args[1]))
+re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathdiet where id=%s ",args[1]))
 #保存数据
 Diet <- dbFetch(re)
 #清空re值，以便下次使用
 dbClearResult(re)
-pred <- as.vector(unlist(Diet[1]))
-prey <- as.vector(unlist(Diet[3]))
-diet <- as.vector(unlist(Diet[4]))
+pred <- as.vector(unlist(Diet[2]))
+prey <- as.vector(unlist(Diet[4]))
+diet <- as.vector(unlist(Diet[5]))
 
 
 # SQL操作 FleetCatah
-re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathcatch%s",args[1]))
+re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathcatch where id=%s",args[1]))
 #保存数据
 Catch <- dbFetch(re)
 #清空re值，以便下次使用
 dbClearResult(re)
-CatchGroupid = as.vector(unlist(Catch[2]))
-CatchFleetid = as.vector(unlist(Catch[3]))
-CatchLand = as.vector(unlist(Catch[4]))
-CatchDiscard = as.vector(unlist(Catch[5]))
+CatchGroupid = as.vector(unlist(Catch[3]))
+CatchFleetid = as.vector(unlist(Catch[4]))
+CatchLand = as.vector(unlist(Catch[5]))
+CatchDiscard = as.vector(unlist(Catch[6]))
 
 # SQL操作 FleetDiscardFate
-re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathdiscardfate%s",args[1]))
+re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathdiscardfate where id=%s",args[1]))
 #保存数据
 DiscardFate <- dbFetch(re)
 discard = rep(0,GroupNum)
 #清空re值，以便下次使用
 dbClearResult(re)
-fleetname = as.vector(unlist(DiscardFate[3]))
-fleetDiscardF = as.vector(unlist(DiscardFate[4]))
+fleetname = as.vector(unlist(DiscardFate[4]))
+fleetDiscardF = as.vector(unlist(DiscardFate[5]))
 FleetNum = length(fleetname)
 
 # SQL操作 找到Diet中Detritus一列，preyid=21
-re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathdiet%s where preyid=%s order by predid",args[1],GroupID[which(groups=="Detritus")]))
+re <- dbSendQuery(con, sprintf("SELECT * FROM ecopathdiet where id=%s and preyid=%s order by predid",args[1],GroupID[which(groups=="Detritus")]))
 #保存数据
 Detritus <- dbFetch(re)
 # 1:Discards 加上Fleet的数量
-detritus = as.vector(unlist(Detritus[5]))
+detritus = as.vector(unlist(Detritus[6]))
 
 #清空re值，以便下次使用
 dbClearResult(re)
-
 
 # 先处理Group Basic Input 中的基本输入
 for(i in 1:(length(fleetname)+1)){

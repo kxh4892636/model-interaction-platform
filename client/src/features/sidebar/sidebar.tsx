@@ -92,7 +92,7 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
                   if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "none");
                   else;
                 });
-                navigate("/model/EWEfish");
+                navigate("/model/EWEModel");
               } else {
                 layerChecked.forEach((key) => {
                   if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "visible");

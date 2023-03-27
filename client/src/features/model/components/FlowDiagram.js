@@ -26,7 +26,7 @@ const colorpanel = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba
 export default function App() {
 const graph = FlowDiagram((state) => state.Graph)
 useEffect(()=>{
-  console.log(graph,graph.length)
+  // console.log(graph,graph.length)
   var chartDom = document.getElementById('main');
   var myChart = echarts.init(chartDom);
   var option
