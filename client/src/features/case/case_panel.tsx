@@ -28,8 +28,6 @@ const CaseSearch = styled(Search)`
   padding: 0 8px;
 `;
 
-type AppProps = { url: string };
-
 /**
  * @description CasePanel components
  * @module CasePanel
@@ -37,13 +35,13 @@ type AppProps = { url: string };
  * @param the url that get case list
  * @export module: CasePanel
  */
-const CasePanel = ({ url }: AppProps) => {
+const CasePanel = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [selectedItem, setselectedItem] = useState("s");
   const [data, setData] = useState<CaseListData[]>([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3456" + url).then((res) => {
+    axios.get("http://localhost:3456/case/list").then((res) => {
       const data = (res.data as { [props: string]: any }[]).map((value) => {
         return {
           key: value.id,
@@ -55,7 +53,7 @@ const CasePanel = ({ url }: AppProps) => {
       });
       setData(data);
     });
-  }, [url]);
+  }, []);
 
   return (
     <PanelContainer>
@@ -69,7 +67,7 @@ const CasePanel = ({ url }: AppProps) => {
       ) : (
         <></>
       )}
-      <PanelTitleContainer>案例面板</PanelTitleContainer>
+      <PanelTitleContainer>项目面板</PanelTitleContainer>
       <PanelToolsContainer>
         <PanelToolContainer>
           <CaseSearch

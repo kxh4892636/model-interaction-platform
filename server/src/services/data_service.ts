@@ -2,12 +2,16 @@ import fs from "fs";
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import { dataFoldURL } from "../../config/global_data";
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import { resolve } from "path";
-import { title } from "process";
 
 
 const prisma = new PrismaClient();
+
+const getList = async () => {
+  const data = await prisma.data.findMany();
+  return data;
+};
 
 const getDetail = async (id: string) => {
   const info = await prisma.data.findUnique({
@@ -55,8 +59,8 @@ const getUVET = async (id: string, type: string, currentImage: number) => {
   });
   if (!info) return "can't find data by id";
   else if (type === "description")
-    return dataFoldURL + info.transform[0] + "/flow_field_description.json";
-  else return dataFoldURL + info.transform[0] + `/${type}_${currentImage}.png`;
+    return dataFoldURL + info.transform[0] + `/flow_field_description_${info.transform[2]}.json`;
+  else return dataFoldURL + info.transform[0] + `/${type}_${info.transform[2]}_${currentImage}.png`;
 };
 
 const getImage = async (id: string) => {
@@ -96,30 +100,60 @@ const uploadData = async (file: Express.Multer.File) => {
   const id = crypto.randomUUID();
   // get type and style of data
   const output = execSync(
-    `python ${
-      resolve("./").split("\\").join("/") + "/utils/python/get_data_type_and_style.py"
+    `conda activate gis && python ${
+      resolve("./").split("\\").join("/") + "/utils/get_data_type_and_style.py"
     } ${filePath}`
   );
   const [type, style] = output.toString().trimEnd().split(",");
   let transform: string[] = [];
   let extent: number[] = [];
-  console.log(type, style);
+
   // generate transform filed
   if (type === "mesh") {
     const fileName = file.filename.split(".")[0];
-    const transformPath = filePath
-      .replace(file.filename, `${fileName}_transform.png`)
-      .replace("\\temp\\input", "\\temp\\transform\\mesh");
-    transform.push(transformPath.split("\\").join("/").split(dataFoldURL)[1]);
-    // generate transformed png of mesh
-    const output = execSync(
-      `python ${
+    const csvPath = filePath
+      .replace(file.filename, `${fileName}.csv`)
+      .replace("\\temp\\input", "\\temp\\model\\hydrodynamics\\transform\\mesh");
+    const maskPath = filePath
+      .replace(file.filename, `${fileName}.shp`)
+      .replace("\\temp\\input", "\\temp\\model\\hydrodynamics\\transform\\mask");
+    const pngPath = filePath
+      .replace(file.filename, `${fileName}.png`)
+      .replace("\\temp\\input", "\\temp\\model\\hydrodynamics\\transform\\mesh");
+    transform.push(pngPath.split("\\").join("/").split(dataFoldURL)[1]);
+    // generate csv from mesh
+    execSync(
+      `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
-        "/utils/python/mesh_transform.py" +
+        "/utils/hydrodynamics/mesh2csv.py" +
         " " +
         filePath +
         " " +
-        transformPath
+        csvPath
+      }`
+    );
+    // generate mask from csv
+    execSync(
+      `conda activate gis && python ${
+        resolve("./").split("\\").join("/") +
+        "/utils/hydrodynamics/mesh2mask.py" +
+        " " +
+        csvPath +
+        " " +
+        maskPath
+      }`
+    );
+    // generate png from csv and mask
+    const output = execSync(
+      `conda activate gis && python ${
+        resolve("./").split("\\").join("/") +
+        "/utils/hydrodynamics/mesh2png.py" +
+        " " +
+        csvPath +
+        " " +
+        pngPath +
+        " " +
+        maskPath
       }`
     );
     // get extent of mesh
@@ -130,8 +164,6 @@ const uploadData = async (file: Express.Multer.File) => {
       .replace(")", "")
       .split(",")
       .map((value) => Number(value));
-  } else if (type === "shp") {
-    // TODO 以后写
   } else if (type === "uvet") {
     // TODO 以后写
   }
@@ -142,15 +174,26 @@ const uploadData = async (file: Express.Multer.File) => {
       data: filePath.split("\\").join("/").split(dataFoldURL)[1],
       id: id,
       temp: true,
-      title: file.filename.split(".")[0],
+      title: file.filename.split("_")[0],
       type: type,
       style: style,
       extent: extent,
       transform: transform,
+      progress: [1, 1],
     },
   });
 
   return id;
 };
 
-export default { getDetail, getImage, getJSON, getMesh, getShp, getUVET, getText, uploadData };
+export default {
+  getList,
+  getDetail,
+  getImage,
+  getJSON,
+  getMesh,
+  getShp,
+  getUVET,
+  getText,
+  uploadData,
+};

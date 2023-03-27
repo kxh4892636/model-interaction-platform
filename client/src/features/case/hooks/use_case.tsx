@@ -22,14 +22,11 @@ const useCase = () => {
   const dataActions = useData();
   const getKeys = useKeys();
 
-  const addCase = (id: string) => {
-    axios.get("http://localhost:3456/case/case?id=" + id).then(async (res) => {
+  const addCase = async (id: string) => {
+    await axios.get("http://localhost:3456/case/case?id=" + id).then(async (res) => {
       const caseData: ServerCase = res.data;
-      caseData.data.forEach((key) => {
-        dataActions.addDataToMap(key);
-      });
       const id = crypto.randomUUID();
-
+      // add data of case to layer tree
       let groupLayer: Layer = {
         title: caseData.title,
         key: id,
@@ -59,6 +56,10 @@ const useCase = () => {
           addLayer(groupLayer);
         }
       }
+      // add data of case to map
+      caseData.data.forEach((key) => {
+        dataActions.addDataToMap(key);
+      });
     });
   };
 

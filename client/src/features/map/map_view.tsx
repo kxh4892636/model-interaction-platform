@@ -49,7 +49,6 @@ const MapView = () => {
     // update map center position
     mapRef.current.on("move", () => {
       setPosition([
-        // NOTE ts ! 和 ? 的使用
         Number(mapRef.current!.getCenter().lng.toFixed(4)),
         Number(mapRef.current!.getCenter().lat.toFixed(4)),
         Number(mapRef.current!.getZoom().toFixed(2)),

@@ -1,14 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
+import fs from "fs";
 import path from "path";
+import { dataFoldURL } from "../config/global_data";
 
 const prisma = new PrismaClient();
 
 const main = async () => {
-  const id = crypto.randomUUID();
+  // const id = crypto.randomUUID();
   // const data = await prisma.data.findMany({
   //   where: {
-  //     temp: false,
+  //     temp: true,
   //   },
   // });
   // const keys = data.map((value) => value.id);
@@ -16,53 +18,58 @@ const main = async () => {
   //   data: {
   //     author: "kxh",
   //     count: 0,
-  //     description: "示例数据描述",
+  //     description: "水动力模型案例",
   //     id: id,
   //     image: "",
-  //     time: new Date("2023-3-8"),
-  //     title: "UVET流场可视化示例",
-  //     data: ["71f67d10-555b-469a-acc0-8cacec14bb67"],
-  //     tags: ["示例数据"],
+  //     time: new Date("2023-3-22"),
+  //     title: "水动力模型案例",
+  //     data: keys,
+  //     tags: ["水动力模型", "案例"],
   //   },
   // });
   // await prisma.data.create({
   //   data: {
-  //     data: "/case/test/output/uvet.dat",
+  //     data: "/case/hydrodynamics_result/model/hydrodynamics/model/uvet.dat",
   //     id: id,
-  //     temp: false,
-  //     title: "uvet",
-  //     type: "uvet",
-  //     extent: [119.5498985092223, 120.21745091964257, 26.34525050928077, 26.972279065373204],
-  //     style: "flow",
-  //     transform: ["/case/test/transform/uvet/uv", "120"],
-  //   },
-  // });
-  await prisma.data.deleteMany({
-    where: {
-      temp: true,
-    },
-  });
-
-  // await prisma.data.deleteMany({
-  //   where: {
   //     temp: true,
+  //     title: "uvet水深数据",
+  //     type: "uvet",
+  //     extent: [119.5498985092223, 120.2174509196426, 26.34525050928077, 26.9722790653732],
+  //     style: "raster",
+  //     transform: ["/case/hydrodynamics_result/model/hydrodynamics/transform/uvet/petak", "120"],
+  //     progress: [120, 120],
   //   },
   // });
+  // console.log(keys.length);
   // await prisma.case.updateMany({
-  //   where: { id: "3c2af655-bb70-472a-9f83-97bbe163e4fa" },
+  //   where: {
+  //     id: "0d74ad15-910b-49d6-bdd2-dfd50fe2cb22",
+  //   },
   //   data: {
-  //     data: [
-  //       "d1e7f07e-93ea-47dc-af53-33dcfdf1e167",
-  //       "0659274e-9dbb-4e14-891a-bec7e47bfd13",
-  //       "a07ad02e-a96c-4e6b-9de2-ca2ec85a4157",
-  //       "e73599fb-fa3f-4816-ae28-a45f0570eabe",
-  //       "35b0d729-2322-4fd4-b959-2ba10250d6f6",
-  //       "e4e3849b-2cee-4ef9-81ae-293a3ab7f48b",
-  //     ],
+  //     data: keys,
   //   },
   // });
-  const info = await prisma.data.findMany();
-  console.log(info);
+  // await prisma.data.updateMany({
+  //   where: {
+  //     // id: "0825e77e-a3db-4048-a594-b79f91765c4f",
+  //   },
+  //   data: {
+  //     temp: false,
+  //   },
+  // });
+  // await prisma.$queryRaw`UPDATE data SET data = replace(data,'/temp/','/case/hydrodynamics_result/') WHERE temp = true`;
+  // await prisma.data.deleteMany({
+  //   where: { temp: true },
+  // });
+  // await prisma.case.deleteMany({
+  //   where: {},
+  // });
+  // prisma.$queryRaw``;
+  const info = await prisma.data.findMany({
+    // where: { id: "a3e062a1-d8ac-4ad1-ad46-ea9394f09400" },
+  });
+  // console.log(info);
+  console.log(info.length);
   // npx ts-node prisma.ts
 };
 
@@ -76,3 +83,15 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+console.log(dataFoldURL);
+
+const descriptionPath = `${dataFoldURL}/temp/model/hydrodynamics/transform/uvet/uv/flow_field_description.json`;
+console.log(descriptionPath);
+fs.rename(
+  descriptionPath,
+  descriptionPath.replace(`flow_field_description.json`, `flow_field_description_${123456}.json`),
+  () => {}
+);
+console.log(
+  descriptionPath.replace(`flow_field_description.json`, `flow_field_description_${123456}.json`)
+);

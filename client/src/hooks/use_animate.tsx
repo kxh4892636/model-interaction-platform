@@ -35,7 +35,6 @@ const useAnimate = () => {
     const intervalFunc = isInterval
       ? setInterval(() => {
           updateAnimatedStatus(id, "currentCount", currentCount);
-          // NOTE
           dataAction
             .getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!
             .then((res) => {
@@ -68,7 +67,6 @@ const useAnimate = () => {
     });
   };
 
-  // NOTE 可选参数的思想, 如何实时更新
   const continueAnimate = (id: string, current?: number, start?: number, end?: number) => {
     animatedStatus.forEach((value) => {
       if (value.key === id && value.isInterval) {
@@ -81,7 +79,6 @@ const useAnimate = () => {
 
         const intervalFunc = setInterval(() => {
           updateAnimatedStatus(id, "currentCount", currentCount);
-          // NOTE
           dataAction
             .getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!
             .then((res) => {
@@ -93,7 +90,7 @@ const useAnimate = () => {
             (currentCount + 1) % (endValue + 1) === 0
               ? startValue
               : (currentCount + 1) % (endValue + 1);
-        }, 150);
+        }, 200);
         updateAnimatedStatus(id, "intervalFunction", intervalFunc);
       } else;
     });

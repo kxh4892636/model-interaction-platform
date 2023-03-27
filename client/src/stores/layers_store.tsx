@@ -26,7 +26,6 @@ interface LayersStore {
  * @Author xiaohan kong
  * @export module: useLayerStore
  */
-// NOTE get
 const useLayersStore = create<LayersStore>((set, get) => ({
   layers: [],
   setLayers: (value) => set({ layers: value }),

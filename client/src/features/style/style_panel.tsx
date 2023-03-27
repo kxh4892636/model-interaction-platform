@@ -8,7 +8,7 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import { Button, Slider, Select } from "antd";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PanelContainer,
   PanelContentContainer,
@@ -40,12 +40,28 @@ const StylePanel = () => {
   const selectOptions = createSelectOptions(layers);
   const getSlideRange = useSliderRange();
   const [range, setRange] = useState(getSlideRange(layerSelected));
-  const [sliderValue, setSliderValue] = useState<[number, number]>([0, 100]);
+  const getSlideValue = useSliderValue();
+  const [sliderValue, setSliderValue] = useState<[number, number]>(getSlideValue(layerSelected));
   const getAnimatedStatus = useAnimatedStatusStore((state) => state.getAnimatedStatus);
   const updateAnimatedStatus = useAnimatedStatusStore((state) => state.updateAnimatedStatus);
   const animateActions = useAnimate();
   const map = useMapStore((state) => state.map);
   const dataActions = useData();
+
+  useEffect(() => {
+    // Update the value of slide when the value of selected is changed
+    if (!layerSelected) return;
+    else;
+    const layer = getLayer(layerSelected!.key);
+    if (layer) {
+      if (layer.type !== "uvet") return;
+      else;
+      const range = getSlideRange(layer);
+      setRange(range);
+      setSliderValue(getSlideValue(layer));
+    } else;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layerSelected]);
 
   return (
     <PanelContainer>
@@ -58,16 +74,9 @@ const StylePanel = () => {
             value={layerSelected ? layerSelected.title : undefined}
             style={{ margin: "6px 12px" }}
             onChange={(key) => {
-              // TODO
+              // Update layerSelected when the value of selected is changed
               const layer = getLayer(key);
-              if (layer) {
-                setLayersSelected(layer);
-                if (layer.type !== "uvet") return;
-                else;
-                const range = getSlideRange(layer);
-                setRange(range);
-                setSliderValue(range);
-              }
+              setLayersSelected(layer);
             }}
             options={selectOptions}
           />
@@ -79,12 +88,13 @@ const StylePanel = () => {
               range
               min={range[0]}
               max={range[1]}
-              step={10}
-              defaultValue={range}
+              step={1}
+              defaultValue={sliderValue}
               value={sliderValue}
               tooltip={{ open: true, placement: "bottom" }}
               style={{ margin: "6px 18px" }}
               onChange={(value) => {
+                // Update the value of slider
                 setSliderValue(value);
               }}
             />
@@ -95,7 +105,7 @@ const StylePanel = () => {
       </PanelContentContainer>
       <PanelToolsContainer>
         <PanelToolContainer>
-          <Button type="primary" danger>
+          <Button type="primary" danger style={{ marginBottom: "10px" }}>
             取消
           </Button>
         </PanelToolContainer>
@@ -105,6 +115,7 @@ const StylePanel = () => {
             onClick={() => {
               console.log(layerSelected);
             }}
+            style={{ marginBottom: "10px" }}
           >
             应用
           </Button>
@@ -112,18 +123,20 @@ const StylePanel = () => {
         <PanelToolContainer>
           <Button
             type="primary"
+            style={{ marginBottom: "10px" }}
             onClick={() => {
+              // Update the animatedStatus of selected layer
               const style = layerSelected!.layerStyle;
-              const startValue = sliderValue[0];
-              const endValue = sliderValue[1];
+              const startValue = sliderValue[0] - 1;
+              const endValue = sliderValue[1] - 1;
               const key = layerSelected!.key;
               const currentCount = getAnimatedStatus(key)!.currentCount;
               const currentCountNow =
-                currentCount < endValue && currentCount > startValue
+                (currentCount < endValue && currentCount > startValue
                   ? currentCount
                   : currentCount < startValue
                   ? startValue
-                  : endValue;
+                  : endValue) - 1;
               if (style === "raster") {
                 animateActions.pauseAnimate(key);
                 updateAnimatedStatus(key, "startValue", startValue);
@@ -131,14 +144,27 @@ const StylePanel = () => {
                 updateAnimatedStatus(key, "currentCount", currentCountNow);
                 animateActions.continueAnimate(key, currentCountNow, startValue, endValue);
               } else if (style === "flow") {
+                // Re-render the flow field
+                updateAnimatedStatus(key, "startValue", startValue);
+                updateAnimatedStatus(key, "endValue", endValue);
+                updateAnimatedStatus(key, "currentCount", currentCountNow);
                 dataActions.getDataDetail(key).then((res) => {
-                  map!.removeLayer(key);
                   let flowFieldManager = new FlowFieldManager(key, res, {
                     startValue: startValue,
                     endValue: endValue,
                   });
-                  const flowLayer = new FlowLayer(key, "2d", flowFieldManager);
-                  map!.addLayer(flowLayer);
+                  // Hide layer if it isn't showed
+                  if (map!.getLayoutProperty(key, "visibility") === "none") {
+                    map!.removeLayer(key);
+                    const flowLayer = new FlowLayer(key, "2d", flowFieldManager);
+                    map!.addLayer(flowLayer);
+                    map!.setLayoutProperty(key, "visibility", "none");
+                  } else {
+                    map!.removeLayer(key);
+                    const flowLayer = new FlowLayer(key, "2d", flowFieldManager);
+                    map!.addLayer(flowLayer);
+                    map!.setLayoutProperty(key, "visibility", "visible");
+                  }
                 });
               } else;
             }}
@@ -153,7 +179,11 @@ const StylePanel = () => {
 
 export default StylePanel;
 
-// create the options of Select
+/**
+ * Create the options of Select
+ * @param layers All layer of layer tree
+ * @returns selectOptions
+ */
 const createSelectOptions = (layers: Layer[]) => {
   let selectOptions: object[] = [];
   const loop = (data: Layer[], callback: (value: Layer, index: number, data: Layer[]) => void) => {
@@ -171,15 +201,38 @@ const createSelectOptions = (layers: Layer[]) => {
   return selectOptions;
 };
 
-const useSliderRange = () => {
+/**
+ * Get the current range of slider based on the animatedStatus of selected layer
+ * @returns [min, max]
+ */
+const useSliderValue = () => {
   const getAnimatedStatus = useLayersAnimatedStore((state) => state.getAnimatedStatus);
-  const getSliderRange = (layerSelected: Layer | undefined): [number, number] => {
-    if (!layerSelected) return [0, 99];
+  const getSliderValue = (layerSelected: Layer | undefined): [number, number] => {
+    if (!layerSelected) return [1, 100];
     else;
     const key = layerSelected.key;
     const animatedStatus = getAnimatedStatus(key);
-    if (animatedStatus) return [0, animatedStatus.imageCount - 1];
-    else return [0, 99];
+
+    if (animatedStatus) return [animatedStatus.startValue + 1, animatedStatus.endValue + 1];
+    else return [1, 100];
+  };
+
+  return getSliderValue;
+};
+
+/**
+ * Get the initial range of slider based on  the animatedStatus of selected layer
+ * @returns [min, max]
+ */
+const useSliderRange = () => {
+  const getAnimatedStatus = useLayersAnimatedStore((state) => state.getAnimatedStatus);
+  const getSliderRange = (layerSelected: Layer | undefined): [number, number] => {
+    if (!layerSelected) return [1, 100];
+    else;
+    const key = layerSelected.key;
+    const animatedStatus = getAnimatedStatus(key);
+    if (animatedStatus) return [1, animatedStatus.imageCount];
+    else return [1, 100];
   };
 
   return getSliderRange;

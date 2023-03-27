@@ -9,7 +9,13 @@
  */
 
 import styled from "styled-components/macro";
-import { AppstoreOutlined, CloudUploadOutlined, BgColorsOutlined,MediumOutlined } from "@ant-design/icons";
+import {
+  AppstoreOutlined,
+  CloudUploadOutlined,
+  BgColorsOutlined,
+  MediumOutlined,
+  SlackOutlined,
+} from "@ant-design/icons";
 import { LayerOutlined } from "../../components/icons";
 import Sidebar from "../../features/sidebar";
 import useMapPositionStore from "../../stores/map_postion_store";
@@ -20,7 +26,8 @@ import { DataPanel } from "../../features/data";
 import { StylePanel } from "../../features/style";
 
 import { ExchangeFlag } from "../../stores/model";
-import Model from "../../features/model/App"
+import { ModelPanel } from "../../features/model";
+import Model from "../../features/model/App";
 
 const View = styled.div`
   position: relative;
@@ -64,7 +71,7 @@ const Home: React.FC = () => {
   // 侧边栏数据
   const sidebarItemsLeft = [
     {
-      title: "上传",
+      title: "数据",
       id: "data",
       icon: <CloudUploadOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <DataPanel />,
@@ -76,16 +83,16 @@ const Home: React.FC = () => {
       panel: <LayerPanel />,
     },
     {
-      title: "案例",
+      title: "项目",
       id: "case",
       icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
-      panel: <CasePanel url={"/case/list"} />,
+      panel: <CasePanel />,
     },
     {
       title: "模型",
       id: "model",
       icon: <MediumOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
-      panel: <div></div>
+      panel: <Model />,
     },
   ];
 
@@ -95,6 +102,12 @@ const Home: React.FC = () => {
       id: "style",
       icon: <BgColorsOutlined style={{ color: "#262626", fontSize: "24px" }} />,
       panel: <StylePanel />,
+    },
+    {
+      title: "水动力模型",
+      id: "hydrodynamics",
+      icon: <SlackOutlined style={{ color: "#262626", fontSize: "24px" }} />,
+      panel: <ModelPanel title="水动力模型面板" model="hydrodynamics" />,
     },
   ];
 

@@ -57,6 +57,8 @@ type AppProps = {
   theme?: Theme;
 };
 
+// NOTE 不使用路由实现动态菜单思路
+
 /**
  * @description: sidebar component
  * @module Sidebar

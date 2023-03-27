@@ -11,6 +11,7 @@ import express from "express";
 import multer from "multer";
 import dataController from "../controllers/data_controller";
 import { dataFoldURL } from "../../config/global_data";
+import path from "path";
 
 const router = express.Router();
 // NOTE multer
@@ -20,12 +21,17 @@ const upload = multer({
       cb(null, dataFoldURL + "/temp/input");
     },
     filename: (req, file, cb) => {
-      // NOTE 解决中文名乱码
-      cb(null, Buffer.from(file.originalname, "latin1").toString("utf8"));
+      //  解决中文名乱码
+      // NOTE extName
+      const fileName = Buffer.from(file.originalname, "latin1").toString("utf8");
+      const extName = path.extname(fileName);
+      cb(null, path.basename(fileName, extName) + "_" + Date.now().toString() + extName);
     },
   }),
 });
 
+// /data/list
+router.get("/list", dataController.getList);
 // /data/detail
 router.get("/detail", dataController.getDetail);
 // /data/json

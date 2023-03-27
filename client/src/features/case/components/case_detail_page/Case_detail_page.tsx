@@ -3,13 +3,13 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-03-09
+ * @LastEditTime: 2023-03-22
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
 import { CloseOutlined } from "@ant-design/icons";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import styled from "styled-components/macro";
@@ -105,9 +105,9 @@ const CasePage = ({ id, onClose }: AppProps) => {
     axios.get("http://localhost:3456/case/case?id=" + id).then((res) => {
       if (typeof res.data === "object") setData(res.data);
     });
+    console.log(id);
   }, [id]);
 
-  // NOTE marginInlineEnd: "auto" 的机制
   return data ? (
     <CaseContainer>
       <CaseTitleContainer>{data.title}</CaseTitleContainer>
@@ -127,8 +127,9 @@ const CasePage = ({ id, onClose }: AppProps) => {
         <Button
           type="primary"
           style={{ marginInlineStart: "auto", marginInlineEnd: "10px", fontSize: "14px" }}
-          onClick={() => {
-            caseActions.addCase(id);
+          onClick={async () => {
+            await caseActions.addCase(id);
+            message.success("加载项目完成");
           }}
         >
           添加至地图

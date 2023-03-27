@@ -12,7 +12,16 @@ import { Request, Response } from "express";
 import fs from "fs";
 import dataService from "../services/data_service";
 
-// NOTE try catch structure
+// get data list
+const getList = async (req: Request, res: Response) => {
+  try {
+    res.status(200).json(await dataService.getList());
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(error);
+  }
+};
+
 // get meta data of data by key
 const getDetail = async (req: Request, res: Response) => {
   try {
@@ -112,4 +121,14 @@ const uploadData = async (req: Request, res: Response) => {
   }
 };
 
-export default { getDetail, getImage, getJSON, getMesh, getShp, getUVET, getText, uploadData };
+export default {
+  getList,
+  getDetail,
+  getImage,
+  getJSON,
+  getMesh,
+  getShp,
+  getUVET,
+  getText,
+  uploadData,
+};
