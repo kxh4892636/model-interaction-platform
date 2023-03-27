@@ -38,11 +38,15 @@ const ModelPanel = ({ title, model }: AppProps) => {
   const layers = useLayersStore((state) => state.layers);
   const options: SelectProps["options"] = createSelectOptions(layers);
   const dataActions = useData();
+  // NOTE 为什么要加 modelStatus
+  const modelStatus = useModelsStatus((state) => state.modelStatus);
   const addModelStatus = useModelsStatus((state) => state.addModelStatus);
   const getModelStatus = useModelsStatus((state) => state.getModelStatus);
   const updateModelStatus = useModelsStatus((state) => state.updateModelStatus);
+  const removeModelStatus = useModelsStatus((state) => state.removeModelStatus);
   const currentModelStatus = getModelStatus(model);
 
+  // NOTE react 组件渲染两次和 effect 渲染两次的顺序
   useEffect(() => {
     if (getModelStatus(model)) return;
     addModelStatus({
@@ -54,9 +58,9 @@ const ModelPanel = ({ title, model }: AppProps) => {
       percent: 0,
       projKey: null,
       resultKeys: null,
+      pid: null,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   return (
     <PanelContainer>
@@ -121,8 +125,6 @@ const ModelPanel = ({ title, model }: AppProps) => {
             onClick={() => {
               updateModelStatus(model, "isRunning", !currentModelStatus?.isRunning);
               const getPercent = (keys: string[]) => {
-                currentModelStatus?.intervalStore &&
-                  clearInterval(currentModelStatus.intervalStore);
                 const percentInterval = setInterval(async () => {
                   const dataInfo = await dataActions.getDataDetail(keys[0]);
                   const progress = dataInfo.progress;
@@ -144,7 +146,19 @@ const ModelPanel = ({ title, model }: AppProps) => {
                 updateModelStatus(model, "intervalStore", percentInterval);
               };
               if (currentModelStatus?.isRunning) {
-                getPercent(currentModelStatus.resultKeys!);
+                // TODO stop the model
+                clearInterval(currentModelStatus.intervalStore!);
+                removeModelStatus(model);
+                axios({
+                  method: "post",
+                  baseURL: "http://localhost:3456/model/Hydrodynamic",
+                  data: [
+                    currentModelStatus!.paramKeys,
+                    currentModelStatus!.projKey,
+                    currentModelStatus!.boundaryKey,
+                    currentModelStatus.pid,
+                  ],
+                });
               } else {
                 axios({
                   method: "post",
@@ -153,10 +167,13 @@ const ModelPanel = ({ title, model }: AppProps) => {
                     currentModelStatus!.paramKeys,
                     currentModelStatus!.projKey,
                     currentModelStatus!.boundaryKey,
+                    undefined,
                   ],
                 }).then((response) => {
                   if (response.data.status === "success") {
+                    console.log(response);
                     updateModelStatus(model, "resultKeys", response.data.content);
+                    updateModelStatus(model, "pid", response.data.pid);
                     updateModelStatus(model, "isRunning", true);
                     getPercent(response.data.content);
                     message.success("模型开始运行", 10);
@@ -174,12 +191,10 @@ const ModelPanel = ({ title, model }: AppProps) => {
           </Button>
           <Button
             onClick={() => {
+              console.log(modelStatus);
               console.log(currentModelStatus);
-              console.log(currentModelStatus?.paramKeys);
             }}
-          >
-            kkk
-          </Button>
+          ></Button>
         </PanelToolContainer>
       </PanelToolsContainer>
     </PanelContainer>

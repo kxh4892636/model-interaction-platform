@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { dataFoldURL } from "../../config/global_data";
-import fs from "fs";
+import { copyFile, rename } from "fs";
 import path, { resolve } from "path";
 import crypto from "crypto";
-import { exec, execFile, execSync } from "child_process";
-import { stderr, stdout } from "process";
+import { spawn, spawnSync } from "child_process";
 const cs = require("child_process");
 const { query } = require("../../utils/ewe/importEWE");
 const { CRUDdatabase, HandleReturn, FlowDiagram } = require("../../utils/ewe/exportEWE");
@@ -81,10 +80,20 @@ exports.R_test3 = (req: Request, res: Response) => {
 // 水动力模型计算接口
 exports.Hydrodynamic = async (req: Request, res: Response) => {
   try {
-    const body: [string[], string, string] = req.body;
+    const body: [string[], string, string, number?] = req.body;
     const paramKeys = body[0];
     const projKeys = body[1];
     const boundaryKeys = body[2];
+    const type = body[3];
+
+    // transform null
+    if (type) {
+      // NOTE how to kill process tree
+      console.log(-type);
+      spawn(`taskkill /f /t /pid ${type}`, { shell: true });
+
+      return;
+    }
     let keys: string[] = paramKeys;
     projKeys && keys.push(projKeys);
     boundaryKeys && keys.push(boundaryKeys);
@@ -117,7 +126,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         dataFoldURL +
         "/temp/model/hydrodynamics/model/" +
         path.basename(fileInfo.data).replace("_" + timeStamp!, "");
-      fs.copyFile(src, dst, (err) => {
+      copyFile(src, dst, (err) => {
         if (err) throw err;
         else;
       });
@@ -130,7 +139,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       res.status(200).json({ status: "failed", content: "the file is not exist" });
       return;
     } else;
-
+    // create the record fo result
     const petakID = crypto.randomUUID();
     const uvID = crypto.randomUUID();
     const uvetPath = "/temp/model/hydrodynamics/model/uvet.dat";
@@ -156,20 +165,31 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         extent: extent!,
       },
     });
-
+    // run model
     const modelPath = dataFoldURL + "/temp/model/hydrodynamics/model/model.exe";
-    const output = exec(`cd ${path.dirname(modelPath)} && ${modelPath}`, (err, stdout, stderr) => {
-      if (stderr) res.status(200).json({ status: "wrong", content: "params is wrong" });
+    // NOTE spawn format shell detached
+    // NOTE detached 的不好之处
+    // shell = true 的作用, 和 cmd.exe ['/c',...] 的等效替换
+    const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+      shell: true,
     });
+    // const outputModel = spawn(`cmd`, ["/c", `cd ${path.dirname(modelPath)} && ${modelPath}`], {});
+
+    // NOTE 为什么 outputModel.kill() 不生效的原因
+    // 以及 process.kill(pid) 和 (-pid) 的区别以及 (-pid) 不生效的原因(我也不知道)
+
     let currentCount = 0;
-    let num: number;
-
-    output.stdout?.on("data", async (chunk: string) => {
-      console.log(chunk);
-      if (chunk.includes("rnday")) {
-        res.status(200).json({ status: "success", content: [uvID, petakID] });
-        num = Number(chunk.match(/\d*\.\d{1,6}/)![0]) * 24;
-
+    let num: number = 0;
+    outputModel.on("close", () => {
+      if (!num) res.status(200).json({ status: "wrong", content: "params is wrong" });
+    });
+    outputModel.stdout?.on("data", async (chunk) => {
+      const content = chunk.toString();
+      console.log(content);
+      if (content.includes("rnday")) {
+        res.status(200).json({ status: "success", content: [uvID, petakID], pid: outputModel.pid });
+        num = Number(content.match(/\d*\.\d{1,6}/)![0]) * 24;
+        // init the progress of result
         await prisma.data.updateMany({
           where: {
             id: uvID,
@@ -187,7 +207,8 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           },
         });
       } else;
-      if (chunk.includes("nt,it")) {
+      if (content.includes("nt,it")) {
+        // update the progress of result
         currentCount = currentCount + 3;
         await prisma.data.updateMany({
           where: {
@@ -207,8 +228,8 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         });
       }
     });
-
-    output.stdout?.on("end", async () => {
+    outputModel.stdout?.on("end", async () => {
+      // delete the record if the result is wrong
       if (!currentCount) {
         await prisma.data.deleteMany({
           where: {
@@ -222,10 +243,10 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         });
         return;
       } else;
-
+      console.log("model finished");
       // uvet2txt
       const txtTimeStamp = Date.now().toString();
-      execSync(
+      spawnSync(
         `conda activate gis && python ${
           path.resolve("./").split("\\").join("/") +
           "/utils/hydrodynamics/uvet2txt.py" +
@@ -242,11 +263,13 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           num +
           " " +
           txtTimeStamp
-        }`
+        }`,
+        { shell: true }
       );
+      console.log("uvet2png finished");
       // uvet2description
       const descriptionTimeStamp = Date.now().toString();
-      exec(
+      spawn(
         `conda activate gis && python ${
           path.resolve("./").split("\\").join("/") +
           "/utils/hydrodynamics/uvet2description.py" +
@@ -264,8 +287,10 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           `../../mask/${meshFileName!.replace("gr3", "shp")}` +
           " " +
           num
-        }`
+        }`,
+        { shell: true }
       );
+      console.log("uvet2description finished");
       // uvet2png;
       const pngTimeStamp = Date.now();
       await prisma.data.updateMany({
@@ -280,7 +305,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           ],
         },
       });
-      exec(
+      spawn(
         `conda activate gis && python ${
           path.resolve("./").split("\\").join("/") +
           "/utils/hydrodynamics/uvet2png.py" +
@@ -300,9 +325,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           " " +
           num
         }`,
-        (err, stdout, stderr) => {
-          console.log("uvet2png succeed");
-        }
+        { shell: true }
       );
       // uvet process
       await prisma.data.updateMany({
@@ -325,31 +348,54 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         ".json";
       // NOTE 不知道为什么, 加一个 setTImeout 就可以, 而且延时时间要多一点
       setTimeout(() => {
-        const output = exec(processPath + " " + descriptionPath, (err, stdout, stderr) => {
+        const output = spawn(processPath + " " + descriptionPath, { shell: true });
+        output.stdout?.on("data", async (chunk) => {
+          const content = chunk.toString();
+          // console.log(content);
+          if (content.includes("uvet")) {
+            currentCount = currentCount + 1;
+            await prisma.data.updateMany({
+              where: {
+                id: uvID,
+              },
+              data: {
+                progress: [currentCount, 5 * Number(num) + 2],
+              },
+            });
+            await prisma.data.updateMany({
+              where: {
+                id: petakID,
+              },
+              data: {
+                progress: [currentCount, 5 * Number(num) + 2],
+              },
+            });
+          } else;
+        });
+        output.stdout.on("end", () => {
           const renameFiles = async (timeStamp: string, num: number) => {
             const descriptionPath = `${dataFoldURL}/temp/model/hydrodynamics/transform/uvet/uv/flow_field_description.json`;
             for (let index = 0; index < num; index++) {
               const uvPath = `${dataFoldURL}/temp/model/hydrodynamics/transform/uvet/uv/uv_${index}.png`;
               const maskPath = `${dataFoldURL}/temp/model/hydrodynamics/transform/uvet/uv/mask_${index}.png`;
               const validPath = `${dataFoldURL}/temp/model/hydrodynamics/transform/uvet/uv/valid_${index}.png`;
-              fs.rename(
+              rename(
                 uvPath,
                 uvPath.replace(`uv_${index}.png`, `uv_${timeStamp}_${index}.png`),
                 () => {}
               );
-              fs.rename(
+              rename(
                 maskPath,
                 maskPath.replace(`mask_${index}.png`, `mask_${timeStamp}_${index}.png`),
                 () => {}
               );
-              fs.rename(
+              rename(
                 validPath,
                 validPath.replace(`valid_${index}.png`, `valid_${timeStamp}_${index}.png`),
                 () => {}
               );
             }
-            console.log(descriptionPath);
-            fs.rename(
+            rename(
               descriptionPath,
               descriptionPath.replace(
                 `flow_field_description.json`,
@@ -377,29 +423,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
               },
             });
           });
-        });
-
-        output.stdout?.on("data", async (chunk) => {
-          console.log(chunk);
-          if (chunk.includes("uvet")) {
-            currentCount = currentCount + 1;
-            await prisma.data.updateMany({
-              where: {
-                id: uvID,
-              },
-              data: {
-                progress: [currentCount, 5 * Number(num) + 2],
-              },
-            });
-            await prisma.data.updateMany({
-              where: {
-                id: petakID,
-              },
-              data: {
-                progress: [currentCount, 5 * Number(num) + 2],
-              },
-            });
-          } else;
+          console.log("all finished");
         });
       }, 1000);
     });
@@ -407,3 +431,5 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
     res.status(200).send(error);
   }
 };
+
+const clearModelFolds = async (foldPath: string) => {};

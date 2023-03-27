@@ -27,6 +27,7 @@ interface ModelStatus {
   resultKeys: string[] | null;
   percent: number;
   intervalStore: NodeJS.Timer | null;
+  pid: number | null;
 }
 
 interface ModelStatusStore {
@@ -43,10 +44,11 @@ interface ModelStatusStore {
       | "isRunning"
       | "resultKeys"
       | "percent"
-      | "intervalStore",
+      | "intervalStore"
+      | "pid",
     value: string | string[] | boolean | number | NodeJS.Timer
   ) => void;
-  removeModelStatus: (model: string) => ModelStatus | undefined;
+  removeModelStatus: (model: string) => void;
 }
 
 const useModelsStatus = create<ModelStatusStore>((set, get) => ({
@@ -76,14 +78,11 @@ const useModelsStatus = create<ModelStatusStore>((set, get) => ({
     );
   },
   removeModelStatus: (model) => {
-    let removeModel: ModelStatus | undefined = undefined;
     set(
       produce((draft: ModelStatusStore) => {
-        removeModel = draft.modelStatus.filter((ms) => ms.model === model)[0];
         draft.modelStatus = draft.modelStatus.filter((ms) => ms.model !== model);
       })
     );
-    return removeModel;
   },
 }));
 
