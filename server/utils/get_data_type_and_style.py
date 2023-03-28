@@ -6,9 +6,8 @@ import os
 
 def getDataType(filePath: str) -> str:
     type: dict = {
-        'uvet.dat': 'uvet', '.gr3': 'mesh', '.json': 'json'
+        'uvet.dat': 'uvet', '.gr3': 'mesh', '.json': 'json', '.eweaccdb': 'ewemodel', '.ewemdb': 'ewemodel'
     }
-
     for key, value in type.items():
         if (filePath.endswith(key)):
             return value
@@ -20,7 +19,7 @@ def getDataType(filePath: str) -> str:
 
 def getDataStyle(filePath: str) -> str:
     style: dict = {
-        'uvet.dat': 'uvet', '.gr3': 'raster', '.json': getVectorStyle(filePath)}
+        'uvet.dat': 'uvet', '.gr3': 'raster', '.json': getVectorStyle(filePath), '.eweaccdb': 'echarts', '.ewemdb': 'echarts'}
 
     for key, value in style.items():
         if (filePath.endswith(key)):
@@ -60,6 +59,7 @@ if __name__ == '__main__':
         #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\mesh31.json",
         #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\test.json",
         #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\sanshawan.th",
+        #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\New model.eweaccdb"
         #          ]
         # for path in paths:
         #     type = getDataType(path)

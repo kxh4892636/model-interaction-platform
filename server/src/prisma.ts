@@ -68,7 +68,7 @@ const main = async () => {
   const info = await prisma.data.findMany({
     // where: { id: "a3e062a1-d8ac-4ad1-ad46-ea9394f09400" },
   });
-  // console.log(info);
+  console.log(info);
   console.log(info.length);
   // npx ts-node prisma.ts
 };
@@ -83,15 +83,3 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
-console.log(dataFoldURL);
-
-const descriptionPath = `${dataFoldURL}/temp/model/hydrodynamics/transform/uvet/uv/flow_field_description.json`;
-console.log(descriptionPath);
-fs.rename(
-  descriptionPath,
-  descriptionPath.replace(`flow_field_description.json`, `flow_field_description_${123456}.json`),
-  () => {}
-);
-console.log(
-  descriptionPath.replace(`flow_field_description.json`, `flow_field_description_${123456}.json`)
-);

@@ -7,73 +7,96 @@ import crypto from "crypto";
 import { spawn, spawnSync } from "child_process";
 const cs = require("child_process");
 const { query } = require("../../utils/ewe/importEWE");
-const { CRUDdatabase, HandleReturn, FlowDiagram,ModifyDatabase } = require("../../utils/ewe/exportEWE");
+const {
+  CRUDdatabase,
+  HandleReturn,
+  FlowDiagram,
+  ModifyDatabase,
+} = require("../../utils/ewe/exportEWE");
 const prisma = new PrismaClient();
 
 // 计算结果
 exports.R_test2 = (req: Request, res: Response) => {
-  const ModelState = req.body.ModelState
-  const num = req.body.singleID
-  if(ModelState==="Start"){
-      const Group = req.body.Group
-      const Diet = req.body.Diet
-      const Detritus = req.body.Detritus
-      const DiscardFate = req.body.DiscardFate
-      const Land = req.body.Land
-      const Discard = req.body.Discard
-      const Fleet = req.body.Fleet
-      
-      // 全部封到exportEWE中去
-      const database = CRUDdatabase(Group,Fleet,Diet,Detritus,DiscardFate,Land,Discard,num)
-      // console.log(database)
-      database.then(()=>{
-          cs.exec(`Rscript ./utils/ewe/EcoPath.R '${num}'` ,(error:any,stdout:any,stderr:any)=>{
-              if (error) {
-                  console.error('error:', error);
-              }
-              // [1] TRUE 长度为10 后面还跟着2个空格 10*n-1  5个最后为49  加上“[1] ” 从54开始
-              // 如果图标那一块真的要使用图片进行传输的话，多了“pdf 2” 所以要从65开始
-              let data = JSON.parse(stdout.slice(54))
-              // 得弄两次，第一次弄完还是字符串string类型
-              data = JSON.parse(data)
-              data.Basic = JSON.parse(data.Basic)
-              data.InputFlag = JSON.parse(data.InputFlag)
-              data.link = JSON.parse(data.link)
-              data.prenode = JSON.parse(data.prenode)
-              res.send({BasicEst:HandleReturn(data.Basic,data.InputFlag),Graph:FlowDiagram(data.prenode,data.link),status:data.status,statusname:data.statusname})
-          })
-      }).catch((err:any)=>console.log(err))
-  }
-  else if(ModelState==="Modify"){
-      const ModifyData = req.body.ModifyData
-      const Group = req.body.Group
-      const Fleet = req.body.Fleet
-      console.log("此次修改的数据为",ModifyData)
-      const database = ModifyDatabase(ModifyData,num,Group,Fleet)
+  const ModelState = req.body.ModelState;
+  const num = req.body.singleID;
+  if (ModelState === "Start") {
+    const Group = req.body.Group;
+    const Diet = req.body.Diet;
+    const Detritus = req.body.Detritus;
+    const DiscardFate = req.body.DiscardFate;
+    const Land = req.body.Land;
+    const Discard = req.body.Discard;
+    const Fleet = req.body.Fleet;
 
-      database.then(()=>{
-          cs.exec(`Rscript ./utils/ewe/EcoPath.R '${num}'` ,(error:any,stdout:any,stderr:any)=>{
-              if (error) {
-                  console.error('error:', error);
-              }
-              // [1] TRUE 长度为10 后面还跟着2个空格 10*n-1  5个最后为49  加上“[1] ” 从54开始
-              // 如果图标那一块真的要使用图片进行传输的话，多了“pdf 2” 所以要从65开始
-              let data = JSON.parse(stdout.slice(54))
-              // 得弄两次，第一次弄完还是字符串string类型
-              data = JSON.parse(data)
-              // console.log(data.statusname)
-              data.Basic = JSON.parse(data.Basic)
-              data.InputFlag = JSON.parse(data.InputFlag)
-              data.link = JSON.parse(data.link)
-              data.prenode = JSON.parse(data.prenode)
-              // res.send(data)
-              res.send({BasicEst:HandleReturn(data.Basic,data.InputFlag),Graph:FlowDiagram(data.prenode,data.link),status:data.status,statusname:data.statusname})
-              // res.send(data)
-          })
-      }).catch((err:any)=>console.log(err))
-  }
-  else{
-      res.send("请勿重复执行")
+    // 全部封到exportEWE中去
+    const database = CRUDdatabase(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num);
+    // console.log(database)
+    database
+      .then(() => {
+        cs.exec(
+          `Rscript ./utils/ewe/EcoPath.R '${num}'`,
+          (error: any, stdout: any, stderr: any) => {
+            if (error) {
+              console.error("error:", error);
+            }
+            // [1] TRUE 长度为10 后面还跟着2个空格 10*n-1  5个最后为49  加上“[1] ” 从54开始
+            // 如果图标那一块真的要使用图片进行传输的话，多了“pdf 2” 所以要从65开始
+            let data = JSON.parse(stdout.slice(54));
+            // 得弄两次，第一次弄完还是字符串string类型
+            data = JSON.parse(data);
+            data.Basic = JSON.parse(data.Basic);
+            data.InputFlag = JSON.parse(data.InputFlag);
+            data.link = JSON.parse(data.link);
+            data.prenode = JSON.parse(data.prenode);
+            res.send({
+              BasicEst: HandleReturn(data.Basic, data.InputFlag),
+              Graph: FlowDiagram(data.prenode, data.link),
+              status: data.status,
+              statusname: data.statusname,
+            });
+          }
+        );
+      })
+      .catch((err: any) => console.log(err));
+  } else if (ModelState === "Modify") {
+    const ModifyData = req.body.ModifyData;
+    const Group = req.body.Group;
+    const Fleet = req.body.Fleet;
+    console.log("此次修改的数据为", ModifyData);
+    const database = ModifyDatabase(ModifyData, num, Group, Fleet);
+
+    database
+      .then(() => {
+        cs.exec(
+          `Rscript ./utils/ewe/EcoPath.R '${num}'`,
+          (error: any, stdout: any, stderr: any) => {
+            if (error) {
+              console.error("error:", error);
+            }
+            // [1] TRUE 长度为10 后面还跟着2个空格 10*n-1  5个最后为49  加上“[1] ” 从54开始
+            // 如果图标那一块真的要使用图片进行传输的话，多了“pdf 2” 所以要从65开始
+            let data = JSON.parse(stdout.slice(54));
+            // 得弄两次，第一次弄完还是字符串string类型
+            data = JSON.parse(data);
+            // console.log(data.statusname)
+            data.Basic = JSON.parse(data.Basic);
+            data.InputFlag = JSON.parse(data.InputFlag);
+            data.link = JSON.parse(data.link);
+            data.prenode = JSON.parse(data.prenode);
+            // res.send(data)
+            res.send({
+              BasicEst: HandleReturn(data.Basic, data.InputFlag),
+              Graph: FlowDiagram(data.prenode, data.link),
+              status: data.status,
+              statusname: data.statusname,
+            });
+            // res.send(data)
+          }
+        );
+      })
+      .catch((err: any) => console.log(err));
+  } else {
+    res.send("请勿重复执行");
   }
 };
 
@@ -83,10 +106,12 @@ exports.R_test3 = (req: Request, res: Response) => {
   // console.log(dataFoldURL+req.body.filepath)
   const ADODB = require("node-adodb");
   const connection = ADODB.open(
-    `Provider=Microsoft.ACE.OLEDB.12.0;Data Source=${dataFoldURL+req.body.filepath};Persist Security Info=False;`
+    `Provider=Microsoft.ACE.OLEDB.12.0;Data Source=${
+      dataFoldURL + req.body.filepath
+    };Persist Security Info=False;`
   );
   const result = query(connection);
-  result.then((val:any, err:any) => {
+  result.then((val: any, err: any) => {
     if (err) {
       res.send(err);
     } else {

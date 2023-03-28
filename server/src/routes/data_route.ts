@@ -21,11 +21,18 @@ const upload = multer({
       cb(null, dataFoldURL + "/temp/input");
     },
     filename: (req, file, cb) => {
-      //  解决中文名乱码
+      //  解决中文名乱码并将文件中的空格转换为 _
       // NOTE extName
+      // NOTE 文件中的空格对于 spawn 的坏处
       const fileName = Buffer.from(file.originalname, "latin1").toString("utf8");
       const extName = path.extname(fileName);
-      cb(null, path.basename(fileName, extName) + "_" + Date.now().toString() + extName);
+      cb(
+        null,
+        path.basename(fileName, extName).split(" ").join("_") +
+          "_" +
+          Date.now().toString() +
+          extName
+      );
     },
   }),
 });
