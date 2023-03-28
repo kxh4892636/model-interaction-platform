@@ -21,6 +21,8 @@ import {
 import CaseList from "./components/case_list";
 import CasePage from "./components/case_detail_page";
 import { CaseListData } from "./types";
+import { useData } from "../../hooks";
+import { ServerCase } from "../../types";
 
 // modify style of antd search component
 const { Search } = Input;
@@ -39,20 +41,33 @@ const CasePanel = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [selectedItem, setselectedItem] = useState("s");
   const [data, setData] = useState<CaseListData[]>([]);
+  const dataAction = useData();
+
+  const getImageUrl = async (key: string) => {
+    const image = await dataAction.getData(key, "image", {}, "blob");
+    const blob = new Blob([image]);
+    const url = window.URL.createObjectURL(blob);
+    return url;
+  };
 
   useEffect(() => {
-    axios.get("http://localhost:3456/case/list").then((res) => {
-      const data = (res.data as { [props: string]: any }[]).map((value) => {
-        return {
-          key: value.id,
-          title: value.title,
-          image: value.image,
-          author: value.author,
-          data: value.data,
-        };
-      });
-      setData(data);
+    axios.get("http://localhost:3456/case/list").then(async (res) => {
+      const result: ServerCase[] = res.data;
+      let caseListData: CaseListData[] = [];
+      for (let index = 0; index < result.length; index++) {
+        const item = result[index];
+        const imageUrl = await getImageUrl(item.image);
+        caseListData.push({
+          key: item.id,
+          title: item.title,
+          image: imageUrl,
+          author: item.author,
+          data: item.data,
+        });
+      }
+      setData(caseListData);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

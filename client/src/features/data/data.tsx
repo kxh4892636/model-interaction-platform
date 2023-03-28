@@ -26,8 +26,8 @@ const StyledUpload = styled(Upload)`
  */
 const DataPanel = () => {
   const dataActions = useData();
-  const EWEID:any = EWEModelID((state)=>state.EWEModelID)
-  const setEWEID:any = EWEModelID((state)=>state.setEWEModelID)
+  const EWEID: any = EWEModelID((state) => state.EWEModelID);
+  const setEWEID: any = EWEModelID((state) => state.setEWEModelID);
   return (
     <PanelContainer>
       <PanelTitleContainer>数据面板</PanelTitleContainer>
@@ -38,16 +38,15 @@ const DataPanel = () => {
         onChange={(info) => {
           if (info.file.status === "done") {
             message.success(`${info.file.name} 文件上传成功`);
-            if(info.file.name.split(".")[1]==="eweaccdb" || info.file.name.split(".")[1]==="ewemdb")
-            {
+            if (
+              info.file.name.split(".")[1] === "eweaccdb" ||
+              info.file.name.split(".")[1] === "ewemdb"
+            ) {
               // console.log(info.file.response)
-              setEWEID([...EWEID,info.file.response])
-            }
-            else{
-              // TODO 添加案例时相同案例数据放置于一个图层组内
-              dataActions.addDataToMap(info.file.response);
-              dataActions.addDataToLayerTree(info.file.response);
-            }
+              setEWEID([...EWEID, info.file.response]);
+            } else;
+            dataActions.addDataToMap(info.file.response);
+            dataActions.addDataToLayerTree(info.file.response);
           }
         }}
         method="post"

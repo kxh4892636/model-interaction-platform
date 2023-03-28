@@ -1,6 +1,5 @@
 from osgeo import ogr
 import sys
-import os
 # NOTE python 类型注释如何表示一个函数
 
 

@@ -9,10 +9,11 @@
  */
 
 import { CloseOutlined } from "@ant-design/icons";
-import { Button, message } from "antd";
+import { Button, message, Tag } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import styled from "styled-components/macro";
+import useData from "../../../../hooks/use_data";
 import { ServerCase } from "../../../../types";
 import useCase from "../../hooks/use_case";
 
@@ -47,7 +48,7 @@ const StyledCloseOutlined = styled(CloseOutlined)`
 `;
 // CasePage Image container
 const CaseImageContainer = styled.div`
-  height: 240px;
+  height: 255px;
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #d9d9d9;
   .view {
@@ -62,6 +63,8 @@ const CaseImageContainer = styled.div`
 const CaseTagsContainer = styled.div`
   height: 40px;
   border-bottom: 1px solid #d9d9d9;
+  display: flex;
+  align-items: center;
 `;
 // CasePage meta container
 const CaseMetaContainer = styled.div`
@@ -75,6 +78,7 @@ const CaseMetaContainer = styled.div`
 const CaseDescriptionContainer = styled.div`
   flex: 1 1 0;
   border-bottom: 1px solid #d9d9d9;
+  padding: 10px;
 `;
 
 const CaseDataActionContainer = styled.div`
@@ -100,12 +104,43 @@ type AppProps = {
 const CasePage = ({ id, onClose }: AppProps) => {
   const [data, setData] = useState<ServerCase>();
   const caseActions = useCase();
+  const [imageUrl, setImageUrl] = useState<string>();
+  const dataAction = useData();
+
+  const createTags = (tags: string[]) => {
+    let color = ["magenta", "volcano", "blue", "purple"];
+    const tagsElement = tags.map((tag) => {
+      const tag2Name = {
+        data: "数据集",
+        example: "示例集",
+        hydrodynamics: "水动力模型",
+        ecopath: "Ecopath 模型",
+      };
+
+      return (
+        <Tag
+          key={tag}
+          style={{ margin: "0px 6px", fontSize: "14px", lineHeight: "28px", height: "28px" }}
+          color={color.pop()}
+        >
+          {(tag2Name as any)[tag]}
+        </Tag>
+      );
+    });
+    return tagsElement;
+  };
 
   useEffect(() => {
     axios.get("http://localhost:3456/case/case?id=" + id).then((res) => {
       if (typeof res.data === "object") setData(res.data);
+      else;
+      dataAction.getData(res.data.image, "image", {}, "blob").then((res) => {
+        const blob = new Blob([res]);
+        const url = window.URL.createObjectURL(blob);
+        setImageUrl(url);
+      });
     });
-    console.log(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   return data ? (
@@ -113,9 +148,9 @@ const CasePage = ({ id, onClose }: AppProps) => {
       <CaseTitleContainer>{data.title}</CaseTitleContainer>
       <StyledCloseOutlined onClick={onClose} />
       <CaseImageContainer>
-        <img alt="view" className="view" src={data.image} />
+        <img alt="view" className="view" src={imageUrl} />
       </CaseImageContainer>
-      <CaseTagsContainer>{data.tags}</CaseTagsContainer>
+      <CaseTagsContainer>{createTags(data.tags)}</CaseTagsContainer>
       <CaseMetaContainer>
         <div style={{ marginInlineEnd: "auto", paddingInlineStart: "10px" }}>
           作者: {data.author}

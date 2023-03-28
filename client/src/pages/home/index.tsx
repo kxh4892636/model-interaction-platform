@@ -15,6 +15,7 @@ import {
   BgColorsOutlined,
   MediumOutlined,
   SlackOutlined,
+  SaveOutlined,
 } from "@ant-design/icons";
 import { LayerOutlined } from "../../components/icons";
 import Sidebar from "../../features/sidebar";
@@ -28,6 +29,9 @@ import { StylePanel } from "../../features/style";
 import { ExchangeFlag } from "../../stores/model";
 import { ModelPanel } from "../../features/model";
 import Model from "../../features/model/App";
+import { SavePanel } from "../../features/save";
+import { useEffect } from "react";
+import axios from "axios";
 
 const View = styled.div`
   position: relative;
@@ -66,7 +70,7 @@ const MapContainer = styled.div`
 const Home: React.FC = () => {
   const position = useMapPositionStore((state) => state.position);
 
-  const Flag = ExchangeFlag((state) => state.Flag)
+  const Flag = ExchangeFlag((state) => state.Flag);
 
   // 侧边栏数据
   const sidebarItemsLeft = [
@@ -94,6 +98,12 @@ const Home: React.FC = () => {
       icon: <MediumOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
       panel: <Model />,
     },
+    {
+      title: "保存",
+      id: "save",
+      icon: <SaveOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
+      panel: <SavePanel />,
+    },
   ];
 
   const sidebarItemsRight = [
@@ -111,20 +121,23 @@ const Home: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    axios.request({ url: "http://localhost:3456/case/temp", method: "get" }).then((res) => {
+      console.log(res.data);
+    });
+  }, []);
+
   // NOTE 弹窗设计思想
   return (
     <View>
       <TitleBarContainer>港口水环境与生态动力学精细化模拟平台</TitleBarContainer>
       <ContentContainer>
         <Sidebar items={sidebarItemsLeft} key="left" />
-        {
-        Flag===false? 
-          <MapContainer>
-            <MapView />
-            <MapStatus position={position} />
-          </MapContainer>
-          :<Model></Model>
-        }
+        <MapContainer>
+          <MapView display={Flag} />
+          <MapStatus position={position} />
+          {Flag === true ? <Model></Model> : <></>}
+        </MapContainer>
         <Sidebar items={sidebarItemsRight} position="right" key="right" theme="white"></Sidebar>
       </ContentContainer>
     </View>

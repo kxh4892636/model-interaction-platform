@@ -59,7 +59,7 @@ const main = async () => {
   // });
   // await prisma.$queryRaw`UPDATE data SET data = replace(data,'/temp/','/case/hydrodynamics_result/') WHERE temp = true`;
   // await prisma.data.deleteMany({
-  //   where: { temp: true },
+  //   // where: { temp: false },
   // });
   // await prisma.case.deleteMany({
   //   where: {},

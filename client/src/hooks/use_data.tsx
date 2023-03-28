@@ -273,6 +273,7 @@ const useData = () => {
       } else if (type === "image") {
         addImageToMap(id);
       } else if (type === "text") {
+      } else if (type === "ewemodel") {
       } else {
         console.error("the type of data is unknown");
       }

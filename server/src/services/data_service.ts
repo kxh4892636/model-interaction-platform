@@ -94,7 +94,6 @@ const getText = async () => {
 const uploadData = async (file: Express.Multer.File) => {
   if (!file) return "upload failed";
   else;
-
   const filePath: string = file.path;
   const id = crypto.randomUUID();
   // get type and style of data
@@ -103,13 +102,10 @@ const uploadData = async (file: Express.Multer.File) => {
       resolve("./").split("\\").join("/") + "/utils/get_data_type_and_style.py"
     } ${filePath}`
   );
-  console.log(filePath);
 
   const [type, style] = output.toString().trimEnd().split(",");
-  console.log(type, style);
   let transform: string[] = [];
   let extent: number[] = [];
-
   // generate transform filed
   if (type === "mesh") {
     const fileName = file.filename.split(".")[0];
@@ -169,7 +165,6 @@ const uploadData = async (file: Express.Multer.File) => {
   } else if (type === "uvet") {
     // TODO 以后写
   }
-
   // write data into database
   await prisma.data.create({
     data: {

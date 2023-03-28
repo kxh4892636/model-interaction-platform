@@ -142,7 +142,7 @@ const ModelPanel = ({ title, model }: AppProps) => {
                   updateModelStatus(
                     model,
                     "percent",
-                    (Number(progress[0]) / Number(progress[1])).toFixed(2)
+                    ((Number(progress[0]) / Number(progress[1])) * 100).toFixed(2)
                   );
                   // add result if model is finished
                   if (progress[0] === progress[1] && progress[1]) {
@@ -155,7 +155,7 @@ const ModelPanel = ({ title, model }: AppProps) => {
                     message.success("模型运行完毕", 10);
                     return;
                   } else;
-                }, 2000);
+                }, 10000);
                 updateModelStatus(model, "intervalStore", percentInterval);
               };
               // stop the model
@@ -171,6 +171,8 @@ const ModelPanel = ({ title, model }: AppProps) => {
                     currentModelStatus!.boundaryKey,
                     currentModelStatus.pid,
                   ],
+                }).then(() => {
+                  message.error("模型停止运行", 10);
                 });
               } // run the model
               else {
@@ -203,12 +205,12 @@ const ModelPanel = ({ title, model }: AppProps) => {
           >
             {currentModelStatus?.isRunning ? "停止运行" : "开始运行"}
           </Button>
-          <Button
+          {/* <Button
             onClick={() => {
               console.log(modelStatus);
               console.log(currentModelStatus);
             }}
-          ></Button>
+          ></Button> */}
         </PanelToolContainer>
       </PanelToolsContainer>
     </PanelContainer>

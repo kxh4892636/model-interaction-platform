@@ -135,6 +135,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       // NOTE how to kill process tree
       console.log(type);
       spawn(`taskkill /f /t /pid ${type}`, { shell: true });
+      res.status(200).json({ status: "success", content: "kill" });
       return;
     }
     let keys: string[] = paramKeys;
@@ -193,6 +194,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         title: "uvet水深数据",
         type: "uvet",
         extent: extent!,
+        progress: [],
       },
     });
     await prisma.data.create({
@@ -204,6 +206,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         title: "uvet流场数据",
         type: "uvet",
         extent: extent!,
+        progress: [],
       },
     });
     // run model
@@ -220,13 +223,13 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
 
     let currentCount = 0;
     let num: number = 0;
-    outputModel.stderr.on("end", async () => {
-      const content: string = "模型运行错误";
+    outputModel.stderr.on("data", async () => {
       if (num === 0) {
         res.status(200).json({ status: "failed", content: "模型参数错误" });
         return;
-      } else;
-      await isModelFailed(uvID, petakID);
+      } else {
+        await isModelFailed(uvID, petakID);
+      }
     });
     outputModel.stdout?.on("data", async (chunk) => {
       const content = chunk.toString();

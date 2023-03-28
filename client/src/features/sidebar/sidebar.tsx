@@ -69,10 +69,10 @@ type AppProps = {
  * @export module: Sidebar
  */
 const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
-  const navigate = useNavigate()
-  const Flag = ExchangeFlag((state) => state.Flag)
-  const setFlag = ExchangeFlag((state) => state.setFlag)
-  
+  const navigate = useNavigate();
+  const Flag = ExchangeFlag((state) => state.Flag);
+  const setFlag = ExchangeFlag((state) => state.setFlag);
+
   const [showPanelID, setShowPanelID] = useState("");
   const [showItem, setshowItem] = useState(false);
   const map = useMapStore((state) => state.map);
@@ -100,8 +100,7 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
                 });
                 navigate("/");
               }
-            }
-            else{
+            } else {
               if (showItem && e.currentTarget.id !== showPanelID) {
               } else {
                 setshowItem(!showItem);
@@ -111,7 +110,6 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
               } else {
                 setShowPanelID(e.currentTarget.id);
               }
-
             }
           }}
         >

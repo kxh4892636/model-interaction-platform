@@ -16,5 +16,9 @@ const router = express.Router();
 router.get("/case", caseController.getCase);
 // /case/list
 router.get("/list", caseController.getList);
+// /case/save
+router.post("/save", caseController.saveCase);
+// /case/temp
+router.get("/temp", caseController.clearTemp);
 
 export default router;

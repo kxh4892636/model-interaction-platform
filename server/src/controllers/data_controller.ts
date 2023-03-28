@@ -99,7 +99,7 @@ const getShp = async (req: Request, res: Response) => {
     res.status(200).json(dataService.getShp(req.query.id as string));
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    res.status(200).json(error);
   }
 };
 // do noting
@@ -108,7 +108,7 @@ const getText = async (req: Request, res: Response) => {
     res.status(200).json(dataService.getText());
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    res.status(200).json(error);
   }
 };
 // upload data
@@ -117,7 +117,7 @@ const uploadData = async (req: Request, res: Response) => {
     res.status(200).json(await dataService.uploadData(req.file!));
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    res.status(200).json(error);
   }
 };
 

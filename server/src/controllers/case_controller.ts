@@ -16,7 +16,7 @@ const getList = async (req: Request, res: Response) => {
     res.status(200).json(await caseService.getList());
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    res.status(200).json(error);
   }
 };
 // get data of case by key
@@ -25,8 +25,37 @@ const getCase = async (req: Request, res: Response) => {
     res.status(200).json(await caseService.getCase(req.query.id as string));
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    res.status(200).json(error);
   }
 };
 
-export default { getList, getCase };
+const saveCase = async (req: Request, res: Response) => {
+  try {
+    res
+      .status(200)
+      .json(
+        await caseService.saveCase(
+          req.body.title,
+          req.body.imageKey,
+          req.body.author,
+          req.body.tags,
+          req.body.description,
+          req.body.keys
+        )
+      );
+  } catch (error) {
+    console.error(error);
+    res.status(200).json(error);
+  }
+};
+
+const clearTemp = async (req: Request, res: Response) => {
+  try {
+    res.status(200).json(await caseService.clearTempFolder());
+  } catch (error) {
+    console.error(error);
+    res.status(200).json(error);
+  }
+};
+
+export default { getList, getCase, saveCase, clearTemp };

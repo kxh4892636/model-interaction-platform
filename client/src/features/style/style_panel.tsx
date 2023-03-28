@@ -70,8 +70,12 @@ const StylePanel = () => {
         <>
           <div style={{ padding: "10px 12px" }}>选择图层</div>
           <Select
-            defaultValue={layerSelected ? layerSelected.title : undefined}
-            value={layerSelected ? layerSelected.title : undefined}
+            defaultValue={
+              layerSelected ? (layerSelected.group ? undefined : layerSelected.title) : undefined
+            }
+            value={
+              layerSelected ? (layerSelected.group ? undefined : layerSelected.title) : undefined
+            }
             style={{ margin: "6px 12px" }}
             onChange={(key) => {
               // Update layerSelected when the value of selected is changed

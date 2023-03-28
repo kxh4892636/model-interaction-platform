@@ -17,23 +17,20 @@ import model from "./routes/ewe_route";
 // NOTE structure of express
 // NOTE cors json urlencoded
 
-
 const app = express();
 const port = 3456;
 
+// NOTE use 的顺序
 // cors
 app.use(cors());
-
-// Routes
-app.use("/case", caseRoute);
-app.use("/data", dataRoute);
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 // parse application/json
 app.use(express.json());
-
+// Routes
+app.use("/case", caseRoute);
+app.use("/data", dataRoute);
 app.use("/model", model);
-
 
 app.listen(port, () => {
   console.log("http://localhost:3456");

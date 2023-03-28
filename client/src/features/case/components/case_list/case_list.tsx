@@ -70,7 +70,7 @@ const CaseList = ({ data, onShow }: AppProps) => {
                 添加至地图
               </Button>,
             ]}
-            extra={<img width={130} height={90} alt="logo" src={item.image} />}
+            extra={<img width={120} height={90} alt="logo" src={item.image} />}
           >
             <List.Item.Meta
               // title click event
