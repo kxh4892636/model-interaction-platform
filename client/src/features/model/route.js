@@ -8,6 +8,7 @@ import EcopathOutput from "./components/EcopathOutput";
 import FlowDiagram from "./components/FlowDiagram";
 import Hydrodynamic from "./components/Hydrodynamic";
 import EWEModel from "./components/EWEfish";
+import EWELog from "./components/EWElog";
 import { Navigate } from "react-router-dom";
 
 const routes = [
@@ -52,8 +53,12 @@ const routes = [
     element: <EWEModel />,
   },
   {
+    path: "/model/EWElog",
+    element: <EWELog />,
+  },
+  {
     path: "/",
-    element: <Navigate to="/model/EWEModel" />,
+    element: <Navigate to="/model/EWElog" />,
   },
 ];
 export default routes;

@@ -13,9 +13,15 @@ const App = (props) => {
     {
       title: '生态系统模型(EWE)',
       key: '0-2',
-      routekey:"model/EWEModel",
+      routekey:"model/EWElog",
       // icon: <AliwangwangOutlined />,
       children:[
+        {
+          title: '模型配置',
+          key: '0-0',
+          routekey:"model/EWEModel",
+          icon: ({ selected }) => (selected ? <CreditCardFilled />: <CalendarOutlined />),
+        },
         {
           title: 'Ecopath',
           key: '0-3',

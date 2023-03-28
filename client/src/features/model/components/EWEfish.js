@@ -1,5 +1,5 @@
 import { PlusOutlined, CheckOutlined } from "@ant-design/icons";
-import { Button, Space, Form, Input, Popconfirm, Table, Radio, message, Divider } from "antd";
+import { Button, Space, Form, Input, Popconfirm, Table, Radio, message, Divider,Select } from "antd";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "./index.css";
 import {
@@ -103,23 +103,16 @@ const EditableCell = ({
 export default function App() {
   const dataActions = useData();
   const EWEID = EWEModelID((state) => state.EWEModelID);
-  // 包含React Radio node的
-  const [EWEModelData, setEWEModelData] = useState([]);
-  const [EWERadiovalue, setEWERadiovalue] = useState();
+  const [SelectOptions, setSelectOptions] = useState([])
   const setselectEWEModelID = selectedEWEModelID((state) => state.setEWEModelID);
   useEffect(() => {
-    // console.log(EWEID)
-    let RadioArr = [];
+    let SelectArr = []
     EWEID.forEach(async (el, index) => {
       // dataActions.getDataDetail(el) 传入ID，得到的是response.data
       const resdata = await dataActions.getDataDetail(el);
-      RadioArr.push(
-        <Radio value={resdata.data + "|" + el} key={el}>
-          {resdata.title}
-        </Radio>
-      );
+      SelectArr.push({label:resdata.title,value:resdata.data + "|" + el})
       if (index === EWEID.length - 1) {
-        setEWEModelData(RadioArr);
+        setSelectOptions(SelectArr)
       }
     });
     //eslint-disable-next-line react-hooks/exhaustive-deps
@@ -385,33 +378,25 @@ export default function App() {
     >
       <div>
         <Space>
-          <span style={{ fontSize: 15 }}>模型选择</span>
-          <Radio.Group
-            onChange={(e) => {
-              console.log("radio checked", e.target.value);
-              setEWERadiovalue(e.target.value);
-              // 设置选中的模型ID
-              setselectEWEModelID(e.target.value.split("|")[1]);
+          <span>模型选择</span>
+          <Select
+            placeholder="请选择导入的模型"
+            style={{
+              width: 240,
             }}
-            value={EWERadiovalue}
-            name="asdasd"
-          >
-            <Space>{EWEModelData}</Space>
-          </Radio.Group>
-          <Button
-            type="primary"
-            onClick={() => {
-              ImportModel(EWERadiovalue.split("|")[0]);
+            onChange={(value) => {
+              // 先设置UUID 再执行计算
+              setselectEWEModelID(value.split("|")[1]);
+              ImportModel(value.split("|")[0]);
             }}
-          >
-            导入
-          </Button>
+            options={SelectOptions}
+          />
         </Space>
       </div>
       <Divider />
       <div>
         <Space>
-          <span style={{ fontSize: 25 }}>定义功能组</span>
+          <span>定义功能组</span>
           <Button
             onClick={GroupTableAdd}
             type="primary"
@@ -452,7 +437,7 @@ export default function App() {
       </div>
       <div>
         <Space>
-          <span style={{ fontSize: 25 }}>定义舰船</span>
+          <span>定义舰船</span>
           <Button
             onClick={FleetTableAdd}
             type="primary"
