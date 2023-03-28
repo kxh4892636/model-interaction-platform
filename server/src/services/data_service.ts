@@ -5,7 +5,6 @@ import { dataFoldURL } from "../../config/global_data";
 import { exec, execSync } from "child_process";
 import { resolve } from "path";
 
-
 const prisma = new PrismaClient();
 
 const getList = async () => {
@@ -98,7 +97,7 @@ const uploadData = async (file: Express.Multer.File) => {
 
   const filePath: string = file.path;
   const id = crypto.randomUUID();
-  if(file.filename.split(".")[1]==="eweaccdb" || file.filename.split(".")[1]==="ewemdb"){
+  if (file.filename.split(".")[1] === "eweaccdb" || file.filename.split(".")[1] === "ewemdb") {
     // console.log(file.filename)
     // write data into database
     await prisma.data.create({
@@ -113,9 +112,8 @@ const uploadData = async (file: Express.Multer.File) => {
         // transform: transform,
       },
     });
-    return id
-  }
-  else{
+    return id;
+  } else {
     // get type and style of data
     const output = execSync(
       `conda activate gis && python ${
@@ -197,13 +195,12 @@ const uploadData = async (file: Express.Multer.File) => {
         style: style,
         extent: extent,
         transform: transform,
-        progress: [1, 1],
+        progress: ["1", "1"],
       },
     });
 
     return id;
   }
-
 };
 
 export default {

@@ -16,7 +16,7 @@ export type ServerData = {
   temp: boolean;
   extent: number[];
   transform: string[];
-  progress: [number, number];
+  progress: [string, string?];
 };
 
 export type ServerCase = {

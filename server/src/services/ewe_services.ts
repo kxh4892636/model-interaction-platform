@@ -108,9 +108,8 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
     // transform null
     if (type) {
       // NOTE how to kill process tree
-      console.log(-type);
+      console.log(type);
       spawn(`taskkill /f /t /pid ${type}`, { shell: true });
-
       return;
     }
     let keys: string[] = paramKeys;
@@ -135,8 +134,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       });
       // NOTE 如何抛出错误
       if (!fileInfo) {
-        res.status(200).json({ status: "failed", content: "the file is not exist" });
-        return;
+        throw new Error("模型参数文件请重新上传");
       } else;
 
       const src = dataFoldURL + fileInfo.data;
@@ -155,8 +153,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       } else;
     }
     if (!meshFileName) {
-      res.status(200).json({ status: "failed", content: "the file is not exist" });
-      return;
+      throw new Error("mesh 模型参数文件不存在");
     } else;
     // create the record fo result
     const petakID = crypto.randomUUID();
@@ -193,14 +190,18 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       shell: true,
     });
     // const outputModel = spawn(`cmd`, ["/c", `cd ${path.dirname(modelPath)} && ${modelPath}`], {});
-
     // NOTE 为什么 outputModel.kill() 不生效的原因
-    // 以及 process.kill(pid) 和 (-pid) 的区别以及 (-pid) 不生效的原因(我也不知道)
+    // 以及 process.kill(pid) 和 (-pid) 的区别以及 (-pid) 不生效的原因(我也不知道)极其解决方法
 
     let currentCount = 0;
     let num: number = 0;
-    outputModel.on("close", () => {
-      if (!num) res.status(200).json({ status: "wrong", content: "params is wrong" });
+    outputModel.stderr.on("end", async () => {
+      const content: string = "模型运行错误";
+      if (num === 0) {
+        res.status(200).json({ status: "failed", content: "模型参数错误" });
+        return;
+      } else;
+      await isModelFailed(uvID, petakID);
     });
     outputModel.stdout?.on("data", async (chunk) => {
       const content = chunk.toString();
@@ -214,7 +215,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: uvID,
           },
           data: {
-            progress: [0, 5 * Number(num) + 2],
+            progress: ["0", `${5 * Number(num) + 2}`],
           },
         });
         await prisma.data.updateMany({
@@ -222,7 +223,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: petakID,
           },
           data: {
-            progress: [0, 5 * Number(num) + 2],
+            progress: ["0", `${5 * Number(num) + 2}`],
           },
         });
       } else;
@@ -234,7 +235,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: uvID,
           },
           data: {
-            progress: [currentCount, 5 * Number(num) + 2],
+            progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
           },
         });
         await prisma.data.updateMany({
@@ -242,24 +243,15 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: petakID,
           },
           data: {
-            progress: [currentCount, 5 * Number(num) + 2],
+            progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
           },
         });
       }
     });
     outputModel.stdout?.on("end", async () => {
-      // delete the record if the result is wrong
+      // same as stderr
       if (!currentCount) {
-        await prisma.data.deleteMany({
-          where: {
-            id: uvID,
-          },
-        });
-        await prisma.data.deleteMany({
-          where: {
-            id: petakID,
-          },
-        });
+        await isModelFailed(uvID, petakID);
         return;
       } else;
       console.log("model finished");
@@ -378,7 +370,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
                 id: uvID,
               },
               data: {
-                progress: [currentCount, 5 * Number(num) + 2],
+                progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
               },
             });
             await prisma.data.updateMany({
@@ -386,7 +378,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
                 id: petakID,
               },
               data: {
-                progress: [currentCount, 5 * Number(num) + 2],
+                progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
               },
             });
           } else;
@@ -430,7 +422,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
                 id: uvID,
               },
               data: {
-                progress: [currentCount, 5 * Number(num) + 2],
+                progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
               },
             });
             await prisma.data.updateMany({
@@ -438,7 +430,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
                 id: petakID,
               },
               data: {
-                progress: [currentCount, 5 * Number(num) + 2],
+                progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
               },
             });
           });
@@ -447,8 +439,30 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       }, 1000);
     });
   } catch (error) {
-    res.status(200).send(error);
+    if (error instanceof Error) {
+      console.log(error);
+      res.status(200).json(error.message);
+    }
   }
 };
 
-const clearModelFolds = async (foldPath: string) => {};
+const isModelFailed = async (uvID: string, petakID: string) => {
+  const content: string = "模型运行错误";
+  await prisma.data.updateMany({
+    where: {
+      id: uvID,
+    },
+    data: {
+      progress: [content],
+    },
+  });
+  await prisma.data.updateMany({
+    where: {
+      id: petakID,
+    },
+    data: {
+      progress: [content],
+    },
+  });
+  // TODO delete files
+};

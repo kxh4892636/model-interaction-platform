@@ -77,6 +77,7 @@ const ModelPanel = ({ title, model }: AppProps) => {
             value={currentModelStatus?.paramKeys}
             onChange={(values) => {
               updateModelStatus(model, "paramKeys", values);
+              updateModelStatus(model, "percent", 0);
             }}
             options={options}
           />
@@ -91,6 +92,7 @@ const ModelPanel = ({ title, model }: AppProps) => {
             value={currentModelStatus?.projKey}
             onChange={(value) => {
               updateModelStatus(model, "projKey", value);
+              updateModelStatus(model, "percent", 0);
             }}
             options={options}
           />
@@ -105,6 +107,7 @@ const ModelPanel = ({ title, model }: AppProps) => {
             value={currentModelStatus?.boundaryKey}
             onChange={(value) => {
               updateModelStatus(model, "boundaryKey", value);
+              updateModelStatus(model, "percent", 0);
             }}
             options={options}
           />
@@ -128,11 +131,20 @@ const ModelPanel = ({ title, model }: AppProps) => {
                 const percentInterval = setInterval(async () => {
                   const dataInfo = await dataActions.getDataDetail(keys[0]);
                   const progress = dataInfo.progress;
+                  // stop model if failed to run model
+                  if (progress.length === 1) {
+                    clearInterval(percentInterval);
+                    updateModelStatus(model, "isRunning", false);
+                    message.error(progress[0]);
+                    return;
+                  } else;
+                  // update progress of model
                   updateModelStatus(
                     model,
                     "percent",
-                    Number(((progress[0] / progress[1]) * 100).toFixed(2))
+                    (Number(progress[0]) / Number(progress[1])).toFixed(2)
                   );
+                  // add result if model is finished
                   if (progress[0] === progress[1] && progress[1]) {
                     clearInterval(percentInterval);
                     updateModelStatus(model, "isRunning", false);
@@ -141,12 +153,13 @@ const ModelPanel = ({ title, model }: AppProps) => {
                       dataActions.addDataToMap(key);
                     });
                     message.success("模型运行完毕", 10);
-                  }
+                    return;
+                  } else;
                 }, 2000);
                 updateModelStatus(model, "intervalStore", percentInterval);
               };
+              // stop the model
               if (currentModelStatus?.isRunning) {
-                // TODO stop the model
                 clearInterval(currentModelStatus.intervalStore!);
                 removeModelStatus(model);
                 axios({
@@ -159,7 +172,8 @@ const ModelPanel = ({ title, model }: AppProps) => {
                     currentModelStatus.pid,
                   ],
                 });
-              } else {
+              } // run the model
+              else {
                 axios({
                   method: "post",
                   baseURL: "http://localhost:3456/model/Hydrodynamic",
