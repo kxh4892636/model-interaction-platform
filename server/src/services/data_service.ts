@@ -32,7 +32,6 @@ const getJSON = async (id: string) => {
     },
   });
   if (!info) return "can't find data by id";
-  // NOTE how to resolve json
   const filePath = dataFoldURL + info.data;
   const buffer = fs.readFileSync(filePath).toString();
   const json = JSON.parse(buffer);

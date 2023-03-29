@@ -132,7 +132,6 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
 
     // transform null
     if (type) {
-      // NOTE how to kill process tree
       console.log(type);
       spawn(`taskkill /f /t /pid ${type}`, { shell: true });
       res.status(200).json({ status: "success", content: "kill" });
@@ -143,8 +142,6 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
     boundaryKeys && keys.push(boundaryKeys);
     let meshFileName: string | undefined = undefined;
     let extent: number[] | undefined = undefined;
-    // NOTE prisma 如何查找字段 where and select
-    // NOTE JavaScript 中的 forEach不支持 promise 感知，也不支持 async 和await，所以不能在 forEach 使用 await 。 读一下 https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
     // get data by key
     for (let index = 0; index < paramKeys.length; index++) {
       const key = paramKeys[index];
@@ -158,7 +155,6 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           extent: true,
         },
       });
-      // NOTE 如何抛出错误
       if (!fileInfo) {
         throw new Error("模型参数文件请重新上传");
       } else;
@@ -211,15 +207,9 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
     });
     // run model
     const modelPath = dataFoldURL + "/temp/model/hydrodynamics/model/model.exe";
-    // NOTE spawn format shell detached
-    // NOTE detached 的不好之处
-    // shell = true 的作用, 和 cmd.exe ['/c',...] 的等效替换
     const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,
     });
-    // const outputModel = spawn(`cmd`, ["/c", `cd ${path.dirname(modelPath)} && ${modelPath}`], {});
-    // NOTE 为什么 outputModel.kill() 不生效的原因
-    // 以及 process.kill(pid) 和 (-pid) 的区别以及 (-pid) 不生效的原因(我也不知道)极其解决方法
 
     let currentCount = 0;
     let num: number = 0;

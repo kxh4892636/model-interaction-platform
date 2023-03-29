@@ -160,7 +160,6 @@ const SavePanel = () => {
                     setSelectOption(selectOptionDefault);
                   }}
                   onChange={(values: string[]) => {
-                    // NOTE options disable: true,
                     setSelectOption(
                       produce((draft) => {
                         draft.forEach((group) => {
@@ -191,9 +190,6 @@ const SavePanel = () => {
                   placeholder="请输入项目描述(可选)"
                 />
               </Form.Item>
-              {/* // NOTE upload name = file
-              // NOTE form.item getvaluefromevent
-              */}
               <Form.Item
                 label="图片"
                 name="image"

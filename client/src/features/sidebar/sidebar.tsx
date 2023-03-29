@@ -57,8 +57,6 @@ type AppProps = {
   theme?: Theme;
 };
 
-// NOTE 不使用路由实现动态菜单思路
-
 /**
  * @description: sidebar component
  * @module Sidebar
@@ -74,7 +72,7 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
   const setFlag = ExchangeFlag((state) => state.setFlag);
 
   const [showPanelID, setShowPanelID] = useState("");
-  const [showItem, setshowItem] = useState(false);
+  const [showItem, setShowItem] = useState(false);
   const map = useMapStore((state) => state.map);
   const layerChecked = useLayersStatusStore((state) => state.layersChecked);
   const sidebarItems = items.map((value): JSX.Element => {
@@ -103,7 +101,7 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
             } else {
               if (showItem && e.currentTarget.id !== showPanelID) {
               } else {
-                setshowItem(!showItem);
+                setShowItem(!showItem);
               }
               if (showPanelID === e.currentTarget.id) {
                 setShowPanelID("");

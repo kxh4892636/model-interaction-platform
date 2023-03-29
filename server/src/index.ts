@@ -13,14 +13,9 @@ import caseRoute from "./routes/case_route";
 import dataRoute from "./routes/data_route";
 import model from "./routes/ewe_route";
 
-// NOTE usage of express
-// NOTE structure of express
-// NOTE cors json urlencoded
-
 const app = express();
 const port = 3456;
 
-// NOTE use 的顺序
 // cors
 app.use(cors());
 // parse application/x-www-form-urlencoded

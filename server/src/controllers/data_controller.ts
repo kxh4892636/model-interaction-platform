@@ -43,7 +43,6 @@ const getJSON = async (req: Request, res: Response) => {
 // get transformed png of mesh by key
 const getMesh = async (req: Request, res: Response) => {
   try {
-    // NOTE how to send image
     const filePath = await dataService.getMesh(req.query.id as string);
     const cs = fs.createReadStream(filePath);
     cs.on("data", (chunk) => {

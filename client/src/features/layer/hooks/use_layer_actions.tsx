@@ -104,7 +104,6 @@ const useLayerActions = () => {
 
     // deep copy layers
     const data: Layer[] = JSON.parse(JSON.stringify(layers));
-    // NOTE 限制 tree drag 行为的思路
     // if drop and drag layer are both layer group, the action is invalid
     if (info.dragNode.group) {
       const pos = info.node.pos.split("-");

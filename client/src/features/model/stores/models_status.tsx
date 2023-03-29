@@ -61,7 +61,6 @@ const useModelsStatus = create<ModelStatusStore>((set, get) => ({
     );
   },
   getModelStatus: (model) => {
-    // NOTE get 不能使用 immer, 否则获取到的是 proxy
     const modelStatus = get().modelStatus;
     const ms: ModelStatus | undefined = modelStatus.filter((ms) => ms.model === model)[0];
     return ms;

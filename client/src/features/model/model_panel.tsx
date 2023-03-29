@@ -38,7 +38,6 @@ const ModelPanel = ({ title, model }: AppProps) => {
   const layers = useLayersStore((state) => state.layers);
   const options: SelectProps["options"] = createSelectOptions(layers);
   const dataActions = useData();
-  // NOTE 为什么要加 modelStatus
   const modelStatus = useModelsStatus((state) => state.modelStatus);
   const addModelStatus = useModelsStatus((state) => state.addModelStatus);
   const getModelStatus = useModelsStatus((state) => state.getModelStatus);
@@ -46,7 +45,6 @@ const ModelPanel = ({ title, model }: AppProps) => {
   const removeModelStatus = useModelsStatus((state) => state.removeModelStatus);
   const currentModelStatus = getModelStatus(model);
 
-  // NOTE react 组件渲染两次和 effect 渲染两次的顺序
   useEffect(() => {
     if (getModelStatus(model)) return;
     console.log(modelStatus);

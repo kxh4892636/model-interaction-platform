@@ -14,7 +14,6 @@ import { dataFoldURL } from "../../config/global_data";
 import path from "path";
 
 const router = express.Router();
-// NOTE multer
 const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
@@ -22,8 +21,6 @@ const upload = multer({
     },
     filename: (req, file, cb) => {
       //  解决中文名乱码并将文件中的空格转换为 _
-      // NOTE extName
-      // NOTE 文件中的空格对于 spawn 的坏处
       const fileName = Buffer.from(file.originalname, "latin1").toString("utf8");
       const extName = path.extname(fileName);
       cb(
