@@ -160,7 +160,6 @@ const SavePanel = () => {
                     setSelectOption(selectOptionDefault);
                   }}
                   onChange={(values: string[]) => {
-                    // TODO change selectOption
                     // NOTE options disable: true,
                     setSelectOption(
                       produce((draft) => {

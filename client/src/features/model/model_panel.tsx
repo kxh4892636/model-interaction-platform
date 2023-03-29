@@ -9,7 +9,7 @@
  */
 
 import { Button, Select, SelectProps, Progress, message } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   PanelContainer,
   PanelContentContainer,
@@ -49,6 +49,7 @@ const ModelPanel = ({ title, model }: AppProps) => {
   // NOTE react 组件渲染两次和 effect 渲染两次的顺序
   useEffect(() => {
     if (getModelStatus(model)) return;
+    console.log(modelStatus);
     addModelStatus({
       boundaryKey: null,
       intervalStore: null,
