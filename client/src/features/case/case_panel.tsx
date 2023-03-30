@@ -39,7 +39,7 @@ const CaseSearch = styled(Search)`
  */
 const CasePanel = () => {
   const [showDetail, setShowDetail] = useState(false);
-  const [selectedItem, setselectedItem] = useState("s");
+  const [selectedItem, setSelectedItem] = useState("s");
   const [data, setData] = useState<CaseListData[]>([]);
   const dataAction = useData();
 
@@ -85,11 +85,7 @@ const CasePanel = () => {
       <PanelTitleContainer>项目面板</PanelTitleContainer>
       <PanelToolsContainer>
         <PanelToolContainer>
-          <CaseSearch
-            placeholder="input search text"
-            // TODO 方法要加
-            onSearch={() => {}}
-          />
+          <CaseSearch placeholder="input search text" onSearch={() => {}} />
         </PanelToolContainer>
       </PanelToolsContainer>
       <PanelToolsContainer>占位符, 此处为筛选功能</PanelToolsContainer>
@@ -97,7 +93,7 @@ const CasePanel = () => {
         <CaseList
           data={data}
           onShow={(id) => {
-            setselectedItem(id);
+            setSelectedItem(id);
             setShowDetail(true);
           }}
         ></CaseList>

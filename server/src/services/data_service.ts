@@ -166,7 +166,6 @@ const uploadData = async (file: Express.Multer.File) => {
       .split(",")
       .map((value) => Number(value));
   } else if (type === "uvet") {
-    // TODO 以后写
   }
   // write data into database
   await prisma.data.create({

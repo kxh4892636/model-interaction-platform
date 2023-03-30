@@ -35,6 +35,7 @@ exports.R_test2 = (req: Request, res: Response) => {
       .then(() => {
         cs.exec(
           `Rscript ./src/utils/ewe/EcoPath.R '${num}'`,
+          { windowsHide: true },
           (error: any, stdout: any, stderr: any) => {
             if (error) {
               console.error("error:", error);
@@ -69,6 +70,7 @@ exports.R_test2 = (req: Request, res: Response) => {
       .then(() => {
         cs.exec(
           `Rscript ./src/utils/ewe/EcoPath.R '${num}'`,
+          { windowsHide: true },
           (error: any, stdout: any, stderr: any) => {
             if (error) {
               console.error("error:", error);
@@ -488,5 +490,4 @@ const isModelFailed = async (uvID: string, petakID: string) => {
       progress: [content],
     },
   });
-  // TODO delete files
 };

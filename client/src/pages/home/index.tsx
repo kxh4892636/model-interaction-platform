@@ -127,7 +127,6 @@ const Home: React.FC = () => {
     });
   }, []);
 
-  // NOTE 弹窗设计思想
   return (
     <View>
       <TitleBarContainer>港口水环境与生态动力学精细化模拟平台</TitleBarContainer>

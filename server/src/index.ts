@@ -19,7 +19,6 @@ const port = 3456;
 
 // cors
 app.use(cors());
-// NOTE helmet
 // helmet
 app.use(helmet());
 // parse application/x-www-form-urlencoded

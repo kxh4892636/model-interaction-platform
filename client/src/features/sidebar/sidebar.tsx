@@ -120,7 +120,6 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
   return (
     <>
       {showItem && position === "right" ? (
-        // TODO react html props
         <PanelContainer style={{ borderLeft: "1px solid #d9d9d9" }}>
           <Item selectID={showPanelID} items={items} />
         </PanelContainer>

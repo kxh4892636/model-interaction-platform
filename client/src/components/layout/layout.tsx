@@ -8,7 +8,6 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-// NOTE 布局组件的心得, 只设置高度
 import styled from "styled-components/macro";
 
 /**
@@ -53,7 +52,6 @@ export const PanelToolContainer = styled.div`
 `;
 
 // panel content container
-// NOTE flex 布局详解
 export const PanelContentContainer = styled.div`
   background: #fff;
   display: flex;
