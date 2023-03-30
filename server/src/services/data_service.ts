@@ -99,7 +99,8 @@ const uploadData = async (file: Express.Multer.File) => {
   const output = execSync(
     `conda activate gis && python ${
       resolve("./").split("\\").join("/") + "/src/utils/get_data_type_and_style.py"
-    } ${filePath}`
+    } ${filePath}`,
+    { windowsHide: true }
   );
 
   const [type, style] = output.toString().trimEnd().split(",");
@@ -127,7 +128,8 @@ const uploadData = async (file: Express.Multer.File) => {
         filePath +
         " " +
         csvPath
-      }`
+      }`,
+      { windowsHide: true }
     );
     // generate mask from csv
     execSync(
@@ -138,7 +140,8 @@ const uploadData = async (file: Express.Multer.File) => {
         csvPath +
         " " +
         maskPath
-      }`
+      }`,
+      { windowsHide: true }
     );
     // generate png from csv and mask
     const output = execSync(
@@ -151,7 +154,8 @@ const uploadData = async (file: Express.Multer.File) => {
         pngPath +
         " " +
         maskPath
-      }`
+      }`,
+      { windowsHide: true }
     );
     // get extent of mesh
     extent = output

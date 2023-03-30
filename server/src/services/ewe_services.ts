@@ -133,7 +133,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
     // transform null
     if (type) {
       console.log(type);
-      spawn(`taskkill /f /t /pid ${type}`, { shell: true });
+      spawn(`taskkill /f /t /pid ${type}`, { shell: true, windowsHide: true });
       res.status(200).json({ status: "success", content: "kill" });
       return;
     }
@@ -209,6 +209,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
     const modelPath = dataFoldURL + "/temp/model/hydrodynamics/model/model.exe";
     const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,
+      windowsHide: true,
     });
 
     let currentCount = 0;
@@ -295,7 +296,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           " " +
           txtTimeStamp
         }`,
-        { shell: true }
+        { shell: true, windowsHide: true }
       );
       console.log("uvet2png finished");
       // uvet2description
@@ -319,7 +320,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           " " +
           num
         }`,
-        { shell: true }
+        { shell: true, windowsHide: true }
       );
       console.log("uvet2description finished");
       // uvet2png;
@@ -356,7 +357,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           " " +
           num
         }`,
-        { shell: true }
+        { shell: true, windowsHide: true }
       );
       // uvet process
       await prisma.data.updateMany({
@@ -379,7 +380,10 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         ".json";
       // NOTE 不知道为什么, 加一个 setTImeout 就可以, 而且延时时间要多一点
       setTimeout(() => {
-        const output = spawn(processPath + " " + descriptionPath, { shell: true });
+        const output = spawn(processPath + " " + descriptionPath, {
+          shell: true,
+          windowsHide: true,
+        });
         output.stdout?.on("data", async (chunk) => {
           const content = chunk.toString();
           // console.log(content);

@@ -191,9 +191,10 @@ const saveCase = async (
   }
 };
 
-const clearTempFolder = () => {
+const clearTempFolder = async () => {
   try {
     deleteFolderFilesSync(dataFoldURL + "/temp", ["model.exe"]);
+    await prisma.data.deleteMany({ where: { temp: true } });
     return { status: "success", content: "clear temp folder succeed" };
   } catch (error) {
     if (error instanceof Error) {
