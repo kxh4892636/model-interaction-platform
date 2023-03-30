@@ -12,7 +12,6 @@ import { UploadOutlined } from "@ant-design/icons";
 import { Button, message, Upload } from "antd";
 import { PanelContainer, PanelTitleContainer } from "../../components/layout";
 import { useData } from "../../hooks";
-import { EWEModelID } from "../model/store";
 // modify style of antd upload component
 const StyledUpload = styled(Upload)`
   padding: 6px 10px;
@@ -26,8 +25,6 @@ const StyledUpload = styled(Upload)`
  */
 const DataPanel = () => {
   const dataActions = useData();
-  const EWEID: any = EWEModelID((state) => state.EWEModelID);
-  const setEWEID: any = EWEModelID((state) => state.setEWEModelID);
 
   return (
     <PanelContainer>
@@ -39,13 +36,6 @@ const DataPanel = () => {
         onChange={(info) => {
           if (info.file.status === "done") {
             message.success(`${info.file.name} 文件上传成功`);
-            if (
-              info.file.name.split(".")[1] === "eweaccdb" ||
-              info.file.name.split(".")[1] === "ewemdb"
-            ) {
-              // console.log(info.file.response)
-              setEWEID([...EWEID, info.file.response]);
-            } else;
             dataActions.addDataToMap(info.file.response);
             dataActions.addDataToLayerTree(info.file.response);
           }

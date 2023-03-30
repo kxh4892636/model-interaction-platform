@@ -8,8 +8,8 @@ import {
   Table,
   Radio,
   message,
-  Divider,
   Select,
+  Switch
 } from "antd";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "./index.css";
@@ -25,10 +25,10 @@ import {
   FisheryLand,
   FisheryDiscard,
   FisheryDiscardCol,
-  EWEModelID,
   selectedEWEModelID,
 } from "../store";
 import { useData } from "../../../hooks";
+import useLayersStore from "../../../stores/layers_store";
 import axios from "axios";
 const EditableContext = React.createContext(null);
 const EditableRow = ({ index, ...props }) => {
@@ -113,21 +113,34 @@ const EditableCell = ({
 };
 export default function App() {
   const dataActions = useData();
-  const EWEID = EWEModelID((state) => state.EWEModelID);
   const [SelectOptions, setSelectOptions] = useState([]);
   const setselectEWEModelID = selectedEWEModelID((state) => state.setEWEModelID);
-  useEffect(() => {
-    let SelectArr = [];
-    EWEID.forEach(async (el, index) => {
-      // dataActions.getDataDetail(el) 传入ID，得到的是response.data
-      const resdata = await dataActions.getDataDetail(el);
-      SelectArr.push({ label: resdata.title, value: resdata.data + "|" + el });
-      if (index === EWEID.length - 1) {
-        setSelectOptions(SelectArr);
+  // 生成select下拉框内容
+  const layers = useLayersStore((state) => state.layers);
+  const createSelectOptions = (layers) => {
+    console.log(layers)
+    let selectOptions = [];
+    const loop = (data, callback) => {
+      for (let index = 0; index < data.length; index++) {
+        const layer = data[index];
+        if (layer.children) loop(layer.children, callback);
+        else;
+        if (!layer.group) callback(layer, index, data);
+        else;
+      }
+    };
+    loop(layers, (layer) => {
+      if(layer.type==="ewemodel"){
+        selectOptions.push({ value: layer.key, label: layer.title });
       }
     });
+    return selectOptions;
+  };
+
+  useEffect(() => {
+    setSelectOptions(createSelectOptions(layers));
     //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [layers.length]);
   // Group 完成编辑
   const GrouphandleOk = () => {
     setGroupTData(GroupData);
@@ -360,13 +373,13 @@ export default function App() {
 
     setDiscardFateData(response.DiscardFate);
   };
-  const ImportModel = (filepath) => {
-    // console.log(filepath)
+  const ImportModel = async (id) => {
+    const detail = await dataActions.getDataDetail(id)
     message.loading({ content: "数据加载中", key: "Mloading" });
     axios({
       method: "post",
       baseURL: "http://localhost:3456/model/R_test3",
-      data: { filepath: filepath },
+      data: { filepath: detail.data },
     }).then((response) => {
       if (response.status === 200) {
         message.destroy("Mloading");
@@ -379,7 +392,21 @@ export default function App() {
       LoadDATA(response.data);
     });
   };
+  // 控制显示与隐藏
+  const [Mdisplaystate,setMdisplaystate] = useState("block") 
+  const [displaystate,setdisplaystate] = useState("none") 
+  const onChange333 = (checked) => {
+    if(checked===true){
+      setMdisplaystate("block")
+      setdisplaystate("none")
+    }
+    else{
+      setMdisplaystate("none")
+      setdisplaystate("block")
+    }
+  };
   return (
+    
     <Space
       direction="vertical"
       size="middle"
@@ -387,7 +414,8 @@ export default function App() {
         display: "flex",
       }}
     >
-      <div>
+      <Switch checkedChildren="直接导入" unCheckedChildren="手动定义" defaultChecked onChange={onChange333}/>
+      <div style={{display:Mdisplaystate}}>
         <Space>
           <span>模型选择</span>
           <Select
@@ -397,15 +425,14 @@ export default function App() {
             }}
             onChange={(value) => {
               // 先设置UUID 再执行计算
-              setselectEWEModelID(value.split("|")[1]);
-              ImportModel(value.split("|")[0]);
+              setselectEWEModelID(value);
+              ImportModel(value);
             }}
             options={SelectOptions}
           />
         </Space>
       </div>
-      <Divider />
-      <div>
+      <div style={{display:displaystate}}>
         <Space>
           <span>定义功能组</span>
           <Button
@@ -446,7 +473,7 @@ export default function App() {
           width="1200"
         />
       </div>
-      <div>
+      <div style={{display:displaystate}}>
         <Space>
           <span>定义舰船</span>
           <Button
