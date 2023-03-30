@@ -10,7 +10,7 @@
 import express from "express";
 import multer from "multer";
 import dataController from "../controllers/data_controller";
-import { dataFoldURL } from "../../config/global_data";
+import { dataFoldURL } from "../config/global_data";
 import path from "path";
 
 const router = express.Router();

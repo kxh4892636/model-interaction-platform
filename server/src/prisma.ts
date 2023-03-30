@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
-import { dataFoldURL } from "../config/global_data";
+import { dataFoldURL } from "./config/global_data";
 
 const prisma = new PrismaClient();
 

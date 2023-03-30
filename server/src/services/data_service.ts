@@ -1,7 +1,7 @@
 import fs from "fs";
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
-import { dataFoldURL } from "../../config/global_data";
+import { dataFoldURL } from "../config/global_data";
 import { execSync } from "child_process";
 import { resolve } from "path";
 

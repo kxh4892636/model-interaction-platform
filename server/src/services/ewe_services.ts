@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import { dataFoldURL } from "../../config/global_data";
+import { dataFoldURL } from "../config/global_data";
 import { copyFile, rename } from "fs";
 import path, { resolve } from "path";
 import crypto from "crypto";
