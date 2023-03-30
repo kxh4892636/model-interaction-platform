@@ -8,7 +8,6 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-// TODO comments
 import { create } from "zustand";
 import produce from "immer";
 
@@ -49,7 +48,6 @@ interface AnimatedStatusStore {
  * @Author xiaohan kong
  * @export module: useLayerStatusStore
  */
-// NOTE 控制 animate 的思路
 const useAnimatedStatusStore = create<AnimatedStatusStore>((set, get) => ({
   animatedStatus: [],
   addAnimatedStatus: (value) =>

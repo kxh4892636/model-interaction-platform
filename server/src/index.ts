@@ -9,6 +9,7 @@
  */
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import caseRoute from "./routes/case_route";
 import dataRoute from "./routes/data_route";
 import model from "./routes/ewe_route";
@@ -18,6 +19,8 @@ const port = 3456;
 
 // cors
 app.use(cors());
+// helmet
+app.use(helmet());
 // parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 // parse application/json

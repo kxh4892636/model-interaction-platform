@@ -8,14 +8,13 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-// TODO comments
 
 import { ImageSource } from "mapbox-gl";
 import useLayersAnimatedStore from "../stores/animated_status_store";
 import useMapStore from "../stores/map_store";
 import useData from "./use_data";
 
-// TODO can't alert each other between hooks
+// NOtE can't alert each other between hooks
 const useAnimate = () => {
   const map = useMapStore((state) => state.map);
   const dataAction = useData();

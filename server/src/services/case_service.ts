@@ -44,7 +44,7 @@ const deleteFolderFilesSync = (folderPath: string, filter: string[]) => {
  * @param source the source path of folder
  * @param target the target path of folder
  */
-function copyFolderSync(source: string, target: string) {
+const copyFolderSync = (source: string, target: string) => {
   if (!fs.existsSync(target)) {
     fs.mkdirSync(target);
   }
@@ -61,7 +61,23 @@ function copyFolderSync(source: string, target: string) {
       copyFolderSync(sourcePath, targetPath);
     }
   });
-}
+};
+
+/**
+ * clear temp folder in data folder
+ */
+const clearTempFolder = async () => {
+  try {
+    deleteFolderFilesSync(dataFoldURL + "/temp", ["model.exe"]);
+    await prisma.data.deleteMany({ where: { temp: true } });
+    return { status: "success", content: "clear temp folder succeed" };
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error);
+      return error.message;
+    }
+  }
+};
 
 /**
  * return the list of all cases
@@ -183,18 +199,6 @@ const saveCase = async (
     console.log("save case succeed");
 
     return { status: "success", content: "save case succeed" };
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(error);
-      return error.message;
-    }
-  }
-};
-
-const clearTempFolder = () => {
-  try {
-    deleteFolderFilesSync(dataFoldURL + "/temp", ["model.exe"]);
-    return { status: "success", content: "clear temp folder succeed" };
   } catch (error) {
     if (error instanceof Error) {
       console.error(error);
