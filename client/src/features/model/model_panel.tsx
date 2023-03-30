@@ -133,7 +133,8 @@ const ModelPanel = ({ title, model }: AppProps) => {
                   // stop model if failed to run model
                   if (progress.length === 1) {
                     clearInterval(percentInterval);
-                    updateModelStatus(model, "isRunning", false);
+                    currentModelStatus && clearInterval(currentModelStatus.intervalStore!);
+                    removeModelStatus(model);
                     message.error(progress[0]);
                     return;
                   } else;

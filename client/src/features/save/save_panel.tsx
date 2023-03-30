@@ -230,7 +230,7 @@ const SavePanel = () => {
               </Form.Item>
               <Form.Item wrapperCol={{ offset: 18, span: 6 }}>
                 <Button type="primary" htmlType="submit">
-                  Submit
+                  确认
                 </Button>
               </Form.Item>
             </Form>

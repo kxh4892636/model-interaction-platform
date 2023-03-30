@@ -8,7 +8,7 @@ library(rjson)
 #print(getwd())
 
 
-source(str_c(getwd(),"/utils/ewe/MyFunction.R",seq="",collapse = NULL))
+source(str_c(getwd(),"/src/utils/ewe/MyFunction.R",seq="",collapse = NULL))
 # 携带参数
 args <- commandArgs(trailingOnly = TRUE)
 

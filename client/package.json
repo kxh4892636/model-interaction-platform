@@ -24,7 +24,6 @@
     "react-router-dom": "^6.9.0",
     "react-scripts": "5.0.1",
     "styled-components": "^5.3.6",
-    "swr": "^2.0.3",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
     "zustand": "^4.3.3"
@@ -48,7 +47,11 @@
     "production": [
       ">0.2%",
       "not dead",
-      "not op_mini all"
+      "not op_mini all",
+      "not safari < 10",
+      "not chrome < 51",
+      "not android < 5",
+      "not ie < 12"
     ],
     "development": [
       "last 1 chrome version",

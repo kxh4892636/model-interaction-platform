@@ -28,6 +28,7 @@ const DataPanel = () => {
   const dataActions = useData();
   const EWEID: any = EWEModelID((state) => state.EWEModelID);
   const setEWEID: any = EWEModelID((state) => state.setEWEModelID);
+
   return (
     <PanelContainer>
       <PanelTitleContainer>数据面板</PanelTitleContainer>

@@ -109,12 +109,12 @@ const StylePanel = () => {
       </PanelContentContainer>
       <PanelToolsContainer>
         <PanelToolContainer>
-          <Button type="primary" danger style={{ marginBottom: "10px" }}>
+          {/* <Button type="primary" danger style={{ marginBottom: "10px" }}>
             取消
-          </Button>
+          </Button> */}
         </PanelToolContainer>
         <PanelToolContainer>
-          <Button
+          {/* <Button
             type="primary"
             onClick={() => {
               console.log(layerSelected);
@@ -122,7 +122,7 @@ const StylePanel = () => {
             style={{ marginBottom: "10px" }}
           >
             应用
-          </Button>
+          </Button> */}
         </PanelToolContainer>
         <PanelToolContainer>
           <Button

@@ -98,7 +98,7 @@ const uploadData = async (file: Express.Multer.File) => {
   // get type and style of data
   const output = execSync(
     `conda activate gis && python ${
-      resolve("./").split("\\").join("/") + "/utils/get_data_type_and_style.py"
+      resolve("./").split("\\").join("/") + "/src/utils/get_data_type_and_style.py"
     } ${filePath}`
   );
 
@@ -122,7 +122,7 @@ const uploadData = async (file: Express.Multer.File) => {
     execSync(
       `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
-        "/utils/hydrodynamics/mesh2csv.py" +
+        "/src/utils/hydrodynamics/mesh2csv.py" +
         " " +
         filePath +
         " " +
@@ -133,7 +133,7 @@ const uploadData = async (file: Express.Multer.File) => {
     execSync(
       `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
-        "/utils/hydrodynamics/mesh2mask.py" +
+        "/src/utils/hydrodynamics/mesh2mask.py" +
         " " +
         csvPath +
         " " +
@@ -144,7 +144,7 @@ const uploadData = async (file: Express.Multer.File) => {
     const output = execSync(
       `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
-        "/utils/hydrodynamics/mesh2png.py" +
+        "/src/utils/hydrodynamics/mesh2png.py" +
         " " +
         csvPath +
         " " +

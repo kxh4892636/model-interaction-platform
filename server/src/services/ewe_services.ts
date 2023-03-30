@@ -6,13 +6,13 @@ import path, { resolve } from "path";
 import crypto from "crypto";
 import { spawn, spawnSync } from "child_process";
 const cs = require("child_process");
-const { query } = require("../../utils/ewe/importEWE");
+const { query } = require("../../src/utils/ewe/importEWE");
 const {
   CRUDdatabase,
   HandleReturn,
   FlowDiagram,
   ModifyDatabase,
-} = require("../../utils/ewe/exportEWE");
+} = require("../../src/utils/ewe/exportEWE");
 const prisma = new PrismaClient();
 
 // 计算结果
@@ -34,7 +34,7 @@ exports.R_test2 = (req: Request, res: Response) => {
     database
       .then(() => {
         cs.exec(
-          `Rscript ./utils/ewe/EcoPath.R '${num}'`,
+          `Rscript ./src/utils/ewe/EcoPath.R '${num}'`,
           (error: any, stdout: any, stderr: any) => {
             if (error) {
               console.error("error:", error);
@@ -68,7 +68,7 @@ exports.R_test2 = (req: Request, res: Response) => {
     database
       .then(() => {
         cs.exec(
-          `Rscript ./utils/ewe/EcoPath.R '${num}'`,
+          `Rscript ./src/utils/ewe/EcoPath.R '${num}'`,
           (error: any, stdout: any, stderr: any) => {
             if (error) {
               console.error("error:", error);
@@ -233,7 +233,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: uvID,
           },
           data: {
-            progress: ["0", `${5 * Number(num) + 2}`],
+            progress: ["0", `${5 * num + 2}`],
           },
         });
         await prisma.data.updateMany({
@@ -241,7 +241,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: petakID,
           },
           data: {
-            progress: ["0", `${5 * Number(num) + 2}`],
+            progress: ["0", `${5 * num + 2}`],
           },
         });
       } else;
@@ -253,7 +253,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: uvID,
           },
           data: {
-            progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
+            progress: [`${currentCount}`, `${5 * num + 2}`],
           },
         });
         await prisma.data.updateMany({
@@ -261,14 +261,16 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
             id: petakID,
           },
           data: {
-            progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
+            progress: [`${currentCount}`, `${5 * num + 2}`],
           },
         });
       }
     });
     outputModel.stdout?.on("end", async () => {
       // same as stderr
-      if (!currentCount) {
+      if (!currentCount || currentCount !== 3 * num) {
+        console.log(currentCount, num);
+
         await isModelFailed(uvID, petakID);
         return;
       } else;
@@ -278,7 +280,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       spawnSync(
         `conda activate gis && python ${
           path.resolve("./").split("\\").join("/") +
-          "/utils/hydrodynamics/uvet2txt.py" +
+          "/src/utils/hydrodynamics/uvet2txt.py" +
           " " +
           `${dataFoldURL}/temp/model/hydrodynamics/model/uvet.dat` +
           " " +
@@ -301,7 +303,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       spawn(
         `conda activate gis && python ${
           path.resolve("./").split("\\").join("/") +
-          "/utils/hydrodynamics/uvet2description.py" +
+          "/src/utils/hydrodynamics/uvet2description.py" +
           " " +
           `${dataFoldURL}/temp/model/hydrodynamics/transform/uvet/txt/description_${descriptionTimeStamp}.json` +
           " " +
@@ -337,7 +339,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       spawn(
         `conda activate gis && python ${
           path.resolve("./").split("\\").join("/") +
-          "/utils/hydrodynamics/uvet2png.py" +
+          "/src/utils/hydrodynamics/uvet2png.py" +
           " " +
           `${dataFoldURL}/temp/model/hydrodynamics/transform/uvet/txt` +
           " " +
@@ -369,7 +371,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           ],
         },
       });
-      const processPath = resolve("./").split("\\").join("/") + "/utils/process/process.exe";
+      const processPath = resolve("./").split("\\").join("/") + "/src/utils/process/process.exe";
       const descriptionPath =
         dataFoldURL +
         "/temp/model/hydrodynamics/transform/uvet/txt/description_" +
@@ -388,7 +390,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
                 id: uvID,
               },
               data: {
-                progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
+                progress: [`${currentCount}`, `${5 * num + 2}`],
               },
             });
             await prisma.data.updateMany({
@@ -396,7 +398,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
                 id: petakID,
               },
               data: {
-                progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
+                progress: [`${currentCount}`, `${5 * num + 2}`],
               },
             });
           } else;
@@ -440,7 +442,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
                 id: uvID,
               },
               data: {
-                progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
+                progress: [`${currentCount}`, `${5 * num + 2}`],
               },
             });
             await prisma.data.updateMany({
@@ -448,7 +450,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
                 id: petakID,
               },
               data: {
-                progress: [`${currentCount}`, `${5 * Number(num) + 2}`],
+                progress: [`${currentCount}`, `${5 * num + 2}`],
               },
             });
           });

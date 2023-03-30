@@ -1,5 +1,16 @@
 import { PlusOutlined, CheckOutlined } from "@ant-design/icons";
-import { Button, Space, Form, Input, Popconfirm, Table, Radio, message, Divider,Select } from "antd";
+import {
+  Button,
+  Space,
+  Form,
+  Input,
+  Popconfirm,
+  Table,
+  Radio,
+  message,
+  Divider,
+  Select,
+} from "antd";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "./index.css";
 import {
@@ -103,16 +114,16 @@ const EditableCell = ({
 export default function App() {
   const dataActions = useData();
   const EWEID = EWEModelID((state) => state.EWEModelID);
-  const [SelectOptions, setSelectOptions] = useState([])
+  const [SelectOptions, setSelectOptions] = useState([]);
   const setselectEWEModelID = selectedEWEModelID((state) => state.setEWEModelID);
   useEffect(() => {
-    let SelectArr = []
+    let SelectArr = [];
     EWEID.forEach(async (el, index) => {
       // dataActions.getDataDetail(el) 传入ID，得到的是response.data
       const resdata = await dataActions.getDataDetail(el);
-      SelectArr.push({label:resdata.title,value:resdata.data + "|" + el})
+      SelectArr.push({ label: resdata.title, value: resdata.data + "|" + el });
       if (index === EWEID.length - 1) {
-        setSelectOptions(SelectArr)
+        setSelectOptions(SelectArr);
       }
     });
     //eslint-disable-next-line react-hooks/exhaustive-deps
