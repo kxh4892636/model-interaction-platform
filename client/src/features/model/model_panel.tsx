@@ -115,7 +115,7 @@ const ModelPanel = ({ title, model }: AppProps) => {
           <div style={{ padding: "10px 12px" }}>模型运行进度</div>
           <Progress
             percent={currentModelStatus?.percent ? currentModelStatus.percent : 0}
-            style={{ margin: "0px 12px", width: "300px" }}
+            style={{ margin: "0px 12px", width: "320px" }}
           />
         </>
       </PanelContentContainer>

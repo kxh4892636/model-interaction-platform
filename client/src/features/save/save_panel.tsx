@@ -34,7 +34,7 @@ const StyledButton = styled(Button)`
 
 const StyledUpload = styled(Upload)`
   &&& .ant-upload {
-    width: 240px;
+    width: 260px;
     height: 240px;
   }
 `;
@@ -95,7 +95,7 @@ const SavePanel = () => {
               name="basic"
               labelCol={{ span: 4 }}
               wrapperCol={{ span: 20 }}
-              style={{ maxWidth: 340, padding: "10px 14px" }}
+              style={{ maxWidth: 360, padding: "10px 14px" }}
               onFinish={(value) => {
                 const keys = getKeys.getLayerKeys(layers);
                 if (!keys.length) {

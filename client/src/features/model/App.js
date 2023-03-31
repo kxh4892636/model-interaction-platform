@@ -5,6 +5,11 @@ import MySider from "./components/Sider";
 //路由
 import { useRoutes, useNavigate } from "react-router-dom";
 import routes from "./route";
+import {
+  PanelContainer,
+  PanelContentContainer,
+  PanelTitleContainer,
+} from "../../components/layout";
 
 export default function App() {
   const { Sider, Content } = Layout;
@@ -18,13 +23,18 @@ export default function App() {
   }
 
   return (
-    <Layout style={{ height: "100%", position: "relative"}}>
+    <Layout style={{ height: "100%", position: "relative", zIndex: "10" }}>
       {/* <Header className="header" style={{backgroundColor:"black",height:"48px",lineHeight:"48px"}}>
           <MyHeader></MyHeader>
         </Header> */}
-      <Layout style={{ height: "94vh",border: "1px solid rgb(172,172,172)" }}>
-        <Sider width={250} style={{ background: "#fff", paddingTop: "10px" }}>
-          <MySider routechange={test}></MySider>
+      <Layout style={{ height: "94vh", borderRight: "1px solid rgb(172,172,172)" }}>
+        <Sider width={360} style={{ background: "#fff" }}>
+          <PanelContainer>
+            <PanelTitleContainer>生态系统模型(EWE)</PanelTitleContainer>
+            <PanelContentContainer>
+              <MySider routechange={test}></MySider>
+            </PanelContentContainer>
+          </PanelContainer>
         </Sider>
         <Layout>
           {/* <Layout style={{ padding: '0 24px 24px' }}> */}
@@ -34,7 +44,7 @@ export default function App() {
               margin: 0,
               minHeight: 280,
               background: "white",
-              borderLeft:"1px dotted"
+              borderLeft: "1px dotted",
             }}
           >
             {/* 路由注册 */}

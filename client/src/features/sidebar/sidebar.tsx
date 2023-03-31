@@ -44,8 +44,9 @@ const PanelContainer = styled.div`
   position: relative;
   display: flex;
   flex-flow: column;
-  width: 340px;
+  width: 360px;
   background: #fff;
+  max-height: 94vh;
 `;
 
 type Position = "left" | "right";
@@ -85,6 +86,8 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
             // model模块大切换
             if (e.currentTarget.id === "model") {
               setFlag(Flag);
+              setShowItem(false);
+              setShowPanelID(e.currentTarget.id);
               if (Flag === false) {
                 layerChecked.forEach((key) => {
                   if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "none");

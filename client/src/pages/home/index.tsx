@@ -43,10 +43,10 @@ const View = styled.div`
 
 // TitleBar container
 const TitleBarContainer = styled.div`
-  height: 56px;
-  line-height: 56px;
+  height: 6vh;
+  line-height: 6vh;
   font-size: 20px;
-  background: #fff;
+  background: #ffffff;
   padding-left: 20px;
   border-bottom: 1px solid #d9d9d9;
 `;

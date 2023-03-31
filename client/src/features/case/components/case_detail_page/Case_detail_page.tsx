@@ -22,7 +22,7 @@ const CaseContainer = styled.div`
   display: flex;
   flex-flow: column;
   position: absolute;
-  width: 340px;
+  width: 360px;
   height: 100%;
   background-color: #fff;
   z-index: 9;

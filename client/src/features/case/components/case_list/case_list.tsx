@@ -8,16 +8,11 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import styled from "styled-components/macro";
-import { List, Button, message } from "antd";
+import { List, Button, message, Divider, Skeleton } from "antd";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { CaseListData } from "../../types";
 import useCase from "../../hooks/use_case";
 
-// modify sytle of antd list component
-const StyledList = styled(List)`
-  && .ant-list-item-meta {
-    margin-block-end: 12px;
-  }
-`;
 // CaseList title Style
 const StyledTitle = styled.div`
   :hover {
@@ -48,15 +43,21 @@ const CaseList = ({ data, onShow }: AppProps) => {
   };
 
   return (
-    <>
-      <StyledList
+    <div id="scrollableDiv" style={{ height: "calc(94vh - 88px)", overflow: "auto" }}>
+      {/* <InfiniteScroll
+        dataLength={data.length}
+        next={() => {}}
+        hasMore={data.length < 999}
+        loader={<></>}
+        endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+        scrollableTarget="scrollableDiv"
+      > */}
+      <List
         itemLayout="vertical"
-        pagination={{
-          pageSize: 5,
-        }}
         dataSource={data}
         renderItem={(item: any) => (
           <List.Item
+            style={{ minHeight: "140px" }}
             key={item.key}
             // button click event
             actions={[
@@ -70,7 +71,7 @@ const CaseList = ({ data, onShow }: AppProps) => {
                 添加至地图
               </Button>,
             ]}
-            extra={<img width={120} height={90} alt="logo" src={item.image} />}
+            extra={<img width={140} height={110} alt="logo" src={item.image} />}
           >
             <List.Item.Meta
               // title click event
@@ -89,7 +90,8 @@ const CaseList = ({ data, onShow }: AppProps) => {
           </List.Item>
         )}
       />
-    </>
+      {/* </InfiniteScroll> */}
+    </div>
   );
 };
 

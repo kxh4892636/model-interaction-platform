@@ -58,7 +58,7 @@ const MapView = ({ display }: { display: boolean }) => {
   return (
     <div
       ref={mapContainerRef}
-      style={{ height: "100%", position: display ? "absolute" : "relative" }}
+      style={{ height: "100%", width: "100%", position: display ? "absolute" : "relative" }}
       className="map-container"
     />
   );

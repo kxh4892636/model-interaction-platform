@@ -98,7 +98,6 @@ const CasePanel = () => {
           />
         </PanelToolContainer>
       </PanelToolsContainer>
-      <PanelToolsContainer>占位符, 此处为筛选功能</PanelToolsContainer>
       <PanelContentContainer>
         {!showDetail && (
           <CaseList
