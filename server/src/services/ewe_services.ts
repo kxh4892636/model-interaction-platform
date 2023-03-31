@@ -5,6 +5,7 @@ import { copyFile, rename } from "fs";
 import path, { resolve } from "path";
 import crypto from "crypto";
 import { spawn, spawnSync } from "child_process";
+import { deleteFolderFilesSync } from "../utils/tools/fs_action";
 const cs = require("child_process");
 const { query } = require("../../src/utils/ewe/importEWE");
 const {
@@ -158,6 +159,9 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         },
       });
       if (!fileInfo) {
+        setTimeout(() => {
+          deleteFolderFilesSync(dataFoldURL + "/temp/model/hydrodynamics/model", ["model.exe"]);
+        }, 2000);
         throw new Error("模型参数文件请重新上传");
       } else;
 
@@ -177,6 +181,9 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       } else;
     }
     if (!meshFileName) {
+      setTimeout(() => {
+        deleteFolderFilesSync(dataFoldURL + "/temp/model/hydrodynamics/model", ["model.exe"]);
+      }, 2000);
       throw new Error("mesh 模型参数文件不存在");
     } else;
     // create the record fo result
@@ -220,6 +227,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
     let num: number = 0;
     outputModel.stderr.on("data", async () => {
       if (num === 0) {
+        deleteFolderFilesSync(dataFoldURL + "/temp/model/hydrodynamics/model", ["model.exe"]);
         res.status(200).json({ status: "failed", content: "模型参数错误" });
         return;
       } else {
@@ -275,7 +283,6 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       // same as stderr
       if (!currentCount || currentCount !== 3 * num) {
         console.log(currentCount, num);
-
         await isModelFailed(uvID, petakID);
         return;
       } else;
@@ -476,6 +483,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
 
 const isModelFailed = async (uvID: string, petakID: string) => {
   const content: string = "模型运行错误";
+  deleteFolderFilesSync(dataFoldURL + "/temp/model/hydrodynamics/model", ["model.exe"]);
   await prisma.data.updateMany({
     where: {
       id: uvID,

@@ -58,8 +58,8 @@ const main = async () => {
   //   },
   // });
   // await prisma.$queryRaw`UPDATE data SET data = replace(data,'/temp/','/case/hydrodynamics_result/') WHERE temp = true`;
-  await prisma.data.deleteMany({});
-  await prisma.case.deleteMany({});
+  // await prisma.data.deleteMany({});
+  // await prisma.case.deleteMany({});
   // prisma.$queryRaw``;
   const data = await prisma.data.findMany({
     // where: { id: "a3e062a1-d8ac-4ad1-ad46-ea9394f09400" },
@@ -67,8 +67,8 @@ const main = async () => {
   const aa = await prisma.case.findMany();
   console.log(aa);
   console.log(data);
-  console.log(data.length);
   console.log(aa.length);
+  console.log(data.length);
   // npx ts-node prisma.ts
 };
 

@@ -42,19 +42,9 @@ const CasePanel = () => {
   const [selectedItem, setSelectedItem] = useState("");
   const [data, setData] = useState<CaseListData[]>([]);
   const dataAction = useData();
+  const [refresh, setRefresh] = useState(0);
 
   const getImageUrl = async (key: string | undefined) => {
-    // if (typeof res.data === "object") setData(res.data);
-    // else;
-    // if (!res.data.image) {
-    //   setImageUrl("http://localhost:3333/no_data.png");
-    // } else {
-    //   dataAction.getData(res.data.image, "image", {}, "blob").then((res) => {
-    //     const blob = new Blob([res]);
-    //     const url = window.URL.createObjectURL(blob);
-    //     setImageUrl(url);
-    //   });
-    // }
     if (!key) {
       return "http://localhost:3333/no_data.png";
     } else {
@@ -83,7 +73,7 @@ const CasePanel = () => {
       setData(caseListData);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [refresh]);
 
   return (
     <PanelContainer>
@@ -92,6 +82,7 @@ const CasePanel = () => {
           id={selectedItem}
           onClose={() => {
             setShowDetail(false);
+            setRefresh(refresh + 1);
           }}
         />
       ) : (

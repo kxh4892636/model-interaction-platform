@@ -6,7 +6,7 @@ import path from "path";
  * @param folderPath the path of folder
  * @param filter the files (have suffix) that excluding delete eg. model.exe
  */
-export const deleteFolderFilesSync = (folderPath: string, filter: string[]) => {
+export const deleteFolderFilesSync = (folderPath: string, filter: string[] = []) => {
   if (!fs.existsSync(folderPath)) {
     return;
   } else;

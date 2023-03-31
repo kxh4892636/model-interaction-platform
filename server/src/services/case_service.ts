@@ -23,7 +23,11 @@ const prisma = new PrismaClient();
  * @returns caseList
  */
 const getList = async () => {
-  const data = await prisma.case.findMany();
+  const data = await prisma.case.findMany({
+    orderBy: {
+      count: "desc",
+    },
+  });
   return data;
 };
 
@@ -153,7 +157,7 @@ const deleteCase = async (id: string) => {
   if (!info) {
     return { status: "fail", content: "can't find case by id" };
   }
-  const keys = [...info.data, info.image];
+  const keys = info.image ? [...info.data, info.image] : info.data;
   let timeStamps: string[] = [];
   let filterKeys: string[] = [];
 
@@ -163,18 +167,16 @@ const deleteCase = async (id: string) => {
     const dataInfo = await prisma.data.findUnique({ where: { id: key } });
     const timeStamp = dataInfo!.data.match(/(?<=\_)\d*(?=\.)/)?.toString();
     const count = dataInfo!.count;
-    console.log(count);
-    console.log(key);
 
     if (count > 1) {
       await prisma.data.update({ where: { id: key }, data: { count: count - 1 } });
-      filterKeys.push(key);
     } else {
+      filterKeys.push(key);
       timeStamps.push(timeStamp!);
     }
   }
-  for (let index = 0; index < keys.length; index++) {
-    const key = keys[index];
+  for (let index = 0; index < filterKeys.length; index++) {
+    const key = filterKeys[index];
     await prisma.data.delete({ where: { id: key } });
   }
   await prisma.case.delete({ where: { id: id } });

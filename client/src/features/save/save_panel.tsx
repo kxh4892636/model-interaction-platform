@@ -96,8 +96,11 @@ const SavePanel = () => {
               wrapperCol={{ span: 20 }}
               style={{ maxWidth: 340, padding: "10px 10px" }}
               onFinish={(value) => {
-                console.log(value);
                 const keys = getKeys.getLayerKeys(layers);
+                if (!keys.length) {
+                  message.error("项目保存失败, 无数据可以保存", 10);
+                  return;
+                } else;
                 axios
                   .request({
                     url: "http://localhost:3456/case/action",
@@ -117,9 +120,7 @@ const SavePanel = () => {
                     console.log(res.data);
                     if (result.status === "success") {
                       message.success("模型案例保存成功", 10);
-                      setTimeout(() => {
-                        setIsShowSaveInfo(false);
-                      }, 1000);
+                      setIsShowSaveInfo(false);
                     } else {
                       message.error("模型案例保存失败", 10);
                     }
