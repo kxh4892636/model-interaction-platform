@@ -127,7 +127,7 @@ const StylePanel = () => {
         <PanelToolContainer>
           <Button
             type="primary"
-            style={{ marginBottom: "10px" }}
+            style={{ marginBottom: "10px", marginLeft: "auto", marginRight: "12px" }}
             onClick={() => {
               // Update the animatedStatus of selected layer
               const style = layerSelected!.layerStyle;

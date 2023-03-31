@@ -68,6 +68,7 @@ const SavePanel = () => {
   const [imageUrl, setImageUrl] = useState<string>();
   const [imageLoading, setImageLoading] = useState(false);
   const [imageKey, setImageKey] = useState<string>();
+  const [isLoading, setIsLoading] = useState(false);
   const getKeys = useKeys();
   const layers = useLayersStore((state) => state.layers);
 
@@ -98,6 +99,7 @@ const SavePanel = () => {
               onFinish={(value) => {
                 const keys = getKeys.getLayerKeys(layers);
                 if (!keys.length) {
+                  setIsLoading(false);
                   message.error("项目保存失败, 无数据可以保存", 10);
                   return;
                 } else;
@@ -124,6 +126,7 @@ const SavePanel = () => {
                     } else {
                       message.error("模型案例保存失败", 10);
                     }
+                    setIsLoading(false);
                     setIsShowSaveInfo(false);
                     setSelectOption(selectOptionDefault);
                     setImageUrl(undefined);
@@ -231,7 +234,14 @@ const SavePanel = () => {
                 </StyledUpload>
               </Form.Item>
               <Form.Item wrapperCol={{ offset: 18, span: 6 }}>
-                <Button type="primary" htmlType="submit">
+                <Button
+                  loading={isLoading}
+                  onClick={() => {
+                    setIsLoading(true);
+                  }}
+                  type="primary"
+                  htmlType="submit"
+                >
                   确认
                 </Button>
               </Form.Item>

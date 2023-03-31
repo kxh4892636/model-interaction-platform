@@ -73,13 +73,14 @@ const saveCase = async (
 ) => {
   try {
     // create case record
+    const caseID = crypto.randomUUID();
     const timeStamp = Date.now();
     await prisma.case.create({
       data: {
         author: author,
         count: 0,
         description: description ? description : title,
-        id: crypto.randomUUID(),
+        id: caseID,
         image: imageKey ? imageKey : "",
         time: new Date(timeStamp).toISOString(),
         title: title,
@@ -98,6 +99,11 @@ const saveCase = async (
       });
 
       if (!info) {
+        await prisma.case.delete({
+          where: {
+            id: caseID,
+          },
+        });
         return { status: "fail", content: "the file is not exist" };
       }
 

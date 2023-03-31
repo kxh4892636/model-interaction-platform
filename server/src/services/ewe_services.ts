@@ -226,6 +226,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
     let currentCount = 0;
     let num: number = 0;
     outputModel.stderr.on("data", async () => {
+      console.log("model failed");
       if (num === 0) {
         deleteFolderFilesSync(dataFoldURL + "/temp/model/hydrodynamics/model", ["model.exe"]);
         res.status(200).json({ status: "failed", content: "模型参数错误" });
@@ -309,7 +310,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         }`,
         { shell: true, windowsHide: true }
       );
-      console.log("uvet2png finished");
+      console.log("uvet2txt finished");
       // uvet2description
       const descriptionTimeStamp = Date.now().toString();
       spawn(
