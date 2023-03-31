@@ -62,7 +62,7 @@ export const copyFolderSync = (source: string, target: string) => {
 
   const files = fs.readdirSync(source);
 
-  files.forEach(function (file) {
+  files.forEach((file) => {
     const sourcePath = path.join(source, file);
     const targetPath = path.join(target, file);
 
@@ -70,6 +70,35 @@ export const copyFolderSync = (source: string, target: string) => {
       fs.copyFileSync(sourcePath, targetPath);
     } else {
       copyFolderSync(sourcePath, targetPath);
+    }
+  });
+};
+
+/**
+ * delete select files in selected fold
+ * @param folderPath the path of folder
+ * @param timeStamp the files timeStamp array that delete eg. 1680016885050
+ */
+export const copySelectFilesInFolderSync = (
+  source: string,
+  target: string,
+  timeStamps: string[] = []
+) => {
+  if (!fs.existsSync(source)) {
+    return;
+  } else;
+
+  const files = fs.readdirSync(source);
+  files.forEach((file) => {
+    const sourcePath = path.join(source, file);
+    const targetPath = path.join(target, file);
+    if (fs.statSync(sourcePath).isFile()) {
+      timeStamps.forEach((timeStamp) => {
+        if (file.includes(timeStamp)) fs.copyFileSync(sourcePath, targetPath);
+        else;
+      });
+    } else {
+      copySelectFilesInFolderSync(sourcePath, targetPath, timeStamps);
     }
   });
 };

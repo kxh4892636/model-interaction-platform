@@ -5,7 +5,7 @@ import { copyFile, rename } from "fs";
 import path, { resolve } from "path";
 import crypto from "crypto";
 import { spawn, spawnSync } from "child_process";
-import { deleteFolderFilesSync } from "../utils/tools/fs_action";
+import { copySelectFilesInFolderSync, deleteFolderFilesSync } from "../utils/tools/fs_action";
 const cs = require("child_process");
 const { query } = require("../../src/utils/ewe/importEWE");
 const {
@@ -156,6 +156,8 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
           data: true,
           type: true,
           extent: true,
+          transform: true,
+          temp: true,
         },
       });
       if (!fileInfo) {
@@ -165,6 +167,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         throw new Error("模型参数文件请重新上传");
       } else;
 
+      // copy model data
       const src = dataFoldURL + fileInfo.data;
       const timeStamp = fileInfo.data.match(/(?<=\_)\d*(?=\.)/)?.toString();
       const dst =
@@ -175,6 +178,15 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         if (err) throw err;
         else;
       });
+      // copy transform
+      const transform = fileInfo.transform;
+      if (transform && !fileInfo.temp) {
+        const source = dataFoldURL + "/case/model/hydrodynamics/transform/";
+        const target = dataFoldURL + "/temp/model/hydrodynamics/transform/";
+        copySelectFilesInFolderSync(source, target, timeStamp ? [timeStamp] : []);
+      } else;
+
+      // find mesh
       if (fileInfo.type === "mesh") {
         meshFileName = path.basename(fileInfo.data);
         extent = fileInfo.extent;
