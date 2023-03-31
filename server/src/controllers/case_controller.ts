@@ -29,33 +29,32 @@ const getCase = async (req: Request, res: Response) => {
   }
 };
 
-const saveCase = async (req: Request, res: Response) => {
+const caseAction = async (req: Request, res: Response) => {
   try {
-    res
-      .status(200)
-      .json(
-        await caseService.saveCase(
-          req.body.title,
-          req.body.imageKey,
-          req.body.author,
-          req.body.tags,
-          req.body.description,
-          req.body.keys
-        )
-      );
+    const type = req.body.action;
+    if (type === "save") {
+      res
+        .status(200)
+        .json(
+          await caseService.saveCase(
+            req.body.title,
+            req.body.imageKey,
+            req.body.author,
+            req.body.tags,
+            req.body.description,
+            req.body.keys
+          )
+        );
+    } else if (type === "delete") {
+      res.status(200).json(await caseService.deleteCase(req.body.id));
+    } else {
+      throw new Error("don't have this action");
+    }
   } catch (error) {
-    console.error(error);
-    res.status(200).json(error);
+    if (error instanceof Error) {
+      res.status(200).json(error.message);
+    }
   }
 };
 
-const clearTemp = async (req: Request, res: Response) => {
-  try {
-    res.status(200).json(await caseService.clearTempFolder());
-  } catch (error) {
-    console.error(error);
-    res.status(200).json(error);
-  }
-};
-
-export default { getList, getCase, saveCase, clearTemp };
+export default { getList, getCase, caseAction };

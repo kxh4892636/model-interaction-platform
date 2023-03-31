@@ -122,7 +122,7 @@ const Home: React.FC = () => {
   ];
 
   useEffect(() => {
-    axios.request({ url: "http://localhost:3456/case/temp", method: "get" }).then((res) => {
+    axios.request({ url: "http://localhost:3456/data/init", method: "get" }).then((res) => {
       console.log(res.data);
     });
   }, []);

@@ -52,5 +52,7 @@ router.get("/shp", dataController.getShp);
 router.get("/text", dataController.getText);
 // /data/upload
 router.post("/upload", upload.single("file"), dataController.uploadData);
+// /data/init
+router.get("/init", dataController.init);
 
 export default router;

@@ -63,7 +63,18 @@ const useCase = () => {
     });
   };
 
-  return { addCase };
+  const deleteCase = async (id: string) => {
+    await axios.request({
+      url: "http://localhost:3456/case/action",
+      method: "post",
+      data: {
+        action: "delete",
+        id: id,
+      },
+    });
+  };
+
+  return { addCase, deleteCase };
 };
 
 export default useCase;

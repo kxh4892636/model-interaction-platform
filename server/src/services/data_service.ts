@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
 import { execSync } from "child_process";
 import { resolve } from "path";
+import { deleteFolderFilesSync } from "../utils/tools/fs_action";
 
 const prisma = new PrismaClient();
 
@@ -19,7 +20,7 @@ const getDetail = async (id: string) => {
     },
   });
 
-  if (!info) return "can't find data by id";
+  if (!info) throw new Error("can't find data by id");
   else;
 
   return info;
@@ -31,7 +32,7 @@ const getJSON = async (id: string) => {
       id: id as string,
     },
   });
-  if (!info) return "can't find data by id";
+  if (!info) throw new Error("can't find data by id");
   const filePath = dataFoldURL + info.data;
   const buffer = fs.readFileSync(filePath).toString();
   const json = JSON.parse(buffer);
@@ -44,7 +45,7 @@ const getMesh = async (id: string) => {
       id: id as string,
     },
   });
-  if (!info) return "can't find data by id";
+  if (!info) throw new Error("can't find data by id");
   const filePath = dataFoldURL + info.transform[0];
   return filePath;
 };
@@ -55,7 +56,7 @@ const getUVET = async (id: string, type: string, currentImage: number) => {
       id: id as string,
     },
   });
-  if (!info) return "can't find data by id";
+  if (!info) throw new Error("can't find data by id");
   else if (type === "description")
     return dataFoldURL + info.transform[0] + `/flow_field_description_${info.transform[2]}.json`;
   else return dataFoldURL + info.transform[0] + `/${type}_${info.transform[2]}_${currentImage}.png`;
@@ -67,7 +68,7 @@ const getImage = async (id: string) => {
       id: id as string,
     },
   });
-  if (!info) return "can't find data by id";
+  if (!info) throw new Error("can't find data by id");
   const filePath = dataFoldURL + info.data;
   return filePath;
 };
@@ -78,7 +79,7 @@ const getShp = async (id: string) => {
       id: id as string,
     },
   });
-  if (!info) return "can't find data by id";
+  if (!info) throw new Error("can't find data by id");
   const filePath = dataFoldURL + info.transform[0];
   const buffer = fs.readFileSync(filePath).toString();
   const json = JSON.parse(buffer);
@@ -98,7 +99,7 @@ const uploadData = async (file: Express.Multer.File) => {
   // get type and style of data
   const output = execSync(
     `conda activate gis && python ${
-      resolve("./").split("\\").join("/") + "/src/utils/get_data_type_and_style.py"
+      resolve("./").split("\\").join("/") + "/src/utils/tools/get_data_type_and_style.py"
     } ${filePath}`,
     { windowsHide: true }
   );
@@ -179,10 +180,27 @@ const uploadData = async (file: Express.Multer.File) => {
       extent: extent,
       transform: transform,
       progress: ["1", "1"],
+      count: 1,
     },
   });
 
   return id;
+};
+
+/**
+ * clear temp folder in data folder
+ */
+const init = async () => {
+  try {
+    deleteFolderFilesSync(dataFoldURL + "/temp", ["model.exe"]);
+    await prisma.data.deleteMany({ where: { temp: true } });
+    return { status: "success", content: "clear temp folder succeed" };
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error);
+      return error.message;
+    }
+  }
 };
 
 export default {
@@ -195,4 +213,5 @@ export default {
   getUVET,
   getText,
   uploadData,
+  init,
 };

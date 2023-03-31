@@ -162,7 +162,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
       } else;
 
       const src = dataFoldURL + fileInfo.data;
-      const timeStamp = fileInfo.data.match(/(?<=\_)\d*/)?.toString();
+      const timeStamp = fileInfo.data.match(/(?<=\_)\d*(?=\.)/)?.toString();
       const dst =
         dataFoldURL +
         "/temp/model/hydrodynamics/model/" +
@@ -193,6 +193,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         type: "uvet",
         extent: extent!,
         progress: [],
+        count: 1,
       },
     });
     await prisma.data.create({
@@ -205,6 +206,7 @@ exports.Hydrodynamic = async (req: Request, res: Response) => {
         type: "uvet",
         extent: extent!,
         progress: [],
+        count: 1,
       },
     });
     // run model

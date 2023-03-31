@@ -100,9 +100,10 @@ const SavePanel = () => {
                 const keys = getKeys.getLayerKeys(layers);
                 axios
                   .request({
-                    url: "http://localhost:3456/case/save",
+                    url: "http://localhost:3456/case/action",
                     method: "post",
                     data: {
+                      action: "save",
                       title: value.caseTitle,
                       imageKey: imageKey,
                       author: value.author,

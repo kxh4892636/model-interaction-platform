@@ -9,75 +9,14 @@
  */
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
-import fs from "fs";
-import path from "path";
+import {
+  copyFolderSync,
+  deleteFolderFilesSync,
+  deleteSelectFilesInFolderSync,
+} from "../utils/tools/fs_action";
 import { dataFoldURL } from "../config/global_data";
 
 const prisma = new PrismaClient();
-
-/**
- * delete all files in selected fold
- * @param folderPath the path of folder
- * @param filter the files (have suffix) that excluding delete eg. model.exe
- */
-const deleteFolderFilesSync = (folderPath: string, filter: string[]) => {
-  if (!fs.existsSync(folderPath)) {
-    return;
-  } else;
-
-  const files = fs.readdirSync(folderPath);
-
-  files.forEach((file) => {
-    const filePath = path.join(folderPath, file);
-
-    if (fs.statSync(filePath).isFile()) {
-      if (!filter.includes(file)) fs.unlinkSync(filePath);
-      else;
-    } else {
-      deleteFolderFilesSync(filePath, filter);
-    }
-  });
-};
-
-/**
- * copy selected folder to target path
- * @param source the source path of folder
- * @param target the target path of folder
- */
-const copyFolderSync = (source: string, target: string) => {
-  if (!fs.existsSync(target)) {
-    fs.mkdirSync(target);
-  }
-
-  const files = fs.readdirSync(source);
-
-  files.forEach(function (file) {
-    const sourcePath = path.join(source, file);
-    const targetPath = path.join(target, file);
-
-    if (fs.statSync(sourcePath).isFile()) {
-      fs.copyFileSync(sourcePath, targetPath);
-    } else {
-      copyFolderSync(sourcePath, targetPath);
-    }
-  });
-};
-
-/**
- * clear temp folder in data folder
- */
-const clearTempFolder = async () => {
-  try {
-    deleteFolderFilesSync(dataFoldURL + "/temp", ["model.exe"]);
-    await prisma.data.deleteMany({ where: { temp: true } });
-    return { status: "success", content: "clear temp folder succeed" };
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(error);
-      return error.message;
-    }
-  }
-};
 
 /**
  * return the list of all cases
@@ -135,9 +74,9 @@ const saveCase = async (
       data: {
         author: author,
         count: 0,
-        description: description,
+        description: description ? description : title,
         id: crypto.randomUUID(),
-        image: imageKey,
+        image: imageKey ? imageKey : "",
         time: new Date(timeStamp).toISOString(),
         title: title,
         data: keys,
@@ -145,7 +84,7 @@ const saveCase = async (
       },
     });
     // update or create data record
-    const allKeys = [...keys, imageKey];
+    const allKeys = imageKey ? [...keys, imageKey] : keys;
     for (let index = 0; index < allKeys.length; index++) {
       const key = allKeys[index];
       const info = await prisma.data.findUnique({
@@ -155,7 +94,7 @@ const saveCase = async (
       });
 
       if (!info) {
-        throw new Error("the file is not exist");
+        return { status: "fail", content: "the file is not exist" };
       }
 
       // generate transform field
@@ -176,19 +115,17 @@ const saveCase = async (
             transform: transform,
           },
         });
-      } // create new record if data is case data
+      } // increase count if data is case data
       else {
-        await prisma.data.create({
+        const info = await prisma.data.findUnique({
+          where: { id: key },
+          select: { count: true },
+        });
+        const count = info!.count;
+        await prisma.data.update({
+          where: { id: key },
           data: {
-            temp: false,
-            data: info.data.replace("/temp/", "/case/"),
-            transform: transform,
-            id: info.id,
-            style: info.style,
-            title: info.title,
-            type: info.type,
-            extent: info.extent,
-            progress: info.progress,
+            count: count + 1,
           },
         });
       }
@@ -207,4 +144,43 @@ const saveCase = async (
   }
 };
 
-export default { getList, getCase, saveCase, clearTempFolder };
+/**
+ * delete case and its data
+ * @param id the id of case
+ */
+const deleteCase = async (id: string) => {
+  const info = await prisma.case.findUnique({ where: { id: id } });
+  if (!info) {
+    return { status: "fail", content: "can't find case by id" };
+  }
+  const keys = [...info.data, info.image];
+  let timeStamps: string[] = [];
+  let filterKeys: string[] = [];
+
+  // NOTE 不要在循环中修改被循环数组
+  for (let index = 0; index < keys.length; index++) {
+    const key = keys[index];
+    const dataInfo = await prisma.data.findUnique({ where: { id: key } });
+    const timeStamp = dataInfo!.data.match(/(?<=\_)\d*(?=\.)/)?.toString();
+    const count = dataInfo!.count;
+    console.log(count);
+    console.log(key);
+
+    if (count > 1) {
+      await prisma.data.update({ where: { id: key }, data: { count: count - 1 } });
+      filterKeys.push(key);
+    } else {
+      timeStamps.push(timeStamp!);
+    }
+  }
+  for (let index = 0; index < keys.length; index++) {
+    const key = keys[index];
+    await prisma.data.delete({ where: { id: key } });
+  }
+  await prisma.case.delete({ where: { id: id } });
+  deleteSelectFilesInFolderSync(dataFoldURL + "/case", timeStamps);
+
+  return { status: "success", content: "delete case succeed" };
+};
+
+export default { getList, getCase, saveCase, deleteCase };

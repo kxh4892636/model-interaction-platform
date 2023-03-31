@@ -120,6 +120,15 @@ const uploadData = async (req: Request, res: Response) => {
   }
 };
 
+const init = async (req: Request, res: Response) => {
+  try {
+    res.status(200).json(await dataService.init());
+  } catch (error) {
+    console.error(error);
+    res.status(200).json(error);
+  }
+};
+
 export default {
   getList,
   getDetail,
@@ -130,4 +139,5 @@ export default {
   getUVET,
   getText,
   uploadData,
+  init,
 };

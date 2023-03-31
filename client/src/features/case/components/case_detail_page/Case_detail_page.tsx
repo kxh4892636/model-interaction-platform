@@ -97,7 +97,7 @@ type AppProps = {
  * @description CasePage
  * @module CasePage
  * @Author xiaohan kong
- * @param id data id
+ * @param id case id
  * @param onClose click event for the top left close symbol, close CasePage component
  * @export module: CasePage
  */
@@ -134,11 +134,15 @@ const CasePage = ({ id, onClose }: AppProps) => {
     axios.get("http://localhost:3456/case/case?id=" + id).then((res) => {
       if (typeof res.data === "object") setData(res.data);
       else;
-      dataAction.getData(res.data.image, "image", {}, "blob").then((res) => {
-        const blob = new Blob([res]);
-        const url = window.URL.createObjectURL(blob);
-        setImageUrl(url);
-      });
+      if (!res.data.image) {
+        setImageUrl("http://localhost:3333/no_data.png");
+      } else {
+        dataAction.getData(res.data.image, "image", {}, "blob").then((res) => {
+          const blob = new Blob([res]);
+          const url = window.URL.createObjectURL(blob);
+          setImageUrl(url);
+        });
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -159,6 +163,18 @@ const CasePage = ({ id, onClose }: AppProps) => {
       </CaseMetaContainer>
       <CaseDescriptionContainer>{data.description}</CaseDescriptionContainer>
       <CaseDataActionContainer>
+        <Button
+          type="primary"
+          danger
+          style={{ marginInlineEnd: "auto", marginInlineStart: "10px", fontSize: "14px" }}
+          onClick={async () => {
+            await caseActions.deleteCase(id);
+            message.success("项目删除完成");
+            onClose();
+          }}
+        >
+          删除案例
+        </Button>
         <Button
           type="primary"
           style={{ marginInlineStart: "auto", marginInlineEnd: "10px", fontSize: "14px" }}

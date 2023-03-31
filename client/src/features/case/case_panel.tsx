@@ -39,15 +39,30 @@ const CaseSearch = styled(Search)`
  */
 const CasePanel = () => {
   const [showDetail, setShowDetail] = useState(false);
-  const [selectedItem, setSelectedItem] = useState("s");
+  const [selectedItem, setSelectedItem] = useState("");
   const [data, setData] = useState<CaseListData[]>([]);
   const dataAction = useData();
 
-  const getImageUrl = async (key: string) => {
-    const image = await dataAction.getData(key, "image", {}, "blob");
-    const blob = new Blob([image]);
-    const url = window.URL.createObjectURL(blob);
-    return url;
+  const getImageUrl = async (key: string | undefined) => {
+    // if (typeof res.data === "object") setData(res.data);
+    // else;
+    // if (!res.data.image) {
+    //   setImageUrl("http://localhost:3333/no_data.png");
+    // } else {
+    //   dataAction.getData(res.data.image, "image", {}, "blob").then((res) => {
+    //     const blob = new Blob([res]);
+    //     const url = window.URL.createObjectURL(blob);
+    //     setImageUrl(url);
+    //   });
+    // }
+    if (!key) {
+      return "http://localhost:3333/no_data.png";
+    } else {
+      const image = await dataAction.getData(key, "image", {}, "blob");
+      const blob = new Blob([image]);
+      const url = window.URL.createObjectURL(blob);
+      return url;
+    }
   };
 
   useEffect(() => {
@@ -85,18 +100,24 @@ const CasePanel = () => {
       <PanelTitleContainer>项目面板</PanelTitleContainer>
       <PanelToolsContainer>
         <PanelToolContainer>
-          <CaseSearch placeholder="input search text" onSearch={() => {}} />
+          <CaseSearch
+            placeholder="input search text"
+            // TODO 方法要加
+            onSearch={() => {}}
+          />
         </PanelToolContainer>
       </PanelToolsContainer>
       <PanelToolsContainer>占位符, 此处为筛选功能</PanelToolsContainer>
       <PanelContentContainer>
-        <CaseList
-          data={data}
-          onShow={(id) => {
-            setSelectedItem(id);
-            setShowDetail(true);
-          }}
-        ></CaseList>
+        {!showDetail && (
+          <CaseList
+            data={data}
+            onShow={(id) => {
+              setSelectedItem(id);
+              setShowDetail(true);
+            }}
+          ></CaseList>
+        )}
       </PanelContentContainer>
     </PanelContainer>
   );

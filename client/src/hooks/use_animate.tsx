@@ -8,7 +8,6 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-
 import { ImageSource } from "mapbox-gl";
 import useLayersAnimatedStore from "../stores/animated_status_store";
 import useMapStore from "../stores/map_store";
