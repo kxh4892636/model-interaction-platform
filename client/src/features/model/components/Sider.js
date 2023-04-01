@@ -9,12 +9,12 @@ import { Tree } from "antd";
 
 const App = (props) => {
   const treeData = [
-    // {
-    //   title: '水动力模型',
-    //   key: '0-1',
-    //   // icon: <AliwangwangOutlined />,
-    //   routekey:"model/Hydrodynamic",
-    // },
+    {
+      title: "水动力模型",
+      key: "0-1",
+      // icon: <AliwangwangOutlined />,
+      routekey: "model/hydrodynamics",
+    },
     {
       title: "生态系统模型(EWE)",
       key: "0-2",

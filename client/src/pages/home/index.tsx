@@ -14,7 +14,6 @@ import {
   CloudUploadOutlined,
   BgColorsOutlined,
   MediumOutlined,
-  SlackOutlined,
   SaveOutlined,
 } from "@ant-design/icons";
 import { LayerOutlined } from "../../components/icons";
@@ -25,10 +24,9 @@ import { LayerPanel } from "../../features/layer";
 import { CasePanel } from "../../features/case";
 import { DataPanel } from "../../features/data";
 import { StylePanel } from "../../features/style";
-
-import { ExchangeFlag } from "../../stores/model";
-import { ModelPanel } from "../../features/model";
 import Model from "../../features/model/App";
+import { ExchangeFlag } from "../../stores/model";
+import { Hydrodynamics } from "../../features/model/components/hydrodynamics";
 import { SavePanel } from "../../features/save";
 import { useEffect } from "react";
 import axios from "axios";
@@ -93,12 +91,6 @@ const Home: React.FC = () => {
       panel: <CasePanel />,
     },
     {
-      title: "模型",
-      id: "model",
-      icon: <MediumOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
-      panel: <Model />,
-    },
-    {
       title: "保存",
       id: "save",
       icon: <SaveOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
@@ -114,11 +106,17 @@ const Home: React.FC = () => {
       panel: <StylePanel />,
     },
     {
-      title: "水动力模型",
-      id: "hydrodynamics",
-      icon: <SlackOutlined style={{ color: "#262626", fontSize: "24px" }} />,
-      panel: <ModelPanel title="水动力模型面板" model="hydrodynamics" />,
+      title: "模型",
+      id: "model",
+      icon: <MediumOutlined style={{ color: "#262626", fontSize: "24px" }} />,
+      panel: <Model />,
     },
+    // {
+    //   title: "水动力模型",
+    //   id: "hydrodynamics",
+    //   icon: <SlackOutlined style={{ color: "#262626", fontSize: "24px" }} />,
+    //   panel: <ModelPanel title="水动力模型面板" model="hydrodynamics" />,
+    // },
   ];
 
   useEffect(() => {

@@ -83,7 +83,7 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
           id={value.id}
           theme={theme}
           onClick={(e) => {
-            // model模块大切换
+            // TODO 这里写的太乱了, 我也不想改, 讲究着用吧
             if (e.currentTarget.id === "model") {
               setFlag(Flag);
               setShowItem(false);
@@ -104,6 +104,10 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
             } else {
               if (showItem && e.currentTarget.id !== showPanelID) {
               } else {
+                if (e.currentTarget.id === "style") {
+                  navigate("/");
+                  setFlag(true);
+                } else;
                 setShowItem(!showItem);
               }
               if (showPanelID === e.currentTarget.id) {

@@ -6,15 +6,15 @@ import FisheryLand from "./components/FisheryLand";
 import FisheryDiscard from "./components/FisheryDiscard";
 import EcopathOutput from "./components/EcopathOutput";
 import FlowDiagram from "./components/FlowDiagram";
-import Hydrodynamic from "./components/Hydrodynamic";
 import EWEModel from "./components/EWEfish";
 import EWELog from "./components/EWElog";
 import { Navigate } from "react-router-dom";
+import { Hydrodynamics } from "./components/hydrodynamics";
 
 const routes = [
   {
-    path: "/model/Hydrodynamic",
-    element: <Hydrodynamic />,
+    path: "/model/hydrodynamics",
+    element: <Hydrodynamics />,
   },
   {
     path: "/model/Group",
