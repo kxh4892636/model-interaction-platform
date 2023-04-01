@@ -30,7 +30,7 @@ export default function App() {
       <Layout style={{ height: "94vh", borderRight: "1px solid rgb(172,172,172)" }}>
         <Sider width={360} style={{ background: "#fff" }}>
           <PanelContainer>
-            <PanelTitleContainer>生态系统模型(EWE)</PanelTitleContainer>
+            <PanelTitleContainer>模型面板</PanelTitleContainer>
             <PanelContentContainer>
               <MySider routechange={test}></MySider>
             </PanelContentContainer>

@@ -56,7 +56,7 @@ const ContentContainer = styled.div`
   flex: 1 1 0;
 `;
 // MapContainer 样式
-const MapContainer = styled.div`
+const ViewContainer = styled.div`
   position: relative;
   flex: 1 1 0;
 `;
@@ -132,11 +132,11 @@ const Home: React.FC = () => {
       <TitleBarContainer>港口水环境与生态动力学精细化模拟平台</TitleBarContainer>
       <ContentContainer>
         <Sidebar items={sidebarItemsLeft} key="left" />
-        <MapContainer>
+        <ViewContainer>
           <MapView display={Flag} />
           <MapStatus position={position} />
           {Flag === true ? <Model></Model> : <></>}
-        </MapContainer>
+        </ViewContainer>
         <Sidebar items={sidebarItemsRight} position="right" key="right" theme="white"></Sidebar>
       </ContentContainer>
     </View>
