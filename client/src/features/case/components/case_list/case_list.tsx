@@ -43,15 +43,7 @@ const CaseList = ({ data, onShow }: AppProps) => {
   };
 
   return (
-    <div id="scrollableDiv" style={{ height: "calc(94vh - 88px)", overflow: "auto" }}>
-      {/* <InfiniteScroll
-        dataLength={data.length}
-        next={() => {}}
-        hasMore={data.length < 999}
-        loader={<></>}
-        endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
-        scrollableTarget="scrollableDiv"
-      > */}
+    <div id="scrollableDiv" style={{ height: "calc(91vh - 88px)", overflow: "auto" }}>
       <List
         itemLayout="vertical"
         dataSource={data}
@@ -90,7 +82,6 @@ const CaseList = ({ data, onShow }: AppProps) => {
           </List.Item>
         )}
       />
-      {/* </InfiniteScroll> */}
     </div>
   );
 };

@@ -125,7 +125,7 @@ exports.R_test3 = (req: Request, res: Response) => {
 };
 
 // 水动力模型计算接口
-exports.Hydrodynamic = async (req: Request, res: Response) => {
+exports.hydrodynamics = async (req: Request, res: Response) => {
   try {
     const body: [string[], string, string, number?] = req.body;
     const paramKeys = body[0];

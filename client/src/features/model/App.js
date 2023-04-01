@@ -27,7 +27,7 @@ export default function App() {
       {/* <Header className="header" style={{backgroundColor:"black",height:"48px",lineHeight:"48px"}}>
           <MyHeader></MyHeader>
         </Header> */}
-      <Layout style={{ height: "94vh", borderRight: "1px solid rgb(172,172,172)" }}>
+      <Layout style={{ height: "94vh" }}>
         <Sider width={360} style={{ background: "#fff" }}>
           <PanelContainer>
             <PanelTitleContainer>模型面板</PanelTitleContainer>

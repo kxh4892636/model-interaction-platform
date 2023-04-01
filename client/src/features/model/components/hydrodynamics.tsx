@@ -33,7 +33,7 @@ interface AppProps {
   title: string;
   model: string;
 }
-const Hydrodynamics = ({ title, model }: AppProps) => {
+const Hydrodynamics = ({ model }: AppProps) => {
   const layers = useLayersStore((state) => state.layers);
   const options: SelectProps["options"] = createSelectOptions(layers);
   const dataActions = useData();
@@ -162,7 +162,7 @@ const Hydrodynamics = ({ title, model }: AppProps) => {
                     removeModelStatus(model);
                     axios({
                       method: "post",
-                      baseURL: "http://localhost:3456/model/Hydrodynamic",
+                      baseURL: "http://localhost:3456/model/hydrodynamics",
                       data: [
                         currentModelStatus!.paramKeys,
                         currentModelStatus!.projKey,
@@ -176,7 +176,7 @@ const Hydrodynamics = ({ title, model }: AppProps) => {
                   else {
                     axios({
                       method: "post",
-                      baseURL: "http://localhost:3456/model/Hydrodynamic",
+                      baseURL: "http://localhost:3456/model/hydrodynamics",
                       data: [
                         currentModelStatus!.paramKeys,
                         currentModelStatus!.projKey,

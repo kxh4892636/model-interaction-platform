@@ -26,7 +26,6 @@ import { DataPanel } from "../../features/data";
 import { StylePanel } from "../../features/style";
 import Model from "../../features/model/App";
 import { ExchangeFlag } from "../../stores/model";
-import { Hydrodynamics } from "../../features/model/components/hydrodynamics";
 import { SavePanel } from "../../features/save";
 import { useEffect } from "react";
 import axios from "axios";
@@ -44,7 +43,7 @@ const TitleBarContainer = styled.div`
   height: 6vh;
   line-height: 6vh;
   font-size: 20px;
-  background: #ffffff;
+  background: #fcfcfc;
   padding-left: 20px;
   border-bottom: 1px solid #d9d9d9;
 `;
@@ -57,6 +56,13 @@ const ContentContainer = styled.div`
 const ViewContainer = styled.div`
   position: relative;
   flex: 1 1 0;
+`;
+// TitleBar container
+const StatusBarContainer = styled.div`
+  height: 3vh;
+  line-height: 3vh;
+  background: #f5f5f5;
+  border-top: 1px solid #d9d9d9;
 `;
 
 /**
@@ -137,6 +143,7 @@ const Home: React.FC = () => {
         </ViewContainer>
         <Sidebar items={sidebarItemsRight} position="right" key="right" theme="white"></Sidebar>
       </ContentContainer>
+      <StatusBarContainer></StatusBarContainer>
     </View>
   );
 };
