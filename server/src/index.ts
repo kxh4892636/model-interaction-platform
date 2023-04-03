@@ -10,6 +10,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import projectRoute from "./routes/project_route";
 import caseRoute from "./routes/case_route";
 import dataRoute from "./routes/data_route";
 import model from "./routes/ewe_route";
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 // parse application/json
 app.use(express.json());
 // Routes
+app.use("/project", projectRoute);
 app.use("/case", caseRoute);
 app.use("/data", dataRoute);
 app.use("/model", model);

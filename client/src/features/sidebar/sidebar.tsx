@@ -12,11 +12,10 @@ import styled from "styled-components/macro";
 import { useState } from "react";
 import { Tooltip } from "antd";
 import { SidebarItem } from "./types";
-
-import { ExchangeFlag } from "../../stores/model";
 import { useNavigate } from "react-router-dom";
 import useMapStore from "../../stores/map_store";
 import useLayersStatusStore from "../../stores/layers_status_store";
+import usePopupStore from "../../stores/popup_store";
 
 // aside style
 const Aside = styled.aside`
@@ -46,7 +45,7 @@ const PanelContainer = styled.div`
   flex-flow: column;
   width: 360px;
   background: #fff;
-  max-height: 94vh;
+  max-height: 91vh;
 `;
 
 type Position = "left" | "right";
@@ -69,9 +68,10 @@ type AppProps = {
  */
 const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
   const navigate = useNavigate();
-  const Flag = ExchangeFlag((state) => state.Flag);
-  const setFlag = ExchangeFlag((state) => state.setFlag);
-
+  const popupTag = usePopupStore((state) => state.popupTagStore);
+  const setModelPopupTag = usePopupStore((state) => state.setModelPopupTag);
+  const setModelPopup = usePopupStore((state) => state.setModelPopup);
+  const removeModelPopup = usePopupStore((state) => state.removeModelPopup);
   const [showPanelID, setShowPanelID] = useState("");
   const [showItem, setShowItem] = useState(false);
   const map = useMapStore((state) => state.map);
@@ -85,10 +85,11 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
           onClick={(e) => {
             // TODO 这里写的太乱了, 我也不想改, 讲究着用吧
             if (e.currentTarget.id === "model") {
-              setFlag(Flag);
+              setModelPopupTag(!popupTag.model);
               setShowItem(false);
               setShowPanelID(e.currentTarget.id);
-              if (Flag === false) {
+              if (popupTag.model === false) {
+                setModelPopup(items.filter((item) => item.id === "model")[0].panel);
                 layerChecked.forEach((key) => {
                   if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "none");
                   else;
@@ -99,6 +100,7 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
                   if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "visible");
                   else;
                 });
+                removeModelPopup();
                 navigate("/");
               }
             } else {
@@ -106,7 +108,7 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
               } else {
                 if (e.currentTarget.id === "style") {
                   navigate("/");
-                  setFlag(true);
+                  setModelPopupTag(false);
                 } else;
                 setShowItem(!showItem);
               }

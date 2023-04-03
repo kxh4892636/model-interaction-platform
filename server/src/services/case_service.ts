@@ -22,8 +22,11 @@ const prisma = new PrismaClient();
  * return the list of all cases
  * @returns caseList
  */
-const getList = async () => {
+const getList = async (projectID: string) => {
   const data = await prisma.case.findMany({
+    where: {
+      project: projectID,
+    },
     orderBy: {
       count: "desc",
     },

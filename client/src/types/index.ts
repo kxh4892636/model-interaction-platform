@@ -30,3 +30,14 @@ export type ServerCase = {
   data: string[];
   count: number;
 };
+
+export type ServerProject = {
+  id: string;
+  title: string;
+  image: string;
+  author: string;
+  description: string;
+  count: number;
+  data: string[];
+  position: string[];
+};

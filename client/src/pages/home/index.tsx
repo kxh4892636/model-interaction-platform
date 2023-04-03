@@ -25,10 +25,13 @@ import { CasePanel } from "../../features/case";
 import { DataPanel } from "../../features/data";
 import { StylePanel } from "../../features/style";
 import Model from "../../features/model/App";
-import { ExchangeFlag } from "../../stores/model";
 import { SavePanel } from "../../features/save";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { ModelPopup } from "../../components/popup";
+import usePopupStore from "../../stores/popup_store";
+import { ProjectView } from "../../features/project";
+import useProjectStatusStore from "../../stores/project_status_store";
 
 const View = styled.div`
   position: relative;
@@ -50,7 +53,7 @@ const TitleBarContainer = styled.div`
 // conent container
 const ContentContainer = styled.div`
   display: flex;
-  flex: 1 1 0;
+  height: 91vh;
 `;
 // MapContainer 样式
 const ViewContainer = styled.div`
@@ -60,9 +63,10 @@ const ViewContainer = styled.div`
 // TitleBar container
 const StatusBarContainer = styled.div`
   height: 3vh;
-  line-height: 3vh;
+  display: flex;
   background: #f5f5f5;
   border-top: 1px solid #d9d9d9;
+  align-items: center;
 `;
 
 /**
@@ -73,8 +77,11 @@ const StatusBarContainer = styled.div`
  */
 const Home: React.FC = () => {
   const position = useMapPositionStore((state) => state.position);
-
-  const Flag = ExchangeFlag((state) => state.Flag);
+  const popupTag = usePopupStore((state) => state.popupTagStore);
+  const setModelPopupTag = usePopupStore((state) => state.setModelPopupTag);
+  const popup = usePopupStore((state) => state.popupStore);
+  const setModelPopup = usePopupStore((state) => state.setModelPopup);
+  const projectKey = useProjectStatusStore((state) => state.key);
 
   // 侧边栏数据
   const sidebarItemsLeft = [
@@ -91,7 +98,7 @@ const Home: React.FC = () => {
       panel: <LayerPanel />,
     },
     {
-      title: "项目",
+      title: "数据集",
       id: "case",
       icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <CasePanel />,
@@ -129,6 +136,8 @@ const Home: React.FC = () => {
     axios.request({ url: "http://localhost:3456/data/init", method: "get" }).then((res) => {
       console.log(res.data);
     });
+    setModelPopup(<ProjectView></ProjectView>);
+    setModelPopupTag(true);
   }, []);
 
   return (
@@ -137,13 +146,13 @@ const Home: React.FC = () => {
       <ContentContainer>
         <Sidebar items={sidebarItemsLeft} key="left" />
         <ViewContainer>
-          <MapView display={Flag} />
+          <MapView display={popupTag.model} />
           <MapStatus position={position} />
-          {Flag === true ? <Model></Model> : <></>}
+          {popupTag.model === true ? <ModelPopup element={popup.model}></ModelPopup> : <></>}
         </ViewContainer>
         <Sidebar items={sidebarItemsRight} position="right" key="right" theme="white"></Sidebar>
       </ContentContainer>
-      <StatusBarContainer></StatusBarContainer>
+      <StatusBarContainer>{popupTag.model === true ? "弹窗" : "2"}</StatusBarContainer>
     </View>
   );
 };

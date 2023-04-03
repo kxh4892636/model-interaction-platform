@@ -8,8 +8,7 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import styled from "styled-components/macro";
-import { List, Button, message, Divider, Skeleton } from "antd";
-import InfiniteScroll from "react-infinite-scroll-component";
+import { List, Button, message } from "antd";
 import { CaseListData } from "../../types";
 import useCase from "../../hooks/use_case";
 
@@ -39,7 +38,7 @@ const CaseList = ({ data, onShow }: AppProps) => {
 
   const handleClick = async (data: CaseListData) => {
     await caseActions.addCase(data.key);
-    message.success("加载项目完成");
+    message.success("加载数据集完成");
   };
 
   return (

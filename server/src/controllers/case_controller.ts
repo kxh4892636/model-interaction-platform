@@ -13,7 +13,8 @@ import caseService from "../services/case_service";
 // get case list
 const getList = async (req: Request, res: Response) => {
   try {
-    res.status(200).json(await caseService.getList());
+    const projectID = req.query.id as string;
+    res.status(200).json(await caseService.getList(projectID));
   } catch (error) {
     console.error(error);
     res.status(200).json(error);

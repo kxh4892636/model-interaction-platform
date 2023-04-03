@@ -9,7 +9,7 @@
  */
 
 import { CloseOutlined } from "@ant-design/icons";
-import { Button, message, Tag } from "antd";
+import { Button, message, Popconfirm, Tag } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import styled from "styled-components/macro";
@@ -26,6 +26,7 @@ const CaseContainer = styled.div`
   height: 100%;
   background-color: #fff;
   z-index: 9;
+  border-right: 1px solid #d9d9d9;
 `;
 // CasePage title container
 const CaseTitleContainer = styled.div`
@@ -111,8 +112,8 @@ const CasePage = ({ id, onClose }: AppProps) => {
     let color = ["magenta", "volcano", "blue", "purple"];
     const tagsElement = tags.map((tag) => {
       const tag2Name = {
-        data: "数据集",
-        example: "示例集",
+        input: "模型输入",
+        output: "模型输出",
         hydrodynamics: "水动力模型",
         ecopath: "Ecopath 模型",
       };
@@ -163,24 +164,31 @@ const CasePage = ({ id, onClose }: AppProps) => {
       </CaseMetaContainer>
       <CaseDescriptionContainer>{data.description}</CaseDescriptionContainer>
       <CaseDataActionContainer>
-        <Button
-          type="primary"
-          danger
-          style={{ marginInlineEnd: "auto", marginInlineStart: "10px", fontSize: "14px" }}
-          onClick={async () => {
+        <Popconfirm
+          title="Delete the task"
+          description="Are you sure to delete this task?"
+          onConfirm={async () => {
             await caseActions.deleteCase(id);
-            message.success("项目删除完成");
+            message.success("数据集删除完成");
             onClose();
           }}
+          okText="确定删除"
+          cancelText="取消删除"
         >
-          删除案例
-        </Button>
+          <Button
+            type="primary"
+            danger
+            style={{ marginInlineEnd: "auto", marginInlineStart: "10px", fontSize: "14px" }}
+          >
+            删除数据集
+          </Button>
+        </Popconfirm>
         <Button
           type="primary"
           style={{ marginInlineStart: "auto", marginInlineEnd: "10px", fontSize: "14px" }}
           onClick={async () => {
             await caseActions.addCase(id);
-            message.success("加载项目完成");
+            message.success("加载数据集完成");
           }}
         >
           添加至地图

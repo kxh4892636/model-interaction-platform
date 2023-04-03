@@ -88,7 +88,7 @@ const CasePanel = () => {
       ) : (
         <></>
       )}
-      <PanelTitleContainer>项目面板</PanelTitleContainer>
+      <PanelTitleContainer>数据面板</PanelTitleContainer>
       <PanelToolsContainer>
         <PanelToolContainer>
           <CaseSearch
