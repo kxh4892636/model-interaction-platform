@@ -108,7 +108,6 @@ const SaveCasePanel = ({
             })
             .then((res) => {
               const result = res.data;
-              console.log(res.data);
               if (result.status === "success") {
                 message.success("数据集保存成功", 10);
                 setIsShowSaveInfo("");
@@ -121,13 +120,13 @@ const SaveCasePanel = ({
               setImageUrl(undefined);
               setImageLoading(false);
               setImageKey(undefined);
+              setIsSpinning(false);
             });
-          setIsSpinning(false);
         }}
         onFinishFailed={() => {
-          setIsSpinning(false);
-          setIsLoading(false);
           message.error("数据集保存失败", 10);
+          setIsLoading(false);
+          setIsSpinning(false);
         }}
         autoComplete="off"
       >
@@ -235,8 +234,8 @@ const SaveCasePanel = ({
           <Button
             loading={isLoading}
             onClick={() => {
-              setIsLoading(true);
               setIsSpinning(true);
+              setIsLoading(true);
             }}
             type="primary"
             htmlType="submit"

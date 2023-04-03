@@ -92,13 +92,13 @@ const SaveProjectPanel = ({
               setImageLoading(false);
               setImageKey(undefined);
               setIsPosition(false);
+              setIsSpinning(false);
             });
-          setIsSpinning(false);
         }}
         onFinishFailed={() => {
-          setIsSpinning(false);
-          setIsLoading(false);
           message.error("数据集保存失败", 10);
+          setIsLoading(false);
+          setIsSpinning(false);
         }}
         autoComplete="off"
       >
@@ -172,8 +172,8 @@ const SaveProjectPanel = ({
           <Button
             loading={isLoading}
             onClick={() => {
-              setIsLoading(true);
               setIsSpinning(true);
+              setIsLoading(true);
             }}
             type="primary"
             htmlType="submit"

@@ -35,7 +35,6 @@ const StyledButton = styled(Button)`
 const SavePanel = () => {
   const [isShowSaveInfo, setIsShowSaveInfo] = useState("");
   const projectKey = useProjectStatusStore((state) => state.key);
-  console.log(projectKey);
 
   return (
     <PanelContainer>

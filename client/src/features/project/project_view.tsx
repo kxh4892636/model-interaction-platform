@@ -78,9 +78,9 @@ const CardList = ({
 }) => {
   const setModelPopupTag = usePopupStore((state) => state.setModelPopupTag);
   const setProjectKey = useProjectStatusStore((state) => state.setKey);
+  const projectKey = useProjectStatusStore((state) => state.key);
   const map = useMapStore((state) => state.map);
   const initAction = useInit();
-  
 
   const handleCreate = () => {
     initAction.clearStoreDataExcludeMapAndProject();
@@ -132,20 +132,41 @@ const CardList = ({
             删除数据集
           </Button>
         </Popconfirm>,
-        <Button
-          type="primary"
-          onClick={() => {
-            initAction.clearStoreDataExcludeMapAndProject();
-            setProjectKey(data.key);
-            setModelPopupTag(false);
-            map!.setCenter([Number(data.position[0]), Number(data.position[1])]);
-            map!.setZoom(Number(data.position[2]));
-            message.success("加载项目完成");
-          }}
-          style={{ marginLeft: "auto" }}
-        >
-          加载该项目
-        </Button>,
+        projectKey.includes("-") ? (
+          <Popconfirm
+            title="加载项目"
+            description="已存在项目, 加载该项目将取消目前一切操作?"
+            onConfirm={() => {
+              initAction.clearStoreDataExcludeMapAndProject();
+              setProjectKey(data.key);
+              setModelPopupTag(false);
+              map!.setCenter([Number(data.position[0]), Number(data.position[1])]);
+              map!.setZoom(Number(data.position[2]));
+              message.success("加载项目完成");
+            }}
+            okText="确定加载"
+            cancelText="取消加载"
+          >
+            <Button type="primary" style={{ marginLeft: "auto" }}>
+              加载该项目
+            </Button>
+          </Popconfirm>
+        ) : (
+          <Button
+            type="primary"
+            onClick={() => {
+              initAction.clearStoreDataExcludeMapAndProject();
+              setProjectKey(data.key);
+              setModelPopupTag(false);
+              map!.setCenter([Number(data.position[0]), Number(data.position[1])]);
+              map!.setZoom(Number(data.position[2]));
+              message.success("加载项目完成");
+            }}
+            style={{ marginLeft: "auto" }}
+          >
+            加载该项目
+          </Button>
+        ),
       ]}
     >
       <Meta title={data.title} description={`作者:${data.author}`} />
