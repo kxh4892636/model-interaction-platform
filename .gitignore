@@ -2,6 +2,7 @@
 
 # 自定义
 .vscode
+.VSCodeCounter
 /data
 /docs
 .env

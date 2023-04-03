@@ -189,16 +189,13 @@ const deleteCase = async (id: string) => {
     const timeStamp = dataInfo!.data.match(/(?<=\_)\d*(?=\.)/)?.toString();
     const count = dataInfo!.count;
 
-    console.log(key, count);
     if (count > 1) {
-      console.log(key, "iiiiiiiiiiii", count);
       await prisma.data.update({ where: { id: key }, data: { count: count - 1 } });
     } else {
       filterKeys.push(key);
       timeStamps.push(timeStamp!);
     }
   }
-  console.log("filter", filterKeys);
 
   for (let index = 0; index < filterKeys.length; index++) {
     const key = filterKeys[index];
