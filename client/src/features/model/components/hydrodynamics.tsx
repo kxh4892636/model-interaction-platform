@@ -21,6 +21,7 @@ import useLayersStore from "../../../stores/layers_store";
 import { Layer } from "../../../types";
 import axios from "axios";
 import useModelsStatus from "../stores/models_status";
+import useProjectStatusStore from "../../../stores/project_status_store";
 
 /**
  * @description ModelPanel
@@ -43,6 +44,7 @@ const Hydrodynamics = ({ model }: AppProps) => {
   const updateModelStatus = useModelsStatus((state) => state.updateModelStatus);
   const removeModelStatus = useModelsStatus((state) => state.removeModelStatus);
   const currentModelStatus = getModelStatus(model);
+  const setIsSpinning = useProjectStatusStore((state) => state.setIsSpinning);
 
   useEffect(() => {
     if (getModelStatus(model)) return;
@@ -123,6 +125,7 @@ const Hydrodynamics = ({ model }: AppProps) => {
                 type="primary"
                 disabled={!(currentModelStatus?.paramKeys && currentModelStatus?.paramKeys?.length)}
                 onClick={() => {
+                  setIsSpinning(true);
                   updateModelStatus(model, "isRunning", !currentModelStatus?.isRunning);
                   const getPercent = (keys: string[]) => {
                     const percentInterval = setInterval(async () => {
@@ -197,6 +200,7 @@ const Hydrodynamics = ({ model }: AppProps) => {
                       }
                     });
                   }
+                  setIsSpinning(false);
                 }}
                 style={{ marginBottom: "10px", marginLeft: "auto" }}
                 danger={currentModelStatus?.isRunning}

@@ -40,6 +40,7 @@ interface AnimatedStatusStore {
     value: number | NodeJS.Timer
   ) => void;
   removeAnimatedStatus: (key: string) => void;
+  clearAnimatedStatus: () => void;
 }
 
 /**
@@ -85,6 +86,11 @@ const useAnimatedStatusStore = create<AnimatedStatusStore>((set, get) => ({
         });
       })
     ),
+  clearAnimatedStatus: () => {
+    produce((draft: AnimatedStatusStore) => {
+      draft.animatedStatus = [];
+    });
+  },
 }));
 
 export default useAnimatedStatusStore;

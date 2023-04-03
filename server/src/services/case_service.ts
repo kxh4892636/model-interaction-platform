@@ -23,6 +23,8 @@ const prisma = new PrismaClient();
  * @returns caseList
  */
 const getList = async (projectID: string) => {
+  if (!projectID) throw new Error("id is not provided");
+  else;
   const data = await prisma.case.findMany({
     where: {
       project: projectID,
@@ -72,7 +74,8 @@ const saveCase = async (
   author: string,
   tags: string[],
   description: string,
-  keys: string[]
+  keys: string[],
+  projectKey: string
 ) => {
   try {
     // create case record
@@ -89,6 +92,7 @@ const saveCase = async (
         title: title,
         data: keys,
         tags: tags,
+        project: projectKey,
       },
     });
     // update or create data record
@@ -146,6 +150,14 @@ const saveCase = async (
     // copy temp input to case
     copyFolderSync(dataFoldURL + "/temp", dataFoldURL + "/case");
     deleteFolderFilesSync(dataFoldURL + "/temp", ["model.exe"]);
+
+    const projectInfo = await prisma.project.findUnique({ where: { id: projectKey } });
+    await prisma.project.update({
+      where: { id: projectKey },
+      data: {
+        data: [...projectInfo!.data, caseID],
+      },
+    });
     console.log("save case succeed");
 
     return { status: "success", content: "save case succeed" };
@@ -177,13 +189,17 @@ const deleteCase = async (id: string) => {
     const timeStamp = dataInfo!.data.match(/(?<=\_)\d*(?=\.)/)?.toString();
     const count = dataInfo!.count;
 
+    console.log(key, count);
     if (count > 1) {
+      console.log(key, "iiiiiiiiiiii", count);
       await prisma.data.update({ where: { id: key }, data: { count: count - 1 } });
     } else {
       filterKeys.push(key);
       timeStamps.push(timeStamp!);
     }
   }
+  console.log("filter", filterKeys);
+
   for (let index = 0; index < filterKeys.length; index++) {
     const key = filterKeys[index];
     await prisma.data.delete({ where: { id: key } });

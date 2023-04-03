@@ -63,6 +63,7 @@ const SaveCasePanel = ({
   const getKeys = useKeys();
   const layers = useLayersStore((state) => state.layers);
   const projectKey = useProjectStatusStore((state) => state.key);
+  const setIsSpinning = useProjectStatusStore((state) => state.setIsSpinning);
 
   const uploadButton = (
     <div>
@@ -102,6 +103,7 @@ const SaveCasePanel = ({
                 tags: value.tags,
                 description: value.description,
                 keys: keys,
+                projectKey: projectKey,
               },
             })
             .then((res) => {
@@ -120,8 +122,10 @@ const SaveCasePanel = ({
               setImageLoading(false);
               setImageKey(undefined);
             });
+          setIsSpinning(false);
         }}
         onFinishFailed={() => {
+          setIsSpinning(false);
           setIsLoading(false);
           message.error("数据集保存失败", 10);
         }}
@@ -213,7 +217,11 @@ const SaveCasePanel = ({
                   setImageLoading(false);
                   setImageUrl(url);
                 });
+                setIsSpinning(false);
               }
+            }}
+            beforeUpload={() => {
+              setIsSpinning(true);
             }}
           >
             {imageUrl ? (
@@ -228,6 +236,7 @@ const SaveCasePanel = ({
             loading={isLoading}
             onClick={() => {
               setIsLoading(true);
+              setIsSpinning(true);
             }}
             type="primary"
             htmlType="submit"

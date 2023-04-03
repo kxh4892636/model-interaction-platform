@@ -17,6 +17,7 @@ import {
   PanelTitleContainer,
   PanelToolsContainer,
 } from "../../components/layout";
+import useProjectStatusStore from "../../stores/project_status_store";
 import { SaveCasePanel, SaveProjectPanel } from "./components";
 
 const StyledButton = styled(Button)`
@@ -33,12 +34,16 @@ const StyledButton = styled(Button)`
  */
 const SavePanel = () => {
   const [isShowSaveInfo, setIsShowSaveInfo] = useState("");
+  const projectKey = useProjectStatusStore((state) => state.key);
+  console.log(projectKey);
 
   return (
     <PanelContainer>
       <PanelTitleContainer>保存面板</PanelTitleContainer>
       <PanelToolsContainer>
-        <StyledButton onClick={() => setIsShowSaveInfo("project")}>保存项目</StyledButton>
+        {!projectKey.includes("-") && (
+          <StyledButton onClick={() => setIsShowSaveInfo("project")}>保存项目</StyledButton>
+        )}
         <StyledButton onClick={() => setIsShowSaveInfo("case")}>保存数据集</StyledButton>
         <StyledButton type="text"></StyledButton>
         <StyledButton type="text"></StyledButton>

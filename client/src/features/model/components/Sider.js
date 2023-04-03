@@ -18,7 +18,6 @@ const App = (props) => {
     {
       title: "生态系统模型(EWE)",
       key: "0-2",
-      routekey: "model/EWElog",
       // icon: <AliwangwangOutlined />,
       children: [
         {

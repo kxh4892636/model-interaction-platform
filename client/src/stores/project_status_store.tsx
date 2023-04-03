@@ -11,7 +11,9 @@ import { create } from "zustand";
 
 interface ProjectStatus {
   key: string;
+  isSpinning: boolean;
   setKey: (key: string) => void;
+  setIsSpinning: (tag: boolean) => void;
 }
 
 /**
@@ -22,7 +24,9 @@ interface ProjectStatus {
  */
 const useProjectStatusStore = create<ProjectStatus>((set) => ({
   key: "",
+  isSpinning: false,
   setKey: (value) => set({ key: value }),
+  setIsSpinning: (value) => set({ isSpinning: value }),
 }));
 
 export default useProjectStatusStore;

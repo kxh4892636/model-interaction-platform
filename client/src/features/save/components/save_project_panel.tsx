@@ -41,6 +41,7 @@ const SaveProjectPanel = ({
   const [isLoading, setIsLoading] = useState(false);
   const setProjectKey = useProjectStatusStore((state) => state.setKey);
   const position = useMapPositionStore((state) => state.position);
+  const setIsSpinning = useProjectStatusStore((state) => state.setIsSpinning);
 
   const uploadButton = (
     <div>
@@ -81,7 +82,7 @@ const SaveProjectPanel = ({
               if (result.status === "success") {
                 message.success("项目保存成功", 10);
                 setIsShowSaveInfo("");
-                setProjectKey(result.data);
+                setProjectKey(result.content);
               } else {
                 message.error("项目保存失败", 10);
               }
@@ -92,8 +93,10 @@ const SaveProjectPanel = ({
               setImageKey(undefined);
               setIsPosition(false);
             });
+          setIsSpinning(false);
         }}
         onFinishFailed={() => {
+          setIsSpinning(false);
           setIsLoading(false);
           message.error("数据集保存失败", 10);
         }}
@@ -151,7 +154,11 @@ const SaveProjectPanel = ({
                   setImageLoading(false);
                   setImageUrl(url);
                 });
+                setIsSpinning(false);
               }
+            }}
+            beforeUpload={() => {
+              setIsSpinning(true);
             }}
           >
             {imageUrl ? (
@@ -166,6 +173,7 @@ const SaveProjectPanel = ({
             loading={isLoading}
             onClick={() => {
               setIsLoading(true);
+              setIsSpinning(true);
             }}
             type="primary"
             htmlType="submit"

@@ -23,6 +23,7 @@ import CasePage from "./components/case_detail_page";
 import { CaseListData } from "./types";
 import { useData } from "../../hooks";
 import { ServerCase } from "../../types";
+import useProjectStatusStore from "../../stores/project_status_store";
 
 // modify style of antd search component
 const { Search } = Input;
@@ -43,6 +44,7 @@ const CasePanel = () => {
   const [data, setData] = useState<CaseListData[]>([]);
   const dataAction = useData();
   const [refresh, setRefresh] = useState(0);
+  const projectKey = useProjectStatusStore((state) => state.key);
 
   const getImageUrl = async (key: string | undefined) => {
     if (!key) {
@@ -56,22 +58,28 @@ const CasePanel = () => {
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3456/case/list").then(async (res) => {
-      const result: ServerCase[] = res.data;
-      let caseListData: CaseListData[] = [];
-      for (let index = 0; index < result.length; index++) {
-        const item = result[index];
-        const imageUrl = await getImageUrl(item.image);
-        caseListData.push({
-          key: item.id,
-          title: item.title,
-          image: imageUrl,
-          author: item.author,
-          data: item.data,
-        });
-      }
-      setData(caseListData);
-    });
+    axios
+      .get("http://localhost:3456/case/list", {
+        params: {
+          id: projectKey,
+        },
+      })
+      .then(async (res) => {
+        const result: ServerCase[] = res.data;
+        let caseListData: CaseListData[] = [];
+        for (let index = 0; index < result.length; index++) {
+          const item = result[index];
+          const imageUrl = await getImageUrl(item.image);
+          caseListData.push({
+            key: item.id,
+            title: item.title,
+            image: imageUrl,
+            author: item.author,
+            data: item.data,
+          });
+        }
+        setData(caseListData);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 

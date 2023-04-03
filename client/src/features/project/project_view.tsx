@@ -8,15 +8,17 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import styled from "styled-components/macro";
-import useCase from "../case/hooks/use_case";
-import { Button, Card, message, Space } from "antd";
-import { useEffect, useState } from "react";
+import { Button, Card, message, Popconfirm, Space } from "antd";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ServerProject } from "../../types";
 import { useData } from "../../hooks";
-import { CaseListData } from "../case/types";
+import { ProjectListData } from "./types";
 import usePopupStore from "../../stores/popup_store";
 import useProjectStatusStore from "../../stores/project_status_store";
+import useMapStore from "../../stores/map_store";
+import { randomInt } from "crypto";
+import useInit from "../../hooks/use_init";
 
 const { Meta } = Card;
 const ProjectViewContainer = styled.div`
@@ -67,31 +69,81 @@ const CardListContainer = styled.div`
  * @param cardListData the data fo cardList
  * @param caseActions useCase hook
  */
-const CardList = ({ dataList }: { dataList: CaseListData[] }) => {
+const CardList = ({
+  dataList,
+  setIsRefresh,
+}: {
+  dataList: ProjectListData[];
+  setIsRefresh: React.Dispatch<React.SetStateAction<number>>;
+}) => {
   const setModelPopupTag = usePopupStore((state) => state.setModelPopupTag);
+  const setProjectKey = useProjectStatusStore((state) => state.setKey);
+  const map = useMapStore((state) => state.map);
+  const initAction = useInit();
+  
 
   const handleCreate = () => {
+    initAction.clearStoreDataExcludeMapAndProject();
     setModelPopupTag(false);
+    setProjectKey("init");
+    map!.setCenter([116.3916, 39.9079]);
+    map!.setZoom(11);
     message.success("创建空白项目完成");
   };
 
   const cardList = dataList.map((data) => (
     <Card
-      style={{ flex: "1 1 0", width: "240px", maxHeight: "320px" }}
+      style={{ flex: "1 1 0", width: "240px", maxHeight: "310px" }}
       cover={<img alt="cover" src={data.image} width={210} height={180} />}
       key={data.key}
       size={"small"}
       actions={[
+        <Popconfirm
+          title="删除项目"
+          description="你是否确定删除该项目?"
+          onConfirm={() => {
+            axios
+              .request({
+                url: "http://localhost:3456/project/action",
+                method: "post",
+                data: {
+                  action: "delete",
+                  id: data.key,
+                },
+              })
+              .then((res) => {
+                const result = res.data;
+                if (result.status === "success") {
+                  setIsRefresh(Math.floor(Math.random() * 1000));
+                  message.success("删除项目完成");
+                } else {
+                  message.error("删除项目失败");
+                }
+              });
+          }}
+          okText="确定删除"
+          cancelText="取消删除"
+        >
+          <Button
+            type="primary"
+            danger
+            style={{ marginInlineEnd: "auto", marginInlineStart: "10px", fontSize: "14px" }}
+          >
+            删除数据集
+          </Button>
+        </Popconfirm>,
         <Button
-          danger
           type="primary"
-          size="small"
-          onClick={() => {}}
+          onClick={() => {
+            initAction.clearStoreDataExcludeMapAndProject();
+            setProjectKey(data.key);
+            setModelPopupTag(false);
+            map!.setCenter([Number(data.position[0]), Number(data.position[1])]);
+            map!.setZoom(Number(data.position[2]));
+            message.success("加载项目完成");
+          }}
           style={{ marginLeft: "auto" }}
         >
-          删除该项目
-        </Button>,
-        <Button type="primary" size="small" onClick={() => {}} style={{ marginLeft: "auto" }}>
           加载该项目
         </Button>,
       ]}
@@ -103,7 +155,7 @@ const CardList = ({ dataList }: { dataList: CaseListData[] }) => {
   return (
     <CardListContainer>
       <Card
-        style={{ flex: "1 1 0", width: "240px", maxHeight: "320px" }}
+        style={{ flex: "1 1 0", width: "240px", maxHeight: "310px" }}
         cover={
           <img
             alt="cover"
@@ -118,7 +170,6 @@ const CardList = ({ dataList }: { dataList: CaseListData[] }) => {
           <Button
             id="new"
             type="primary"
-            size="small"
             onClick={() => {
               handleCreate();
             }}
@@ -142,11 +193,11 @@ const CardList = ({ dataList }: { dataList: CaseListData[] }) => {
  * @export module: ProjectView
  */
 const ProjectView = () => {
-  const [selectedItem, setSelectedItem] = useState("");
-  const [data, setData] = useState<CaseListData[]>([]);
+  const [data, setData] = useState<ProjectListData[]>([]);
+  const [isRefresh, setIsRefresh] = useState(0);
   const dataAction = useData();
 
-  const getImageUrl = async (key: string | undefined) => {
+  const getImageUrl = async (key: string) => {
     if (!key) {
       return "http://localhost:3333/no_data.png";
     } else {
@@ -159,8 +210,8 @@ const ProjectView = () => {
 
   useEffect(() => {
     axios.get("http://localhost:3456/project/list").then(async (res) => {
-      const result: ServerProject[] = res.data;
-      let projectListData: CaseListData[] = [];
+      const result: ServerProject[] = res.data.content;
+      let projectListData: ProjectListData[] = [];
       for (let index = 0; index < result.length; index++) {
         const item = result[index];
         const imageUrl = await getImageUrl(item.image);
@@ -170,18 +221,19 @@ const ProjectView = () => {
           image: imageUrl,
           author: item.author,
           data: item.data,
+          position: item.position,
         });
       }
       setData(projectListData);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isRefresh]);
 
   return (
     <ProjectViewContainer>
       <ProjectViewTitle>项目列表</ProjectViewTitle>
       <ProjectViewContentContainer>
-        <CardList dataList={data}></CardList>
+        <CardList dataList={data} setIsRefresh={setIsRefresh}></CardList>
       </ProjectViewContentContainer>
     </ProjectViewContainer>
   );

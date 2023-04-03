@@ -109,18 +109,25 @@ const saveProject = async (
  * @param id the id of project
  */
 const deleteProject = async (id: string) => {
-  const info = await prisma.case.findUnique({ where: { id: id } });
+  const info = await prisma.project.findUnique({ where: { id: id } });
+
   if (!info) {
-    return { status: "fail", content: "can't find project by id" };
+    throw new Error("can't find project by id");
   }
-  const imagePath = info.image;
-  unlinkSync(dataFoldURL + imagePath);
+  const imageKey = info.image;
+  if (imageKey) {
+    const imageInfo = await prisma.data.findUnique({ where: { id: imageKey } });
+    const imagePath = imageInfo!.data;
+    unlinkSync(dataFoldURL + imagePath);
+    await prisma.data.delete({ where: { id: imageKey } });
+  } else;
   const caseKeys = info.data;
   for (let index = 0; index < caseKeys.length; index++) {
     const key = caseKeys[index];
-    caseService.deleteCase(key);
+    await caseService.deleteCase(key);
   }
-  return { status: "success", content: "delete case succeed" };
+  await prisma.project.delete({ where: { id: id } });
+  return { status: "success", content: "delete project succeed" };
 };
 
 export default { getProjectList, getProject, saveProject, deleteProject };

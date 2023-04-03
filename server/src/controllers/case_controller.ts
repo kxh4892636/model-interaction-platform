@@ -16,8 +16,9 @@ const getList = async (req: Request, res: Response) => {
     const projectID = req.query.id as string;
     res.status(200).json(await caseService.getList(projectID));
   } catch (error) {
-    console.error(error);
-    res.status(200).json(error);
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    }
   }
 };
 // get data of case by key
@@ -25,8 +26,9 @@ const getCase = async (req: Request, res: Response) => {
   try {
     res.status(200).json(await caseService.getCase(req.query.id as string));
   } catch (error) {
-    console.error(error);
-    res.status(200).json(error);
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    }
   }
 };
 
@@ -43,7 +45,8 @@ const caseAction = async (req: Request, res: Response) => {
             req.body.author,
             req.body.tags,
             req.body.description,
-            req.body.keys
+            req.body.keys,
+            req.body.projectKey
           )
         );
     } else if (type === "delete") {
@@ -53,7 +56,7 @@ const caseAction = async (req: Request, res: Response) => {
     }
   } catch (error) {
     if (error instanceof Error) {
-      res.status(200).json(error.message);
+      res.status(200).json({ status: "fail", content: error.message });
     }
   }
 };

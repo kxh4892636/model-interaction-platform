@@ -14,6 +14,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import styled from "styled-components/macro";
 import useData from "../../../../hooks/use_data";
+import useProjectStatusStore from "../../../../stores/project_status_store";
 import { ServerCase } from "../../../../types";
 import useCase from "../../hooks/use_case";
 
@@ -107,6 +108,7 @@ const CasePage = ({ id, onClose }: AppProps) => {
   const caseActions = useCase();
   const [imageUrl, setImageUrl] = useState<string>();
   const dataAction = useData();
+  const setIsSpinning = useProjectStatusStore((state) => state.setIsSpinning);
 
   const createTags = (tags: string[]) => {
     let color = ["magenta", "volcano", "blue", "purple"];
@@ -165,11 +167,13 @@ const CasePage = ({ id, onClose }: AppProps) => {
       <CaseDescriptionContainer>{data.description}</CaseDescriptionContainer>
       <CaseDataActionContainer>
         <Popconfirm
-          title="Delete the task"
-          description="Are you sure to delete this task?"
+          title="删除数据集"
+          description="你是否确定删除数据集?"
           onConfirm={async () => {
+            setIsSpinning(true);
             await caseActions.deleteCase(id);
             message.success("数据集删除完成");
+            setIsSpinning(false);
             onClose();
           }}
           okText="确定删除"
@@ -187,7 +191,9 @@ const CasePage = ({ id, onClose }: AppProps) => {
           type="primary"
           style={{ marginInlineStart: "auto", marginInlineEnd: "10px", fontSize: "14px" }}
           onClick={async () => {
+            setIsSpinning(true);
             await caseActions.addCase(id);
+            setIsSpinning(false);
             message.success("加载数据集完成");
           }}
         >

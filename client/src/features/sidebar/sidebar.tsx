@@ -10,12 +10,13 @@
 
 import styled from "styled-components/macro";
 import { useState } from "react";
-import { Tooltip } from "antd";
+import { message, Tooltip } from "antd";
 import { SidebarItem } from "./types";
 import { useNavigate } from "react-router-dom";
 import useMapStore from "../../stores/map_store";
 import useLayersStatusStore from "../../stores/layers_status_store";
 import usePopupStore from "../../stores/popup_store";
+import useProjectStatusStore from "../../stores/project_status_store";
 
 // aside style
 const Aside = styled.aside`
@@ -76,18 +77,24 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
   const [showItem, setShowItem] = useState(false);
   const map = useMapStore((state) => state.map);
   const layerChecked = useLayersStatusStore((state) => state.layersChecked);
+  const projKey = useProjectStatusStore((state) => state.key);
+  const setProjKey = useProjectStatusStore((state) => state.setKey);
+
   const sidebarItems = items.map((value): JSX.Element => {
     return (
       <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
         <AsideItem
-          id={value.id}
           theme={theme}
           onClick={(e) => {
             // TODO 这里写的太乱了, 我也不想改, 讲究着用吧
-            if (e.currentTarget.id === "model") {
+            if (projKey === "") {
+              setProjKey("init");
+              message.success("创建空白项目完成");
+            } else;
+            if (value.id === "model") {
               setModelPopupTag(!popupTag.model);
               setShowItem(false);
-              setShowPanelID(e.currentTarget.id);
+              setShowPanelID(value.id);
               if (popupTag.model === false) {
                 setModelPopup(items.filter((item) => item.id === "model")[0].panel);
                 layerChecked.forEach((key) => {
@@ -103,19 +110,28 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
                 removeModelPopup();
                 navigate("/");
               }
-            } else {
-              if (showItem && e.currentTarget.id !== showPanelID) {
+            } else if (value.id === "project") {
+              setModelPopupTag(!popupTag.model);
+              setShowItem(false);
+              setShowPanelID(value.id);
+              if (popupTag.model === false) {
+                setModelPopup(items.filter((item) => item.id === "project")[0].panel);
               } else {
-                if (e.currentTarget.id === "style") {
+                removeModelPopup();
+              }
+            } else {
+              if (showItem && value.id !== showPanelID) {
+              } else {
+                if (value.id !== "style") {
                   navigate("/");
                   setModelPopupTag(false);
                 } else;
                 setShowItem(!showItem);
               }
-              if (showPanelID === e.currentTarget.id) {
+              if (showPanelID === value.id) {
                 setShowPanelID("");
               } else {
-                setShowPanelID(e.currentTarget.id);
+                setShowPanelID(value.id);
               }
             }
           }}

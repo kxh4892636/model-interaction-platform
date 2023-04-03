@@ -11,6 +11,7 @@ import styled from "styled-components/macro";
 import { List, Button, message } from "antd";
 import { CaseListData } from "../../types";
 import useCase from "../../hooks/use_case";
+import useProjectStatusStore from "../../../../stores/project_status_store";
 
 // CaseList title Style
 const StyledTitle = styled.div`
@@ -35,10 +36,13 @@ type AppProps = {
  */
 const CaseList = ({ data, onShow }: AppProps) => {
   const caseActions = useCase();
+  const setIsSpinning = useProjectStatusStore((state) => state.setIsSpinning);
 
   const handleClick = async (data: CaseListData) => {
+    setIsSpinning(true);
     await caseActions.addCase(data.key);
     message.success("加载数据集完成");
+    setIsSpinning(false);
   };
 
   return (
