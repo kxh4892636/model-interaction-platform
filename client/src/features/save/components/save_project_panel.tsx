@@ -60,6 +60,7 @@ const SaveProjectPanel = ({
         style={{ maxWidth: 360, padding: "10px 14px" }}
         onFinish={(value) => {
           if (!isPosition) {
+            setIsSpinning(false);
             setIsLoading(false);
             message.error("未确认空间范围", 10);
             return;

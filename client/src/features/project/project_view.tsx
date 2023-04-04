@@ -129,10 +129,10 @@ const CardList = ({
             danger
             style={{ marginInlineEnd: "auto", marginInlineStart: "10px", fontSize: "14px" }}
           >
-            删除数据集
+            删除项目
           </Button>
         </Popconfirm>,
-        projectKey.includes("-") ? (
+        projectKey !== "" ? (
           <Popconfirm
             title="加载项目"
             description="已存在项目, 加载该项目将取消目前一切操作?"
@@ -148,7 +148,7 @@ const CardList = ({
             cancelText="取消加载"
           >
             <Button type="primary" style={{ marginLeft: "auto" }}>
-              加载该项目
+              加载项目
             </Button>
           </Popconfirm>
         ) : (
@@ -164,7 +164,7 @@ const CardList = ({
             }}
             style={{ marginLeft: "auto" }}
           >
-            加载该项目
+            加载项目
           </Button>
         ),
       ]}
@@ -188,16 +188,32 @@ const CardList = ({
         key={"new"}
         size={"small"}
         actions={[
-          <Button
-            id="new"
-            type="primary"
-            onClick={() => {
-              handleCreate();
-            }}
-            style={{ marginLeft: "auto" }}
-          >
-            创建新项目
-          </Button>,
+          projectKey !== "" ? (
+            <Popconfirm
+              title="创建空白项目"
+              description="已存在项目, 创建该项目将取消目前一切操作?"
+              onConfirm={() => {
+                handleCreate();
+              }}
+              okText="确定创建"
+              cancelText="取消创建"
+            >
+              <Button id="new" type="primary" style={{ marginLeft: "auto" }}>
+                创建空白项目
+              </Button>
+            </Popconfirm>
+          ) : (
+            <Button
+              id="new"
+              type="primary"
+              onClick={() => {
+                handleCreate();
+              }}
+              style={{ marginLeft: "auto" }}
+            >
+              创建空白项目
+            </Button>
+          ),
         ]}
       >
         <Meta title={"空白项目"} description={`作者: `} />

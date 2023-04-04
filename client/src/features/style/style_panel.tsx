@@ -107,7 +107,7 @@ const StylePanel = () => {
           <></>
         )}
       </PanelContentContainer>
-      <PanelToolsContainer>
+      <PanelToolsContainer style={{ border: "0px" }}>
         <PanelToolContainer>
           {/* <Button type="primary" danger style={{ marginBottom: "10px" }}>
             取消

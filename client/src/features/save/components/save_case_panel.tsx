@@ -83,10 +83,12 @@ const SaveCasePanel = ({
         onFinish={(value) => {
           const keys = getKeys.getLayerKeys(layers);
           if (!projectKey.includes("-")) {
+            setIsSpinning(false);
             setIsLoading(false);
             message.error("暂未保存项目, 请先保存项目", 10);
             return;
           } else if (!keys.length) {
+            setIsSpinning(false);
             setIsLoading(false);
             message.error("数据集保存失败, 无数据可以保存", 10);
             return;
