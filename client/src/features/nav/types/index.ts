@@ -1,4 +1,4 @@
-export type SidebarItem = {
+export type NavItem = {
   title: string;
   id: string;
   icon: JSX.Element;

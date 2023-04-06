@@ -53,7 +53,7 @@ const routes = [
     element: <EWEModel />,
   },
   {
-    path: "/model/EWElog",
+    path: "/model",
     element: <EWELog />,
   },
   {

@@ -8,8 +8,8 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import styled from "styled-components/macro";
-import { Button, Card, message, Popconfirm, Space } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { Button, Card, message, Popconfirm } from "antd";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { ServerProject } from "../../types";
 import { useData } from "../../hooks";
@@ -17,7 +17,6 @@ import { ProjectListData } from "./types";
 import usePopupStore from "../../stores/popup_store";
 import useProjectStatusStore from "../../stores/project_status_store";
 import useMapStore from "../../stores/map_store";
-import { randomInt } from "crypto";
 import useInit from "../../hooks/use_init";
 
 const { Meta } = Card;

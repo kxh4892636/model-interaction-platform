@@ -18,7 +18,7 @@ import {
   DatabaseOutlined,
 } from "@ant-design/icons";
 import { LayerOutlined } from "../../components/icons";
-import Sidebar from "../../features/sidebar";
+import Nav from "../../features/nav";
 import useMapPositionStore from "../../stores/map_postion_store";
 import { MapView, MapStatus } from "../../features/map";
 import { LayerPanel } from "../../features/layer";
@@ -28,13 +28,13 @@ import { StylePanel } from "../../features/style";
 import Model from "../../features/model/App";
 import { SavePanel } from "../../features/save";
 import React, { useEffect } from "react";
-import axios from "axios";
 import { ModelPopup } from "../../components/popup";
 import usePopupStore from "../../stores/popup_store";
 import { ProjectView } from "../../features/project";
 import useProjectStatusStore from "../../stores/project_status_store";
-import useInit from "../../hooks/use_init";
 import { Spin } from "antd";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../../features/sidebar";
 
 const View = styled.div`
   position: relative;
@@ -86,65 +86,69 @@ const Home: React.FC = () => {
   const setModelPopup = usePopupStore((state) => state.setModelPopup);
   const projectKey = useProjectStatusStore((state) => state.key);
   const isSpinning = useProjectStatusStore((state) => state.isSpinning);
+  const navigate = useNavigate();
 
   // 侧边栏数据
-  const sidebarItemsLeft = [
+  const navItems = [
     {
       title: "项目",
       id: "project",
       icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <ProjectView />,
+      type: "view",
     },
     {
       title: "上传",
       id: "data",
       icon: <CloudUploadOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <DataPanel />,
+      type: "panel",
     },
     {
       title: "数据集",
       id: "case",
       icon: <DatabaseOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <CasePanel />,
+      type: "panel",
     },
     {
       title: "图层",
       id: "layer",
       icon: <LayerOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <LayerPanel />,
+      type: "panel",
     },
     {
       title: "模型",
       id: "model",
       icon: <MediumOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
       panel: <Model />,
+      type: "view",
     },
     {
       title: "保存",
       id: "save",
       icon: <SaveOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
       panel: <SavePanel />,
+      type: "panel",
     },
   ];
 
-  const sidebarItemsRight = [
+  const sidebarItems = [
     {
       title: "样式",
       id: "style",
       icon: <BgColorsOutlined style={{ color: "#262626", fontSize: "24px" }} />,
       panel: <StylePanel />,
+      type: "panel",
     },
-    // {
-    //   title: "水动力模型",
-    //   id: "hydrodynamics",
-    //   icon: <SlackOutlined style={{ color: "#262626", fontSize: "24px" }} />,
-    //   panel: <ModelPanel title="水动力模型面板" model="hydrodynamics" />,
-    // },
   ];
 
   useEffect(() => {
     setModelPopup(<ProjectView></ProjectView>);
     setModelPopupTag(true);
+    navigate("/project");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -152,13 +156,13 @@ const Home: React.FC = () => {
       <TitleBarContainer>港口水环境与生态动力学精细化模拟平台</TitleBarContainer>
       <Spin spinning={isSpinning} size="large" delay={500} tip="请稍等">
         <ContentContainer>
-          <Sidebar items={sidebarItemsLeft} key="left" />
+          <Nav items={navItems} key="left" />
           <ViewContainer>
             <MapView display={popupTag.model} />
             <MapStatus position={position} />
             {popupTag.model === true ? <ModelPopup element={popup.model}></ModelPopup> : <></>}
           </ViewContainer>
-          <Sidebar items={sidebarItemsRight} position="right" key="right" theme="white"></Sidebar>
+          <Sidebar items={sidebarItems} position="right" key="right" theme="white"></Sidebar>
         </ContentContainer>
       </Spin>
       <StatusBarContainer

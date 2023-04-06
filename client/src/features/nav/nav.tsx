@@ -11,7 +11,10 @@
 import styled from "styled-components/macro";
 import { useState } from "react";
 import { message, Tooltip } from "antd";
-import { SidebarItem } from "./types";
+import { NavItem } from "./types";
+import { useNavigate, useRoutes } from "react-router-dom";
+import useMapStore from "../../stores/map_store";
+import useLayersStatusStore from "../../stores/layers_status_store";
 import usePopupStore from "../../stores/popup_store";
 import useProjectStatusStore from "../../stores/project_status_store";
 
@@ -46,25 +49,7 @@ const PanelContainer = styled.div`
   max-height: 91vh;
 `;
 
-/**
- * @description the panel of item
- * @Author xiaohan kong
- * @param selectID panel id
- * @param items items
- */
-type ItemProps = { selectID: string; items: SidebarItem[] };
-const Item = ({ selectID, items }: ItemProps) => {
-  const panel = items.filter((value) => {
-    if (value.id !== selectID || value.type === "view") {
-      return false;
-    }
-    return true;
-  });
-
-  return panel.length ? panel[0].panel : <></>;
-};
-
-const createRoutes = (items: SidebarItem[]) => {
+const createRoutes = (items: NavItem[]) => {
   return items.map((item) => {
     return { path: `/${item.id}`, element: item.panel };
   });
@@ -81,37 +66,70 @@ const createRoutes = (items: SidebarItem[]) => {
 type Position = "left" | "right";
 type Theme = "black" | "white";
 type AppProps = {
-  items: SidebarItem[];
+  items: NavItem[];
   position?: Position;
   theme?: Theme;
 };
-const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
+const Nav = ({ items, position = "left", theme = "black" }: AppProps) => {
+  const navigate = useNavigate();
+  const element = useRoutes([...createRoutes(items), { path: "/", element: <></> }]);
   const popupTag = usePopupStore((state) => state.popupTagStore);
+  const setModelPopupTag = usePopupStore((state) => state.setModelPopupTag);
+  const setModelPopup = usePopupStore((state) => state.setModelPopup);
+  const removeModelPopup = usePopupStore((state) => state.removeModelPopup);
   const [showPanelID, setShowPanelID] = useState("");
   const [showItem, setShowItem] = useState(false);
+  const map = useMapStore((state) => state.map);
+  const layerChecked = useLayersStatusStore((state) => state.layersChecked);
   const projKey = useProjectStatusStore((state) => state.key);
   const setProjKey = useProjectStatusStore((state) => state.setKey);
 
-  const sidebarItems = items.map((value): JSX.Element => {
+  const NavItems = items.map((value): JSX.Element => {
     return (
       <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
         <AsideItem
           theme={theme}
-          onClick={() => {
-            if (popupTag.model) return;
-            else;
+          onClick={(e) => {
+            // TODO 这里写的太乱了, 我也不想改, 讲究着用吧
             if (projKey === "") {
               setProjKey("init");
               message.success("创建空白项目完成");
             } else;
-            if (showItem && value.id !== showPanelID) {
-            } else {
-              setShowItem(!showItem);
-            }
-            if (showPanelID === value.id) {
-              setShowPanelID("");
-            } else {
+            if (value.type === "view") {
+              setModelPopupTag(!popupTag.model);
+              setShowItem(false);
               setShowPanelID(value.id);
+              if (popupTag.model === false) {
+                setModelPopup(items.filter((item) => item.type === "view")[0].panel);
+                layerChecked.forEach((key) => {
+                  if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "none");
+                  else;
+                });
+                navigate(`/${value.id}`);
+              } else {
+                layerChecked.forEach((key) => {
+                  if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "visible");
+                  else;
+                });
+                removeModelPopup();
+                navigate("/");
+              }
+            } else {
+              setModelPopupTag(false);
+              if (showItem && value.id !== showPanelID) {
+                navigate(`/${value.id}`);
+              } else if (showItem) {
+                navigate("/");
+                setShowItem(!showItem);
+              } else {
+                navigate(`/${value.id}`);
+                setShowItem(!showItem);
+              }
+              if (showPanelID === value.id) {
+                setShowPanelID("");
+              } else {
+                setShowPanelID(value.id);
+              }
             }
           }}
         >
@@ -125,7 +143,8 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
     <>
       {showItem && position === "right" ? (
         <PanelContainer style={{ borderLeft: "1px solid #d9d9d9" }}>
-          <Item selectID={showPanelID} items={items} />
+          {/* <Item selectID={showPanelID} items={items} /> */}
+          {element}
         </PanelContainer>
       ) : (
         <></>
@@ -138,11 +157,12 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
             : { borderLeft: "1px solid #d9d9d9" }
         }
       >
-        {sidebarItems}
+        {NavItems}
       </Aside>
       {showItem && position === "left" ? (
         <PanelContainer style={{ borderRight: "1px solid #d9d9d9" }}>
-          <Item selectID={showPanelID} items={items} />
+          {/* <Item selectID={showPanelID} items={items} /> */}
+          {element}
         </PanelContainer>
       ) : (
         <></>
@@ -151,4 +171,4 @@ const Sidebar = ({ items, position = "left", theme = "black" }: AppProps) => {
   );
 };
 
-export default Sidebar;
+export default Nav;
