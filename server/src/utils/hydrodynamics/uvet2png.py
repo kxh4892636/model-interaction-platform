@@ -135,4 +135,3 @@ if __name__ == '__main__':
                 uvetFold+f'/uvet_{uvetTimeStamp}_{i}.txt', pngFold+f'/petak_{pngTimeStamp}_{i}.png', maskPath)
     except:
         print('输入参数错误, 请输入文件 url')
-    # TODO

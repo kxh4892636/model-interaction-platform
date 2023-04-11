@@ -9,7 +9,7 @@ import {
   Radio,
   message,
   Select,
-  Switch
+  Switch,
 } from "antd";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import "./index.css";
@@ -28,7 +28,7 @@ import {
   selectedEWEModelID,
 } from "../store";
 import { useData } from "../../../hooks";
-import useLayersStore from "../../../stores/layers_store";
+import { useLayersStore } from "../../../stores/layers_store";
 import axios from "axios";
 const EditableContext = React.createContext(null);
 const EditableRow = ({ index, ...props }) => {
@@ -118,7 +118,6 @@ export default function App() {
   // 生成select下拉框内容
   const layers = useLayersStore((state) => state.layers);
   const createSelectOptions = (layers) => {
-    console.log(layers)
     let selectOptions = [];
     const loop = (data, callback) => {
       for (let index = 0; index < data.length; index++) {
@@ -130,7 +129,7 @@ export default function App() {
       }
     };
     loop(layers, (layer) => {
-      if(layer.type==="ewemodel"){
+      if (layer.type === "ewemodel") {
         selectOptions.push({ value: layer.key, label: layer.title });
       }
     });
@@ -138,9 +137,9 @@ export default function App() {
   };
 
   useEffect(() => {
-    setSelectOptions(createSelectOptions(layers));
+    setSelectOptions(createSelectOptions(layers.data));
     //eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layers.length]);
+  }, [layers.data.length]);
   // Group 完成编辑
   const GrouphandleOk = () => {
     setGroupTData(GroupData);
@@ -374,12 +373,11 @@ export default function App() {
     setDiscardFateData(response.DiscardFate);
   };
   const ImportModel = async (id) => {
-    const detail = await dataActions.getDataDetail(id)
     message.loading({ content: "数据加载中", key: "Mloading" });
     axios({
       method: "post",
-      baseURL: "http://localhost:3456/model/R_test3",
-      data: { filepath: detail.data },
+      baseURL: "http://localhost:3456/api/model/R_test3",
+      data: { id: id },
     }).then((response) => {
       if (response.status === 200) {
         message.destroy("Mloading");
@@ -388,25 +386,22 @@ export default function App() {
         message.destroy("Mloading");
         message.error(`数据加载失败`);
       }
-      // console.log(response)
       LoadDATA(response.data);
     });
   };
   // 控制显示与隐藏
-  const [Mdisplaystate,setMdisplaystate] = useState("block") 
-  const [displaystate,setdisplaystate] = useState("none") 
+  const [Mdisplaystate, setMdisplaystate] = useState("block");
+  const [displaystate, setdisplaystate] = useState("none");
   const onChange333 = (checked) => {
-    if(checked===true){
-      setMdisplaystate("block")
-      setdisplaystate("none")
-    }
-    else{
-      setMdisplaystate("none")
-      setdisplaystate("block")
+    if (checked === true) {
+      setMdisplaystate("block");
+      setdisplaystate("none");
+    } else {
+      setMdisplaystate("none");
+      setdisplaystate("block");
     }
   };
   return (
-    
     <Space
       direction="vertical"
       size="middle"
@@ -414,8 +409,13 @@ export default function App() {
         display: "flex",
       }}
     >
-      <Switch checkedChildren="直接导入" unCheckedChildren="手动定义" defaultChecked onChange={onChange333}/>
-      <div style={{display:Mdisplaystate}}>
+      <Switch
+        checkedChildren="直接导入"
+        unCheckedChildren="手动定义"
+        defaultChecked
+        onChange={onChange333}
+      />
+      <div style={{ display: Mdisplaystate }}>
         <Space>
           <span>模型选择</span>
           <Select
@@ -432,7 +432,7 @@ export default function App() {
           />
         </Space>
       </div>
-      <div style={{display:displaystate}}>
+      <div style={{ display: displaystate }}>
         <Space>
           <span>定义功能组</span>
           <Button
@@ -473,7 +473,7 @@ export default function App() {
           width="1200"
         />
       </div>
-      <div style={{display:displaystate}}>
+      <div style={{ display: displaystate }}>
         <Space>
           <span>定义舰船</span>
           <Button

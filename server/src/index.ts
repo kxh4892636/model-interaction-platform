@@ -10,10 +10,10 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import projectRoute from "./routes/project_route";
-import caseRoute from "./routes/case_route";
-import dataRoute from "./routes/data_route";
-import model from "./routes/ewe_route";
+import { projectRoute } from "./routes/project_route";
+import { datasetRoute } from "./routes/dataset_route";
+import { dataRoute } from "./routes/data_route";
+import { modelRoute } from "./routes/model_route";
 
 const app = express();
 const port = 3456;
@@ -27,10 +27,10 @@ app.use(express.urlencoded({ extended: false }));
 // parse application/json
 app.use(express.json());
 // Routes
-app.use("/project", projectRoute);
-app.use("/case", caseRoute);
-app.use("/data", dataRoute);
-app.use("/model", model);
+app.use("/api/project", projectRoute);
+app.use("/api/dataset", datasetRoute);
+app.use("/api/data", dataRoute);
+app.use("/api/model", modelRoute);
 
 app.listen(port, () => {
   console.log("http://localhost:3456");

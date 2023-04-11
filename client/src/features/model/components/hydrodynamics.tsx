@@ -8,7 +8,7 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import { Button, Select, SelectProps, Progress, message } from "antd";
+import { Button, Select, SelectProps, Progress, message, Input } from "antd";
 import { useEffect } from "react";
 import {
   PanelContainer,
@@ -17,11 +17,28 @@ import {
   PanelToolsContainer,
 } from "../../../components/layout";
 import { useData } from "../../../hooks";
-import useLayersStore from "../../../stores/layers_store";
+import { useLayersStore } from "../../../stores/layers_store";
 import { Layer } from "../../../types";
 import axios from "axios";
-import useModelsStatus from "../stores/models_status";
-import useProjectStatusStore from "../../../stores/project_status_store";
+import { useModelsStatus } from "../stores/models_status";
+import { useProjectStatusStore } from "../../../stores/project_status_store";
+
+const createSelectOptions = (layers: Layer[]) => {
+  interface optionType {
+    label: string;
+    options: { value: string; label: string }[];
+  }
+  let selectOptions: optionType[] = [];
+  for (let index = 0; index < layers.length; index++) {
+    const layer = layers[index];
+    selectOptions.push({ label: layer.title, options: [] });
+    layer.children.forEach((layer) => {
+      selectOptions[index].options.push({ label: layer.title, value: layer.key });
+    });
+  }
+
+  return selectOptions;
+};
 
 /**
  * @description ModelPanel
@@ -34,9 +51,9 @@ interface AppProps {
   title: string;
   model: string;
 }
-const Hydrodynamics = ({ model }: AppProps) => {
+export const Hydrodynamics = ({ model }: AppProps) => {
   const layers = useLayersStore((state) => state.layers);
-  const options: SelectProps["options"] = createSelectOptions(layers);
+  const options: SelectProps["options"] = createSelectOptions(layers.data);
   const dataActions = useData();
   const modelStatus = useModelsStatus((state) => state.modelStatus);
   const addModelStatus = useModelsStatus((state) => state.addModelStatus);
@@ -45,12 +62,43 @@ const Hydrodynamics = ({ model }: AppProps) => {
   const removeModelStatus = useModelsStatus((state) => state.removeModelStatus);
   const currentModelStatus = getModelStatus(model);
   const setIsSpinning = useProjectStatusStore((state) => state.setIsSpinning);
+  const projectKey = useProjectStatusStore((state) => state.key);
+
+  const getPercent = (key: string) => {
+    const percentInterval = setInterval(async () => {
+      const dataInfo = await dataActions.getDataDetail(key);
+      if (!dataInfo) {
+        clearInterval(percentInterval);
+        // currentModelStatus && clearInterval(currentModelStatus.intervalStore!);
+        removeModelStatus(model);
+        message.error("模型运行错误");
+        return;
+      } else;
+      const progress = dataInfo.progress;
+      // stop model if failed to run model
+      // update progress of model
+      updateModelStatus(
+        model,
+        "percent",
+        ((Number(progress[0]) / Number(progress[1])) * 100).toFixed(2)
+      );
+      // add result if model is finished
+      if (progress[0] === progress[1] && progress[1]) {
+        clearInterval(percentInterval);
+        removeModelStatus(model);
+        dataActions.addDataToLayerTree(key);
+        dataActions.addDataToMap(key);
+        message.success("模型运行完毕", 10);
+        return;
+      } else;
+    }, 2000);
+    updateModelStatus(model, "intervalStore", percentInterval);
+  };
 
   useEffect(() => {
     if (getModelStatus(model)) return;
     console.log(modelStatus);
     addModelStatus({
-      boundaryKey: null,
       intervalStore: null,
       isRunning: false,
       model: model,
@@ -59,20 +107,34 @@ const Hydrodynamics = ({ model }: AppProps) => {
       projKey: null,
       resultKeys: null,
       pid: null,
+      datasetKey: null,
+      title: "",
     });
   });
 
   return (
-    <PanelContainer style={{ maxWidth: "40vw" }}>
+    <PanelContainer style={{ maxWidth: "30vw" }}>
       <PanelContentContainer>
+        <>
+          <div style={{ padding: "10px 12px" }}>模型案例名称</div>
+          <Input
+            placeholder="请输入项目案例名称"
+            allowClear
+            disabled={currentModelStatus?.isRunning}
+            style={{ margin: "6px 12px", width: "100%" }}
+            onChange={(e) => {
+              updateModelStatus(model, "title", e.target.value);
+            }}
+          />
+        </>
         <>
           <div style={{ padding: "10px 12px" }}>模型参数</div>
           <Select
             mode="multiple"
             disabled={currentModelStatus?.isRunning}
             allowClear
-            style={{ margin: "6px 12px" }}
-            placeholder="请输入指定参数"
+            style={{ margin: "6px 12px", width: "100%" }}
+            placeholder="请选择模型参数"
             value={currentModelStatus?.paramKeys}
             onChange={(values) => {
               updateModelStatus(model, "paramKeys", values);
@@ -82,12 +144,12 @@ const Hydrodynamics = ({ model }: AppProps) => {
           />
         </>
         <>
-          <div style={{ padding: "10px 12px" }}>投影文件(可选参数)</div>
+          <div style={{ padding: "10px 12px" }}>投影文件(可选)</div>
           <Select
             allowClear
             disabled={currentModelStatus?.isRunning}
-            style={{ margin: "6px 12px" }}
-            placeholder="请输入投影文件"
+            style={{ margin: "6px 12px", width: "100%" }}
+            placeholder="请选择投影文件(可选)"
             value={currentModelStatus?.projKey}
             onChange={(value) => {
               updateModelStatus(model, "projKey", value);
@@ -97,81 +159,40 @@ const Hydrodynamics = ({ model }: AppProps) => {
           />
         </>
         <>
-          <div style={{ padding: "10px 12px" }}>边界文件(可选参数)</div>
-          <Select
-            allowClear
-            disabled={currentModelStatus?.isRunning}
-            style={{ margin: "6px 12px" }}
-            placeholder="请输入边界文件"
-            value={currentModelStatus?.boundaryKey}
-            onChange={(value) => {
-              updateModelStatus(model, "boundaryKey", value);
-              updateModelStatus(model, "percent", 0);
-            }}
-            options={options}
-          />
-        </>
-        <>
           <div style={{ padding: "10px 12px" }}>模型运行进度</div>
-          <PanelToolsContainer>
+          <PanelToolsContainer style={{ border: "0px" }}>
             <PanelToolContainer>
               <Progress
                 percent={currentModelStatus?.percent ? currentModelStatus.percent : 0}
-                style={{ maxWidth: "50vw", marginRight: "auto", marginLeft: "12px" }}
+                style={{ minWidth: "15vw", marginRight: "auto", marginLeft: "12px" }}
               />
             </PanelToolContainer>
             <PanelToolContainer>
               <Button
                 type="primary"
-                disabled={!(currentModelStatus?.paramKeys && currentModelStatus?.paramKeys?.length)}
+                style={{ marginBottom: "10px", marginLeft: "auto" }}
+                disabled={
+                  !(
+                    currentModelStatus?.paramKeys &&
+                    currentModelStatus.paramKeys.length &&
+                    currentModelStatus.title.length
+                  )
+                }
                 onClick={() => {
                   setIsSpinning(true);
                   updateModelStatus(model, "isRunning", !currentModelStatus?.isRunning);
-                  const getPercent = (keys: string[]) => {
-                    const percentInterval = setInterval(async () => {
-                      const dataInfo = await dataActions.getDataDetail(keys[0]);
-                      const progress = dataInfo.progress;
-                      // stop model if failed to run model
-                      if (progress.length === 1) {
-                        clearInterval(percentInterval);
-                        currentModelStatus && clearInterval(currentModelStatus.intervalStore!);
-                        removeModelStatus(model);
-                        message.error(progress[0]);
-                        return;
-                      } else;
-                      // update progress of model
-                      updateModelStatus(
-                        model,
-                        "percent",
-                        ((Number(progress[0]) / Number(progress[1])) * 100).toFixed(2)
-                      );
-                      // add result if model is finished
-                      if (progress[0] === progress[1] && progress[1]) {
-                        clearInterval(percentInterval);
-                        updateModelStatus(model, "isRunning", false);
-                        keys.forEach((key) => {
-                          dataActions.addDataToLayerTree(key);
-                          dataActions.addDataToMap(key);
-                        });
-                        message.success("模型运行完毕", 10);
-                        return;
-                      } else;
-                    }, 10000);
-                    updateModelStatus(model, "intervalStore", percentInterval);
-                  };
                   // stop the model
                   if (currentModelStatus?.isRunning) {
                     clearInterval(currentModelStatus.intervalStore!);
                     removeModelStatus(model);
                     axios({
                       method: "post",
-                      baseURL: "http://localhost:3456/model/hydrodynamics",
-                      data: [
-                        currentModelStatus!.paramKeys,
-                        currentModelStatus!.projKey,
-                        currentModelStatus!.boundaryKey,
-                        currentModelStatus.pid,
-                      ],
+                      baseURL: "http://localhost:3456/api/model/hydrodynamics",
+                      data: {
+                        action: "stop",
+                        datasetID: "",
+                        pid: "",
+                      },
                     }).then(() => {
                       message.error("模型停止运行", 10);
                     });
@@ -179,30 +200,30 @@ const Hydrodynamics = ({ model }: AppProps) => {
                   else {
                     axios({
                       method: "post",
-                      baseURL: "http://localhost:3456/model/hydrodynamics",
-                      data: [
-                        currentModelStatus!.paramKeys,
-                        currentModelStatus!.projKey,
-                        currentModelStatus!.boundaryKey,
-                        undefined,
-                      ],
+                      baseURL: "http://localhost:3456/api/model/hydrodynamics",
+                      data: {
+                        action: "run",
+                        paramKeys: currentModelStatus!.paramKeys,
+                        projKey: currentModelStatus!.projKey,
+                        title: currentModelStatus!.title,
+                        projectID: projectKey,
+                      },
                     }).then((response) => {
                       if (response.data.status === "success") {
-                        console.log(response);
-                        updateModelStatus(model, "resultKeys", response.data.content);
-                        updateModelStatus(model, "pid", response.data.pid);
+                        updateModelStatus(model, "datasetKey", response.data.content[0]);
+                        updateModelStatus(model, "pid", response.data.content[1]);
+                        updateModelStatus(model, "resultKeys", response.data.content[2]);
                         updateModelStatus(model, "isRunning", true);
-                        getPercent(response.data.content);
+                        getPercent(response.data.content[2][0]);
                         message.success("模型开始运行", 10);
                       } else {
                         message.error("模型输入参数错误", 10);
-                        updateModelStatus(model, "isRunning", false);
+                        removeModelStatus(model);
                       }
                     });
                   }
                   setIsSpinning(false);
                 }}
-                style={{ marginBottom: "10px", marginLeft: "auto" }}
                 danger={currentModelStatus?.isRunning}
               >
                 {currentModelStatus?.isRunning ? "停止运行" : "开始运行"}
@@ -214,26 +235,3 @@ const Hydrodynamics = ({ model }: AppProps) => {
     </PanelContainer>
   );
 };
-
-const createSelectOptions = (layers: Layer[]) => {
-  let selectOption: { label: string; value: string }[] = [];
-  const loop = (
-    layers: Layer[],
-    callback: (value: Layer, index?: number, data?: { label: string; value: string }[]) => void
-  ) => {
-    for (let i = 0; i < layers.length; i++) {
-      const layer = layers[i];
-      if (layer.group) {
-        loop(layer.children, callback);
-      } else {
-        callback(layer);
-      }
-    }
-  };
-  loop(layers, (layer) => {
-    selectOption.push({ label: layer.title, value: layer.key });
-  });
-  return selectOption;
-};
-
-export { Hydrodynamics };

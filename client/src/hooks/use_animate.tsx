@@ -9,18 +9,18 @@
  */
 
 import { ImageSource } from "mapbox-gl";
-import useLayersAnimatedStore from "../stores/animated_status_store";
-import useMapStore from "../stores/map_store";
-import useData from "./use_data";
+import { useAnimatedStatusStore } from "../../src/stores/animated_status_store";
+import { useMapStore } from "../../src/stores/map_store";
+import { useData } from "./";
 
 // NOtE can't alert each other between hooks
-const useAnimate = () => {
+export const useAnimate = () => {
   const map = useMapStore((state) => state.map);
   const dataAction = useData();
-  const animatedStatus = useLayersAnimatedStore((state) => state.animatedStatus);
-  const updateAnimatedStatus = useLayersAnimatedStore((state) => state.updateAnimatedStatus);
-  const addAnimatedStatus = useLayersAnimatedStore((state) => state.addAnimatedStatus);
-  const removeAnimatedStatus = useLayersAnimatedStore((state) => state.removeAnimatedStatus);
+  const animatedStatus = useAnimatedStatusStore((state) => state.animatedStatus);
+  const updateAnimatedStatus = useAnimatedStatusStore((state) => state.updateAnimatedStatus);
+  const addAnimatedStatus = useAnimatedStatusStore((state) => state.addAnimatedStatus);
+  const removeAnimatedStatus = useAnimatedStatusStore((state) => state.removeAnimatedStatus);
 
   const createAnimate = (
     id: string,
@@ -110,5 +110,3 @@ const useAnimate = () => {
     removeAnimate,
   };
 };
-
-export default useAnimate;

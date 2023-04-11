@@ -20,11 +20,12 @@ import { create } from "zustand";
 
 interface ModelStatus {
   model: string;
+  title: string;
   paramKeys: string[];
   projKey: string | null;
-  boundaryKey: string | null;
   isRunning: boolean;
   resultKeys: string[] | null;
+  datasetKey: string | null;
   percent: number;
   intervalStore: NodeJS.Timer | null;
   pid: number | null;
@@ -38,11 +39,12 @@ interface ModelStatusStore {
     model: string,
     prop:
       | "model"
+      | "title"
       | "paramKeys"
       | "projKey"
-      | "boundaryKey"
       | "isRunning"
       | "resultKeys"
+      | "datasetKey"
       | "percent"
       | "intervalStore"
       | "pid",
@@ -51,7 +53,7 @@ interface ModelStatusStore {
   removeModelStatus: (model: string) => void;
 }
 
-const useModelsStatus = create<ModelStatusStore>((set, get) => ({
+export const useModelsStatus = create<ModelStatusStore>((set, get) => ({
   modelStatus: [],
   addModelStatus: (modelStatus) => {
     set(
@@ -84,5 +86,3 @@ const useModelsStatus = create<ModelStatusStore>((set, get) => ({
     );
   },
 }));
-
-export default useModelsStatus;

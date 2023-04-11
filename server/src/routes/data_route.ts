@@ -8,51 +8,58 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import express from "express";
+import { dataController } from "../controllers/data_controller";
 import multer from "multer";
-import dataController from "../controllers/data_controller";
+import { basename, extname } from "path";
+import { PrismaClient } from "@prisma/client";
 import { dataFoldURL } from "../config/global_data";
-import path from "path";
 
-const router = express.Router();
 const upload = multer({
   storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, dataFoldURL + "/temp/input");
+    destination: async (req, file, cb) => {
+      const prisma = new PrismaClient();
+      const datasetID = req.body.datasetID;
+      if (datasetID == "assets") {
+        cb(null, dataFoldURL + "/project/assets");
+      } else {
+        const info = await prisma.dataset.findUnique({
+          where: { id: datasetID },
+          select: {
+            path: true,
+          },
+        });
+        cb(null, dataFoldURL + info!.path + "/input");
+      }
     },
     filename: (req, file, cb) => {
       //  解决中文名乱码并将文件中的空格转换为 _
       const fileName = Buffer.from(file.originalname, "latin1").toString("utf8");
-      const extName = path.extname(fileName);
+      const extName = extname(fileName);
       cb(
         null,
-        path.basename(fileName, extName).split(" ").join("_") +
-          "_" +
-          Date.now().toString() +
-          extName
+        basename(fileName, extName).split(" ").join("_") + "_" + Date.now().toString() + extName
       );
     },
   }),
 });
 
-// /data/list
-router.get("/list", dataController.getList);
-// /data/detail
-router.get("/detail", dataController.getDetail);
-// /data/json
-router.get("/json", dataController.getJSON);
-// /data/mesh
-router.get("/mesh", dataController.getMesh);
-// /data/uvet
-router.get("/uvet", dataController.getUVET);
-// /data/image
-router.get("/image", dataController.getImage);
-// /data/shp
-router.get("/shp", dataController.getShp);
-// /data/text
-router.get("/text", dataController.getText);
-// /data/upload
-router.post("/upload", upload.single("file"), dataController.uploadData);
-// /data/init
-router.get("/init", dataController.init);
+const dataRoute = express.Router();
 
-export default router;
+// /api/data/detail
+dataRoute.get("/detail", dataController.getDetail);
+// /api/data/json
+dataRoute.get("/json", dataController.getJSON);
+// /api/data/mesh
+dataRoute.get("/mesh", dataController.getMesh);
+// /api/data/uvet
+dataRoute.get("/uvet", dataController.getUVET);
+// /api/data/image
+dataRoute.get("/image", dataController.getImage);
+// /api/data/text
+dataRoute.get("/text", dataController.getText);
+// /api/data/upload
+dataRoute.post("/upload", upload.single("file"), dataController.uploadData);
+// /api/data/action
+dataRoute.post("/action", dataController.dataAction);
+
+export { dataRoute };

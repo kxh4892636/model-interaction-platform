@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import fs from "fs";
-import path from "path";
+import path, { dirname } from "path";
 import { title } from "process";
 import { dataFoldURL } from "./config/global_data";
 
@@ -59,20 +59,19 @@ const main = async () => {
   //   },
   // });
   // await prisma.$queryRaw`UPDATE data SET data = replace(data,'/temp/','/case/hydrodynamics_result/') WHERE temp = true`;
-  // await prisma.data.deleteMany({});
-  // await prisma.case.deleteMany({});
-  // await prisma.project.deleteMany({});
+
+  await prisma.data.deleteMany({});
+  await prisma.dataset.deleteMany({});
+  await prisma.project.deleteMany({});
   // prisma.$queryRaw``;
-  const data = await prisma.data.findMany({
-    // where: { id: "a3e062a1-d8ac-4ad1-ad46-ea9394f09400" },
-  });
-  const ccase = await prisma.case.findMany();
+  const data = await prisma.data.findMany({});
+  const dataset = await prisma.dataset.findMany();
   const project = await prisma.project.findMany();
   console.log(project);
-  console.log(ccase);
+  console.log(dataset);
   console.log(data);
   console.log(project.length);
-  console.log(ccase.length);
+  console.log(dataset.length);
   console.log(data.length);
 
   // npx ts-node prisma.ts
@@ -80,8 +79,6 @@ const main = async () => {
 
 main()
   .then(async () => {
-    const time = new Date(1680529583346);
-    console.log(time.toISOString());
     await prisma.$disconnect();
   })
   .catch(async (err) => {

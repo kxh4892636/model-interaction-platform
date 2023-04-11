@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-03-01
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-03-10
+ * @LastEditTime: 2023-04-07
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -49,7 +49,7 @@ interface AnimatedStatusStore {
  * @Author xiaohan kong
  * @export module: useLayerStatusStore
  */
-const useAnimatedStatusStore = create<AnimatedStatusStore>((set, get) => ({
+export const useAnimatedStatusStore = create<AnimatedStatusStore>((set, get) => ({
   animatedStatus: [],
   addAnimatedStatus: (value) =>
     set(
@@ -92,5 +92,3 @@ const useAnimatedStatusStore = create<AnimatedStatusStore>((set, get) => ({
     });
   },
 }));
-
-export default useAnimatedStatusStore;

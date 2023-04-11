@@ -5,39 +5,34 @@ export type Layer = {
   layerStyle: string;
   group: boolean;
   children: Layer[];
-};
-
-export type ServerData = {
-  id: string;
-  title: string;
-  data: string[];
-  style: string;
-  type: string;
-  temp: boolean;
-  extent: number[];
-  transform: string[];
-  progress: [string, string?];
-};
-
-export type ServerCase = {
-  id: string;
-  title: string;
-  image: string;
-  tags: string[];
-  author: string;
-  time: string;
-  description: string;
-  data: string[];
-  count: number;
+  input?: boolean;
 };
 
 export type ServerProject = {
   id: string;
   title: string;
   image: string;
-  author: string;
-  description: string;
-  count: number;
   data: string[];
   position: string[];
+  tags: string[];
+  description: string[];
+};
+
+export type ServerDataset = {
+  id: string;
+  title: string;
+  data: string[];
+  project: string;
+};
+
+export type ServerData = {
+  id: string;
+  title: string;
+  style: string;
+  type: string;
+  extent: number[];
+  progress: string[];
+  dataset: string;
+  input: boolean;
+  transformNum: string;
 };

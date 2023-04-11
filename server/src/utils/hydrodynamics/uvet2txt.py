@@ -53,4 +53,3 @@ if __name__ == '__main__':
             uvet2txt(uvet, dst + f"/uvet_{timeStamp}_{i}.txt", dataDict, i)
     except:
         print('输入参数错误, 请输入文件 url')
-    # TODO

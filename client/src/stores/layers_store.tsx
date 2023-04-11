@@ -1,9 +1,9 @@
 /*
- * @File: 储存图层列表
+ * @File: layers_store.tsx
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-16
+ * @LastEditTime: 2023-04-09
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -12,30 +12,40 @@ import produce from "immer";
 import { Layer } from "../types";
 
 interface LayersStore {
-  layers: Layer[];
-  setLayers: (value: Layer[]) => void;
-  addLayer: (info: Layer) => void;
-  getLayer: (key: string) => Layer | undefined;
-  deleteLayer: (key: string) => void;
-  updateLayer: (key: string, prop: string, value: string | boolean | Layer) => void;
+  layers: { data: Layer[]; map: Layer[] };
+  setLayers: (value: Layer[], type: "data" | "map") => void;
+  addLayer: (layer: Layer, type: "data" | "map") => void;
+  getLayer: (key: string, type: "data" | "map") => Layer | undefined;
+  deleteLayer: (key: string, type: "data" | "map") => void;
+  updateLayer: (
+    key: string,
+    type: "data" | "map",
+    prop: string,
+    value: string | boolean | Layer
+  ) => void;
 }
 
 /**
- * @description 储存图层列表及其 curd 操作
+ * @description store the layer and it's actions of data and map panel
  * @module useLayerStore
  * @Author xiaohan kong
  * @export module: useLayerStore
  */
-const useLayersStore = create<LayersStore>((set, get) => ({
-  layers: [],
-  setLayers: (value) => set({ layers: value }),
-  addLayer: (info) =>
+export const useLayersStore = create<LayersStore>((set, get) => ({
+  layers: { data: [], map: [] },
+  setLayers: (value, type) =>
     set(
-      produce((draft) => {
-        draft.layers.push(info);
+      produce((draft: LayersStore) => {
+        draft.layers[type] = value;
       })
     ),
-  getLayer: (key) => {
+  addLayer: (layer, type) =>
+    set(
+      produce((draft) => {
+        draft.layers[type].push(layer);
+      })
+    ),
+  getLayer: (key, type) => {
     const loop = (
       data: Layer[],
       key: string,
@@ -50,14 +60,14 @@ const useLayersStore = create<LayersStore>((set, get) => ({
         }
       });
     };
-    const layers = get().layers;
+    const layers = get().layers[type];
     let layer: Layer | undefined = undefined;
     loop(layers, key, (value, index, data) => {
       layer = value;
     });
     return layer ? layer : undefined;
   },
-  deleteLayer: (key) =>
+  deleteLayer: (key, type) =>
     set(
       produce((draft: LayersStore) => {
         const loop = (
@@ -74,14 +84,14 @@ const useLayersStore = create<LayersStore>((set, get) => ({
             }
           });
         };
-        loop(draft.layers, key, (value, index, data) => {
+        loop(draft.layers[type], key, (value, index, data) => {
           data.splice(index, 1);
         });
       })
     ),
-  updateLayer: (key, prop, value) =>
+  updateLayer: (key, type, prop, value) =>
     set(
-      produce((draft) => {
+      produce((draft: LayersStore) => {
         const loop = (
           data: Layer[],
           key: string,
@@ -97,11 +107,9 @@ const useLayersStore = create<LayersStore>((set, get) => ({
           });
         };
 
-        loop(draft.layers, key, (item) => {
+        loop(draft.layers[type], key, (item) => {
           (item as any)[prop] = value;
         });
       })
     ),
 }));
-
-export default useLayersStore;

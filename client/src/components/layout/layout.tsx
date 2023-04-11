@@ -18,6 +18,7 @@ export const PanelContainer = styled.div`
   display: flex;
   flex-flow: column;
   max-height: 91vh;
+  position: relative;
 `;
 /**
  * panel title container

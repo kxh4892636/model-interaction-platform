@@ -1,29 +1,58 @@
-import fs from "fs";
+/*
+ * @file: data_services.ts
+ * @Author: xiaohan kong
+ * @Date: 2023-04-09
+ * @LastEditors: xiaohan kong
+ * @LastEditTime: 2023-04-09
+ *
+ * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
+ */
+
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
 import { execSync } from "child_process";
-import { resolve } from "path";
-import { deleteFolderFilesSync } from "../utils/tools/fs_action";
+import { dirname, resolve } from "path";
+import { deleteSelectFilesInFolderSync } from "../utils/tools/fs_action";
+import { lstatSync, readFileSync, unlinkSync } from "fs";
 
 const prisma = new PrismaClient();
-
-const getList = async () => {
-  const data = await prisma.data.findMany();
-  return data;
-};
 
 const getDetail = async (id: string) => {
   const info = await prisma.data.findUnique({
     where: {
       id: id as string,
     },
+    select: {
+      id: true,
+      title: true,
+      style: true,
+      type: true,
+      extent: true,
+      progress: true,
+      dataset: true,
+      input: true,
+      transformPath: true,
+    },
   });
-
   if (!info) throw new Error("can't find data by id");
   else;
-
-  return info;
+  let transformNum = info.transformPath.length.toString();
+  if (Number(transformNum) > 1) transformNum = info.transformPath[1];
+  return {
+    status: "success",
+    content: {
+      id: info.id,
+      title: info.title,
+      style: info.style,
+      type: info.type,
+      extent: info.extent,
+      progress: info.progress,
+      dataset: info.dataset,
+      input: info.input,
+      transformNum: transformNum,
+    },
+  };
 };
 
 const getJSON = async (id: string) => {
@@ -33,10 +62,10 @@ const getJSON = async (id: string) => {
     },
   });
   if (!info) throw new Error("can't find data by id");
-  const filePath = dataFoldURL + info.data;
-  const buffer = fs.readFileSync(filePath).toString();
+  const filePath = dataFoldURL + info.path;
+  const buffer = readFileSync(filePath).toString();
   const json = JSON.parse(buffer);
-  return json;
+  return { status: "success", content: json };
 };
 
 const getMesh = async (id: string) => {
@@ -46,8 +75,8 @@ const getMesh = async (id: string) => {
     },
   });
   if (!info) throw new Error("can't find data by id");
-  const filePath = dataFoldURL + info.transform[0];
-  return filePath;
+  const filePath = dataFoldURL + info.transformPath[0];
+  return { status: "success", content: filePath };
 };
 
 const getUVET = async (id: string, type: string, currentImage: number) => {
@@ -56,10 +85,15 @@ const getUVET = async (id: string, type: string, currentImage: number) => {
       id: id as string,
     },
   });
+  let content = "";
   if (!info) throw new Error("can't find data by id");
   else if (type === "description")
-    return dataFoldURL + info.transform[0] + `/flow_field_description_${info.transform[2]}.json`;
-  else return dataFoldURL + info.transform[0] + `/${type}_${info.transform[2]}_${currentImage}.png`;
+    content =
+      dataFoldURL + info.transformPath[0] + `/flow_field_description_${info.transformPath[2]}.json`;
+  else
+    content =
+      dataFoldURL + info.transformPath[0] + `/${type}_${info.transformPath[2]}_${currentImage}.png`;
+  return { status: "success", content: content };
 };
 
 const getImage = async (id: string) => {
@@ -69,33 +103,43 @@ const getImage = async (id: string) => {
     },
   });
   if (!info) throw new Error("can't find data by id");
-  const filePath = dataFoldURL + info.data;
-  return filePath;
-};
-
-const getShp = async (id: string) => {
-  const info = await prisma.data.findUnique({
-    where: {
-      id: id as string,
-    },
-  });
-  if (!info) throw new Error("can't find data by id");
-  const filePath = dataFoldURL + info.transform[0];
-  const buffer = fs.readFileSync(filePath).toString();
-  const json = JSON.parse(buffer);
-
-  return json;
+  else;
+  const filePath = dataFoldURL + info.path;
+  return { status: "success", content: filePath };
 };
 
 const getText = async () => {
-  return "need not to send";
+  return { status: "success", content: "need not to send" };
 };
 
-const uploadData = async (file: Express.Multer.File) => {
-  if (!file) return "upload failed";
+/**
+ * upload file to server
+ * @param file upload file
+ * @returns the id of updata file
+ */
+const uploadData = async (file: Express.Multer.File, datasetID: string) => {
+  if (!file) throw new Error("upload failed");
   else;
   const filePath: string = file.path;
   const id = crypto.randomUUID();
+  if (datasetID === "assets") {
+    await prisma.data.create({
+      data: {
+        path: filePath.split("\\").join("/").split(dataFoldURL)[1],
+        id: id,
+        title: file.filename.split(/_\d+/)[0],
+        type: "text",
+        style: "text",
+        extent: [],
+        progress: ["1", "1"],
+        dataset: datasetID,
+        input: true,
+        timeStamp: "",
+        transformPath: [],
+      },
+    });
+    return id;
+  } else;
   // get type and style of data
   const output = execSync(
     `conda activate gis && python ${
@@ -103,7 +147,6 @@ const uploadData = async (file: Express.Multer.File) => {
     } ${filePath}`,
     { windowsHide: true }
   );
-
   const [type, style] = output.toString().trimEnd().split(",");
   let transform: string[] = [];
   let extent: number[] = [];
@@ -112,13 +155,13 @@ const uploadData = async (file: Express.Multer.File) => {
     const fileName = file.filename.split(".")[0];
     const csvPath = filePath
       .replace(file.filename, `${fileName}.csv`)
-      .replace("\\temp\\input", "\\temp\\model\\hydrodynamics\\transform\\mesh");
+      .replace(/(?<=\d*)\\input/, "\\transform\\mesh");
     const maskPath = filePath
       .replace(file.filename, `${fileName}.shp`)
-      .replace("\\temp\\input", "\\temp\\model\\hydrodynamics\\transform\\mask");
+      .replace(/(?<=\d*)\\input/, "\\transform\\mesh");
     const pngPath = filePath
       .replace(file.filename, `${fileName}.png`)
-      .replace("\\temp\\input", "\\temp\\model\\hydrodynamics\\transform\\mesh");
+      .replace(/(?<=\d*)\\input/, "\\transform\\mesh");
     transform.push(pngPath.split("\\").join("/").split(dataFoldURL)[1]);
     // generate csv from mesh
     execSync(
@@ -166,52 +209,88 @@ const uploadData = async (file: Express.Multer.File) => {
       .replace(")", "")
       .split(",")
       .map((value) => Number(value));
-  } else if (type === "uvet") {
+  } else {
   }
   // write data into database
+  const timeStamp = filePath.match(/(?<=\_)\d*(?=\.)/)?.toString();
   await prisma.data.create({
     data: {
-      data: filePath.split("\\").join("/").split(dataFoldURL)[1],
+      path: filePath.split("\\").join("/").split(dataFoldURL)[1],
       id: id,
-      temp: true,
       title: file.filename.split(/_\d+/)[0],
       type: type,
       style: style,
       extent: extent,
-      transform: transform,
       progress: ["1", "1"],
-      count: 1,
+      dataset: datasetID,
+      input: true,
+      timeStamp: timeStamp ? timeStamp : "",
+      transformPath: transform,
     },
   });
-
+  // update dataset
+  const datasetInfo = await prisma.dataset.findUnique({
+    where: { id: datasetID },
+    select: {
+      data: true,
+    },
+  });
+  await prisma.dataset.update({
+    where: { id: datasetID },
+    data: {
+      data: [...datasetInfo!.data, id],
+    },
+  });
   return id;
 };
 
 /**
- * clear temp folder in data folder
+ * rename data
+ * @param id the id of data
+ * @param title the title of rename
+ * @returns
  */
-const init = async () => {
-  try {
-    deleteFolderFilesSync(dataFoldURL + "/temp", ["model.exe"]);
-    await prisma.data.deleteMany({ where: { temp: true } });
-    return { status: "success", content: "clear temp folder succeed" };
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(error);
-      return error.message;
-    }
-  }
+const renameData = async (id: string, title: string) => {
+  await prisma.data.update({
+    where: {
+      id: id,
+    },
+    data: {
+      title: title,
+    },
+  });
+  return { status: "success", content: "update succeed" };
 };
 
-export default {
-  getList,
+const deleteData = async (dataID: string) => {
+  const dataInfo = await prisma.data.findUnique({ where: { id: dataID } });
+  if (!dataInfo) throw new Error("can't find data by id");
+  else;
+  const path = dataFoldURL + dataInfo.path;
+  const transformPath = dataFoldURL + dataInfo.transformPath[0];
+  const timeStamp = dataInfo.timeStamp;
+  // delete the record
+  await prisma.data.delete({ where: { id: dataID } });
+  // delete origin file path
+  unlinkSync(path);
+  // delete transform file path
+  if (lstatSync(transformPath).isFile()) {
+    console.log(dirname(transformPath), timeStamp);
+    deleteSelectFilesInFolderSync(dirname(transformPath), [timeStamp]);
+  } else {
+    deleteSelectFilesInFolderSync(transformPath, [timeStamp]);
+  }
+  return { status: "success", content: "delete succeed" };
+};
+
+export const dataService = {
+  uploadData,
+  renameData,
+  deleteData,
   getDetail,
   getImage,
   getJSON,
   getMesh,
-  getShp,
-  getUVET,
   getText,
-  uploadData,
-  init,
+  getUVET,
 };

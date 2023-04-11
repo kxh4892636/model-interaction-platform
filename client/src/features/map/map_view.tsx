@@ -3,16 +3,17 @@
  * @Author: xiaohano kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohano kong
- * @LastEditTime: 2023-02-16
+ * @LastEditTime: 2023-04-09
  *
  * Copyright (c)  by xiaohano kong, All Rights Reserved.
  */
 
 import { useRef, useEffect } from "react";
 import mapboxgl from "mapbox-gl";
-import useMapPositionStore from "../../stores/map_postion_store";
-import useMapStore from "../../stores/map_store";
-import { GetMap } from "./utils/customLayer/cusLayer";
+import MapboxLanguage from "@mapbox/mapbox-gl-language";
+import { useMapPositionStore } from "../../stores/map_postion_store";
+import { useMapStore } from "../../stores/map_store";
+import { GetMap } from "../../utils/customLayer/cusLayer";
 
 mapboxgl.accessToken =
   "pk.eyJ1Ijoia3hoNDg5MjYzNiIsImEiOiJjbGFhcWYyNmcwNHF3M25vNXJqaW95bDZsIn0.ID03BpkSU7-I0OcehcrvlQ";
@@ -23,7 +24,7 @@ mapboxgl.accessToken =
  * @author xiaohan kong
  * @export module: Mapview
  */
-const MapView = ({ display }: { display: boolean }) => {
+export const MapView = ({ display }: { display: boolean }) => {
   const mapContainerRef = useRef<HTMLDivElement>(document.createElement("div"));
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const setMap = useMapStore((state) => state.setMap);
@@ -41,7 +42,15 @@ const MapView = ({ display }: { display: boolean }) => {
         style: "mapbox://styles/mapbox/streets-v12",
         center: [position[0], position[1]],
         zoom: position[2],
+        // NOTE
+        preserveDrawingBuffer: true,
       }
+    );
+    // NOTE
+    mapRef.current.addControl(
+      new MapboxLanguage({
+        defaultLanguage: "zh-Hans",
+      })
     );
     setMap(mapRef.current);
 
@@ -63,5 +72,3 @@ const MapView = ({ display }: { display: boolean }) => {
     />
   );
 };
-
-export default MapView;

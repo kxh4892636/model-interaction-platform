@@ -56,4 +56,3 @@ if __name__ == '__main__':
         mesh2mask(src, dst)
     except:
         print('输入参数错误, 请输入文件 url')
-    # TODO

@@ -3,16 +3,16 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-16
+ * @LastEditTime: 2023-04-10
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
 import styled from "styled-components/macro";
 import { Tree } from "antd";
-import useLayersStore from "../../../../stores/layers_store";
-import useLayersStatusStore from "../../../../stores/layers_status_store";
-import useLayerActions from "../../hooks/use_layer_actions";
+import { useLayersStore } from "../../../../stores/layers_store";
+import { useLayersStatusStore } from "../../../../stores/layers_status_store";
+import { useLayerActions } from "../../hooks/use_layer_actions";
 
 // modify sytle of antd tree component
 const StyledTree = styled(Tree)`
@@ -63,28 +63,29 @@ const LayerTree = ({ children }: AppProps) => {
       checkable
       onCheck={(checkedKeys, info) => {
         // show or hide layer
-        setLayersChecked(checkedKeys as string[]);
+        setLayersChecked(checkedKeys as string[], "map");
         layerActions.showLayer(info);
       }}
-      checkedKeys={layersChecked}
+      checkedKeys={layersChecked.map}
       onExpand={(expandedKeys) => {
         // expand or collapse layer
-        setLayersExpanded(expandedKeys as string[]);
+        setLayersExpanded(expandedKeys as string[], "map");
       }}
-      expandedKeys={layersExpanded}
-      draggable
+      expandedKeys={layersExpanded.map}
+      // TODO drag
+      // draggable
+      // onDrop={(info) => {
+      //   // drag Layer
+      //   layerActions.dragLayer(info);
+      // }}
       blockNode
-      onDrop={(info) => {
-        // drag Layer
-        layerActions.dragLayer(info);
-      }}
       onSelect={(key, e) => {
         // get selected layer node data
         if (e.selected) {
-          setLayersSelected(e.node as any);
+          setLayersSelected(e.node as any, "map");
         }
       }}
-      treeData={layers}
+      treeData={layers["map"]}
     />
   );
 };

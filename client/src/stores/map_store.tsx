@@ -20,9 +20,7 @@ interface MapStore {
  * @Author xiaohan kong
  * @export module: useMapStore
  */
-const useMapStore = create<MapStore>((set) => ({
+export const useMapStore = create<MapStore>((set) => ({
   map: undefined,
   setMap: (value) => set({ map: value }),
 }));
-
-export default useMapStore;

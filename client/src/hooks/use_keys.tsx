@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-16
+ * @LastEditTime: 2023-04-07
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -15,7 +15,7 @@ import { Layer } from "../types";
  * @autor xiaohan kong
  * @param type return funciton according to type, have getAllKeys, getLayerKeys and getGroupkeys
  */
-const useKeys = () => {
+export const useKeys = () => {
   /**
    * get keys of layer and layer group
    * @param layers layers
@@ -86,5 +86,3 @@ const useKeys = () => {
     getLayerKeys,
   };
 };
-
-export default useKeys;

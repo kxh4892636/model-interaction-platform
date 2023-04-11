@@ -40,4 +40,3 @@ if __name__ == '__main__':
                           extent.split(','), mask, int(num))
     except:
         print('输入参数错误, 请输入文件 url')
-    # TODO

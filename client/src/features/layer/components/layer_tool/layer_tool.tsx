@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-16
+ * @LastEditTime: 2023-04-10
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -24,8 +24,6 @@ const StyledDiv = styled.div`
   }
 `;
 
-type AppProps = { title: string; icon: JSX.Element; action: Function };
-
 /**
  * @description PanelTool component
  * @autor xiaohan kong
@@ -33,7 +31,8 @@ type AppProps = { title: string; icon: JSX.Element; action: Function };
  * @param icon tool icon
  * @param action tool's click event
  */
-const LayerTool = ({ title, icon, action }: AppProps) => {
+type LayerToolProps = { title: string; icon: JSX.Element; action: Function };
+const LayerTool = ({ title, icon, action }: LayerToolProps) => {
   return (
     <Tooltip placement="bottom" title={title}>
       <StyledDiv

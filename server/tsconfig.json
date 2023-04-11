@@ -10,5 +10,5 @@
     "strict": true /* Enable all strict type-checking options. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "copy/case_controller.ts", "copy/case_route.ts", "copy/case_service.ts"]
 }

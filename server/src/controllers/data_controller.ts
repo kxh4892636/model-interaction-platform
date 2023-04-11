@@ -1,26 +1,16 @@
 /*
- * @file: data controller
+ * @file: /api/data controller
  * @Author: xiaohan kong
- * @Date: 2023-03-02
+ * @Date: 2023-04-09
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-03-02
+ * @LastEditTime: 2023-04-09
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
 import { Request, Response } from "express";
-import fs from "fs";
-import dataService from "../services/data_service";
-
-// get data list
-const getList = async (req: Request, res: Response) => {
-  try {
-    res.status(200).json(await dataService.getList());
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
-  }
-};
+import { dataService } from "../services/data_service";
+import { createReadStream } from "fs";
 
 // get meta data of data by key
 const getDetail = async (req: Request, res: Response) => {
@@ -28,7 +18,7 @@ const getDetail = async (req: Request, res: Response) => {
     res.status(200).json(await dataService.getDetail(req.query.id as string));
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    res.status(200).json(error);
   }
 };
 // get json by key
@@ -37,14 +27,14 @@ const getJSON = async (req: Request, res: Response) => {
     res.status(200).json(await dataService.getJSON(req.query.id as string));
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    res.status(200).json(error);
   }
 };
 // get transformed png of mesh by key
 const getMesh = async (req: Request, res: Response) => {
   try {
-    const filePath = await dataService.getMesh(req.query.id as string);
-    const cs = fs.createReadStream(filePath);
+    const result = await dataService.getMesh(req.query.id as string);
+    const cs = createReadStream(result.content);
     cs.on("data", (chunk) => {
       res.write(chunk);
     });
@@ -53,18 +43,18 @@ const getMesh = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    res.status(200).json(error);
   }
 };
 // get transformed png of uvet by key
 const getUVET = async (req: Request, res: Response) => {
   try {
-    const filePath = await dataService.getUVET(
+    const result = await dataService.getUVET(
       req.query.id as string,
       req.query.type as string,
       Number(req.query.currentImage)
     );
-    const cs = fs.createReadStream(filePath);
+    const cs = createReadStream(result.content);
     cs.on("data", (chunk) => {
       res.write(chunk);
     });
@@ -73,29 +63,20 @@ const getUVET = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json(error);
+    res.status(200).json(error);
   }
 };
 // get image by key
 const getImage = async (req: Request, res: Response) => {
   try {
-    const filePath = await dataService.getImage(req.query.id as string);
-    const cs = fs.createReadStream(filePath);
+    const result = await dataService.getImage(req.query.id as string);
+    const cs = createReadStream(result.content);
     cs.on("data", (chunk) => {
       res.write(chunk);
     });
     cs.on("end", () => {
       res.status(200).end();
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json(error);
-  }
-};
-// get transformed json of shp by key
-const getShp = async (req: Request, res: Response) => {
-  try {
-    res.status(200).json(dataService.getShp(req.query.id as string));
   } catch (error) {
     console.error(error);
     res.status(200).json(error);
@@ -110,34 +91,49 @@ const getText = async (req: Request, res: Response) => {
     res.status(200).json(error);
   }
 };
-// upload data
+/**
+ * upload data to server
+ * @param req request
+ * @param res response
+ */
+// NOTE req.file
 const uploadData = async (req: Request, res: Response) => {
   try {
-    res.status(200).json(await dataService.uploadData(req.file!));
+    res.status(200).json(await dataService.uploadData(req.file!, req.body.datasetID as string));
   } catch (error) {
-    console.error(error);
-    res.status(200).json(error);
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    } else;
   }
 };
 
-const init = async (req: Request, res: Response) => {
+// actions of data
+const dataAction = async (req: Request, res: Response) => {
   try {
-    res.status(200).json(await dataService.init());
+    const type = req.body.action;
+    if (type === "rename") {
+      res
+        .status(200)
+        .json(await dataService.renameData(req.body.dataID as string, req.body.title as string));
+    } else if (type === "delete") {
+      res.status(200).json(await dataService.deleteData(req.body.dataID as string));
+    } else {
+      throw new Error("don't have this action");
+    }
   } catch (error) {
-    console.error(error);
-    res.status(200).json(error);
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    }
   }
 };
 
-export default {
-  getList,
+export const dataController = {
   getDetail,
   getImage,
   getJSON,
   getMesh,
-  getShp,
-  getUVET,
   getText,
+  getUVET,
   uploadData,
-  init,
+  dataAction,
 };

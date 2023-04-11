@@ -1,1 +1,1 @@
-export { default as LayerPanel } from "./layer_panel";
+export { LayerPanel } from "./layer_panel";

@@ -8,16 +8,18 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import styled from "styled-components/macro";
-import { Button, Card, message, Popconfirm } from "antd";
-import { useEffect, useState } from "react";
+import { Button, Card, message, Popconfirm, Modal, Input, Space, Tag } from "antd";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ServerProject } from "../../types";
 import { useData } from "../../hooks";
 import { ProjectListData } from "./types";
-import usePopupStore from "../../stores/popup_store";
-import useProjectStatusStore from "../../stores/project_status_store";
-import useMapStore from "../../stores/map_store";
-import useInit from "../../hooks/use_init";
+import { useViewStore } from "../../stores/view_store";
+import { useProjectStatusStore } from "../../stores/project_status_store";
+import { useMapStore } from "../../stores/map_store";
+import { useInit } from "../../hooks";
+import { useLayersStore, useModalStore } from "../../stores";
+import { useManualRefreshStore } from "../../stores/refresh_store";
 
 const { Meta } = Card;
 const ProjectViewContainer = styled.div`
@@ -60,6 +62,154 @@ const CardListContainer = styled.div`
   border-radius: 10px;
 `;
 
+const TagsContainer = styled.div`
+  width: 220px;
+  overflow: scroll;
+  white-space: nowrap;
+  ::-webkit-scrollbar {
+    display: none; /* Chrome Safari */
+  }
+  scrollbar-width: none; /* firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+`;
+
+const ProjectInfoModal = () => {
+  const initAction = useInit();
+  const [isLoading, setIsLoading] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const setProjectKey = useProjectStatusStore((state) => state.setKey);
+  const map = useMapStore((state) => state.map);
+  const modalTag = useModalStore((state) => state.modalTag);
+  const setModalTag = useModalStore((state) => state.setModalTag);
+  const setModal = useModalStore((state) => state.setModal);
+
+  return (
+    <Modal
+      title="创建空白项目"
+      cancelText="取消"
+      okText="确认"
+      centered
+      style={{ top: "-10vh" }}
+      confirmLoading={isLoading}
+      open={modalTag}
+      onOk={async () => {
+        if (inputValue === "") {
+          message.error("请输入项目标题");
+          return;
+        } else;
+        const result = await axios.request({
+          url: "http://localhost:3456/api/project/action",
+          method: "post",
+          data: {
+            action: "create",
+            title: inputValue,
+          },
+        });
+        if (result.data.status === "success") {
+          setProjectKey(result.data.content);
+          map!.setCenter([116.3916, 39.9079]);
+          map!.setZoom(11);
+          initAction.clearStoreDataExcludeMapAndProject();
+          message.success("创建空白项目完成");
+        } else {
+          message.error("创建空白项目失败");
+        }
+        setModalTag(false);
+        setIsLoading(false);
+        setModal(<></>);
+      }}
+      onCancel={() => {
+        setModalTag(false);
+        message.error("创建空白项目失败");
+      }}
+    >
+      <Space direction="vertical" style={{ width: 380 }}>
+        <div>项目标题</div>
+        <Input
+          placeholder="请输入项目标题"
+          onChange={(e) => {
+            setInputValue(e.target.value);
+          }}
+        />
+      </Space>
+    </Modal>
+  );
+};
+
+/**
+ * @description display tags of project
+ * @module TagsPanel
+ * @author xiaohan kong
+ * @param tags tags data
+ * @export module: TagsPanel
+ */
+const TagsPanel = ({ tags }: { tags: string[] }) => {
+  // NOTE
+  const tagRef = useRef<HTMLDivElement | null>(null);
+  const intervalRef = useRef<NodeJS.Timer>();
+  const colors = [
+    "magenta",
+    "red",
+    "volcano",
+    "orange",
+    "gold",
+    "lime",
+    "green",
+    "cyan",
+    "blue",
+    "geekblue",
+    "purple",
+  ];
+
+  // NOTE
+  const autoScroll = () => {
+    const scroll = () => {
+      if (!tagRef.current) return;
+      else;
+      if (tagRef.current.scrollWidth <= tagRef.current.clientWidth) return;
+      else;
+      if (tagRef.current.scrollLeft + tagRef.current.clientWidth === tagRef.current.scrollWidth) {
+        tagRef.current.scrollLeft = 0;
+      } else {
+        tagRef.current.scrollLeft += 2;
+      }
+    };
+    if (!tagRef.current) return;
+    else;
+    intervalRef.current = setInterval(scroll, 100);
+    tagRef.current.onmouseenter = () => {
+      clearInterval(intervalRef.current);
+    };
+    tagRef.current.onmouseleave = () => {
+      intervalRef.current = setInterval(scroll, 100);
+    };
+  };
+
+  const element = tags.map((tag, index) => {
+    const random = Math.floor(Math.random() * 10);
+    return (
+      <Tag key={index} color={colors[random]}>
+        {tag}
+      </Tag>
+    );
+  });
+
+  useEffect(() => {
+    autoScroll();
+    return () => {
+      clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  return tags.length >= 1 ? (
+    <TagsContainer ref={tagRef}>{element}</TagsContainer>
+  ) : (
+    <TagsContainer>
+      <Tag>无标签</Tag>
+    </TagsContainer>
+  );
+};
+
 /**
  * @description generate card list
  * @module cardList
@@ -68,27 +218,17 @@ const CardListContainer = styled.div`
  * @param cardListData the data fo cardList
  * @param caseActions useCase hook
  */
-const CardList = ({
-  dataList,
-  setIsRefresh,
-}: {
-  dataList: ProjectListData[];
-  setIsRefresh: React.Dispatch<React.SetStateAction<number>>;
-}) => {
-  const setModelPopupTag = usePopupStore((state) => state.setModelPopupTag);
+const CardList = ({ dataList }: { dataList: ProjectListData[] }) => {
+  const setViewTag = useViewStore((state) => state.setViewTag);
   const setProjectKey = useProjectStatusStore((state) => state.setKey);
   const projectKey = useProjectStatusStore((state) => state.key);
   const map = useMapStore((state) => state.map);
   const initAction = useInit();
-
-  const handleCreate = () => {
-    initAction.clearStoreDataExcludeMapAndProject();
-    setModelPopupTag(false);
-    setProjectKey("init");
-    map!.setCenter([116.3916, 39.9079]);
-    map!.setZoom(11);
-    message.success("创建空白项目完成");
-  };
+  const setModal = useModalStore((state) => state.setModal);
+  const modalTag = useModalStore((state) => state.modalTag);
+  const setModalTag = useModalStore((state) => state.setModalTag);
+  const manualRefresh = useManualRefreshStore((state) => state.manualRefresh);
+  const setLayers = useLayersStore((state) => state.setLayers);
 
   const cardList = dataList.map((data) => (
     <Card
@@ -103,7 +243,7 @@ const CardList = ({
           onConfirm={() => {
             axios
               .request({
-                url: "http://localhost:3456/project/action",
+                url: "http://localhost:3456/api/project/action",
                 method: "post",
                 data: {
                   action: "delete",
@@ -113,11 +253,11 @@ const CardList = ({
               .then((res) => {
                 const result = res.data;
                 if (result.status === "success") {
-                  setIsRefresh(Math.floor(Math.random() * 1000));
                   message.success("删除项目完成");
                 } else {
                   message.error("删除项目失败");
                 }
+                manualRefresh();
               });
           }}
           okText="确定删除"
@@ -135,10 +275,19 @@ const CardList = ({
           <Popconfirm
             title="加载项目"
             description="已存在项目, 加载该项目将取消目前一切操作?"
-            onConfirm={() => {
+            onConfirm={async () => {
               initAction.clearStoreDataExcludeMapAndProject();
+              await axios
+                .request({
+                  url: "http://localhost:3456/api/project/project",
+                  params: {
+                    action: "layer",
+                    id: data.key,
+                  },
+                })
+                .then((res) => setLayers(res.data.content, "data"));
               setProjectKey(data.key);
-              setModelPopupTag(false);
+              setViewTag(false);
               map!.setCenter([Number(data.position[0]), Number(data.position[1])]);
               map!.setZoom(Number(data.position[2]));
               message.success("加载项目完成");
@@ -153,10 +302,19 @@ const CardList = ({
         ) : (
           <Button
             type="primary"
-            onClick={() => {
+            onClick={async () => {
               initAction.clearStoreDataExcludeMapAndProject();
+              await axios
+                .request({
+                  url: "http://localhost:3456/api/project/project",
+                  params: {
+                    action: "layer",
+                    id: data.key,
+                  },
+                })
+                .then((res) => setLayers(res.data.content, "data"));
               setProjectKey(data.key);
-              setModelPopupTag(false);
+              setViewTag(false);
               map!.setCenter([Number(data.position[0]), Number(data.position[1])]);
               map!.setZoom(Number(data.position[2]));
               message.success("加载项目完成");
@@ -168,57 +326,62 @@ const CardList = ({
         ),
       ]}
     >
-      <Meta title={data.title} description={`作者:${data.author}`} />
+      <Meta title={data.title} description={<TagsPanel tags={data.tags}></TagsPanel>} />
     </Card>
   ));
 
   return (
-    <CardListContainer>
-      <Card
-        style={{ flex: "1 1 0", width: "240px", maxHeight: "310px" }}
-        cover={
-          <img
-            alt="cover"
-            src={process.env.PUBLIC_URL + "/new_project.png"}
-            width={210}
-            height={180}
-          />
-        }
-        key={"new"}
-        size={"small"}
-        actions={[
-          projectKey !== "" ? (
-            <Popconfirm
-              title="创建空白项目"
-              description="已存在项目, 创建该项目将取消目前一切操作?"
-              onConfirm={() => {
-                handleCreate();
-              }}
-              okText="确定创建"
-              cancelText="取消创建"
-            >
-              <Button id="new" type="primary" style={{ marginLeft: "auto" }}>
+    <>
+      {modalTag ? <ProjectInfoModal /> : <></>}
+      <CardListContainer>
+        <Card
+          style={{ width: "240px", maxHeight: "310px" }}
+          cover={
+            <img
+              alt="cover"
+              src={process.env.PUBLIC_URL + "/new_project.png"}
+              width={210}
+              height={180}
+            />
+          }
+          key={"new"}
+          size={"small"}
+          actions={[
+            projectKey !== "" ? (
+              <Popconfirm
+                title="创建空白项目"
+                description="已存在项目, 创建该项目将取消目前一切操作?"
+                onConfirm={() => {
+                  setModal(<ProjectInfoModal />);
+                  setModalTag(true);
+                }}
+                okText="确定创建"
+                cancelText="取消创建"
+              >
+                <Button id="new" type="primary" style={{ marginLeft: "auto" }}>
+                  创建空白项目
+                </Button>
+              </Popconfirm>
+            ) : (
+              <Button
+                id="new"
+                type="primary"
+                onClick={() => {
+                  setModal(<ProjectInfoModal />);
+                  setModalTag(true);
+                }}
+                style={{ marginLeft: "auto" }}
+              >
                 创建空白项目
               </Button>
-            </Popconfirm>
-          ) : (
-            <Button
-              id="new"
-              type="primary"
-              onClick={() => {
-                handleCreate();
-              }}
-              style={{ marginLeft: "auto" }}
-            >
-              创建空白项目
-            </Button>
-          ),
-        ]}
-      >
-        <Meta title={"空白项目"} description={`作者: `} />
-      </Card>
-      {cardList}
-    </CardListContainer>
+            ),
+          ]}
+        >
+          <Meta title={"空白项目"} description={<Tag>空白项目</Tag>} />
+        </Card>
+        {cardList}
+      </CardListContainer>
+    </>
   );
 };
 
@@ -228,10 +391,10 @@ const CardList = ({
  * @author xiahan kong
  * @export module: ProjectView
  */
-const ProjectView = () => {
+export const ProjectView = () => {
   const [data, setData] = useState<ProjectListData[]>([]);
-  const [isRefresh, setIsRefresh] = useState(0);
   const dataAction = useData();
+  const refreshTag = useManualRefreshStore((state) => state.refreshTag);
 
   const getImageUrl = async (key: string) => {
     if (!key) {
@@ -245,7 +408,7 @@ const ProjectView = () => {
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3456/project/list").then(async (res) => {
+    axios.get("http://localhost:3456/api/project/list").then(async (res) => {
       const result: ServerProject[] = res.data.content;
       let projectListData: ProjectListData[] = [];
       for (let index = 0; index < result.length; index++) {
@@ -255,24 +418,22 @@ const ProjectView = () => {
           key: item.id,
           title: item.title,
           image: imageUrl,
-          author: item.author,
           data: item.data,
           position: item.position,
+          tags: item.tags,
         });
       }
       setData(projectListData);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRefresh]);
+  }, [refreshTag]);
 
   return (
     <ProjectViewContainer>
       <ProjectViewTitle>项目列表</ProjectViewTitle>
       <ProjectViewContentContainer>
-        <CardList dataList={data} setIsRefresh={setIsRefresh}></CardList>
+        <CardList dataList={data}></CardList>
       </ProjectViewContentContainer>
     </ProjectViewContainer>
   );
 };
-
-export default ProjectView;

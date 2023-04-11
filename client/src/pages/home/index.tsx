@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-16
+ * @LastEditTime: 2023-04-07
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -17,24 +17,23 @@ import {
   SaveOutlined,
   DatabaseOutlined,
 } from "@ant-design/icons";
-import { LayerOutlined } from "../../components/icons";
-import Nav from "../../features/nav";
-import useMapPositionStore from "../../stores/map_postion_store";
-import { MapView, MapStatus } from "../../features/map";
-import { LayerPanel } from "../../features/layer";
-import { CasePanel } from "../../features/case";
-import { DataPanel } from "../../features/data";
-import { StylePanel } from "../../features/style";
-import Model from "../../features/model/App";
-import { SavePanel } from "../../features/save";
-import React, { useEffect } from "react";
-import { ModelPopup } from "../../components/popup";
-import usePopupStore from "../../stores/popup_store";
-import { ProjectView } from "../../features/project";
-import useProjectStatusStore from "../../stores/project_status_store";
 import { Spin } from "antd";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../../features/sidebar";
+import React, { useEffect } from "react";
+import { useMapPositionStore } from "../../stores/map_postion_store";
+import { useViewStore } from "../../stores/view_store";
+import { useProjectStatusStore } from "../../stores/project_status_store";
+import { Nav } from "../../features/nav";
+import { ProjectInfoPanel, ProjectView } from "../../features/project";
+import { useLayersStore, useModalStore } from "../../stores";
+import { MapView, MapStatus } from "../../features/map";
+import { DataPanel } from "../../features/data";
+import { LayerPanel } from "../../features/layer";
+import { LayerOutlined } from "../../components/icons";
+import Model from "../../features/model/App";
+import { useModelsStatus } from "../../features/model/stores";
+import { StylePanel } from "../../features/style";
+import { Sidebar } from "../../features/sidebar";
 
 const View = styled.div`
   position: relative;
@@ -78,61 +77,69 @@ const StatusBarContainer = styled.div`
  * @Author xiaohan kong
  * @export module: Home
  */
-const Home: React.FC = () => {
+export const Home: React.FC = () => {
   const position = useMapPositionStore((state) => state.position);
-  const popupTag = usePopupStore((state) => state.popupTagStore);
-  const setModelPopupTag = usePopupStore((state) => state.setModelPopupTag);
-  const popup = usePopupStore((state) => state.popupStore);
-  const setModelPopup = usePopupStore((state) => state.setModelPopup);
+  const view = useViewStore((state) => state.view);
+  const viewTag = useViewStore((state) => state.viewTag);
+  const setView = useViewStore((state) => state.setView);
+  const setViewTag = useViewStore((state) => state.setViewTag);
+  const modal = useModalStore((state) => state.modal);
+  const modalTag = useModalStore((state) => state.modalTag);
   const projectKey = useProjectStatusStore((state) => state.key);
   const isSpinning = useProjectStatusStore((state) => state.isSpinning);
   const navigate = useNavigate();
+  const layers = useLayersStore((state) => state.layers);
+  const modelStatus = useModelsStatus((state) => state.modelStatus);
 
   // 侧边栏数据
-  const navItems = [
-    {
-      title: "项目",
-      id: "project",
-      icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
-      panel: <ProjectView />,
-      type: "view",
-    },
-    {
-      title: "上传",
-      id: "data",
-      icon: <CloudUploadOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
-      panel: <DataPanel />,
-      type: "panel",
-    },
-    {
-      title: "数据集",
-      id: "case",
-      icon: <DatabaseOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
-      panel: <CasePanel />,
-      type: "panel",
-    },
-    {
-      title: "图层",
-      id: "layer",
-      icon: <LayerOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
-      panel: <LayerPanel />,
-      type: "panel",
-    },
-    {
-      title: "模型",
-      id: "model",
-      icon: <MediumOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
-      panel: <Model />,
-      type: "view",
-    },
-    {
-      title: "保存",
-      id: "save",
-      icon: <SaveOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
-      panel: <SavePanel />,
-      type: "panel",
-    },
-  ];
+  const navItems = projectKey.includes("-")
+    ? [
+        {
+          title: "项目",
+          id: "project",
+          icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
+          panel: <ProjectView />,
+          type: "view",
+        },
+        {
+          title: "数据",
+          id: "data",
+          icon: <DatabaseOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
+          panel: <DataPanel />,
+          type: "panel",
+        },
+        {
+          title: "图层",
+          id: "layer",
+          icon: <LayerOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
+          panel: <LayerPanel />,
+          type: "panel",
+        },
+        {
+          title: "模型",
+          id: "model",
+          icon: <MediumOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
+          panel: <Model />,
+          type: "view",
+        },
+        {
+          title: "详情",
+          id: "info",
+          icon: <SaveOutlined style={{ color: "#fafafa", fontSize: "22px" }} />,
+          panel: <ProjectInfoPanel />,
+          type: "panel",
+          position: "end",
+        },
+      ]
+    : [
+        {
+          title: "项目",
+          id: "project",
+          icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
+          panel: <ProjectView />,
+          type: "view",
+        },
+      ];
 
   const sidebarItems = [
     {
@@ -145,8 +152,8 @@ const Home: React.FC = () => {
   ];
 
   useEffect(() => {
-    setModelPopup(<ProjectView></ProjectView>);
-    setModelPopupTag(true);
+    setView(<ProjectView />);
+    setViewTag(true);
     navigate("/project");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -156,24 +163,25 @@ const Home: React.FC = () => {
       <TitleBarContainer>港口水环境与生态动力学精细化模拟平台</TitleBarContainer>
       <Spin spinning={isSpinning} size="large" delay={500} tip="请稍等">
         <ContentContainer>
-          <Nav items={navItems} key="left" />
+          <Nav items={navItems} />
           <ViewContainer>
-            <MapView display={popupTag.model} />
+            <MapView display={viewTag} />
             <MapStatus position={position} />
-            {popupTag.model === true ? <ModelPopup element={popup.model}></ModelPopup> : <></>}
+            {viewTag ? view : <></>}
           </ViewContainer>
-          <Sidebar items={sidebarItems} position="right" key="right" theme="white"></Sidebar>
+          <Sidebar items={sidebarItems}></Sidebar>
         </ContentContainer>
       </Spin>
       <StatusBarContainer
         onClick={() => {
           console.log(projectKey);
+          console.log(layers);
+          console.log(modelStatus);
         }}
       >
-        {popupTag.model === true ? "弹窗" : "2"}
+        {modalTag ? "弹窗" : "2"}
       </StatusBarContainer>
+      {modalTag ? modal : <></>}
     </View>
   );
 };
-
-export default Home;

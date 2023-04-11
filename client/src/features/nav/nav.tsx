@@ -2,7 +2,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-10
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-10
+ * @LastEditTime: 2023-04-11
  * @Description: sidebar component
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
@@ -10,23 +10,26 @@
 
 import styled from "styled-components/macro";
 import { useState } from "react";
-import { message, Tooltip } from "antd";
-import { NavItem } from "./types";
+import { Tooltip } from "antd";
+import { NavItemType } from "./types";
 import { useNavigate, useRoutes } from "react-router-dom";
-import useMapStore from "../../stores/map_store";
-import useLayersStatusStore from "../../stores/layers_status_store";
-import usePopupStore from "../../stores/popup_store";
-import useProjectStatusStore from "../../stores/project_status_store";
+import { useMapStore } from "../../stores/map_store";
+import { useLayersStatusStore } from "../../stores/layers_status_store";
+import { useViewStore } from "../../stores/view_store";
+import { useProjectStatusStore } from "../../stores";
 
-// aside style
-const Aside = styled.aside`
+// nav style
+const StyledNav = styled.nav`
+  border-right: 1px solid #d9d9d9;
+  background: #434343;
   display: flex;
   flex-direction: column;
   width: 60px;
-  background: ${(props) => (props.theme === "black" ? "#434343" : "#fff")};
 `;
-// aside item style
-const AsideItem = styled.div`
+// nav item style
+// NOTE
+const NavItem = styled.div<{ position: string | undefined }>`
+  margin-top: ${(props) => props.position && "auto"};
   padding: 14px 0;
   height: auto;
   border-radius: 0;
@@ -35,7 +38,7 @@ const AsideItem = styled.div`
   background: rgba(0, 0, 0, 0);
   text-align: center;
   &&:hover {
-    background: ${(props) => (props.theme === "black" ? "#262626" : "#f0f0f0")};
+    background: "#262626";
     border-color: rgba(0, 0, 0, 0);
   }
 `;
@@ -49,7 +52,7 @@ const PanelContainer = styled.div`
   max-height: 91vh;
 `;
 
-const createRoutes = (items: NavItem[]) => {
+const createRoutes = (items: NavItemType[]) => {
   return items.map((item) => {
     return { path: `/${item.id}`, element: item.panel };
   });
@@ -63,103 +66,76 @@ const createRoutes = (items: NavItem[]) => {
  * @param theme the theme of sidebar
  * @export module: Sidebar
  */
-type Position = "left" | "right";
-type Theme = "black" | "white";
-type AppProps = {
-  items: NavItem[];
-  position?: Position;
-  theme?: Theme;
+type NavProps = {
+  items: NavItemType[];
 };
-const Nav = ({ items, position = "left", theme = "black" }: AppProps) => {
+export const Nav = ({ items }: NavProps) => {
   const navigate = useNavigate();
   const element = useRoutes([...createRoutes(items), { path: "/", element: <></> }]);
-  const popupTag = usePopupStore((state) => state.popupTagStore);
-  const setModelPopupTag = usePopupStore((state) => state.setModelPopupTag);
-  const setModelPopup = usePopupStore((state) => state.setModelPopup);
-  const removeModelPopup = usePopupStore((state) => state.removeModelPopup);
+  const viewTag = useViewStore((state) => state.viewTag);
+  const setView = useViewStore((state) => state.setView);
+  const setViewTag = useViewStore((state) => state.setViewTag);
   const [showPanelID, setShowPanelID] = useState("");
   const [showItem, setShowItem] = useState(false);
   const map = useMapStore((state) => state.map);
   const layerChecked = useLayersStatusStore((state) => state.layersChecked);
-  const projKey = useProjectStatusStore((state) => state.key);
-  const setProjKey = useProjectStatusStore((state) => state.setKey);
+  const projectKey = useProjectStatusStore((state) => state.key);
 
   const NavItems = items.map((value): JSX.Element => {
     return (
       <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
-        <AsideItem
-          theme={theme}
-          onClick={(e) => {
-            // TODO 这里写的太乱了, 我也不想改, 讲究着用吧
-            if (projKey === "") {
-              setProjKey("init");
-              message.success("创建空白项目完成");
-            } else;
+        <NavItem
+          position={value.position}
+          onClick={() => {
+            if (!projectKey.includes("-")) return;
+            else;
             if (value.type === "view") {
-              setModelPopupTag(!popupTag.model);
+              // navigate project and model panel
               setShowItem(false);
-              setShowPanelID(value.id);
-              if (popupTag.model === false) {
-                setModelPopup(items.filter((item) => item.type === "view")[0].panel);
-                layerChecked.forEach((key) => {
+              setView(items.filter((item) => item.id === value.id)[0].panel);
+              if (viewTag && value.id !== showPanelID) {
+                layerChecked["map"].forEach((key) => {
                   if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "none");
                   else;
                 });
                 navigate(`/${value.id}`);
               } else {
-                layerChecked.forEach((key) => {
+                layerChecked["map"].forEach((key) => {
                   if (map!.getLayer(key)) map!.setLayoutProperty(key, "visibility", "visible");
                   else;
                 });
-                removeModelPopup();
-                navigate("/");
+                navigate(viewTag ? "/" : `/${value.id}`);
+                setViewTag(!viewTag);
               }
-            } else {
-              setModelPopupTag(false);
+            } // navigate other panel
+            else {
+              setViewTag(false);
+              // navigate logical
               if (showItem && value.id !== showPanelID) {
                 navigate(`/${value.id}`);
-              } else if (showItem) {
-                navigate("/");
-                setShowItem(!showItem);
               } else {
-                navigate(`/${value.id}`);
+                navigate(showItem ? "/" : `/${value.id}`);
                 setShowItem(!showItem);
               }
-              if (showPanelID === value.id) {
-                setShowPanelID("");
-              } else {
-                setShowPanelID(value.id);
-              }
+            }
+            // set new panel id
+            if (showPanelID === value.id) {
+              setShowPanelID("");
+            } else {
+              setShowPanelID(value.id);
             }
           }}
         >
           {value.icon}
-        </AsideItem>
+        </NavItem>
       </Tooltip>
     );
   });
 
   return (
     <>
-      {showItem && position === "right" ? (
-        <PanelContainer style={{ borderLeft: "1px solid #d9d9d9" }}>
-          {/* <Item selectID={showPanelID} items={items} /> */}
-          {element}
-        </PanelContainer>
-      ) : (
-        <></>
-      )}
-      <Aside
-        theme={theme}
-        style={
-          position === "left"
-            ? { borderRight: "1px solid #d9d9d9" }
-            : { borderLeft: "1px solid #d9d9d9" }
-        }
-      >
-        {NavItems}
-      </Aside>
-      {showItem && position === "left" ? (
+      <StyledNav>{NavItems}</StyledNav>
+      {showItem ? (
         <PanelContainer style={{ borderRight: "1px solid #d9d9d9" }}>
           {/* <Item selectID={showPanelID} items={items} /> */}
           {element}
@@ -170,5 +146,3 @@ const Nav = ({ items, position = "left", theme = "black" }: AppProps) => {
     </>
   );
 };
-
-export default Nav;

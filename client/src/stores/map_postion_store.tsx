@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-02-16
+ * @LastEditTime: 2023-04-07
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -20,9 +20,7 @@ interface MapPositionStore {
  * @Author xiaohan kong
  * @export module: useMapPositionStore
  */
-const useMapPositionStore = create<MapPositionStore>((set) => ({
+export const useMapPositionStore = create<MapPositionStore>((set) => ({
   position: [119.8618, 26.7011, 9],
   setPosition: (value) => set({ position: value }),
 }));
-
-export default useMapPositionStore;

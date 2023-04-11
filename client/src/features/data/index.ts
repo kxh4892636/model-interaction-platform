@@ -1,1 +1,1 @@
-export { default as DataPanel } from "./data";
+export { DataPanel } from "./data_panel";

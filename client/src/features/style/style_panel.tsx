@@ -17,14 +17,13 @@ import {
   PanelToolsContainer,
 } from "../../components/layout";
 import { useAnimate, useData } from "../../hooks";
-import useAnimatedStatusStore from "../../stores/animated_status_store";
-import useLayersAnimatedStore from "../../stores/animated_status_store";
-import useLayersStatusStore from "../../stores/layers_status_store";
-import useLayersStore from "../../stores/layers_store";
-import useMapStore from "../../stores/map_store";
+import { useAnimatedStatusStore } from "../../stores/animated_status_store";
+import { useLayersStatusStore } from "../../stores/layers_status_store";
+import { useLayersStore } from "../../stores/layers_store";
+import { useMapStore } from "../../stores/map_store";
 import { Layer } from "../../types";
-import { FlowFieldManager } from "../../features/map/utils/customLayer/flowfield";
-import { FlowLayer } from "../../features/map/utils/customLayer/flowLayer";
+import { FlowFieldManager } from "../../utils/customLayer/flowfield";
+import { FlowLayer } from "../../utils/customLayer/flowLayer";
 
 /**
  * @description StylePanel
@@ -37,11 +36,13 @@ const StylePanel = () => {
   const setLayersSelected = useLayersStatusStore((state) => state.setLayersSelected);
   const getLayer = useLayersStore((state) => state.getLayer);
   const layers = useLayersStore((state) => state.layers);
-  const selectOptions = createSelectOptions(layers);
+  const selectOptions = createSelectOptions(layers.map);
   const getSlideRange = useSliderRange();
-  const [range, setRange] = useState(getSlideRange(layerSelected));
+  const [range, setRange] = useState(getSlideRange(layerSelected.map));
   const getSlideValue = useSliderValue();
-  const [sliderValue, setSliderValue] = useState<[number, number]>(getSlideValue(layerSelected));
+  const [sliderValue, setSliderValue] = useState<[number, number]>(
+    getSlideValue(layerSelected.map)
+  );
   const getAnimatedStatus = useAnimatedStatusStore((state) => state.getAnimatedStatus);
   const updateAnimatedStatus = useAnimatedStatusStore((state) => state.updateAnimatedStatus);
   const animateActions = useAnimate();
@@ -50,9 +51,9 @@ const StylePanel = () => {
 
   useEffect(() => {
     // Update the value of slide when the value of selected is changed
-    if (!layerSelected) return;
+    if (!layerSelected.map) return;
     else;
-    const layer = getLayer(layerSelected!.key);
+    const layer = getLayer(layerSelected.map.key, "map");
     if (layer) {
       if (layer.type !== "uvet") return;
       else;
@@ -71,21 +72,29 @@ const StylePanel = () => {
           <div style={{ padding: "10px 12px" }}>选择图层</div>
           <Select
             defaultValue={
-              layerSelected ? (layerSelected.group ? undefined : layerSelected.title) : undefined
+              layerSelected.map
+                ? layerSelected.map.group
+                  ? undefined
+                  : layerSelected.map.title
+                : undefined
             }
             value={
-              layerSelected ? (layerSelected.group ? undefined : layerSelected.title) : undefined
+              layerSelected.map
+                ? layerSelected.map.group
+                  ? undefined
+                  : layerSelected.map.title
+                : undefined
             }
             style={{ margin: "6px 12px" }}
             onChange={(key) => {
               // Update layerSelected when the value of selected is changed
-              const layer = getLayer(key);
-              setLayersSelected(layer);
+              const layer = getLayer(key, "map");
+              setLayersSelected(layer, "map");
             }}
             options={selectOptions}
           />
         </>
-        {layerSelected?.type === "uvet" ? (
+        {layerSelected.map?.type === "uvet" ? (
           <>
             <div style={{ padding: "10px 12px" }}>时间范围</div>
             <Slider
@@ -130,10 +139,10 @@ const StylePanel = () => {
             style={{ marginBottom: "10px", marginLeft: "auto", marginRight: "12px" }}
             onClick={() => {
               // Update the animatedStatus of selected layer
-              const style = layerSelected!.layerStyle;
+              const style = layerSelected.map!.layerStyle;
               const startValue = sliderValue[0] - 1;
               const endValue = sliderValue[1] - 1;
-              const key = layerSelected!.key;
+              const key = layerSelected.map!.key;
               const currentCount = getAnimatedStatus(key)!.currentCount;
               const currentCountNow =
                 (currentCount < endValue && currentCount > startValue
@@ -210,7 +219,7 @@ const createSelectOptions = (layers: Layer[]) => {
  * @returns [min, max]
  */
 const useSliderValue = () => {
-  const getAnimatedStatus = useLayersAnimatedStore((state) => state.getAnimatedStatus);
+  const getAnimatedStatus = useAnimatedStatusStore((state) => state.getAnimatedStatus);
   const getSliderValue = (layerSelected: Layer | undefined): [number, number] => {
     if (!layerSelected) return [1, 100];
     else;
@@ -229,7 +238,7 @@ const useSliderValue = () => {
  * @returns [min, max]
  */
 const useSliderRange = () => {
-  const getAnimatedStatus = useLayersAnimatedStore((state) => state.getAnimatedStatus);
+  const getAnimatedStatus = useAnimatedStatusStore((state) => state.getAnimatedStatus);
   const getSliderRange = (layerSelected: Layer | undefined): [number, number] => {
     if (!layerSelected) return [1, 100];
     else;

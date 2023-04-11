@@ -8,15 +8,13 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import express from "express";
-import projectController from "../controllers/project_controller";
+import { projectController } from "../controllers/project_controller";
 
-const router = express.Router();
+export const projectRoute = express.Router();
 
-// /project/case
-router.get("/project", projectController.getProject);
-// /project/list
-router.get("/list", projectController.getProjectList);
-// /project/action
-router.post("/action", projectController.projectAction);
-
-export default router;
+// /api/project/project
+projectRoute.get("/project", projectController.getProject);
+// /api/project/list
+projectRoute.get("/list", projectController.getProjectList);
+// /api/project/action
+projectRoute.post("/action", projectController.projectAction);
