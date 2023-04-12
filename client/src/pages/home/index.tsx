@@ -11,7 +11,6 @@
 import styled from "styled-components/macro";
 import {
   AppstoreOutlined,
-  CloudUploadOutlined,
   BgColorsOutlined,
   MediumOutlined,
   SaveOutlined,

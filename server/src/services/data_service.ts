@@ -8,15 +8,13 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
 import { execSync } from "child_process";
 import { dirname, resolve } from "path";
 import { deleteSelectFilesInFolderSync } from "../utils/tools/fs_action";
 import { lstatSync, readFileSync, unlinkSync } from "fs";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/tools/prisma";
 
 const getDetail = async (id: string) => {
   const info = await prisma.data.findUnique({

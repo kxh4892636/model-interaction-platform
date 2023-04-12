@@ -7,19 +7,16 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
-import { copyFolderSync, deleteFolderFilesSync, deleteFolderSync } from "../utils/tools/fs_action";
+import { copyFolderSync, deleteFolderSync } from "../utils/tools/fs_action";
 import { dataFoldURL } from "../config/global_data";
-import { rmdirSync } from "fs";
+import { prisma } from "../utils/tools/prisma";
 // import {
 //   copyFolderSync,
 //   deleteFolderFilesSync,
 //   deleteSelectFilesInFolderSync,
 // } from "../src/utils/tools/fs_action";
 // import { dataFoldURL } from "../src/config/global_data";
-
-const prisma = new PrismaClient();
 
 /**
  * return the list of all dataset

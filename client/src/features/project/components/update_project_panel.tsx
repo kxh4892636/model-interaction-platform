@@ -80,13 +80,12 @@ export const UpdateProjectPanel = ({
                 id: projectKey,
                 title: value.title,
                 image: isPosition && (result as any).data,
-                tags: Array.isArray(value.tags.split()) && value.tags.split(),
+                tags: value.tags && Array.isArray(value.tags.split()) && value.tags.split(),
                 description: value.description,
                 position: isPosition && position.map((value) => value.toString()),
               },
             })
             .then((res) => {
-              console.log("kk");
               const result = res.data;
               if (result.status === "success") {
                 message.success("项目保存成功", 10);

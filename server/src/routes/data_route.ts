@@ -11,13 +11,12 @@ import express from "express";
 import { dataController } from "../controllers/data_controller";
 import multer from "multer";
 import { basename, extname } from "path";
-import { PrismaClient } from "@prisma/client";
 import { dataFoldURL } from "../config/global_data";
+import { prisma } from "../utils/tools/prisma";
 
 const upload = multer({
   storage: multer.diskStorage({
     destination: async (req, file, cb) => {
-      const prisma = new PrismaClient();
       const datasetID = req.body.datasetID;
       if (datasetID == "assets") {
         cb(null, dataFoldURL + "/project/assets");

@@ -46,7 +46,7 @@ export const MapView = ({ display }: { display: boolean }) => {
         preserveDrawingBuffer: true,
       }
     );
-    // NOTE
+    // // NOTE
     mapRef.current.addControl(
       new MapboxLanguage({
         defaultLanguage: "zh-Hans",

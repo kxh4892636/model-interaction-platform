@@ -259,7 +259,6 @@ export class FlowFieldManager {
         const constraints: FlowFieldConstraints = {
           MAX_TEXTURE_SIZE: response.data["constraints"]["max_texture_size"],
           MAX_STREAMLINE_NUM: response.data["constraints"]["max_streamline_num"],
-          // MAX_STREAMLINE_NUM: 131072,
           MAX_SEGMENT_NUM: response.data["constraints"]["max_segment_num"],
           MAX_DORP_RATE: response.data["constraints"]["max_drop_rate"],
           MAX_DORP_RATE_BUMP: response.data["constraints"]["max_drop_rate_bump"],
@@ -285,7 +284,7 @@ export class FlowFieldManager {
 
         // Load textures of flow fields
         for (let i = startValue; i <= endValue; i++) {
-          axios
+          await axios
             .get(`http://localhost:3456/api/data/uvet?id=` + this.id, {
               params: { currentImage: i, type: "uv" },
               responseType: "blob",
@@ -298,7 +297,7 @@ export class FlowFieldManager {
         }
         // Load textures of area masks
         for (let i = startValue; i <= endValue; i++) {
-          axios
+          await axios
             .get(`http://localhost:3456/api/data/uvet?id=` + this.id, {
               params: { currentImage: i, type: "mask" },
               responseType: "blob",
@@ -311,7 +310,7 @@ export class FlowFieldManager {
         }
         // Load textures of valid address
         for (let i = startValue; i <= endValue; i++) {
-          axios
+          await axios
             .get(`http://localhost:3456/api/data/uvet?id=` + this.id, {
               params: { currentImage: i, type: "valid" },
               responseType: "blob",

@@ -7,14 +7,12 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
 import { mkdirSync, unlinkSync } from "fs";
 import { datasetService } from "./dataset_service";
 import { deleteFolderSync } from "../utils/tools/fs_action";
-
-const prisma = new PrismaClient();
+import { prisma } from "../utils/tools/prisma";
 
 /**
  * create project
