@@ -4,6 +4,7 @@ import fs from "fs";
 import path, { dirname } from "path";
 import { title } from "process";
 import { dataFoldURL } from "./config/global_data";
+import { spawn } from "child_process";
 
 const prisma = new PrismaClient();
 
@@ -59,10 +60,9 @@ const main = async () => {
   //   },
   // });
   // await prisma.$queryRaw`UPDATE data SET data = replace(data,'/temp/','/case/hydrodynamics_result/') WHERE temp = true`;
-
-  await prisma.data.deleteMany({});
-  await prisma.dataset.deleteMany({});
-  await prisma.project.deleteMany({});
+  // await prisma.data.deleteMany({});
+  // await prisma.dataset.deleteMany({});
+  // await prisma.project.deleteMany({});
   // prisma.$queryRaw``;
   const data = await prisma.data.findMany({});
   const dataset = await prisma.dataset.findMany();
@@ -73,7 +73,6 @@ const main = async () => {
   console.log(project.length);
   console.log(dataset.length);
   console.log(data.length);
-
   // npx ts-node prisma.ts
 };
 

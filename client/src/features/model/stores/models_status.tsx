@@ -21,7 +21,9 @@ import { create } from "zustand";
 interface ModelStatus {
   model: string;
   title: string;
-  paramKeys: string[];
+  hydrodynamicsParamKeys: string[] | null;
+  qualityParamKeys: string[] | null;
+  sandParamKeys: string[] | null;
   projKey: string | null;
   isRunning: boolean;
   resultKeys: string[] | null;
@@ -40,7 +42,9 @@ interface ModelStatusStore {
     prop:
       | "model"
       | "title"
-      | "paramKeys"
+      | "hydrodynamicsParamKeys"
+      | "qualityParamKeys"
+      | "sandParamKeys"
       | "projKey"
       | "isRunning"
       | "resultKeys"
@@ -48,7 +52,7 @@ interface ModelStatusStore {
       | "percent"
       | "intervalStore"
       | "pid",
-    value: string | string[] | boolean | number | NodeJS.Timer
+    value: string | string[] | boolean | number | NodeJS.Timer | null
   ) => void;
   removeModelStatus: (model: string) => void;
 }

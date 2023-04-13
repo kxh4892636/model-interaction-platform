@@ -8,7 +8,6 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import {
-  FolderAddOutlined,
   EyeOutlined,
   EyeInvisibleOutlined,
   VerticalAlignTopOutlined,

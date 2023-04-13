@@ -28,6 +28,19 @@ def Mesh2CSV(srcPath: str, dstPath) -> None:
                 coords = ct.TransformPoint(x, y)
                 data.append(f"{id},{coords[0]},{coords[1]},{z}\n")
             elif splitNum == 5:
+                tinID = int(content[0])
+                point1 = int(content[2])
+                point2 = int(content[3])
+                point3 = int(content[4])
+                [x1, y1] = data[point1].split(',')[1:3]
+                [x2, y2] = data[point2].split(',')[1:3]
+                [x3, y3] = data[point3].split(',')[1:3]
+                tinX = (float(x1) + float(x2) + float(x3))/3
+                tinY = (float(y1) + float(y2) + float(y3))/3
+                data.append(f"{tinID},{tinX},{tinY}\n")
+            elif splitNum == 1:
+                break
+            elif splitNum == 1:
                 break
 
     with open(dstPath, 'w', encoding='utf8') as f:

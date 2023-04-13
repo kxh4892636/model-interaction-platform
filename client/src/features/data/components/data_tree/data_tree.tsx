@@ -12,7 +12,6 @@ import styled from "styled-components/macro";
 import { Tree } from "antd";
 import { useLayersStore, useProjectStatusStore } from "../../../../stores";
 import { useLayersStatusStore } from "../../../../stores";
-import { useDataActions } from "../../hooks";
 import { useEffect } from "react";
 import axios from "axios";
 import { useManualRefreshStore } from "../../../../stores/refresh_store";
@@ -57,7 +56,6 @@ export const DataTree = ({ children }: DataTreeProps) => {
   const layersExpanded = useLayersStatusStore((state) => state.layersExpanded);
   const setLayersExpanded = useLayersStatusStore((state) => state.setLayersExpanded);
   const setLayersSelected = useLayersStatusStore((state) => state.setLayersSelected);
-  const layerActions = useDataActions();
   const projectKey = useProjectStatusStore((state) => state.key);
   const refreshTag = useManualRefreshStore((state) => state.refreshTag);
 

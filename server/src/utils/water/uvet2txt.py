@@ -9,8 +9,9 @@ def resolveCSV(csvPath: str) -> dict:
         data: list[tuple[str, str, str, str]] = []
         for line in f:
             content = line.split(',')
-            data.append((content[0], content[1],
-                        content[2], content[3]))
+            if len(content) != 3:
+                data.append((content[0], content[1],
+                            content[2], content[3]))
         dataDict['data'] = data
 
     return dataDict
@@ -22,7 +23,9 @@ def uvet2txt(uvetPath: str, dstPath: str, dataDict: dict, num: int):
     uvet: list[str] = []
     # NOTE 二进制读取
     with open(uvetPath, 'rb')as f:
-        f.seek((4 + 24*gridNum)*num + 4)
+        f.seek((4 + 24*gridNum)*num)
+        id: tuple = struct.unpack('i', f.read(4))
+        print(id)
         for i in range(0, gridNum):
             petak: tuple = struct.unpack('d', f.read(8))
             uu2k: tuple = struct.unpack('d', f.read(8))
@@ -46,10 +49,9 @@ if __name__ == '__main__':
         # uvet = r"d:\project\001_model_interaction_platform\data\test\uvet2txt\uvet.dat"
         # dst = r"d:\project\001_model_interaction_platform\data\test\uvet2txt"
         # num = "120"
-        # dataDict = resolveCSV(csv)
         # timeStamp = '123456'
+        dataDict = resolveCSV(csv)
         for i in range(0, int(num)):
-            dataDict = resolveCSV(csv)
             uvet2txt(uvet, dst + f"/uvet_{timeStamp}_{i}.txt", dataDict, i)
     except:
         print('输入参数错误, 请输入文件 url')

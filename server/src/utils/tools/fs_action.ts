@@ -26,7 +26,7 @@ export const deleteFolderSync = (folderPath: string) => {
 /**
  * delete all files in selected fold
  * @param folderPath the path of folder
- * @param filter the files (have suffix) that excluding delete eg. model.exe
+ * @param filter the files (have suffix) that excluding delete eg. elcirc.exe
  */
 export const deleteFolderFilesSync = (folderPath: string, filter: string[] = []) => {
   if (!fs.existsSync(folderPath)) {

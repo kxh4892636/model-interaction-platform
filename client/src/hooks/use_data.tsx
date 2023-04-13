@@ -137,7 +137,7 @@ export const useData = () => {
       const endValue = imageCount - 1;
       let currentCount = startValue;
       if (style === "raster") {
-        getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob").then((res) => {
+        getData(id, "uvet", { currentImage: currentCount, type: "tnd" }, "blob").then((res) => {
           const blob = new Blob([res]);
           const url = window.URL.createObjectURL(blob);
           map!.addSource(id, {
@@ -161,13 +161,11 @@ export const useData = () => {
         });
         const intervalFunc = setInterval(() => {
           updateAnimatedStatus(id, "currentCount", currentCount);
-          getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!.then(
-            (res) => {
-              const blob = new Blob([res]);
-              const url = window.URL.createObjectURL(blob);
-              (map!.getSource(id) as ImageSource).updateImage({ url: url });
-            }
-          );
+          getData(id, "uvet", { currentImage: currentCount, type: "tnd" }, "blob")!.then((res) => {
+            const blob = new Blob([res]);
+            const url = window.URL.createObjectURL(blob);
+            (map!.getSource(id) as ImageSource).updateImage({ url: url });
+          });
           currentCount = (currentCount + 1) % (endValue + 1);
         }, 200);
         addAnimatedStatus({

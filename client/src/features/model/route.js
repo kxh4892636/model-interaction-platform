@@ -10,11 +10,20 @@ import EWEModel from "./components/EWEfish";
 import EWELog from "./components/EWElog";
 import { Navigate } from "react-router-dom";
 import { Hydrodynamics } from "./components/hydrodynamics";
+import { QualityModelPanel } from "./components/quality";
 
 const routes = [
   {
     path: "/model/hydrodynamics",
-    element: <Hydrodynamics />,
+    element: <Hydrodynamics model="hydrodynamics" />,
+  },
+  {
+    path: "/model/quality",
+    element: <QualityModelPanel model="quality" />,
+  },
+  {
+    path: "/model/sand",
+    element: <QualityModelPanel />,
   },
   {
     path: "/model/Group",

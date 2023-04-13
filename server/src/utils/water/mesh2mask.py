@@ -8,8 +8,9 @@ def resolveCSV(src: str, dst: str) -> list[tuple[str, float, float, float]]:
         f.readline()
         for line in f:
             content = line.split(',')
-            dataList.append((str(content[0]), float(content[1]),
-                             float(content[2]), float(content[3])))
+            if len(content) != 3:
+                dataList.append((str(content[0]), float(content[1]),
+                                float(content[2]), float(content[3])))
 
     return dataList
 

@@ -11,12 +11,6 @@ import crypto from "crypto";
 import { copyFolderSync, deleteFolderSync } from "../utils/tools/fs_action";
 import { dataFoldURL } from "../config/global_data";
 import { prisma } from "../utils/tools/prisma";
-// import {
-//   copyFolderSync,
-//   deleteFolderFilesSync,
-//   deleteSelectFilesInFolderSync,
-// } from "../src/utils/tools/fs_action";
-// import { dataFoldURL } from "../src/config/global_data";
 
 /**
  * return the list of all dataset

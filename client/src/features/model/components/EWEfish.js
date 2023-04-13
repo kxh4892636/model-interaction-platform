@@ -27,7 +27,6 @@ import {
   FisheryDiscardCol,
   selectedEWEModelID,
 } from "../store";
-import { useData } from "../../../hooks";
 import { useLayersStore } from "../../../stores/layers_store";
 import axios from "axios";
 const EditableContext = React.createContext(null);
@@ -112,7 +111,6 @@ const EditableCell = ({
   return <td {...restProps}>{childNode}</td>;
 };
 export default function App() {
-  const dataActions = useData();
   const [SelectOptions, setSelectOptions] = useState([]);
   const setselectEWEModelID = selectedEWEModelID((state) => state.setEWEModelID);
   // 生成select下拉框内容

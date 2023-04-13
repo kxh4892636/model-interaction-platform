@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { dataFoldURL } from "../config/global_data";
-import { copyFile, lstatSync, rename } from "fs";
+import { copyFile, copyFileSync, lstatSync, readFileSync, rename } from "fs";
 import path, { dirname, resolve } from "path";
 import crypto from "crypto";
 import { spawn, spawnSync, execSync } from "child_process";
@@ -82,14 +82,6 @@ const R_test3 = async (req: Request, res: Response) => {
   return result;
 };
 
-// // transform null
-// if (type) {
-//     const result = spawn(`taskkill /f /t /pid ${type}`, { shell: true, windowsHide: true });
-//     result.stdout.on("end", () => {
-//       return { status: "success", content: "kill" };
-//     });
-//   }
-
 // 水动力模型计算接口
 const runHydrodynamics = async (
   paramKeys: string[],
@@ -129,19 +121,9 @@ const runHydrodynamics = async (
     const src = dataFoldURL + fileInfo.path;
     const dst = src.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
     if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
-      copyFile(src, dst, (err) => {
-        if (err) {
-          isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
-          throw err;
-        } else;
-      });
+      copyFileSync(src, dst);
     } else;
-    copyFile(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""), (err) => {
-      if (err) {
-        isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
-        throw err;
-      } else;
-    });
+    copyFileSync(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""));
     // copy transform
     const transform = fileInfo.transformPath;
     if (transform.length) {
@@ -187,7 +169,7 @@ const runHydrodynamics = async (
   });
 
   // run model
-  const modelPath = dataFoldURL + datasetInfo!.path + "/model/model.exe";
+  const modelPath = dataFoldURL + datasetInfo!.path + "/model/elcirc.exe";
   const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
     shell: true,
     windowsHide: true,
@@ -213,7 +195,7 @@ const runHydrodynamics = async (
           id: uvID,
         },
         data: {
-          progress: ["0", `${6 * num + 2}`],
+          progress: ["0", `${num * 6 + 2}`],
         },
       });
       res
@@ -228,7 +210,7 @@ const runHydrodynamics = async (
           id: uvID,
         },
         data: {
-          progress: [`${currentCount}`, `${6 * num + 2}`],
+          progress: [`${currentCount}`, `${num * 6 + 2}`],
         },
       });
     }
@@ -245,7 +227,7 @@ const runHydrodynamics = async (
     spawnSync(
       `conda activate gis && python ${
         path.resolve("./").split("\\").join("/") +
-        "/src/utils/hydrodynamics/uvet2txt.py" +
+        "/src/utils/water/uvet2txt.py" +
         " " +
         `${dataFoldURL}${datasetInfo!.path}/model/uvet.dat` +
         " " +
@@ -264,7 +246,7 @@ const runHydrodynamics = async (
     spawn(
       `conda activate gis && python ${
         path.resolve("./").split("\\").join("/") +
-        "/src/utils/hydrodynamics/uvet2description.py" +
+        "/src/utils/water/uvet2description.py" +
         " " +
         `${dataFoldURL}${datasetInfo!.path}/transform/uvet/description_${timeStamp}.json` +
         " " +
@@ -315,7 +297,7 @@ const runHydrodynamics = async (
               id: uvID,
             },
             data: {
-              progress: [`${currentCount}`, `${6 * num + 2}`],
+              progress: [`${currentCount}`, `${num * 6 + 2}`],
             },
           });
         } else;
@@ -363,13 +345,232 @@ const runHydrodynamics = async (
               id: uvID,
             },
             data: {
-              progress: [`${currentCount}`, `${6 * num + 2}`],
+              progress: [`${currentCount}`, `${num * 6 + 2}`],
             },
           });
         });
         console.log("all finished");
       });
     }, 1000);
+  });
+};
+
+const runQuality = async (
+  paramKeys: string[],
+  projKey: string,
+  title: string,
+  projectID: string,
+  res: Response
+) => {
+  // create the record and folder of model
+  const timeStamp = Date.now().toString();
+  const result = await datasetService.addDataset(title, projectID);
+  const datasetID = result.content;
+  const datasetInfo = await prisma.dataset.findUnique({
+    where: {
+      id: datasetID,
+    },
+  });
+
+  let keys: string[] = paramKeys;
+  projKey && keys.push(projKey);
+  let meshFileName: string | undefined = undefined;
+  let extent: number[] | undefined = undefined;
+  // copy data by key
+  for (let index = 0; index < paramKeys.length; index++) {
+    const key = paramKeys[index];
+    const fileInfo = await prisma.data.findUnique({
+      where: {
+        id: key,
+      },
+    });
+    if (!fileInfo) {
+      isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+      throw new Error("模型参数文件请重新上传");
+    } else;
+    console.log(fileInfo.path);
+    // copy uvet data
+    if (fileInfo.type === "uvet") {
+      const datasetOfFile = await prisma.dataset.findUnique({
+        where: {
+          id: fileInfo.dataset,
+        },
+      });
+      const src1 = dataFoldURL + datasetOfFile!.path + "/model/et.dat";
+      const src2 = dataFoldURL + datasetOfFile!.path + "/model/vn.dat";
+      const src3 = dataFoldURL + datasetOfFile!.path + "/model/vt.dat";
+      const dst1 = dataFoldURL + datasetInfo!.path + "/model/et.dat";
+      const dst2 = dataFoldURL + datasetInfo!.path + "/model/vn.dat";
+      const dst3 = dataFoldURL + datasetInfo!.path + "/model/vt.dat";
+      copyFileSync(src1, dst1);
+      copyFileSync(src2, dst2);
+      copyFileSync(src3, dst3);
+      continue;
+    } else;
+    console.log(fileInfo.path);
+    // copy model data
+    const datasetTimeStampOfFile = fileInfo.path.match(/\d*(?=.input)/)!.toString();
+    const src = dataFoldURL + fileInfo.path;
+    const dst = src.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
+    if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
+      copyFileSync(src, dst);
+    } else;
+    copyFileSync(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""));
+    // copy transform
+    const transform = fileInfo.transformPath;
+    if (transform.length) {
+      const datasetTimeStampOfFile = fileInfo.transformPath[0]
+        .match(/\d*(?=.transform)/)!
+        .toString();
+      const source = dataFoldURL + fileInfo.transformPath[0];
+      const target = source.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
+      if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
+        if (lstatSync(source).isFile()) {
+          copySelectFilesInFolderSync(dirname(source), dirname(target), [fileInfo.timeStamp]);
+        } else {
+          copySelectFilesInFolderSync(source, target, [fileInfo.timeStamp]);
+        }
+      } else;
+    } else;
+    // find mesh
+    if (fileInfo.type === "mesh") {
+      meshFileName = path.basename(fileInfo.path);
+      extent = fileInfo.extent;
+    } else;
+  }
+  if (!meshFileName) {
+    isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+    throw new Error("mesh 参数文件不存在");
+  } else;
+  // NOTE readFileSync
+  // create the record fo result
+  const datContent = readFileSync(dataFoldURL + datasetInfo!.path + "/model/初始浓度.dat");
+  const resultNum = datContent.toString().split("\r\n").length;
+  const resultFolder = datasetInfo!.path + "/model";
+  let resultIDs: string[] = [];
+  for (let index = 0; index < resultNum; index++) {
+    const id = crypto.randomUUID();
+    await prisma.data.create({
+      data: {
+        path: resultFolder + `/tnd${index}.dat`,
+        id: id,
+        style: "raster",
+        title: `tnd${index}`,
+        type: "uvet",
+        extent: extent!,
+        progress: [],
+        dataset: datasetID,
+        input: false,
+        timeStamp: timeStamp,
+      },
+    });
+    resultIDs.push(id);
+  }
+  // run quality model
+  const modelPath = dataFoldURL + datasetInfo!.path + "/model/quality.exe";
+  const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+    shell: true,
+    windowsHide: true,
+  });
+  let num = 3;
+  let currentCount = 0;
+  outputModel.stderr.on("data", async (err) => {
+    console.log("model failed");
+    isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+    stopModel(datasetID, outputModel.pid!.toString(), res);
+    if (num === 0) {
+      res.status(200).json({ status: "fail", content: "模型参数错误" });
+    } else;
+  });
+  outputModel.stdout?.on("data", async (chunk) => {
+    const content = chunk.toString();
+    console.log(content);
+    if (content.includes("time")) {
+      // update the progress of result
+      currentCount = currentCount + 4;
+      console.log(currentCount);
+      await prisma.data.updateMany({
+        where: {
+          dataset: datasetID,
+        },
+        data: {
+          progress: [`${currentCount}`, `${num * 12}`],
+        },
+      });
+    }
+  });
+  outputModel.stdout?.on("end", async () => {
+    console.log("quality model finished");
+    // tnd2txt
+    for (let index = 0; index < resultNum; index++) {
+      spawnSync(
+        `conda activate gis && python ${
+          path.resolve("./").split("\\").join("/") +
+          "/src/utils/water/tnd2txt.py" +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/model/tnd${index + 1}.dat` +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/tnd` +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace(
+            "gr3",
+            "csv"
+          )}` +
+          " " +
+          num +
+          " " +
+          timeStamp
+        }`,
+        { shell: true, windowsHide: true }
+      );
+    }
+    console.log("tnd2txt finished");
+    for (let i = 0; i < num; i++) {
+      for (let j = 0; j < resultNum; j++) {
+        spawnSync(
+          `conda activate gis && python ${
+            path.resolve("./").split("\\").join("/") +
+            "/src/utils/water/tnd2png.py" +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/tnd/tnd${i + 1}_${timeStamp}_${j}.txt` +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/tnd` +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace(
+              "gr3",
+              "shp"
+            )}`
+          }`,
+          { shell: true, windowsHide: true }
+        );
+      }
+      currentCount = currentCount + 4;
+      await prisma.data.updateMany({
+        where: {
+          dataset: datasetID,
+        },
+        data: {
+          progress: [`${currentCount}`, `${num * 12}`],
+        },
+      });
+      console.log(`${i + 1} time finished`);
+    }
+    for (let index = 0; index < resultIDs.length; index++) {
+      const id = resultIDs[index];
+      await prisma.data.update({
+        where: {
+          id: id,
+        },
+        data: {
+          transformPath: [
+            `${datasetInfo!.path}/transform/tnd`,
+            num.toString(),
+            timeStamp.toString(),
+          ],
+        },
+      });
+    }
+    console.log("tnd2png finished");
   });
 };
 
@@ -384,4 +585,27 @@ const isModelFailed = async (datasetID: string, path: string) => {
   }, 1000);
 };
 
-export const modelService = { R_test2, R_test3, runHydrodynamics };
+const stopModel = async (datasetID: string, pid: string, res: Response) => {
+  if (pid) {
+    const datasetInfo = await prisma.dataset.findUnique({ where: { id: datasetID } });
+    await prisma.dataset.delete({ where: { id: datasetID } });
+    const projectInfo = await prisma.project.findUnique({
+      where: { id: datasetInfo!.project },
+    });
+    await prisma.project.update({
+      where: { id: datasetInfo!.project },
+      data: {
+        data: projectInfo!.data.filter((value) => value !== datasetID),
+      },
+    });
+    const result = spawn(`taskkill /f /t /pid ${pid}`, { shell: true, windowsHide: true });
+    result.stdout.on("end", () => {
+      setTimeout(() => {
+        deleteFolderSync(dataFoldURL + datasetInfo!.path);
+        return { status: "success", content: "kill" };
+      }, 1000);
+    });
+  } else;
+};
+
+export const modelService = { R_test2, R_test3, runHydrodynamics, runQuality, stopModel };

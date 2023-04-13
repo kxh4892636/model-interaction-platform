@@ -14,8 +14,6 @@ import { modelService } from "../services/model_service";
 //
 const R_Test2 = async (req: Request, res: Response) => {
   try {
-    console.log(await modelService.R_test2(req, res));
-
     res.status(200).send(await modelService.R_test2(req, res));
   } catch (error) {
     if (error instanceof Error) {
@@ -34,10 +32,10 @@ const R_Test3 = async (req: Request, res: Response) => {
   }
 };
 
-const hydrodynamics = async (req: Request, res: Response) => {
+const water = async (req: Request, res: Response) => {
   try {
     const type = req.body.action;
-    if (type === "run") {
+    if (type === "hydrodynamics") {
       const result = await modelService.runHydrodynamics(
         req.body.paramKeys as string[],
         req.body.projKey as string,
@@ -45,16 +43,31 @@ const hydrodynamics = async (req: Request, res: Response) => {
         req.body.projectID as string,
         res
       );
+    } else if (type === "quality") {
+      const result = await modelService.runQuality(
+        req.body.paramKeys as string[],
+        req.body.projKey as string,
+        req.body.title as string,
+        req.body.projectID as string,
+        res
+      );
     } else if (type === "stop") {
+      const result = await modelService.stopModel(
+        req.body.datasetID as string,
+        req.body.pid as string,
+        res
+      );
     }
   } catch (error) {
     if (error instanceof Error) {
+      console.log(error.message);
+
       res.status(200).json({ status: "fail", content: error.message });
     } else;
   }
 };
 
-export const modelController = { R_Test2, R_Test3, hydrodynamics };
+export const modelController = { R_Test2, R_Test3, water };
 
 // DELETE FROM public.ecopathcatch
 // DELETE FROM public.ecopathdiet

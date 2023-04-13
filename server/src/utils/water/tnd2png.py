@@ -1,21 +1,24 @@
+import os
 import sys
-from osgeo import gdal, ogr, osr
+import json
+from osgeo import gdal, osr, ogr
 
 
-def resolveCSV(src: str) -> list[tuple[str, float, float, float]]:
+def resolveTXT(src: str) -> list[tuple[str, float, float, float]]:
     dataList: list[tuple[str, float, float, float]] = []
     with open(src, 'r', encoding='utf8') as f:
         f.readline()
+        f.readline()
         for line in f:
-            content = line.split(',')
+            content = line.split()
             dataList.append((str(content[0]), float(content[1]),
-                             float(content[2]), float(content[3])))
+                             float(content[2]), float(content[3].removesuffix('\n'))))
 
     return dataList
 
 
-def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
-    dataList = resolveCSV(srcPath)
+def tnd2png(srcPath, dstPath: str, maskPath: str) -> tuple:
+    dataList = resolveTXT(srcPath)
 
     # create shp file from the csv file
     driver: ogr.Driver = ogr.GetDriverByName('ESRI Shapefile')
@@ -58,7 +61,7 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
     # shp2tif
     gridOptions = gdal.GridOptions(format="GTiff", outputType=gdal.GDT_Float32,
                                    algorithm="invdist:power=2.0:smoothing=0.0:radius1=0.0:radius2=0.0:angle=0.0:max_points=100:min_points=30:nodata=-9999", zfield="Z",
-                                   width=1000, height=ratio*1000,
+                                   width=1024, height=ratio*1024,
                                    )
     gdal.Grid('/vsimem/temp_grid.tif', '/vsimem/temp.shp', options=gridOptions)
     ds: gdal.Dataset = gdal.Open('/vsimem/temp_grid.tif')
@@ -88,17 +91,19 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
     [min, max, mean, std] = band.ComputeStatistics(0)
     # create color table
     colors = gdal.ColorTable()
+    gap1 = mean - min
+    gap2 = max - mean
     colors.CreateColorRamp(int(min), (122, 4, 3),
-                           int(mean-1.5*std), (227, 68, 10))
-    colors.CreateColorRamp(int(mean-1.5*std), (227, 68, 10),
-                           int(mean-std), (251, 185, 56))
-    colors.CreateColorRamp(int(mean-std), (251, 185, 56),
+                           int(mean-0.7*gap1), (227, 68, 10))
+    colors.CreateColorRamp(int(mean-0.7*gap1), (227, 68, 10),
+                           int(mean-0.4*gap1), (251, 185, 56))
+    colors.CreateColorRamp(int(mean-0.4*gap1), (251, 185, 56),
                            int(mean), (164, 252, 60))
     colors.CreateColorRamp(int(mean), (164, 252, 60),
-                           int(mean+std), (27, 229, 181))
-    colors.CreateColorRamp(int(mean+std), (27, 229, 181),
-                           int(mean+1.5*std), (70, 134, 251))
-    colors.CreateColorRamp(int(mean+1.5*std), (70, 134, 251),
+                           int(mean+0.4*gap2), (27, 229, 181))
+    colors.CreateColorRamp(int(mean+0.4*gap2), (27, 229, 181),
+                           int(mean+0.7*gap2), (70, 134, 251))
+    colors.CreateColorRamp(int(mean+0.7*gap2), (70, 134, 251),
                            int(max), (48, 18, 59))
     # set color table and color interpretation
     band.SetRasterColorTable(colors)
@@ -120,11 +125,12 @@ if __name__ == '__main__':
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
     try:
         # sys.argv
-        [src, dst, mask] = sys.argv[1:4]
-        # src = r"d:\project\001_model_interaction_platform\data\test\mesh2png\mesh31.csv"
-        # dst = r"d:\project\001_model_interaction_platform\data\test\mesh2png\mesh31.png"
-        # mask = r"d:\project\001_model_interaction_platform\data\test\mesh2png\mesh31.shp"
-        extent: tuple = mesh2png(src, dst, mask)
-        print(extent)
+        [tnd, pngFolder, maskPath] = sys.argv[1:4]
+        # tnd = r"d:\project\001_model_interaction_platform\data\test\tnd2png\tnd1_123456_0.txt"
+        # pngFolder = r"d:\project\001_model_interaction_platform\data\test\tnd2png"
+        # maskPath = r"d:\project\001_model_interaction_platform\data\test\tnd2png\mesh31.shp"
+        dirname = os.path.dirname(tnd)
+        fileName = os.path.basename(tnd).split('.')[0]
+        extent = tnd2png(tnd, tnd.replace('txt', 'png'), maskPath)
     except:
         print('输入参数错误, 请输入文件 url')

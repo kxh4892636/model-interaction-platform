@@ -10,10 +10,29 @@ import { Tree } from "antd";
 const App = (props) => {
   const treeData = [
     {
-      title: "水动力模型",
-      key: "0-1",
+      title: "水环境模型",
+      key: "water",
       // icon: <AliwangwangOutlined />,
-      routekey: "model/hydrodynamics",
+      children: [
+        {
+          title: "水动力模型",
+          key: "hydrodynamics",
+          // icon: <AliwangwangOutlined />,
+          routekey: "model/hydrodynamics",
+        },
+        {
+          title: "水质模型",
+          key: "quality",
+          // icon: <AliwangwangOutlined />,
+          routekey: "model/quality",
+        },
+        {
+          title: "泥沙模型",
+          key: "sand",
+          // icon: <AliwangwangOutlined />,
+          routekey: "model/sand",
+        },
+      ],
     },
     {
       title: "生态系统模型(EWE)",
@@ -130,7 +149,7 @@ const App = (props) => {
       <Tree
         showIcon
         // 默认展开指定的树节点
-        defaultExpandedKeys={["0-0-1", "2-0"]}
+        defaultExpandedKeys={["0-0-1", "2-0", "water"]}
         // 默认选中复选框的树节点
         // defaultSelectedKeys={['0-0-0']}
         switcherIcon={<DownOutlined />}

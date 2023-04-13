@@ -16,5 +16,5 @@ export const modelRoute = express.Router();
 modelRoute.post("/R_test2", modelController.R_Test2);
 // /api/model/R_test3
 modelRoute.post("/R_test3", modelController.R_Test3);
-// /api/model/hydrodynamics
-modelRoute.post("/hydrodynamics", modelController.hydrodynamics);
+// /api/model/water
+modelRoute.post("/water", modelController.water);

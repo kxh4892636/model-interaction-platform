@@ -1,9 +1,9 @@
 /*
- * @File: ModelPanel
+ * @File: QualityModelPanel
  * @Author: xiaohan kong
- * @Date: 2023-03-24
+ * @Date: 2023-04-12
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-03-24
+ * @LastEditTime: 2023-04-12
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -41,17 +41,16 @@ const createSelectOptions = (layers: Layer[]) => {
 };
 
 /**
- * @description ModelPanel
- * @module ModelPanel
+ * @description QualityModelPanel
+ * @module QualityModelPanel
  * @author xiaohan kong
- * @param info the info of ModelPanel
- * @export module: ModelPanel
+ * @param model the store of all model
+ * @export module: QualityModelPanel
  */
-interface AppProps {
-  title: string;
+interface QualityModelPanelProps {
   model: string;
 }
-export const Hydrodynamics = ({ model }: AppProps) => {
+export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
   const layers = useLayersStore((state) => state.layers);
   const options: SelectProps["options"] = createSelectOptions(layers.data);
   const dataActions = useData();
@@ -123,15 +122,15 @@ export const Hydrodynamics = ({ model }: AppProps) => {
             placeholder="请输入项目案例名称"
             allowClear
             disabled={currentModelStatus?.isRunning}
-            value={currentModelStatus?.title}
             style={{ margin: "6px 12px", width: "100%" }}
+            value={currentModelStatus?.title}
             onChange={(e) => {
               updateModelStatus(model, "title", e.target.value);
             }}
           />
         </>
         <>
-          <div style={{ padding: "10px 12px" }}>模型参数</div>
+          <div style={{ padding: "10px 12px" }}>水动力模型参数</div>
           <Select
             mode="multiple"
             disabled={currentModelStatus?.isRunning}
@@ -141,6 +140,22 @@ export const Hydrodynamics = ({ model }: AppProps) => {
             value={currentModelStatus?.hydrodynamicsParamKeys}
             onChange={(values) => {
               updateModelStatus(model, "hydrodynamicsParamKeys", values);
+              updateModelStatus(model, "percent", 0);
+            }}
+            options={options}
+          />
+        </>
+        <>
+          <div style={{ padding: "10px 12px" }}>水质模型参数</div>
+          <Select
+            mode="multiple"
+            disabled={currentModelStatus?.isRunning}
+            allowClear
+            style={{ margin: "6px 12px", width: "100%" }}
+            placeholder="请选择模型参数"
+            value={currentModelStatus?.qualityParamKeys}
+            onChange={(values) => {
+              updateModelStatus(model, "qualityParamKeys", values);
               updateModelStatus(model, "percent", 0);
             }}
             options={options}
@@ -176,8 +191,8 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                 style={{ marginBottom: "10px", marginLeft: "auto" }}
                 disabled={
                   !(
-                    currentModelStatus?.hydrodynamicsParamKeys &&
-                    currentModelStatus.hydrodynamicsParamKeys.length &&
+                    currentModelStatus?.qualityParamKeys &&
+                    currentModelStatus.qualityParamKeys.length &&
                     currentModelStatus.title.length
                   )
                 }
@@ -194,7 +209,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                     updateModelStatus(model, "sandParamKeys", []);
                     updateModelStatus(model, "qualityParamKeys", []);
                     updateModelStatus(model, "resultKeys", null);
-                    updateModelStatus(model, "title", "");
+                    updateModelStatus(model, "title", null);
                     axios({
                       method: "post",
                       baseURL: "http://localhost:3456/api/model/water",
@@ -212,8 +227,11 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                       method: "post",
                       baseURL: "http://localhost:3456/api/model/water",
                       data: {
-                        action: "hydrodynamics",
-                        paramKeys: currentModelStatus!.hydrodynamicsParamKeys,
+                        action: "quality",
+                        paramKeys: [
+                          ...currentModelStatus!.hydrodynamicsParamKeys!,
+                          ...currentModelStatus!.qualityParamKeys!,
+                        ],
                         projKey: currentModelStatus!.projKey,
                         title: currentModelStatus!.title,
                         projectID: projectKey,

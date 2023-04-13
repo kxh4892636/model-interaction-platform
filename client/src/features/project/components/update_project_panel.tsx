@@ -7,12 +7,9 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import { Button, Form, Input, message, Upload } from "antd";
-import { RcFile } from "antd/es/upload";
+import { Button, Form, Input, message } from "antd";
 import axios from "axios";
 import { useState } from "react";
-import styled from "styled-components/macro";
 import { useMapPositionStore } from "../../../stores/map_postion_store";
 import { useProjectStatusStore } from "../../../stores/project_status_store";
 import TextArea from "antd/es/input/TextArea";
@@ -33,7 +30,6 @@ export const UpdateProjectPanel = ({
   const [isPosition, setIsPosition] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const projectKey = useProjectStatusStore((state) => state.key);
-  const setProjectKey = useProjectStatusStore((state) => state.setKey);
   const position = useMapPositionStore((state) => state.position);
   const setIsSpinning = useProjectStatusStore((state) => state.setIsSpinning);
   const map = useMapStore((state) => state.map);

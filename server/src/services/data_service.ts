@@ -11,7 +11,7 @@
 import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
 import { execSync } from "child_process";
-import { dirname, resolve } from "path";
+import { basename, dirname, resolve } from "path";
 import { deleteSelectFilesInFolderSync } from "../utils/tools/fs_action";
 import { lstatSync, readFileSync, unlinkSync } from "fs";
 import { prisma } from "../utils/tools/prisma";
@@ -88,9 +88,12 @@ const getUVET = async (id: string, type: string, currentImage: number) => {
   else if (type === "description")
     content =
       dataFoldURL + info.transformPath[0] + `/flow_field_description_${info.transformPath[2]}.json`;
-  else
+  else if (type === "tnd") {
     content =
-      dataFoldURL + info.transformPath[0] + `/${type}_${info.transformPath[2]}_${currentImage}.png`;
+      dataFoldURL +
+      info.transformPath[0] +
+      `/${basename(info.path, ".dat")}_${info.transformPath[2]}_${currentImage}.png`;
+  }
   return { status: "success", content: content };
 };
 
@@ -165,7 +168,7 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
     execSync(
       `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
-        "/src/utils/hydrodynamics/mesh2csv.py" +
+        "/src/utils/water/mesh2csv.py" +
         " " +
         filePath +
         " " +
@@ -177,7 +180,7 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
     execSync(
       `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
-        "/src/utils/hydrodynamics/mesh2mask.py" +
+        "/src/utils/water/mesh2mask.py" +
         " " +
         csvPath +
         " " +
@@ -189,7 +192,7 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
     const output = execSync(
       `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
-        "/src/utils/hydrodynamics/mesh2png.py" +
+        "/src/utils/water/mesh2png.py" +
         " " +
         csvPath +
         " " +
