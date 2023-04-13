@@ -17,6 +17,7 @@ import { useMapStore } from "../../stores/map_store";
 import { useLayersStatusStore } from "../../stores/layers_status_store";
 import { useViewStore } from "../../stores/view_store";
 import { useProjectStatusStore } from "../../stores";
+import modelRoute from "../model/route";
 
 // nav style
 const StyledNav = styled.nav`
@@ -53,9 +54,12 @@ const PanelContainer = styled.div`
 `;
 
 const createRoutes = (items: NavItemType[]) => {
-  return items.map((item) => {
-    return { path: `/${item.id}`, element: item.panel };
-  });
+  return [
+    ...items.map((item) => {
+      return { path: `/${item.id}`, element: item.panel };
+    }),
+    ...modelRoute,
+  ];
 };
 /**
  * @description: sidebar component
