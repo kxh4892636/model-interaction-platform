@@ -33,7 +33,9 @@ const createSelectOptions = (layers: Layer[]) => {
     const layer = layers[index];
     selectOptions.push({ label: layer.title, options: [] });
     layer.children.forEach((layer) => {
-      selectOptions[index].options.push({ label: layer.title, value: layer.key });
+      if (layer.input) {
+        selectOptions[index].options.push({ label: layer.title, value: layer.key });
+      } else;
     });
   }
   const result = selectOptions.filter((value) => value.options.length !== 0);
@@ -86,8 +88,6 @@ export const Hydrodynamics = ({ model }: AppProps) => {
       if (progress[0] === progress[1] && progress[1]) {
         clearInterval(percentInterval);
         removeModelStatus(model);
-        dataActions.addDataToLayerTree(key);
-        dataActions.addDataToMap(key);
         message.success("模型运行完毕", 10);
         return;
       } else;

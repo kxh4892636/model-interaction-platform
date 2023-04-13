@@ -239,7 +239,7 @@ export class FlowFieldManager {
     console.log("prepare");
 
     await axios
-      .get(`http://localhost:3456/api/data/uvet?id=` + this.id, {
+      .get(`http://localhost:3456/api/data/model?id=` + this.id, {
         params: { type: "description" },
       })
       .then(async (response) => {
@@ -285,7 +285,7 @@ export class FlowFieldManager {
         // Load textures of flow fields
         for (let i = startValue; i <= endValue; i++) {
           await axios
-            .get(`http://localhost:3456/api/data/uvet?id=` + this.id, {
+            .get(`http://localhost:3456/api/data/model?id=` + this.id, {
               params: { currentImage: i, type: "uv" },
               responseType: "blob",
             })
@@ -298,7 +298,7 @@ export class FlowFieldManager {
         // Load textures of area masks
         for (let i = startValue; i <= endValue; i++) {
           await axios
-            .get(`http://localhost:3456/api/data/uvet?id=` + this.id, {
+            .get(`http://localhost:3456/api/data/model?id=` + this.id, {
               params: { currentImage: i, type: "mask" },
               responseType: "blob",
             })
@@ -311,7 +311,7 @@ export class FlowFieldManager {
         // Load textures of valid address
         for (let i = startValue; i <= endValue; i++) {
           await axios
-            .get(`http://localhost:3456/api/data/uvet?id=` + this.id, {
+            .get(`http://localhost:3456/api/data/model?id=` + this.id, {
               params: { currentImage: i, type: "valid" },
               responseType: "blob",
             })

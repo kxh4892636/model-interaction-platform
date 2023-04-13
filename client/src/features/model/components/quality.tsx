@@ -33,7 +33,9 @@ const createSelectOptions = (layers: Layer[]) => {
     const layer = layers[index];
     selectOptions.push({ label: layer.title, options: [] });
     layer.children.forEach((layer) => {
-      selectOptions[index].options.push({ label: layer.title, value: layer.key });
+      if (layer.input || layer.layerStyle === "water") {
+        selectOptions[index].options.push({ label: layer.title, value: layer.key });
+      } else;
     });
   }
   const result = selectOptions.filter((value) => value.options.length !== 0);
@@ -65,7 +67,10 @@ export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
 
   const getPercent = (key: string) => {
     const percentInterval = setInterval(async () => {
-      const dataInfo = await dataActions.getDataDetail(key);
+      const dataInfo = await dataActions.getDataDetail(key).catch(() => {
+        const currentProgress = currentModelStatus!.percent;
+        updateModelStatus(model, "percent", currentProgress + 3);
+      });
       if (!dataInfo) {
         clearInterval(percentInterval);
         // currentModelStatus && clearInterval(currentModelStatus.intervalStore!);
@@ -85,12 +90,10 @@ export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
       if (progress[0] === progress[1] && progress[1]) {
         clearInterval(percentInterval);
         removeModelStatus(model);
-        dataActions.addDataToLayerTree(key);
-        dataActions.addDataToMap(key);
         message.success("模型运行完毕", 10);
         return;
       } else;
-    }, 2000);
+    }, 20000);
     updateModelStatus(model, "intervalStore", percentInterval);
   };
 

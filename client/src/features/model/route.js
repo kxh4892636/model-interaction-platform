@@ -11,6 +11,7 @@ import EWELog from "./components/EWElog";
 import { Navigate } from "react-router-dom";
 import { Hydrodynamics } from "./components/hydrodynamics";
 import { QualityModelPanel } from "./components/quality";
+import { SandModelPanel } from "./components/sand";
 
 const routes = [
   {
@@ -23,7 +24,7 @@ const routes = [
   },
   {
     path: "/model/sand",
-    element: <QualityModelPanel />,
+    element: <SandModelPanel model="sand" />,
   },
   {
     path: "/model/Group",

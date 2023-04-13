@@ -27,14 +27,15 @@ export const useAnimate = () => {
     imageCount: number,
     startValue: number = 0,
     endValue: number,
-    isInterval: boolean = true
+    isInterval: boolean = true,
+    style: string
   ) => {
     let currentCount = startValue;
     const intervalFunc = isInterval
       ? setInterval(() => {
           updateAnimatedStatus(id, "currentCount", currentCount);
           dataAction
-            .getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!
+            .getData(id, "model", { currentImage: currentCount, type: style }, "blob")!
             .then((res) => {
               const blob = new Blob([res]);
               const url = window.URL.createObjectURL(blob);
@@ -54,6 +55,7 @@ export const useAnimate = () => {
       startValue: startValue,
       endValue: endValue,
       isInterval: isInterval,
+      style: style,
     });
   };
 
@@ -78,7 +80,7 @@ export const useAnimate = () => {
         const intervalFunc = setInterval(() => {
           updateAnimatedStatus(id, "currentCount", currentCount);
           dataAction
-            .getData(id, "uvet", { currentImage: currentCount, type: "petak" }, "blob")!
+            .getData(id, "model", { currentImage: currentCount, type: info[0].style }, "blob")!
             .then((res) => {
               const blob = new Blob([res]);
               const url = window.URL.createObjectURL(blob);

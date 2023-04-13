@@ -50,8 +50,8 @@ dataRoute.get("/detail", dataController.getDetail);
 dataRoute.get("/json", dataController.getJSON);
 // /api/data/mesh
 dataRoute.get("/mesh", dataController.getMesh);
-// /api/data/uvet
-dataRoute.get("/uvet", dataController.getUVET);
+// /api/data/model
+dataRoute.get("/model", dataController.getModel);
 // /api/data/image
 dataRoute.get("/image", dataController.getImage);
 // /api/data/text

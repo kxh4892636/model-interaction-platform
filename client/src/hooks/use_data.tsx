@@ -37,9 +37,11 @@ export const useData = () => {
    * @param id data id
    */
   const getDataDetail = async (id: string): Promise<ServerData> => {
-    const data = await axios.get("http://localhost:3456/api/data/detail?id=" + id).then((res) => {
-      return res.data.content as ServerData;
-    });
+    const data = await axios
+      .get("http://localhost:3456/api/data/detail?id=" + id, { timeout: 1000 })
+      .then((res) => {
+        return res.data.content as ServerData;
+      });
     return data;
   };
   /**
@@ -124,11 +126,11 @@ export const useData = () => {
     });
   };
   /**
-   * add image to map by id
+   * add model to map by id
    * @param id data id
-   * @param style the style of uvet, raster and flow
+   * @param style the type of model, tnd, flow and ...
    */
-  const addUVETToMap = (id: string, style: string) => {
+  const addModelToMap = (id: string, style: string) => {
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
@@ -136,8 +138,8 @@ export const useData = () => {
       const startValue = 0;
       const endValue = imageCount - 1;
       let currentCount = startValue;
-      if (style === "raster") {
-        getData(id, "uvet", { currentImage: currentCount, type: "tnd" }, "blob").then((res) => {
+      if (style === "quality" || style === "yuji" || style === "snd") {
+        getData(id, "model", { currentImage: currentCount, type: style }, "blob").then((res) => {
           const blob = new Blob([res]);
           const url = window.URL.createObjectURL(blob);
           map!.addSource(id, {
@@ -161,7 +163,7 @@ export const useData = () => {
         });
         const intervalFunc = setInterval(() => {
           updateAnimatedStatus(id, "currentCount", currentCount);
-          getData(id, "uvet", { currentImage: currentCount, type: "tnd" }, "blob")!.then((res) => {
+          getData(id, "model", { currentImage: currentCount, type: style }, "blob")!.then((res) => {
             const blob = new Blob([res]);
             const url = window.URL.createObjectURL(blob);
             (map!.getSource(id) as ImageSource).updateImage({ url: url });
@@ -176,8 +178,9 @@ export const useData = () => {
           startValue: 0,
           endValue: endValue,
           isInterval: true,
+          style: style,
         });
-      } else if (style === "flow") {
+      } else if (style === "water") {
         let flowFieldManager = new FlowFieldManager(id, dataDetail, {
           startValue: 0,
           endValue: res.transformNum ? Number(res.transformNum) - 1 : 59,
@@ -194,6 +197,7 @@ export const useData = () => {
             startValue: 0,
             endValue: res.transformNum ? Number(res.transformNum) - 1 : 59,
             isInterval: false,
+            style: style,
           });
         });
       }
@@ -247,9 +251,9 @@ export const useData = () => {
         addJSONToMap(id);
       } else if (type === "mesh" && Number(dataDetail.transformNum)) {
         addMeshToMap(id);
-      } else if (type === "uvet" && Number(dataDetail.transformNum)) {
-        if (style === "raster" || style === "flow") {
-          addUVETToMap(id, style);
+      } else if (type === "model" && Number(dataDetail.transformNum)) {
+        if (style === "quality" || style === "water" || style === "yuji" || style === "snd") {
+          addModelToMap(id, style);
         } else {
           console.error("the style of uvet is wrong");
         }

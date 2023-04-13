@@ -19,6 +19,7 @@ type AnimatedStatusType = {
   endValue: number;
   isInterval: boolean;
   intervalFunction: NodeJS.Timer | null;
+  style: string;
 };
 
 type AnimatedStatusProps =
@@ -28,7 +29,8 @@ type AnimatedStatusProps =
   | "startValue"
   | "endValue"
   | "isInterval"
-  | "intervalFunction";
+  | "intervalFunction"
+  | "style";
 
 interface AnimatedStatusStore {
   animatedStatus: AnimatedStatusType[];

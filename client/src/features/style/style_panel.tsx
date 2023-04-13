@@ -55,7 +55,7 @@ const StylePanel = () => {
     else;
     const layer = getLayer(layerSelected.map.key, "map");
     if (layer) {
-      if (layer.type !== "uvet") return;
+      if (layer.type !== "model") return;
       else;
       const range = getSlideRange(layer);
       setRange(range);
@@ -94,7 +94,7 @@ const StylePanel = () => {
             options={selectOptions}
           />
         </>
-        {layerSelected.map?.type === "uvet" ? (
+        {layerSelected.map?.type === "model" ? (
           <>
             <div style={{ padding: "10px 12px" }}>时间范围</div>
             <Slider
@@ -150,13 +150,13 @@ const StylePanel = () => {
                   : currentCount < startValue
                   ? startValue
                   : endValue) - 1;
-              if (style === "raster") {
+              if (style === "quality" || style === "yuji" || style === "snd") {
                 animateActions.pauseAnimate(key);
                 updateAnimatedStatus(key, "startValue", startValue);
                 updateAnimatedStatus(key, "endValue", endValue);
                 updateAnimatedStatus(key, "currentCount", currentCountNow);
                 animateActions.continueAnimate(key, currentCountNow, startValue, endValue);
-              } else if (style === "flow") {
+              } else if (style === "water") {
                 // Re-render the flow field
                 updateAnimatedStatus(key, "startValue", startValue);
                 updateAnimatedStatus(key, "endValue", endValue);

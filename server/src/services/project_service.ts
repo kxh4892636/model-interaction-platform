@@ -138,6 +138,9 @@ const getProjectDataLayer = async (projectID: string) => {
       where: {
         dataset: dataset.id,
       },
+      orderBy: {
+        title: "asc",
+      },
     });
     dataInfo.forEach((data) => {
       (layers[index].children as object[]).push({
@@ -191,6 +194,7 @@ const updateProjectInfo = async (
     });
     unlinkSync(dataFoldURL + imageInfo!.path);
   } else;
+
   await prisma.project.update({
     where: { id: projectID },
     data: {

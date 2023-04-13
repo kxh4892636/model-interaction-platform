@@ -77,7 +77,7 @@ const getMesh = async (id: string) => {
   return { status: "success", content: filePath };
 };
 
-const getUVET = async (id: string, type: string, currentImage: number) => {
+const getModel = async (id: string, type: string, currentImage: number) => {
   const info = await prisma.data.findUnique({
     where: {
       id: id as string,
@@ -88,11 +88,30 @@ const getUVET = async (id: string, type: string, currentImage: number) => {
   else if (type === "description")
     content =
       dataFoldURL + info.transformPath[0] + `/flow_field_description_${info.transformPath[2]}.json`;
-  else if (type === "tnd") {
+  else if (type === "uv")
+    content =
+      dataFoldURL + info.transformPath[0] + `/uv_${info.transformPath[2]}_${currentImage}.png`;
+  else if (type === "mask")
+    content =
+      dataFoldURL + info.transformPath[0] + `/mask_${info.transformPath[2]}_${currentImage}.png`;
+  else if (type === "valid")
+    content =
+      dataFoldURL + info.transformPath[0] + `/valid_${info.transformPath[2]}_${currentImage}.png`;
+  else if (type === "quality") {
     content =
       dataFoldURL +
       info.transformPath[0] +
-      `/${basename(info.path, ".dat")}_${info.transformPath[2]}_${currentImage}.png`;
+      `/${basename(info.path!).split(".")[0]}_${info.transformPath[2]}_${currentImage}.png`;
+  } else if (type === "snd") {
+    content =
+      dataFoldURL +
+      info.transformPath[0] +
+      `/${basename(info.path!).split(".")[0]}_${info.transformPath[2]}_${currentImage}.png`;
+  } else if (type === "yuji") {
+    content =
+      dataFoldURL +
+      info.transformPath[0] +
+      `/${basename(info.path!).split(".")[0]}_${info.transformPath[2]}_${currentImage}.png`;
   }
   return { status: "success", content: content };
 };
@@ -293,5 +312,5 @@ export const dataService = {
   getJSON,
   getMesh,
   getText,
-  getUVET,
+  getModel,
 };

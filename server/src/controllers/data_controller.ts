@@ -47,9 +47,9 @@ const getMesh = async (req: Request, res: Response) => {
   }
 };
 // get transformed png of uvet by key
-const getUVET = async (req: Request, res: Response) => {
+const getModel = async (req: Request, res: Response) => {
   try {
-    const result = await dataService.getUVET(
+    const result = await dataService.getModel(
       req.query.id as string,
       req.query.type as string,
       Number(req.query.currentImage)
@@ -133,7 +133,7 @@ export const dataController = {
   getJSON,
   getMesh,
   getText,
-  getUVET,
+  getModel,
   uploadData,
   dataAction,
 };

@@ -157,14 +157,20 @@ const runHydrodynamics = async (
     data: {
       path: uvetPath,
       id: uvID,
-      style: "flow",
+      style: "water",
       title: "uvet流场数据",
-      type: "uvet",
+      type: "model",
       extent: extent!,
       progress: [],
       dataset: datasetID,
       input: false,
       timeStamp: timeStamp,
+    },
+  });
+  await prisma.dataset.update({
+    where: { id: datasetID },
+    data: {
+      data: [...datasetInfo!.data, uvID],
     },
   });
 
@@ -231,7 +237,7 @@ const runHydrodynamics = async (
         " " +
         `${dataFoldURL}${datasetInfo!.path}/model/uvet.dat` +
         " " +
-        `${dataFoldURL}${datasetInfo!.path}/transform/uvet` +
+        `${dataFoldURL}${datasetInfo!.path}/transform/water` +
         " " +
         `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "csv")}` +
         " " +
@@ -248,13 +254,13 @@ const runHydrodynamics = async (
         path.resolve("./").split("\\").join("/") +
         "/src/utils/water/uvet2description.py" +
         " " +
-        `${dataFoldURL}${datasetInfo!.path}/transform/uvet/description_${timeStamp}.json` +
+        `${dataFoldURL}${datasetInfo!.path}/transform/water/description_${timeStamp}.json` +
         " " +
-        `${datasetInfo!.path}/transform/uvet/` +
+        `${datasetInfo!.path}/transform/water/` +
         " " +
         timeStamp +
         " " +
-        `${datasetInfo!.path}/transform/uvet/` +
+        `${datasetInfo!.path}/transform/water/` +
         " " +
         extent!.join(",") +
         " " +
@@ -272,7 +278,7 @@ const runHydrodynamics = async (
       },
       data: {
         transformPath: [
-          `${datasetInfo!.path}/transform/uvet`,
+          `${datasetInfo!.path}/transform/water`,
           num.toString(),
           timeStamp.toString(),
         ],
@@ -280,7 +286,7 @@ const runHydrodynamics = async (
     });
     const processPath = resolve("./").split("\\").join("/") + "/src/utils/process/process.exe";
     const descriptionPath =
-      dataFoldURL + datasetInfo!.path + "/transform/uvet/description_" + timeStamp + ".json";
+      dataFoldURL + datasetInfo!.path + "/transform/water/description_" + timeStamp + ".json";
     // NOTE 不知道为什么, 加一个 setTImeout 就可以, 而且延时时间要多一点
     setTimeout(() => {
       const output = spawn(processPath + " " + descriptionPath, {
@@ -306,13 +312,13 @@ const runHydrodynamics = async (
         const renameFiles = async (timeStamp: string, num: number) => {
           const descriptionPath = `${dataFoldURL}${
             datasetInfo!.path
-          }/transform/uvet/flow_field_description.json`;
+          }/transform/water/flow_field_description.json`;
           for (let index = 0; index < num; index++) {
-            const uvPath = `${dataFoldURL}${datasetInfo!.path}/transform/uvet/uv_${index}.png`;
-            const maskPath = `${dataFoldURL}${datasetInfo!.path}/transform/uvet/mask_${index}.png`;
+            const uvPath = `${dataFoldURL}${datasetInfo!.path}/transform/water/uv_${index}.png`;
+            const maskPath = `${dataFoldURL}${datasetInfo!.path}/transform/water/mask_${index}.png`;
             const validPath = `${dataFoldURL}${
               datasetInfo!.path
-            }/transform/uvet/valid_${index}.png`;
+            }/transform/water/valid_${index}.png`;
             rename(
               uvPath,
               uvPath.replace(`uv_${index}.png`, `uv_${timeStamp}_${index}.png`),
@@ -388,9 +394,8 @@ const runQuality = async (
       isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
       throw new Error("模型参数文件请重新上传");
     } else;
-    console.log(fileInfo.path);
     // copy uvet data
-    if (fileInfo.type === "uvet") {
+    if (fileInfo.style === "water") {
       const datasetOfFile = await prisma.dataset.findUnique({
         where: {
           id: fileInfo.dataset,
@@ -407,7 +412,6 @@ const runQuality = async (
       copyFileSync(src3, dst3);
       continue;
     } else;
-    console.log(fileInfo.path);
     // copy model data
     const datasetTimeStampOfFile = fileInfo.path.match(/\d*(?=.input)/)!.toString();
     const src = dataFoldURL + fileInfo.path;
@@ -447,16 +451,22 @@ const runQuality = async (
   const datContent = readFileSync(dataFoldURL + datasetInfo!.path + "/model/初始浓度.dat");
   const resultNum = datContent.toString().split("\r\n").length;
   const resultFolder = datasetInfo!.path + "/model";
+  const paramContent = readFileSync(dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat")
+    .toString()
+    .split("\r\n");
+  let num = Number(paramContent[9].split(/\s/)[0]) * 24;
+  let currentCount = 0;
+
   let resultIDs: string[] = [];
   for (let index = 0; index < resultNum; index++) {
     const id = crypto.randomUUID();
     await prisma.data.create({
       data: {
-        path: resultFolder + `/tnd${index}.dat`,
+        path: resultFolder + `/tnd${index + 1}.dat`,
         id: id,
-        style: "raster",
+        style: "quality",
         title: `tnd${index}`,
-        type: "uvet",
+        type: "model",
         extent: extent!,
         progress: [],
         dataset: datasetID,
@@ -466,14 +476,18 @@ const runQuality = async (
     });
     resultIDs.push(id);
   }
+  await prisma.dataset.update({
+    where: { id: datasetID },
+    data: {
+      data: resultIDs,
+    },
+  });
   // run quality model
   const modelPath = dataFoldURL + datasetInfo!.path + "/model/quality.exe";
   const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
     shell: true,
     windowsHide: true,
   });
-  let num = 3;
-  let currentCount = 0;
   outputModel.stderr.on("data", async (err) => {
     console.log("model failed");
     isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
@@ -485,6 +499,20 @@ const runQuality = async (
   outputModel.stdout?.on("data", async (chunk) => {
     const content = chunk.toString();
     console.log(content);
+    if (content.includes("computing")) {
+      // num = Number(content.match(/\d*\.\d{1,6}/)![0]) * 24;
+      await prisma.data.updateMany({
+        where: {
+          dataset: datasetID,
+        },
+        data: {
+          progress: ["0", `${num * 8}`],
+        },
+      });
+      res
+        .status(200)
+        .json({ status: "success", content: [datasetInfo!.id, outputModel.pid, resultIDs] });
+    } else;
     if (content.includes("time")) {
       // update the progress of result
       currentCount = currentCount + 4;
@@ -494,7 +522,7 @@ const runQuality = async (
           dataset: datasetID,
         },
         data: {
-          progress: [`${currentCount}`, `${num * 12}`],
+          progress: [`${currentCount}`, `${num * 8}`],
         },
       });
     }
@@ -510,7 +538,7 @@ const runQuality = async (
           " " +
           `${dataFoldURL}${datasetInfo!.path}/model/tnd${index + 1}.dat` +
           " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/tnd` +
+          `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
           " " +
           `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace(
             "gr3",
@@ -532,9 +560,11 @@ const runQuality = async (
             path.resolve("./").split("\\").join("/") +
             "/src/utils/water/tnd2png.py" +
             " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/tnd/tnd${i + 1}_${timeStamp}_${j}.txt` +
+            `${dataFoldURL}${datasetInfo!.path}/transform/quality/tnd${
+              j + 1
+            }_${timeStamp}_${i}.txt` +
             " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/tnd` +
+            `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
             " " +
             `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace(
               "gr3",
@@ -550,10 +580,9 @@ const runQuality = async (
           dataset: datasetID,
         },
         data: {
-          progress: [`${currentCount}`, `${num * 12}`],
+          progress: [`${currentCount}`, `${num * 8}`],
         },
       });
-      console.log(`${i + 1} time finished`);
     }
     for (let index = 0; index < resultIDs.length; index++) {
       const id = resultIDs[index];
@@ -563,14 +592,278 @@ const runQuality = async (
         },
         data: {
           transformPath: [
-            `${datasetInfo!.path}/transform/tnd`,
+            `${datasetInfo!.path}/transform/quality`,
             num.toString(),
             timeStamp.toString(),
           ],
         },
       });
     }
-    console.log("tnd2png finished");
+  });
+};
+
+const runSand = async (
+  paramKeys: string[],
+  projKey: string,
+  title: string,
+  projectID: string,
+  res: Response
+) => {
+  // create the record and folder of model
+  const timeStamp = Date.now().toString();
+  const result = await datasetService.addDataset(title, projectID);
+  const datasetID = result.content;
+  const datasetInfo = await prisma.dataset.findUnique({
+    where: {
+      id: datasetID,
+    },
+  });
+
+  let keys: string[] = paramKeys;
+  projKey && keys.push(projKey);
+  let meshFileName: string | undefined = undefined;
+  let extent: number[] | undefined = undefined;
+  // copy data by key
+  for (let index = 0; index < paramKeys.length; index++) {
+    const key = paramKeys[index];
+    const fileInfo = await prisma.data.findUnique({
+      where: {
+        id: key,
+      },
+    });
+    if (!fileInfo) {
+      isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+      throw new Error("模型参数文件请重新上传");
+    } else;
+    // copy uvet data
+    if (fileInfo.style === "water") {
+      const datasetOfFile = await prisma.dataset.findUnique({
+        where: {
+          id: fileInfo.dataset,
+        },
+      });
+      const src1 = dataFoldURL + datasetOfFile!.path + "/model/et.dat";
+      const src2 = dataFoldURL + datasetOfFile!.path + "/model/vn.dat";
+      const src3 = dataFoldURL + datasetOfFile!.path + "/model/vt.dat";
+      const dst1 = dataFoldURL + datasetInfo!.path + "/model/et.dat";
+      const dst2 = dataFoldURL + datasetInfo!.path + "/model/vn.dat";
+      const dst3 = dataFoldURL + datasetInfo!.path + "/model/vt.dat";
+      copyFileSync(src1, dst1);
+      copyFileSync(src2, dst2);
+      copyFileSync(src3, dst3);
+      continue;
+    } else;
+    // copy model data
+    const datasetTimeStampOfFile = fileInfo.path.match(/\d*(?=.input)/)!.toString();
+    const src = dataFoldURL + fileInfo.path;
+    const dst = src.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
+    if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
+      copyFileSync(src, dst);
+    } else;
+    copyFileSync(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""));
+    // copy transform
+    const transform = fileInfo.transformPath;
+    if (transform.length) {
+      const datasetTimeStampOfFile = fileInfo.transformPath[0]
+        .match(/\d*(?=.transform)/)!
+        .toString();
+      const source = dataFoldURL + fileInfo.transformPath[0];
+      const target = source.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
+      if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
+        if (lstatSync(source).isFile()) {
+          copySelectFilesInFolderSync(dirname(source), dirname(target), [fileInfo.timeStamp]);
+        } else {
+          copySelectFilesInFolderSync(source, target, [fileInfo.timeStamp]);
+        }
+      } else;
+    } else;
+    // find mesh
+    if (fileInfo.type === "mesh") {
+      meshFileName = path.basename(fileInfo.path);
+      extent = fileInfo.extent;
+    } else;
+  }
+  if (!meshFileName) {
+    isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+    throw new Error("mesh 参数文件不存在");
+  } else;
+
+  const paramContent = readFileSync(dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat")
+    .toString()
+    .split("\r\n");
+  let num = Number(paramContent[9].split(/\s/)[0]) * 24;
+  let currentCount = 0;
+
+  // NOTE readFileSync
+  // create the record fo result
+  const resultFolder = datasetInfo!.path + "/model";
+  const sndID = crypto.randomUUID();
+  const yujiID = crypto.randomUUID();
+  await prisma.data.create({
+    data: {
+      path: resultFolder + `/snd.dat`,
+      id: sndID,
+      style: "snd",
+      title: `snd`,
+      type: "model",
+      extent: extent!,
+      progress: [],
+      dataset: datasetID,
+      input: false,
+      timeStamp: timeStamp,
+    },
+  });
+  await prisma.data.create({
+    data: {
+      path: resultFolder + `/yuji.dat`,
+      id: yujiID,
+      style: "yuji",
+      title: `yuji`,
+      type: "model",
+      extent: extent!,
+      progress: [],
+      dataset: datasetID,
+      input: false,
+      timeStamp: timeStamp,
+    },
+  });
+  await prisma.dataset.update({
+    where: { id: datasetID },
+    data: {
+      data: [sndID, yujiID],
+    },
+  });
+  // run sand model
+  const modelPath = dataFoldURL + datasetInfo!.path + "/model/sand.exe";
+  const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+    shell: true,
+    windowsHide: true,
+  });
+  outputModel.stderr.on("data", async (err) => {
+    console.log("model failed");
+    isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+    stopModel(datasetID, outputModel.pid!.toString(), res);
+    if (num === 0) {
+      res.status(200).json({ status: "fail", content: "模型参数错误" });
+    } else;
+  });
+  outputModel.stdout?.on("data", async (chunk) => {
+    const content = chunk.toString();
+    console.log(content);
+    if (content.includes("computing")) {
+      await prisma.data.updateMany({
+        where: {
+          dataset: datasetID,
+        },
+        data: {
+          progress: ["0", `${num * 8}`],
+        },
+      });
+      res
+        .status(200)
+        .json({ status: "success", content: [datasetInfo!.id, outputModel.pid, [sndID, yujiID]] });
+    } else;
+    if (content.includes("SED")) {
+      // update the progress of result
+      currentCount = currentCount + 4;
+      console.log(currentCount);
+      await prisma.data.updateMany({
+        where: {
+          dataset: datasetID,
+        },
+        data: {
+          progress: [`${currentCount}`, `${num * 8}`],
+        },
+      });
+    }
+  });
+  outputModel.stdout?.on("end", async () => {
+    console.log("quality model finished");
+    // sand2txt
+    spawnSync(
+      `conda activate gis && python ${
+        path.resolve("./").split("\\").join("/") +
+        "/src/utils/water/sand2txt.py" +
+        " " +
+        `${dataFoldURL}${datasetInfo!.path}/model/snd.dat` +
+        " " +
+        `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+        " " +
+        `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "csv")}` +
+        " " +
+        num +
+        " " +
+        timeStamp
+      }`,
+      { shell: true, windowsHide: true }
+    );
+    spawnSync(
+      `conda activate gis && python ${
+        path.resolve("./").split("\\").join("/") +
+        "/src/utils/water/sand2txt.py" +
+        " " +
+        `${dataFoldURL}${datasetInfo!.path}/model/yuji.dat` +
+        " " +
+        `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+        " " +
+        `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "csv")}` +
+        " " +
+        num +
+        " " +
+        timeStamp
+      }`,
+      { shell: true, windowsHide: true }
+    );
+    console.log("sand2txt finished");
+    for (let i = 0; i < num; i++) {
+      spawnSync(
+        `conda activate gis && python ${
+          path.resolve("./").split("\\").join("/") +
+          "/src/utils/water/sand2png.py" +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/sand/snd_${timeStamp}_${i}.txt` +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "shp")}`
+        }`,
+        { shell: true, windowsHide: true }
+      );
+      spawnSync(
+        `conda activate gis && python ${
+          path.resolve("./").split("\\").join("/") +
+          "/src/utils/water/sand2png.py" +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/sand/yuji_${timeStamp}_${i}.txt` +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "shp")}`
+        }`,
+        { shell: true, windowsHide: true }
+      );
+      currentCount = currentCount + 4;
+      await prisma.data.updateMany({
+        where: {
+          dataset: datasetID,
+        },
+        data: {
+          progress: [`${currentCount}`, `${num * 8}`],
+        },
+      });
+    }
+    await prisma.data.updateMany({
+      where: {
+        dataset: datasetID,
+      },
+      data: {
+        transformPath: [
+          `${datasetInfo!.path}/transform/sand`,
+          num.toString(),
+          timeStamp.toString(),
+        ],
+      },
+    });
   });
 };
 
@@ -608,4 +901,4 @@ const stopModel = async (datasetID: string, pid: string, res: Response) => {
   } else;
 };
 
-export const modelService = { R_test2, R_test3, runHydrodynamics, runQuality, stopModel };
+export const modelService = { R_test2, R_test3, runHydrodynamics, runQuality, runSand, stopModel };

@@ -51,6 +51,14 @@ const water = async (req: Request, res: Response) => {
         req.body.projectID as string,
         res
       );
+    } else if (type === "sand") {
+      const result = await modelService.runSand(
+        req.body.paramKeys as string[],
+        req.body.projKey as string,
+        req.body.title as string,
+        req.body.projectID as string,
+        res
+      );
     } else if (type === "stop") {
       const result = await modelService.stopModel(
         req.body.datasetID as string,
