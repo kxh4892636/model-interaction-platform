@@ -12,7 +12,7 @@ import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
 import { execSync } from "child_process";
 import { basename, dirname, resolve } from "path";
-import { deleteSelectFilesInFolderSync } from "../utils/tools/fs_action";
+import { deleteSelectFilesInFolder } from "../utils/tools/fs_action";
 import { lstatSync, readFileSync, unlinkSync } from "fs";
 import { prisma } from "../utils/tools/prisma";
 
@@ -27,7 +27,6 @@ const getDetail = async (id: string) => {
       style: true,
       type: true,
       extent: true,
-      progress: true,
       dataset: true,
       input: true,
       transformPath: true,
@@ -45,7 +44,6 @@ const getDetail = async (id: string) => {
       style: info.style,
       type: info.type,
       extent: info.extent,
-      progress: info.progress,
       dataset: info.dataset,
       input: info.input,
       transformNum: transformNum,
@@ -151,7 +149,6 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
         type: "text",
         style: "text",
         extent: [],
-        progress: ["1", "1"],
         dataset: datasetID,
         input: true,
         timeStamp: "",
@@ -241,7 +238,6 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
       type: type,
       style: style,
       extent: extent,
-      progress: ["1", "1"],
       dataset: datasetID,
       input: true,
       timeStamp: timeStamp ? timeStamp : "",
@@ -289,17 +285,28 @@ const deleteData = async (dataID: string) => {
   const path = dataFoldURL + dataInfo.path;
   const transformPath = dataFoldURL + dataInfo.transformPath[0];
   const timeStamp = dataInfo.timeStamp;
+  // update the dataset record
+  const datasetInfo = await prisma.dataset.findUnique({
+    where: { id: dataInfo.dataset },
+    select: { data: true },
+  });
+  await prisma.dataset.update({
+    where: { id: dataInfo.dataset },
+    data: {
+      data: datasetInfo!.data.filter((value) => value !== dataID),
+    },
+  });
   // delete the record
   await prisma.data.delete({ where: { id: dataID } });
   // delete origin file path
   unlinkSync(path);
   // delete transform file path
   if (lstatSync(transformPath).isFile()) {
-    console.log(dirname(transformPath), timeStamp);
-    deleteSelectFilesInFolderSync(dirname(transformPath), [timeStamp]);
+    await deleteSelectFilesInFolder(dirname(transformPath), [timeStamp]);
   } else {
-    deleteSelectFilesInFolderSync(transformPath, [timeStamp]);
+    await deleteSelectFilesInFolder(transformPath, [timeStamp]);
   }
+
   return { status: "success", content: "delete succeed" };
 };
 

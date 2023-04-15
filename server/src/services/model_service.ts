@@ -1,14 +1,15 @@
 import { Request, Response } from "express";
 import { dataFoldURL } from "../config/global_data";
-import { copyFile, copyFileSync, lstatSync, readFileSync, rename } from "fs";
+import { rename } from "fs";
 import path, { dirname, resolve } from "path";
 import crypto from "crypto";
-import { spawn, spawnSync, execSync, exec } from "child_process";
-import { copySelectFilesInFolderSync, deleteFolderSync } from "../utils/tools/fs_action";
+import { spawn, execSync } from "child_process";
+import { copyFolder, copySelectFilesInFolder, deleteFolder } from "../utils/tools/fs_action";
 import { query } from "../utils/ewe/importEWE";
 import { CRUDdatabase, HandleReturn, FlowDiagram, ModifyDatabase } from "../utils/ewe/exportEWE";
 import { datasetService } from "./dataset_service";
 import { prisma } from "../utils/tools/prisma";
+import { copyFile, lstat } from "fs/promises";
 
 // 计算结果
 const R_test2 = async (req: Request, res: Response) => {
@@ -94,7 +95,7 @@ const runHydrodynamics = async (
   projectID: string,
   res: Response
 ) => {
-  // create the record and folder of model
+  // create the record of dataset and model_info
   const timeStamp = Date.now().toString();
   const result = await datasetService.addDataset(title, projectID);
   const datasetID = result.content;
@@ -103,55 +104,29 @@ const runHydrodynamics = async (
       id: datasetID,
     },
   });
-
+  const modelID = crypto.randomUUID();
+  await prisma.model_info.create({
+    data: {
+      id: modelID,
+      is_running: false,
+      dataset: datasetID,
+      pids: undefined,
+      progress: undefined,
+    },
+  });
+  // define keys of param
   let keys: string[] = paramKeys;
   projKey && keys.push(projKey);
-  let meshFileName: string | undefined = undefined;
-  let extent: number[] | undefined = undefined;
-  // copy data by key
-  for (let index = 0; index < paramKeys.length; index++) {
-    const key = paramKeys[index];
-    const fileInfo = await prisma.data.findUnique({
-      where: {
-        id: key,
-      },
-    });
-    if (!fileInfo) {
-      isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
-      throw new Error("模型参数文件请重新上传");
-    } else;
-    // copy model data
-    const datasetTimeStampOfFile = fileInfo.path.match(/\d*(?=.input)/)!.toString();
-    const src = dataFoldURL + fileInfo.path;
-    const dst = src.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
-    if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
-      copyFileSync(src, dst);
-    } else;
-    copyFileSync(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""));
-    // copy transform
-    const transform = fileInfo.transformPath;
-    if (transform.length) {
-      const datasetTimeStampOfFile = fileInfo.transformPath[0]
-        .match(/\d*(?=.transform)/)!
-        .toString();
-      const source = dataFoldURL + fileInfo.transformPath[0];
-      const target = source.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
-      if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
-        if (lstatSync(source).isFile()) {
-          copySelectFilesInFolderSync(dirname(source), dirname(target), [fileInfo.timeStamp]);
-        } else {
-          copySelectFilesInFolderSync(source, target, [fileInfo.timeStamp]);
-        }
-      } else;
-    } else;
-    // find mesh
-    if (fileInfo.type === "mesh") {
-      meshFileName = path.basename(fileInfo.path);
-      extent = fileInfo.extent;
-    } else;
-  }
+  // copy model data by key
+  const [meshFileName, extent] = await copyModelData(
+    datasetID,
+    modelID,
+    datasetInfo!.path,
+    datasetInfo!.timeStamp,
+    paramKeys
+  );
   if (!meshFileName) {
-    isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+    stopModel(datasetID, modelID);
     throw new Error("mesh 参数文件不存在");
   } else;
   // create the record fo result
@@ -165,7 +140,6 @@ const runHydrodynamics = async (
       title: "uvet流场数据",
       type: "model",
       extent: extent!,
-      progress: [],
       dataset: datasetID,
       input: false,
       timeStamp: timeStamp,
@@ -204,9 +178,7 @@ const runHydrodynamics = async (
         where: {
           id: uvID,
         },
-        data: {
-          progress: ["0", `${num * 6 + 2}`],
-        },
+        data: {},
       });
       res
         .status(200)
@@ -219,9 +191,7 @@ const runHydrodynamics = async (
         where: {
           id: uvID,
         },
-        data: {
-          progress: [`${currentCount}`, `${num * 6 + 2}`],
-        },
+        data: {},
       });
     }
   });
@@ -306,9 +276,7 @@ const runHydrodynamics = async (
             where: {
               id: uvID,
             },
-            data: {
-              progress: [`${currentCount}`, `${num * 6 + 2}`],
-            },
+            data: {},
           });
         } else;
       });
@@ -354,9 +322,7 @@ const runHydrodynamics = async (
             where: {
               id: uvID,
             },
-            data: {
-              progress: [`${currentCount}`, `${num * 6 + 2}`],
-            },
+            data: {},
           });
         });
         console.log("all finished");
@@ -372,238 +338,229 @@ const runQuality = async (
   projectID: string,
   res: Response
 ) => {
-  // create the record and folder of model
-  const timeStamp = Date.now().toString();
-  const result = await datasetService.addDataset(title, projectID);
-  const datasetID = result.content;
-  const datasetInfo = await prisma.dataset.findUnique({
-    where: {
-      id: datasetID,
-    },
-  });
-
-  let keys: string[] = paramKeys;
-  projKey && keys.push(projKey);
-  let meshFileName: string | undefined = undefined;
-  let extent: number[] | undefined = undefined;
-  // copy data by key
-  for (let index = 0; index < paramKeys.length; index++) {
-    const key = paramKeys[index];
-    const fileInfo = await prisma.data.findUnique({
-      where: {
-        id: key,
-      },
-    });
-    if (!fileInfo) {
-      isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
-      throw new Error("模型参数文件请重新上传");
-    } else;
-    // copy uvet data
-    if (fileInfo.style === "water") {
-      const datasetOfFile = await prisma.dataset.findUnique({
-        where: {
-          id: fileInfo.dataset,
-        },
-      });
-      const src1 = dataFoldURL + datasetOfFile!.path + "/model/et.dat";
-      const src2 = dataFoldURL + datasetOfFile!.path + "/model/vn.dat";
-      const src3 = dataFoldURL + datasetOfFile!.path + "/model/vt.dat";
-      const dst1 = dataFoldURL + datasetInfo!.path + "/model/et.dat";
-      const dst2 = dataFoldURL + datasetInfo!.path + "/model/vn.dat";
-      const dst3 = dataFoldURL + datasetInfo!.path + "/model/vt.dat";
-      copyFileSync(src1, dst1);
-      copyFileSync(src2, dst2);
-      copyFileSync(src3, dst3);
-      continue;
-    } else;
-    // copy model data
-    const datasetTimeStampOfFile = fileInfo.path.match(/\d*(?=.input)/)!.toString();
-    const src = dataFoldURL + fileInfo.path;
-    const dst = src.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
-    if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
-      copyFileSync(src, dst);
-    } else;
-    copyFileSync(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""));
-    // copy transform
-    const transform = fileInfo.transformPath;
-    if (transform.length) {
-      const datasetTimeStampOfFile = fileInfo.transformPath[0]
-        .match(/\d*(?=.transform)/)!
-        .toString();
-      const source = dataFoldURL + fileInfo.transformPath[0];
-      const target = source.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
-      if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
-        if (lstatSync(source).isFile()) {
-          copySelectFilesInFolderSync(dirname(source), dirname(target), [fileInfo.timeStamp]);
-        } else {
-          copySelectFilesInFolderSync(source, target, [fileInfo.timeStamp]);
-        }
-      } else;
-    } else;
-    // find mesh
-    if (fileInfo.type === "mesh") {
-      meshFileName = path.basename(fileInfo.path);
-      extent = fileInfo.extent;
-    } else;
-  }
-  if (!meshFileName) {
-    isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
-    throw new Error("mesh 参数文件不存在");
-  } else;
-  // NOTE readFileSync
-  // create the record fo result
-  const datContent = readFileSync(dataFoldURL + datasetInfo!.path + "/model/初始浓度.dat");
-  const resultNum = datContent.toString().split("\r\n").length;
-  const resultFolder = datasetInfo!.path + "/model";
-  const paramContent = readFileSync(dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat")
-    .toString()
-    .split("\r\n");
-  let num = Number(paramContent[9].split(/\s/)[0]) * 24;
-  let currentCount = 0;
-
-  let resultIDs: string[] = [];
-  for (let index = 0; index < resultNum; index++) {
-    const id = crypto.randomUUID();
-    await prisma.data.create({
-      data: {
-        path: resultFolder + `/tnd${index + 1}.dat`,
-        id: id,
-        style: "quality",
-        title: `tnd${index}`,
-        type: "model",
-        extent: extent!,
-        progress: [],
-        dataset: datasetID,
-        input: false,
-        timeStamp: timeStamp,
-      },
-    });
-    resultIDs.push(id);
-  }
-  await prisma.dataset.update({
-    where: { id: datasetID },
-    data: {
-      data: resultIDs,
-    },
-  });
-  // run quality model
-  const modelPath = dataFoldURL + datasetInfo!.path + "/model/quality.exe";
-  const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
-    shell: true,
-    windowsHide: true,
-  });
-  outputModel.stderr.on("data", async (err) => {
-    console.log("model failed");
-    isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
-    stopModel(datasetID, outputModel.pid!.toString(), res);
-    if (num === 0) {
-      res.status(200).json({ status: "fail", content: "模型参数错误" });
-    } else;
-  });
-  outputModel.stdout?.on("data", async (chunk) => {
-    const content = chunk.toString();
-    console.log(content);
-    if (content.includes("computing")) {
-      // num = Number(content.match(/\d*\.\d{1,6}/)![0]) * 24;
-      await prisma.data.updateMany({
-        where: {
-          dataset: datasetID,
-        },
-        data: {
-          progress: ["0", `${num * 8}`],
-        },
-      });
-      res
-        .status(200)
-        .json({ status: "success", content: [datasetInfo!.id, outputModel.pid, resultIDs] });
-    } else;
-    if (content.includes("time")) {
-      // update the progress of result
-      currentCount = currentCount + 4;
-      console.log(currentCount);
-      await prisma.data.updateMany({
-        where: {
-          dataset: datasetID,
-        },
-        data: {
-          progress: [`${currentCount}`, `${num * 8}`],
-        },
-      });
-    }
-  });
-  outputModel.stdout?.on("end", async () => {
-    console.log("quality model finished");
-    // tnd2txt
-    for (let index = 0; index < resultNum; index++) {
-      spawnSync(
-        `conda activate gis && python ${
-          path.resolve("./").split("\\").join("/") +
-          "/src/utils/water/tnd2txt.py" +
-          " " +
-          `${dataFoldURL}${datasetInfo!.path}/model/tnd${index + 1}.dat` +
-          " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
-          " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace(
-            "gr3",
-            "csv"
-          )}` +
-          " " +
-          num +
-          " " +
-          timeStamp
-        }`,
-        { shell: true, windowsHide: true }
-      );
-    }
-    console.log("tnd2txt finished");
-    for (let i = 0; i < num; i++) {
-      for (let j = 0; j < resultNum; j++) {
-        spawnSync(
-          `conda activate gis && python ${
-            path.resolve("./").split("\\").join("/") +
-            "/src/utils/water/tnd2png.py" +
-            " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/quality/tnd${
-              j + 1
-            }_${timeStamp}_${i}.txt` +
-            " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
-            " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace(
-              "gr3",
-              "shp"
-            )}`
-          }`,
-          { shell: true, windowsHide: true }
-        );
-      }
-      currentCount = currentCount + 4;
-      await prisma.data.updateMany({
-        where: {
-          dataset: datasetID,
-        },
-        data: {
-          progress: [`${currentCount}`, `${num * 8}`],
-        },
-      });
-    }
-    for (let index = 0; index < resultIDs.length; index++) {
-      const id = resultIDs[index];
-      await prisma.data.update({
-        where: {
-          id: id,
-        },
-        data: {
-          transformPath: [
-            `${datasetInfo!.path}/transform/quality`,
-            num.toString(),
-            timeStamp.toString(),
-          ],
-        },
-      });
-    }
-  });
+  // // create the record and folder of model
+  // const timeStamp = Date.now().toString();
+  // const result = await datasetService.addDataset(title, projectID);
+  // const datasetID = result.content;
+  // const datasetInfo = await prisma.dataset.findUnique({
+  //   where: {
+  //     id: datasetID,
+  //   },
+  // });
+  // let keys: string[] = paramKeys;
+  // projKey && keys.push(projKey);
+  // let meshFileName: string | undefined = undefined;
+  // let extent: number[] | undefined = undefined;
+  // // copy data by key
+  // for (let index = 0; index < paramKeys.length; index++) {
+  //   const key = paramKeys[index];
+  //   const fileInfo = await prisma.data.findUnique({
+  //     where: {
+  //       id: key,
+  //     },
+  //   });
+  //   if (!fileInfo) {
+  //     isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+  //     throw new Error("模型参数文件请重新上传");
+  //   } else;
+  //   // copy uvet data
+  //   if (fileInfo.style === "water") {
+  //     const datasetOfFile = await prisma.dataset.findUnique({
+  //       where: {
+  //         id: fileInfo.dataset,
+  //       },
+  //     });
+  //     const src1 = dataFoldURL + datasetOfFile!.path + "/model/et.dat";
+  //     const src2 = dataFoldURL + datasetOfFile!.path + "/model/vn.dat";
+  //     const src3 = dataFoldURL + datasetOfFile!.path + "/model/vt.dat";
+  //     const dst1 = dataFoldURL + datasetInfo!.path + "/model/et.dat";
+  //     const dst2 = dataFoldURL + datasetInfo!.path + "/model/vn.dat";
+  //     const dst3 = dataFoldURL + datasetInfo!.path + "/model/vt.dat";
+  //     copyFileSync(src1, dst1);
+  //     copyFileSync(src2, dst2);
+  //     copyFileSync(src3, dst3);
+  //     continue;
+  //   } else;
+  //   // copy model data
+  //   const datasetTimeStampOfFile = fileInfo.path.match(/\d*(?=.input)/)!.toString();
+  //   const src = dataFoldURL + fileInfo.path;
+  //   const dst = src.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
+  //   if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
+  //     copyFileSync(src, dst);
+  //   } else;
+  //   copyFileSync(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""));
+  //   // copy transform
+  //   const transform = fileInfo.transformPath;
+  //   if (transform.length) {
+  //     const datasetTimeStampOfFile = fileInfo.transformPath[0]
+  //       .match(/\d*(?=.transform)/)!
+  //       .toString();
+  //     const source = dataFoldURL + fileInfo.transformPath[0];
+  //     const target = source.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
+  //     if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
+  //       if (lstatSync(source).isFile()) {
+  //         copySelectFilesInFolderSync(dirname(source), dirname(target), [fileInfo.timeStamp]);
+  //       } else {
+  //         copySelectFilesInFolderSync(source, target, [fileInfo.timeStamp]);
+  //       }
+  //     } else;
+  //   } else;
+  //   // find mesh
+  //   if (fileInfo.type === "mesh") {
+  //     meshFileName = path.basename(fileInfo.path);
+  //     extent = fileInfo.extent;
+  //   } else;
+  // }
+  // if (!meshFileName) {
+  //   isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+  //   throw new Error("mesh 参数文件不存在");
+  // } else;
+  // // NOTE readFileSync
+  // // create the record fo result
+  // const datContent = readFileSync(dataFoldURL + datasetInfo!.path + "/model/初始浓度.dat");
+  // const resultNum = datContent.toString().split("\r\n").length;
+  // const resultFolder = datasetInfo!.path + "/model";
+  // const paramContent = readFileSync(dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat")
+  //   .toString()
+  //   .split("\r\n");
+  // let num = Number(paramContent[9].split(/\s/)[0]) * 24;
+  // let currentCount = 0;
+  // let resultIDs: string[] = [];
+  // for (let index = 0; index < resultNum; index++) {
+  //   const id = crypto.randomUUID();
+  //   await prisma.data.create({
+  //     data: {
+  //       path: resultFolder + `/tnd${index + 1}.dat`,
+  //       id: id,
+  //       style: "quality",
+  //       title: `tnd${index}`,
+  //       type: "model",
+  //       extent: extent!,
+  //       dataset: datasetID,
+  //       input: false,
+  //       timeStamp: timeStamp,
+  //     },
+  //   });
+  //   resultIDs.push(id);
+  // }
+  // await prisma.dataset.update({
+  //   where: { id: datasetID },
+  //   data: {
+  //     data: resultIDs,
+  //   },
+  // });
+  // // run quality model
+  // const modelPath = dataFoldURL + datasetInfo!.path + "/model/quality.exe";
+  // const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+  //   shell: true,
+  //   windowsHide: true,
+  // });
+  // outputModel.stderr.on("data", async (err) => {
+  //   console.log("model failed");
+  //   isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+  //   stopModel(datasetID, outputModel.pid!.toString(), res);
+  //   if (num === 0) {
+  //     res.status(200).json({ status: "fail", content: "模型参数错误" });
+  //   } else;
+  // });
+  // outputModel.stdout?.on("data", async (chunk) => {
+  //   const content = chunk.toString();
+  //   console.log(content);
+  //   if (content.includes("computing")) {
+  //     // num = Number(content.match(/\d*\.\d{1,6}/)![0]) * 24;
+  //     await prisma.data.updateMany({
+  //       where: {
+  //         dataset: datasetID,
+  //       },
+  //       data: {},
+  //     });
+  //     res
+  //       .status(200)
+  //       .json({ status: "success", content: [datasetInfo!.id, outputModel.pid, resultIDs] });
+  //   } else;
+  //   if (content.includes("time")) {
+  //     // update the progress of result
+  //     currentCount = currentCount + 4;
+  //     console.log(currentCount);
+  //     await prisma.data.updateMany({
+  //       where: {
+  //         dataset: datasetID,
+  //       },
+  //       data: {},
+  //     });
+  //   }
+  // });
+  // outputModel.stdout?.on("end", async () => {
+  //   console.log("quality model finished");
+  //   // tnd2txt
+  //   for (let index = 0; index < resultNum; index++) {
+  //     spawnSync(
+  //       `conda activate gis && python ${
+  //         path.resolve("./").split("\\").join("/") +
+  //         "/src/utils/water/tnd2txt.py" +
+  //         " " +
+  //         `${dataFoldURL}${datasetInfo!.path}/model/tnd${index + 1}.dat` +
+  //         " " +
+  //         `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
+  //         " " +
+  //         `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace(
+  //           "gr3",
+  //           "csv"
+  //         )}` +
+  //         " " +
+  //         num +
+  //         " " +
+  //         timeStamp
+  //       }`,
+  //       { shell: true, windowsHide: true }
+  //     );
+  //   }
+  //   console.log("tnd2txt finished");
+  //   for (let i = 0; i < num; i++) {
+  //     for (let j = 0; j < resultNum; j++) {
+  //       spawnSync(
+  //         `conda activate gis && python ${
+  //           path.resolve("./").split("\\").join("/") +
+  //           "/src/utils/water/tnd2png.py" +
+  //           " " +
+  //           `${dataFoldURL}${datasetInfo!.path}/transform/quality/tnd${
+  //             j + 1
+  //           }_${timeStamp}_${i}.txt` +
+  //           " " +
+  //           `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
+  //           " " +
+  //           `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace(
+  //             "gr3",
+  //             "shp"
+  //           )}`
+  //         }`,
+  //         { shell: true, windowsHide: true }
+  //       );
+  //     }
+  //     currentCount = currentCount + 4;
+  //     await prisma.data.updateMany({
+  //       where: {
+  //         dataset: datasetID,
+  //       },
+  //       data: {},
+  //     });
+  //   }
+  //   for (let index = 0; index < resultIDs.length; index++) {
+  //     const id = resultIDs[index];
+  //     await prisma.data.update({
+  //       where: {
+  //         id: id,
+  //       },
+  //       data: {
+  //         transformPath: [
+  //           `${datasetInfo!.path}/transform/quality`,
+  //           num.toString(),
+  //           timeStamp.toString(),
+  //         ],
+  //       },
+  //     });
+  //   }
+  // });
 };
 
 const runSand = async (
@@ -613,31 +570,271 @@ const runSand = async (
   projectID: string,
   res: Response
 ) => {
-  // create the record and folder of model
-  const timeStamp = Date.now().toString();
-  const result = await datasetService.addDataset(title, projectID);
-  const datasetID = result.content;
-  const datasetInfo = await prisma.dataset.findUnique({
-    where: {
-      id: datasetID,
-    },
-  });
+  // // create the record and folder of model
+  // const timeStamp = Date.now().toString();
+  // const result = await datasetService.addDataset(title, projectID);
+  // const datasetID = result.content;
+  // const datasetInfo = await prisma.dataset.findUnique({
+  //   where: {
+  //     id: datasetID,
+  //   },
+  // });
+  // let keys: string[] = paramKeys;
+  // projKey && keys.push(projKey);
+  // let meshFileName: string | undefined = undefined;
+  // let extent: number[] | undefined = undefined;
+  // // copy data by key
+  // for (let index = 0; index < paramKeys.length; index++) {
+  //   const key = paramKeys[index];
+  //   const fileInfo = await prisma.data.findUnique({
+  //     where: {
+  //       id: key,
+  //     },
+  //   });
+  //   if (!fileInfo) {
+  //     isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+  //     throw new Error("模型参数文件请重新上传");
+  //   } else;
+  //   // copy uvet data
+  //   if (fileInfo.style === "water") {
+  //     const datasetOfFile = await prisma.dataset.findUnique({
+  //       where: {
+  //         id: fileInfo.dataset,
+  //       },
+  //     });
+  //     const src1 = dataFoldURL + datasetOfFile!.path + "/model/et.dat";
+  //     const src2 = dataFoldURL + datasetOfFile!.path + "/model/vn.dat";
+  //     const src3 = dataFoldURL + datasetOfFile!.path + "/model/vt.dat";
+  //     const dst1 = dataFoldURL + datasetInfo!.path + "/model/et.dat";
+  //     const dst2 = dataFoldURL + datasetInfo!.path + "/model/vn.dat";
+  //     const dst3 = dataFoldURL + datasetInfo!.path + "/model/vt.dat";
+  //     copyFileSync(src1, dst1);
+  //     copyFileSync(src2, dst2);
+  //     copyFileSync(src3, dst3);
+  //     continue;
+  //   } else;
+  //   // copy model data
+  //   const datasetTimeStampOfFile = fileInfo.path.match(/\d*(?=.input)/)!.toString();
+  //   const src = dataFoldURL + fileInfo.path;
+  //   const dst = src.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
+  //   if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
+  //     copyFileSync(src, dst);
+  //   } else;
+  //   copyFileSync(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""));
+  //   // copy transform
+  //   const transform = fileInfo.transformPath;
+  //   if (transform.length) {
+  //     const datasetTimeStampOfFile = fileInfo.transformPath[0]
+  //       .match(/\d*(?=.transform)/)!
+  //       .toString();
+  //     const source = dataFoldURL + fileInfo.transformPath[0];
+  //     const target = source.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
+  //     if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
+  //       if (lstatSync(source).isFile()) {
+  //         copySelectFilesInFolderSync(dirname(source), dirname(target), [fileInfo.timeStamp]);
+  //       } else {
+  //         copySelectFilesInFolderSync(source, target, [fileInfo.timeStamp]);
+  //       }
+  //     } else;
+  //   } else;
+  //   // find mesh
+  //   if (fileInfo.type === "mesh") {
+  //     meshFileName = path.basename(fileInfo.path);
+  //     extent = fileInfo.extent;
+  //   } else;
+  // }
+  // if (!meshFileName) {
+  //   isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+  //   throw new Error("mesh 参数文件不存在");
+  // } else;
+  // const paramContent = readFileSync(dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat")
+  //   .toString()
+  //   .split("\r\n");
+  // let num = Number(paramContent[9].split(/\s/)[0]) * 24;
+  // let currentCount = 0;
+  // // NOTE readFileSync
+  // // create the record fo result
+  // const resultFolder = datasetInfo!.path + "/model";
+  // const sndID = crypto.randomUUID();
+  // const yujiID = crypto.randomUUID();
+  // await prisma.data.create({
+  //   data: {
+  //     path: resultFolder + `/snd.dat`,
+  //     id: sndID,
+  //     style: "snd",
+  //     title: `snd`,
+  //     type: "model",
+  //     extent: extent!,
+  //     dataset: datasetID,
+  //     input: false,
+  //     timeStamp: timeStamp,
+  //   },
+  // });
+  // await prisma.data.create({
+  //   data: {
+  //     path: resultFolder + `/yuji.dat`,
+  //     id: yujiID,
+  //     style: "yuji",
+  //     title: `yuji`,
+  //     type: "model",
+  //     extent: extent!,
+  //     dataset: datasetID,
+  //     input: false,
+  //     timeStamp: timeStamp,
+  //   },
+  // });
+  // await prisma.dataset.update({
+  //   where: { id: datasetID },
+  //   data: {
+  //     data: [sndID, yujiID],
+  //   },
+  // });
+  // // run sand model
+  // const modelPath = dataFoldURL + datasetInfo!.path + "/model/sand.exe";
+  // const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+  //   shell: true,
+  //   windowsHide: true,
+  // });
+  // outputModel.stderr.on("data", async (err) => {
+  //   console.log("model failed");
+  //   isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
+  //   stopModel(datasetID, outputModel.pid!.toString(), res);
+  //   if (num === 0) {
+  //     res.status(200).json({ status: "fail", content: "模型参数错误" });
+  //   } else;
+  // });
+  // outputModel.stdout?.on("data", async (chunk) => {
+  //   const content = chunk.toString();
+  //   console.log(content);
+  //   if (content.includes("computing")) {
+  //     await prisma.data.updateMany({
+  //       where: {
+  //         dataset: datasetID,
+  //       },
+  //       data: {},
+  //     });
+  //     res
+  //       .status(200)
+  //       .json({ status: "success", content: [datasetInfo!.id, outputModel.pid, [sndID, yujiID]] });
+  //   } else;
+  //   if (content.includes("SED")) {
+  //     // update the progress of result
+  //     currentCount = currentCount + 4;
+  //     console.log(currentCount);
+  //     await prisma.data.updateMany({
+  //       where: {
+  //         dataset: datasetID,
+  //       },
+  //       data: {},
+  //     });
+  //   }
+  // });
+  // outputModel.stdout?.on("end", async () => {
+  //   console.log("quality model finished");
+  //   // sand2txt
+  //   spawnSync(
+  //     `conda activate gis && python ${
+  //       path.resolve("./").split("\\").join("/") +
+  //       "/src/utils/water/sand2txt.py" +
+  //       " " +
+  //       `${dataFoldURL}${datasetInfo!.path}/model/snd.dat` +
+  //       " " +
+  //       `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+  //       " " +
+  //       `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "csv")}` +
+  //       " " +
+  //       num +
+  //       " " +
+  //       timeStamp
+  //     }`,
+  //     { shell: true, windowsHide: true }
+  //   );
+  //   spawnSync(
+  //     `conda activate gis && python ${
+  //       path.resolve("./").split("\\").join("/") +
+  //       "/src/utils/water/sand2txt.py" +
+  //       " " +
+  //       `${dataFoldURL}${datasetInfo!.path}/model/yuji.dat` +
+  //       " " +
+  //       `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+  //       " " +
+  //       `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "csv")}` +
+  //       " " +
+  //       num +
+  //       " " +
+  //       timeStamp
+  //     }`,
+  //     { shell: true, windowsHide: true }
+  //   );
+  //   console.log("sand2txt finished");
+  //   for (let i = 0; i < num; i++) {
+  //     spawnSync(
+  //       `conda activate gis && python ${
+  //         path.resolve("./").split("\\").join("/") +
+  //         "/src/utils/water/sand2png.py" +
+  //         " " +
+  //         `${dataFoldURL}${datasetInfo!.path}/transform/sand/snd_${timeStamp}_${i}.txt` +
+  //         " " +
+  //         `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+  //         " " +
+  //         `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "shp")}`
+  //       }`,
+  //       { shell: true, windowsHide: true }
+  //     );
+  //     spawnSync(
+  //       `conda activate gis && python ${
+  //         path.resolve("./").split("\\").join("/") +
+  //         "/src/utils/water/sand2png.py" +
+  //         " " +
+  //         `${dataFoldURL}${datasetInfo!.path}/transform/sand/yuji_${timeStamp}_${i}.txt` +
+  //         " " +
+  //         `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+  //         " " +
+  //         `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "shp")}`
+  //       }`,
+  //       { shell: true, windowsHide: true }
+  //     );
+  //     currentCount = currentCount + 4;
+  //     await prisma.data.updateMany({
+  //       where: {
+  //         dataset: datasetID,
+  //       },
+  //       data: {},
+  //     });
+  //   }
+  //   await prisma.data.updateMany({
+  //     where: {
+  //       dataset: datasetID,
+  //     },
+  //     data: {
+  //       transformPath: [
+  //         `${datasetInfo!.path}/transform/sand`,
+  //         num.toString(),
+  //         timeStamp.toString(),
+  //       ],
+  //     },
+  //   });
+  // });
+};
 
-  let keys: string[] = paramKeys;
-  projKey && keys.push(projKey);
+const copyModelData = async (
+  datasetID: string,
+  modelInfoID: string,
+  datasetPath: string,
+  datasetTimeStamp: string,
+  paramKeys: string[]
+) => {
   let meshFileName: string | undefined = undefined;
   let extent: number[] | undefined = undefined;
-  // copy data by key
-  for (let index = 0; index < paramKeys.length; index++) {
-    const key = paramKeys[index];
+  const promises = paramKeys.map(async (key) => {
     const fileInfo = await prisma.data.findUnique({
       where: {
         id: key,
       },
     });
     if (!fileInfo) {
-      isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
-      throw new Error("模型参数文件请重新上传");
+      await stopModel(datasetID, modelInfoID);
+      throw new Error("未找到参数文件");
     } else;
     // copy uvet data
     if (fileInfo.style === "water") {
@@ -649,22 +846,22 @@ const runSand = async (
       const src1 = dataFoldURL + datasetOfFile!.path + "/model/et.dat";
       const src2 = dataFoldURL + datasetOfFile!.path + "/model/vn.dat";
       const src3 = dataFoldURL + datasetOfFile!.path + "/model/vt.dat";
-      const dst1 = dataFoldURL + datasetInfo!.path + "/model/et.dat";
-      const dst2 = dataFoldURL + datasetInfo!.path + "/model/vn.dat";
-      const dst3 = dataFoldURL + datasetInfo!.path + "/model/vt.dat";
-      copyFileSync(src1, dst1);
-      copyFileSync(src2, dst2);
-      copyFileSync(src3, dst3);
-      continue;
+      const dst1 = dataFoldURL + datasetPath + "/model/et.dat";
+      const dst2 = dataFoldURL + datasetPath + "/model/vn.dat";
+      const dst3 = dataFoldURL + datasetPath + "/model/vt.dat";
+      await copyFile(src1, dst1);
+      await copyFile(src2, dst2);
+      await copyFile(src3, dst3);
+      resolve;
     } else;
     // copy model data
     const datasetTimeStampOfFile = fileInfo.path.match(/\d*(?=.input)/)!.toString();
     const src = dataFoldURL + fileInfo.path;
-    const dst = src.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
-    if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
-      copyFileSync(src, dst);
+    const dst = src.replace(datasetTimeStampOfFile!, datasetTimeStamp);
+    if (datasetTimeStampOfFile !== datasetTimeStamp) {
+      await copyFile(src, dst);
     } else;
-    copyFileSync(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""));
+    await copyFile(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""));
     // copy transform
     const transform = fileInfo.transformPath;
     if (transform.length) {
@@ -672,12 +869,12 @@ const runSand = async (
         .match(/\d*(?=.transform)/)!
         .toString();
       const source = dataFoldURL + fileInfo.transformPath[0];
-      const target = source.replace(datasetTimeStampOfFile!, datasetInfo!.timeStamp);
-      if (datasetTimeStampOfFile !== datasetInfo!.timeStamp) {
-        if (lstatSync(source).isFile()) {
-          copySelectFilesInFolderSync(dirname(source), dirname(target), [fileInfo.timeStamp]);
+      const target = source.replace(datasetTimeStampOfFile!, datasetTimeStamp);
+      if (datasetTimeStampOfFile !== datasetTimeStamp) {
+        if ((await lstat(source)).isFile()) {
+          await copySelectFilesInFolder(dirname(source), dirname(target), [fileInfo.timeStamp]);
         } else {
-          copySelectFilesInFolderSync(source, target, [fileInfo.timeStamp]);
+          await copySelectFilesInFolder(source, target, [fileInfo.timeStamp]);
         }
       } else;
     } else;
@@ -686,223 +883,47 @@ const runSand = async (
       meshFileName = path.basename(fileInfo.path);
       extent = fileInfo.extent;
     } else;
-  }
-  if (!meshFileName) {
-    isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
-    throw new Error("mesh 参数文件不存在");
-  } else;
-
-  const paramContent = readFileSync(dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat")
-    .toString()
-    .split("\r\n");
-  let num = Number(paramContent[9].split(/\s/)[0]) * 24;
-  let currentCount = 0;
-
-  // NOTE readFileSync
-  // create the record fo result
-  const resultFolder = datasetInfo!.path + "/model";
-  const sndID = crypto.randomUUID();
-  const yujiID = crypto.randomUUID();
-  await prisma.data.create({
-    data: {
-      path: resultFolder + `/snd.dat`,
-      id: sndID,
-      style: "snd",
-      title: `snd`,
-      type: "model",
-      extent: extent!,
-      progress: [],
-      dataset: datasetID,
-      input: false,
-      timeStamp: timeStamp,
-    },
+    resolve;
   });
-  await prisma.data.create({
-    data: {
-      path: resultFolder + `/yuji.dat`,
-      id: yujiID,
-      style: "yuji",
-      title: `yuji`,
-      type: "model",
-      extent: extent!,
-      progress: [],
-      dataset: datasetID,
-      input: false,
-      timeStamp: timeStamp,
-    },
-  });
-  await prisma.dataset.update({
-    where: { id: datasetID },
-    data: {
-      data: [sndID, yujiID],
-    },
-  });
-  // run sand model
-  const modelPath = dataFoldURL + datasetInfo!.path + "/model/sand.exe";
-  const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
-    shell: true,
-    windowsHide: true,
-  });
-  outputModel.stderr.on("data", async (err) => {
-    console.log("model failed");
-    isModelFailed(datasetInfo!.id, dataFoldURL + datasetInfo!.path);
-    stopModel(datasetID, outputModel.pid!.toString(), res);
-    if (num === 0) {
-      res.status(200).json({ status: "fail", content: "模型参数错误" });
-    } else;
-  });
-  outputModel.stdout?.on("data", async (chunk) => {
-    const content = chunk.toString();
-    console.log(content);
-    if (content.includes("computing")) {
-      await prisma.data.updateMany({
-        where: {
-          dataset: datasetID,
-        },
-        data: {
-          progress: ["0", `${num * 8}`],
-        },
-      });
-      res
-        .status(200)
-        .json({ status: "success", content: [datasetInfo!.id, outputModel.pid, [sndID, yujiID]] });
-    } else;
-    if (content.includes("SED")) {
-      // update the progress of result
-      currentCount = currentCount + 4;
-      console.log(currentCount);
-      await prisma.data.updateMany({
-        where: {
-          dataset: datasetID,
-        },
-        data: {
-          progress: [`${currentCount}`, `${num * 8}`],
-        },
-      });
-    }
-  });
-  outputModel.stdout?.on("end", async () => {
-    console.log("quality model finished");
-    // sand2txt
-    spawnSync(
-      `conda activate gis && python ${
-        path.resolve("./").split("\\").join("/") +
-        "/src/utils/water/sand2txt.py" +
-        " " +
-        `${dataFoldURL}${datasetInfo!.path}/model/snd.dat` +
-        " " +
-        `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
-        " " +
-        `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "csv")}` +
-        " " +
-        num +
-        " " +
-        timeStamp
-      }`,
-      { shell: true, windowsHide: true }
-    );
-    spawnSync(
-      `conda activate gis && python ${
-        path.resolve("./").split("\\").join("/") +
-        "/src/utils/water/sand2txt.py" +
-        " " +
-        `${dataFoldURL}${datasetInfo!.path}/model/yuji.dat` +
-        " " +
-        `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
-        " " +
-        `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "csv")}` +
-        " " +
-        num +
-        " " +
-        timeStamp
-      }`,
-      { shell: true, windowsHide: true }
-    );
-    console.log("sand2txt finished");
-    for (let i = 0; i < num; i++) {
-      spawnSync(
-        `conda activate gis && python ${
-          path.resolve("./").split("\\").join("/") +
-          "/src/utils/water/sand2png.py" +
-          " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/sand/snd_${timeStamp}_${i}.txt` +
-          " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
-          " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "shp")}`
-        }`,
-        { shell: true, windowsHide: true }
-      );
-      spawnSync(
-        `conda activate gis && python ${
-          path.resolve("./").split("\\").join("/") +
-          "/src/utils/water/sand2png.py" +
-          " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/sand/yuji_${timeStamp}_${i}.txt` +
-          " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
-          " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${meshFileName!.replace("gr3", "shp")}`
-        }`,
-        { shell: true, windowsHide: true }
-      );
-      currentCount = currentCount + 4;
-      await prisma.data.updateMany({
-        where: {
-          dataset: datasetID,
-        },
-        data: {
-          progress: [`${currentCount}`, `${num * 8}`],
-        },
-      });
-    }
-    await prisma.data.updateMany({
-      where: {
-        dataset: datasetID,
-      },
-      data: {
-        transformPath: [
-          `${datasetInfo!.path}/transform/sand`,
-          num.toString(),
-          timeStamp.toString(),
-        ],
-      },
-    });
-  });
+  await Promise.all(promises);
+  return [meshFileName, extent];
 };
 
-const isModelFailed = async (datasetID: string, path: string) => {
-  setTimeout(async () => {
-    deleteFolderSync(path);
-    await prisma.data.deleteMany({
-      where: {
-        dataset: datasetID,
-      },
-    });
-  }, 1000);
-};
-
-const stopModel = async (datasetID: string, pid: string, res: Response) => {
-  if (pid) {
-    const datasetInfo = await prisma.dataset.findUnique({ where: { id: datasetID } });
-    await prisma.dataset.delete({ where: { id: datasetID } });
-    const projectInfo = await prisma.project.findUnique({
-      where: { id: datasetInfo!.project },
-    });
-    await prisma.project.update({
-      where: { id: datasetInfo!.project },
-      data: {
-        data: projectInfo!.data.filter((value) => value !== datasetID),
-      },
-    });
+const stopModel = async (datasetID: string, modelInfoID: string) => {
+  // get modelInfo
+  const modelInfo = await prisma.model_info.findUnique({
+    where: { id: modelInfoID },
+  });
+  // NOTE
+  // delete all programs by pid
+  async function killPidPromise(pid: string) {
+    const { spawn } = require("child_process");
     const result = spawn(`taskkill /f /t /pid ${pid}`, { shell: true, windowsHide: true });
-    result.stdout.on("end", () => {
-      setTimeout(() => {
-        deleteFolderSync(dataFoldURL + datasetInfo!.path);
-        return { status: "success", content: "kill" };
-      }, 1000);
+
+    let data = "";
+    for await (const chunk of result.stdout) {
+      console.log("stdout chunk: " + chunk);
+      data += chunk;
+    }
+    let error = "";
+    for await (const chunk of result.stderr) {
+      console.error("stderr chunk: " + chunk);
+      error += chunk;
+    }
+    const exitCode = await new Promise((resolve, reject) => {
+      result.on("exit", resolve);
     });
-  } else;
+    if (exitCode) {
+      throw new Error(`subprocess error exit ${exitCode}, ${error}`);
+    }
+    return data;
+  }
+  for (let index = 0; index < modelInfo!.pids.length; index++) {
+    const pid = modelInfo!.pids[index];
+    await killPidPromise(pid);
+  }
+  // delete dataset
+  await datasetService.deleteDataset(datasetID);
 };
 
 export const modelService = { R_test2, R_test3, runHydrodynamics, runQuality, runSand, stopModel };

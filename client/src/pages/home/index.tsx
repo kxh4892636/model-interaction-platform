@@ -168,7 +168,7 @@ export const Home: React.FC = () => {
             <MapStatus position={position} />
             {viewTag ? view : <></>}
           </ViewContainer>
-          <Sidebar items={sidebarItems}></Sidebar>
+          <Sidebar items={projectKey.includes("-") ? sidebarItems : []}></Sidebar>
         </ContentContainer>
       </Spin>
       <StatusBarContainer
@@ -184,3 +184,4 @@ export const Home: React.FC = () => {
     </View>
   );
 };
+

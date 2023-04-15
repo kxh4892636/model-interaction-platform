@@ -8,7 +8,7 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import crypto from "crypto";
-import { copyFolderSync, deleteFolderSync } from "../utils/tools/fs_action";
+import { copyFolder, deleteFolder } from "../utils/tools/fs_action";
 import { dataFoldURL } from "../config/global_data";
 import { prisma } from "../utils/tools/prisma";
 
@@ -44,7 +44,7 @@ const addDataset = async (title: string, projectID: string) => {
     where: { id: projectID },
   });
   const path = projectInfo!.path + `/${timeStamp}`;
-  copyFolderSync(dataFoldURL + "/template/dataset_template", dataFoldURL + path);
+  await copyFolder(dataFoldURL + "/template/dataset_template", dataFoldURL + path);
   await prisma.dataset.create({
     data: {
       id: id,
@@ -87,11 +87,21 @@ const deleteDataset = async (datasetID: string) => {
   if (!datasetInfo) throw new Error("can't find data by id");
   else;
   const path = dataFoldURL + datasetInfo.path;
+  // update project
+  const projectInfo = await prisma.project.findUnique({
+    where: { id: datasetInfo!.project },
+  });
+  await prisma.project.update({
+    where: { id: datasetInfo!.project },
+    data: {
+      data: projectInfo!.data.filter((value) => value !== datasetID),
+    },
+  });
   // delete the record
   await prisma.data.deleteMany({ where: { dataset: datasetID } });
   await prisma.dataset.delete({ where: { id: datasetID } });
   // delete origin file path
-  deleteFolderSync(path);
+  deleteFolder(path);
   return { status: "success", content: "delete succeed" };
 };
 

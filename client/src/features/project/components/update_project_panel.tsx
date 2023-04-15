@@ -76,7 +76,8 @@ export const UpdateProjectPanel = ({
                 id: projectKey,
                 title: value.title,
                 image: isPosition && (result as any).data,
-                tags: value.tags && Array.isArray(value.tags.split()) && value.tags.split(" "),
+                tags:
+                  value.tags && Array.isArray(value.tags.split()) && value.tags.trim().split(" "),
                 description: value.description,
                 position: isPosition && position.map((value) => value.toString()),
               },

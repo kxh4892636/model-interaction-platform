@@ -67,32 +67,32 @@ export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
 
   const getPercent = (key: string) => {
     const percentInterval = setInterval(async () => {
-      const dataInfo = await dataActions.getDataDetail(key).catch(() => {
-        const currentProgress = currentModelStatus!.percent;
-        updateModelStatus(model, "percent", currentProgress + 3);
-      });
-      if (!dataInfo) {
-        clearInterval(percentInterval);
-        // currentModelStatus && clearInterval(currentModelStatus.intervalStore!);
-        removeModelStatus(model);
-        message.error("模型运行错误");
-        return;
-      } else;
-      const progress = dataInfo.progress;
-      // stop model if failed to run model
-      // update progress of model
-      updateModelStatus(
-        model,
-        "percent",
-        ((Number(progress[0]) / Number(progress[1])) * 100).toFixed(2)
-      );
-      // add result if model is finished
-      if (progress[0] === progress[1] && progress[1]) {
-        clearInterval(percentInterval);
-        removeModelStatus(model);
-        message.success("模型运行完毕", 10);
-        return;
-      } else;
+      // const dataInfo = await dataActions.getDataDetail(key).catch(() => {
+      //   const currentProgress = currentModelStatus!.percent;
+      //   updateModelStatus(model, "percent", currentProgress + 3);
+      // });
+      // if (!dataInfo) {
+      //   clearInterval(percentInterval);
+      //   // currentModelStatus && clearInterval(currentModelStatus.intervalStore!);
+      //   removeModelStatus(model);
+      //   message.error("模型运行错误");
+      //   return;
+      // } else;
+      // const progress = dataInfo.progress;
+      // // stop model if failed to run model
+      // // update progress of model
+      // updateModelStatus(
+      //   model,
+      //   "percent",
+      //   ((Number(progress[0]) / Number(progress[1])) * 100).toFixed(2)
+      // );
+      // // add result if model is finished
+      // if (progress[0] === progress[1] && progress[1]) {
+      //   clearInterval(percentInterval);
+      //   removeModelStatus(model);
+      //   message.success("模型运行完毕", 10);
+      //   return;
+      // } else;
     }, 20000);
     updateModelStatus(model, "intervalStore", percentInterval);
   };

@@ -140,10 +140,7 @@ export const Nav = ({ items }: NavProps) => {
     <>
       <StyledNav>{NavItems}</StyledNav>
       {showItem ? (
-        <PanelContainer style={{ borderRight: "1px solid #d9d9d9" }}>
-          {/* <Item selectID={showPanelID} items={items} /> */}
-          {element}
-        </PanelContainer>
+        <PanelContainer style={{ borderRight: "1px solid #d9d9d9" }}>{element}</PanelContainer>
       ) : (
         <></>
       )}

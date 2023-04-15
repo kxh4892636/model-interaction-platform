@@ -31,7 +31,6 @@ export type ServerData = {
   style: string;
   type: string;
   extent: number[];
-  progress: string[];
   dataset: string;
   input: boolean;
   transformNum: string;

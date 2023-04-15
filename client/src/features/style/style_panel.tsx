@@ -48,6 +48,7 @@ const StylePanel = () => {
   const animateActions = useAnimate();
   const map = useMapStore((state) => state.map);
   const dataActions = useData();
+  
 
   useEffect(() => {
     // Update the value of slide when the value of selected is changed

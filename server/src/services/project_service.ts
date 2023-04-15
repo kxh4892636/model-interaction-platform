@@ -11,7 +11,7 @@ import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
 import { mkdirSync, unlinkSync } from "fs";
 import { datasetService } from "./dataset_service";
-import { deleteFolderSync } from "../utils/tools/fs_action";
+import { deleteFolder } from "../utils/tools/fs_action";
 import { prisma } from "../utils/tools/prisma";
 
 /**
@@ -217,8 +217,6 @@ const deleteProject = async (projectID: string) => {
   if (!info) {
     throw new Error("can't find project by id");
   } else;
-  // delete the record of project
-  await prisma.project.delete({ where: { id: projectID } });
   // delete the image
   const imageKey = info.image;
   if (imageKey) {
@@ -233,7 +231,10 @@ const deleteProject = async (projectID: string) => {
     const datasetID = datasetIDs[index];
     await datasetService.deleteDataset(datasetID);
   }
-  deleteFolderSync(dataFoldURL + info.path);
+  // delete the record of project
+  await prisma.project.delete({ where: { id: projectID } });
+  // delete the folder of project
+  await deleteFolder(dataFoldURL + info.path);
   return { status: "success", content: "delete project succeed" };
 };
 
