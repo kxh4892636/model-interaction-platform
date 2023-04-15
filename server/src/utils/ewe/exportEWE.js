@@ -153,8 +153,7 @@ function FleetDiscardFate(GroupID,FleetID,DiscardFate,singleID){
     // console.log(Data)
     return Data
 } 
-
-exports.CRUDdatabase = (Group,Fleet,Diet,Detritus,DiscardFate,Land,Discard,num)=>{
+function CRUDFunc(Group,Fleet,Diet,Detritus,DiscardFate,Land,Discard,num){
     const GroupID = genID(Group)
     const FleetID = genID(Fleet)
     // 自动解构Group Basic
@@ -172,104 +171,135 @@ exports.CRUDdatabase = (Group,Fleet,Diet,Detritus,DiscardFate,Land,Discard,num)=
     const InsertCatch = `INSERT INTO EcopathCatch(ID,RecordID,GroupID,FleetID,Landing,Discards) VALUES `
     const InsertDF = `INSERT INTO EcopathDiscardFate(ID,GroupID,FleetID,FleetName,DiscardFate) VALUES `
 
-    const database = pool.connect().then((client) => {
-        return client
-                // 插入Group数据
-            .query(`INSERT INTO ewecase(ID) VALUES ($1)`,[num])
-            .then(()=>{
-                client.query(InsertGroup+BasicSql.Sql,BasicSql.Data,(err, res) => {
+    return new Promise((reslove,reject)=>{
+        const database = pool.connect().then((client) => {
+            return client
+                    // 插入Group数据
+                .query(`INSERT INTO ewecase(ID) VALUES ($1)`,[num])
+                .then(()=>{
+                    client.query(InsertGroup+BasicSql.Sql,BasicSql.Data,(err, res) => {
+                        if (err) {console.log(err)};
+                        // client.release()
+                        console.log("插入Group数据")
+                    })
+                }).then(()=>{
+                // 插入Diet数据
+                client.query(InsertDiet+DietSql.Sql,DietSql.Data, (err, res) => {
                     if (err) {console.log(err)};
                     // client.release()
-                    console.log("插入Group数据")
+                    console.log("插入Diet数据")
                 })
-            }).then(()=>{
-            // 插入Diet数据
-            client.query(InsertDiet+DietSql.Sql,DietSql.Data, (err, res) => {
-                if (err) {console.log(err)};
-                // client.release()
-                console.log("插入Diet数据")
-            })
-          }).then(()=>{
-            // 插入Catch LD数据
-            client.query(InsertCatch+LandDiscSql.Sql,LandDiscSql.Data, (err, res) => {
-                if (err) {console.log(err)};
-                // client.release()
-                console.log("插入Catch数据")
-            })
-          }).then(()=>{
-            // 插入discard fate数据
-            client.query(InsertDF+DiscardFateSql.Sql,DiscardFateSql.Data, (err, res) => {
-                if (err) {console.log(err)};
-                console.log("插入Fate数据")
+              }).then(()=>{
+                // 插入Catch LD数据
+                client.query(InsertCatch+LandDiscSql.Sql,LandDiscSql.Data, (err, res) => {
+                    if (err) {console.log(err)};
+                    // client.release()
+                    console.log("插入Catch数据")
+                })
+              }).then(()=>{
+                // 插入discard fate数据
+                client.query(InsertDF+DiscardFateSql.Sql,DiscardFateSql.Data, (err, res) => {
+                    if (err) {console.log(err)};
+                    console.log("插入Fate数据")
+                    reslove("完成插入")
+                    client.release()
+                })
+              })
+              .catch((err) => {
                 client.release()
-            })
-          })
-          .catch((err) => {
-            client.release()
-            console.log(err.stack)
+                console.log(err.stack)
+              })
+        })
+
+    })
+    
+}
+exports.CRUDdatabase = (Group,Fleet,Diet,Detritus,DiscardFate,Land,Discard,num)=>{
+    return new Promise((reslove,reject)=>{
+        pool.connect().then((client) => {
+            return client
+              .query('SELECT * FROM ewecase WHERE id = $1', [num])
+              .then(async(res) => {
+                // console.log(res.rows[0])
+                    if(res.rows[0]!==undefined){
+                        client.release()
+                        console.log("已存在")
+                        reslove("已存在")
+                    }
+                    else{
+                        const database = await CRUDFunc(Group,Fleet,Diet,Detritus,DiscardFate,Land,Discard,num)
+                        // console.log("database",database)
+                        reslove(database)
+                    }
+              })
+              .catch((err) => {
+                client.release()
+                console.log(err.stack)
+              })
           })
     })
-
-    return database
 }
 
 exports.ModifyDatabase = (ModifyData,singleID,Group,Fleet)=>{
-    let returndata
-    let querysql = ""
-    const GroupID = genID(Group)
-    const FleetID = genID(Fleet)
-    ModifyData.forEach((el,index)=>{
-        // 生成不同的插入语句，具体情况具体分析 
-        if(el.tablename==="ecopathcatch"){
-          el.groupname = GroupID[el.groupname]
-          querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`
-        //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`)
-        }
-        else if(el.tablename==="ecopathdiscardfate"){
-          el.groupname = FleetID[el.groupname]
-          querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`
-        //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`)
-        }
-        else if(el.tablename==="ecopathdiet"){
-          el.groupname1 = GroupID[el.groupname1]
-          el.groupname2 = GroupID[el.groupname2]
-          querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup1}='${el.groupname1}' and ${el.attrgroup2}='${el.groupname2}'`
-        //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup1}='${el.groupname1}' and ${el.attrgroup2}='${el.groupname2}'`)
-        }
-        else{
-          // ecopathgroup的情况
-          querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`
-        //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`)
-        }
-
-        // 执行到最后一个sql语句的时候，需要返回一个promise对象用于下一步操作是
-        if(index+1===ModifyData.length){
-            returndata =         
-            pool.query(querysql)
-            .then((res) => {
-                // console.log('user:', Object.keys(res))
-                console.log("")
-            })
-            .catch((err) =>
-                setImmediate(() => {
-                    throw err
+    return new Promise((reslove,reject)=>{
+        let returndata
+        let querysql = ""
+        const GroupID = genID(Group)
+        const FleetID = genID(Fleet)
+        ModifyData.forEach((el,index)=>{
+            // 生成不同的插入语句，具体情况具体分析 
+            if(el.tablename==="ecopathcatch"){
+              el.groupname = GroupID[el.groupname]
+              querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`
+            //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`)
+            }
+            else if(el.tablename==="ecopathdiscardfate"){
+              el.groupname = FleetID[el.groupname]
+              querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`
+            //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`)
+            }
+            else if(el.tablename==="ecopathdiet"){
+              el.groupname1 = GroupID[el.groupname1]
+              el.groupname2 = GroupID[el.groupname2]
+              querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup1}='${el.groupname1}' and ${el.attrgroup2}='${el.groupname2}'`
+            //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup1}='${el.groupname1}' and ${el.attrgroup2}='${el.groupname2}'`)
+            }
+            else{
+              // ecopathgroup的情况
+              querysql=`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`
+            //   console.log(`update ${el.tablename} set ${el.attribute}=${el.value} where id='${singleID}' and ${el.attrgroup}='${el.groupname}'`)
+            }
+    
+            // 执行到最后一个sql语句的时候，需要返回一个promise对象用于下一步操作是
+            if(index+1===ModifyData.length){
+                returndata =         
+                pool.query(querysql)
+                .then((res) => {
+                    // console.log('user:', Object.keys(res))
+                    console.log("")
                 })
-            )
-        }
-        else{
-            pool.query(querysql)
-            .then((res) => {
-                // console.log('user:', Object.keys(res))
-                console.log("")
-            })
-            .catch((err) =>
-                setImmediate(() => {
-                    throw err
+                .catch((err) =>
+                    setImmediate(() => {
+                        throw err
+                    })
+                )
+            }
+            else{
+                pool.query(querysql)
+                .then((res) => {
+                    // console.log('user:', Object.keys(res))
+                    console.log("")
                 })
-            )
-        }
+                .catch((err) =>
+                    setImmediate(() => {
+                        throw err
+                    })
+                )
+            }
+        })
+        reslove(returndata)
     })
-    return returndata
+    
 }
 
 // 对结果的处理也放在了后端，前端接收到数据直接设置状态就好了

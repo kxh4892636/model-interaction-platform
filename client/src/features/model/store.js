@@ -407,6 +407,16 @@ const selectedEWEModelID = create((set, get) => ({
 }))},
 }));
 
+const fakedataV = create((set, get) => ({
+  fakedataV:false,
+  // 单纯更新状态
+  setfakedataV: (newData) =>{
+    // console.log("ModifyData",newData)
+    set((state) => ({
+      fakedataV: newData
+}))},
+}));
+
 export {
   useStore,
   Basic,
@@ -424,5 +434,6 @@ export {
   RunModelState,
   ModifyState,
   EWEModelID,
-  selectedEWEModelID
+  selectedEWEModelID,
+  fakedataV
 };

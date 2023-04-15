@@ -3,7 +3,7 @@ import { dataFoldURL } from "../config/global_data";
 import { copyFile, copyFileSync, lstatSync, readFileSync, rename } from "fs";
 import path, { dirname, resolve } from "path";
 import crypto from "crypto";
-import { spawn, spawnSync, execSync } from "child_process";
+import { spawn, spawnSync, execSync, exec } from "child_process";
 import { copySelectFilesInFolderSync, deleteFolderSync } from "../utils/tools/fs_action";
 import { query } from "../utils/ewe/importEWE";
 import { CRUDdatabase, HandleReturn, FlowDiagram, ModifyDatabase } from "../utils/ewe/exportEWE";
@@ -25,6 +25,10 @@ const R_test2 = async (req: Request, res: Response) => {
     // 全部封到exportEWE中去
     await CRUDdatabase(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num);
     const stdout = execSync(`Rscript ./src/utils/ewe/EcoPath.R '${num}'`, { windowsHide: true });
+    // stdout.stdout!.on('end',()=>{
+    //   // after
+    // })
+
     // [1] TRUE 长度为10 后面还跟着2个空格 10*n-1  5个最后为49  加上“[1] ” 从54开始
     // 如果图标那一块真的要使用图片进行传输的话，多了“pdf 2” 所以要从65开始
     let data = JSON.parse(stdout.toString().slice(54));

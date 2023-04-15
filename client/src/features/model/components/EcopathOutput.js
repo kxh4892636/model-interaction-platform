@@ -13,6 +13,7 @@ import {
   RunModelState,
   ModifyState,
   selectedEWEModelID,
+  fakedataV
 } from "../store";
 import axios from "axios";
 // 模型平衡与否 已极不平衡时的功能组名称
@@ -118,6 +119,7 @@ export default function App() {
   const setModelState = RunModelState((state) => state.setState);
   const ModifyData = ModifyState((state) => state.ModifyData);
   const selectedEWElID = selectedEWEModelID((state) => state.selectedEWEModelID);
+  const setfakedataV = fakedataV((state)=>state.setfakedataV)
   // Run Ecopath
   const RunEcopath = () => {
     // console.log(GroupTData,DietData)
@@ -160,6 +162,7 @@ export default function App() {
         message.success(`计算完成！！！`);
         setEcopathOutputData(response.data.BasicEst);
         setGraphData(response.data.Graph);
+        setfakedataV(true)
       } else {
         message.warning("请勿重复点击", 0.5);
       }

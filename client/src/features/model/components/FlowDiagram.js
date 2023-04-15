@@ -50,12 +50,14 @@ useEffect(()=>{
     option = {
     // 强行对legend颜色设置
     color:colorpanel,
-    // title: {
-    //   text: 'Les Miserables',
-    //   subtext: 'Default layout',
-    //   top: 'bottom',
-    //   left: 'right'
-    // },
+    title: {
+      text: '港口海域食物网结构',
+      textStyle: {
+        fontSize: 30
+      },
+      left: "center",
+      top: "top",
+    },
     tooltip: {},
     legend: [
       {
@@ -63,6 +65,7 @@ useEffect(()=>{
         data: graph.categories.map(function (a) {
           return a.name;
         }),
+        bottom:"bottom"
       }
     ],
     // coordinateSystem:"cartesian2d",

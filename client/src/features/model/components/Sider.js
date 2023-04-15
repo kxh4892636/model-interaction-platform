@@ -35,7 +35,7 @@ const App = (props) => {
       ],
     },
     {
-      title: "生态系统模型(EWE)",
+      title: "生态系统模型",
       key: "0-2",
       // icon: <AliwangwangOutlined />,
       children: [
@@ -43,7 +43,6 @@ const App = (props) => {
           title: "模型配置",
           key: "0-0",
           routekey: "model/EWEModel",
-          icon: ({ selected }) => (selected ? <CreditCardFilled /> : <CalendarOutlined />),
         },
         {
           title: "Ecopath",
@@ -115,9 +114,15 @@ const App = (props) => {
                   icon: ({ selected }) => (selected ? <CreditCardFilled /> : <CalendarOutlined />),
                 },
                 {
-                  title: "食物网",
+                  title: "食物网结构",
                   key: "2-0-2",
                   routekey: "model/FlowDiagram",
+                  icon: ({ selected }) => (selected ? <CreditCardFilled /> : <CalendarOutlined />),
+                },
+                {
+                  title: "营养级流动",
+                  key: "2-0-3",
+                  routekey: "model/EcopathPNG",
                   icon: ({ selected }) => (selected ? <CreditCardFilled /> : <CalendarOutlined />),
                 },
               ],
@@ -130,13 +135,41 @@ const App = (props) => {
           // icon: <AliwangwangOutlined />,
           children: [
             {
-              title: "leaf",
+              title: "生物量动态变化",
               key: "0-1-0",
+              routekey:"/model/EcoSim",
               icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
             },
             {
-              title: "leaf",
+              title: "生物量随时间变化",
               key: "0-1-1",
+              routekey:"/model/EcoSimPNG",
+              icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
+            },
+            
+          ],
+        },
+        {
+          title: "Ecospace",
+          key: "0-5",
+          // icon: <AliwangwangOutlined />,
+          children: [
+            {
+              title: "初级生产能流",
+              key: "0-5-0",
+              routekey:"/model/Ecospace1",
+              icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
+            },
+            {
+              title: "碎屑的能流",
+              key: "0-5-1",
+              routekey:"/model/Ecospace2",
+              icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
+            },
+            {
+              title: "综合能流",
+              key: "0-5-2",
+              routekey:"/model/Ecospace3",
               icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
             },
           ],
