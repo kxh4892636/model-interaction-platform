@@ -9,10 +9,10 @@
  */
 import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
-import { mkdirSync, unlinkSync } from "fs";
 import { datasetService } from "./dataset_service";
 import { deleteFolder } from "../utils/tools/fs_action";
 import { prisma } from "../utils/tools/prisma";
+import { mkdir, unlink } from "fs/promises";
 
 /**
  * create project
@@ -37,7 +37,7 @@ const createProject = async (title: string) => {
       tags: [],
     },
   });
-  mkdirSync(dataFoldURL + path);
+  await mkdir(dataFoldURL + path);
   return { status: "success", content: projectID };
 };
 
@@ -192,7 +192,7 @@ const updateProjectInfo = async (
         id: projectInfo.image,
       },
     });
-    unlinkSync(dataFoldURL + imageInfo!.path);
+    await unlink(dataFoldURL + imageInfo!.path);
   } else;
 
   await prisma.project.update({
@@ -223,7 +223,7 @@ const deleteProject = async (projectID: string) => {
     const imageInfo = await prisma.data.findUnique({ where: { id: imageKey } });
     const imagePath = imageInfo!.path;
     await prisma.data.delete({ where: { id: imageKey } });
-    unlinkSync(dataFoldURL + imagePath);
+    await unlink(dataFoldURL + imagePath);
   } else;
   // delete the dataset
   const datasetIDs = info.data;

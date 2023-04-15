@@ -35,3 +35,11 @@ export type ServerData = {
   input: boolean;
   transformNum: string;
 };
+
+export type ServerModel = {
+  id: string;
+  pids: string[];
+  is_running: boolean;
+  progress: number[];
+  dataset: string;
+};

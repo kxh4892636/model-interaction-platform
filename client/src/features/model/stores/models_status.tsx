@@ -30,7 +30,7 @@ interface ModelStatus {
   datasetKey: string | null;
   percent: number;
   intervalStore: NodeJS.Timer | null;
-  pid: number | null;
+  modelID: number | null;
 }
 
 interface ModelStatusStore {
@@ -51,7 +51,7 @@ interface ModelStatusStore {
       | "datasetKey"
       | "percent"
       | "intervalStore"
-      | "pid",
+      | "modelID",
     value: string | string[] | boolean | number | NodeJS.Timer | null
   ) => void;
   removeModelStatus: (model: string) => void;

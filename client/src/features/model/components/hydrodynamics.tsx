@@ -16,7 +16,6 @@ import {
   PanelToolContainer,
   PanelToolsContainer,
 } from "../../../components/layout";
-import { useData } from "../../../hooks";
 import { useLayersStore } from "../../../stores/layers_store";
 import { Layer } from "../../../types";
 import axios from "axios";
@@ -56,7 +55,6 @@ interface AppProps {
 export const Hydrodynamics = ({ model }: AppProps) => {
   const layers = useLayersStore((state) => state.layers);
   const options: SelectProps["options"] = createSelectOptions(layers.data);
-  const dataActions = useData();
   const modelStatus = useModelsStatus((state) => state.modelStatus);
   const addModelStatus = useModelsStatus((state) => state.addModelStatus);
   const getModelStatus = useModelsStatus((state) => state.getModelStatus);
@@ -66,32 +64,45 @@ export const Hydrodynamics = ({ model }: AppProps) => {
   const setIsSpinning = useProjectStatusStore((state) => state.setIsSpinning);
   const projectKey = useProjectStatusStore((state) => state.key);
 
-  const getPercent = (key: string) => {
+  const getPercent = (modelID: string) => {
     const percentInterval = setInterval(async () => {
-      // const dataInfo = await dataActions.getDataDetail(key);
-      // if (!dataInfo) {
-      //   clearInterval(percentInterval);
-      //   // currentModelStatus && clearInterval(currentModelStatus.intervalStore!);
-      //   removeModelStatus(model);
-      //   message.error("模型运行错误");
-      //   return;
-      // } else;
-      // const progress = dataInfo.progress;
-      // // stop model if failed to run model
-      // // update progress of model
-      // updateModelStatus(
-      //   model,
-      //   "percent",
-      //   ((Number(progress[0]) / Number(progress[1])) * 100).toFixed(2)
-      // );
-      // // add result if model is finished
-      // if (progress[0] === progress[1] && progress[1]) {
-      //   clearInterval(percentInterval);
-      //   removeModelStatus(model);
-      //   message.success("模型运行完毕", 10);
-      //   return;
-      // } else;
-    }, 2000);
+      const result = await axios({
+        method: "post",
+        baseURL: "http://localhost:3456/api/model/water",
+        data: {
+          action: "info",
+          modelID: modelID,
+        },
+      });
+      console.log(result.data);
+      if (result.data.status === "fail") {
+        axios({
+          method: "post",
+          baseURL: "http://localhost:3456/api/model/water",
+          data: {
+            action: "stop",
+            modelID: modelID,
+          },
+        }).then(() => {
+          message.error("模型停止运行", 10);
+          clearInterval(percentInterval);
+          // currentModelStatus && clearInterval(currentModelStatus.intervalStore!);
+          removeModelStatus(model);
+          return;
+        });
+      } else;
+      const progress = result.data.content.progress;
+      // stop model if failed to run model
+      // update progress of model
+      updateModelStatus(model, "percent", ((progress[0] / progress[1]) * 100).toFixed(2));
+      // add result if model is finished
+      if (!result.data.content.is_running) {
+        clearInterval(percentInterval);
+        removeModelStatus(model);
+        message.success("模型运行完毕", 10);
+        return;
+      } else;
+    }, 5000);
     updateModelStatus(model, "intervalStore", percentInterval);
   };
 
@@ -108,7 +119,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
       percent: 0,
       projKey: null,
       resultKeys: null,
-      pid: null,
+      modelID: null,
       datasetKey: null,
       title: "",
     });
@@ -189,7 +200,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                     clearInterval(currentModelStatus.intervalStore!);
                     updateModelStatus(model, "intervalStore", null);
                     updateModelStatus(model, "percent", 0);
-                    updateModelStatus(model, "pid", null);
+                    updateModelStatus(model, "modelID", null);
                     updateModelStatus(model, "hydrodynamicsParamKeys", []);
                     updateModelStatus(model, "sandParamKeys", []);
                     updateModelStatus(model, "qualityParamKeys", []);
@@ -200,8 +211,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                       baseURL: "http://localhost:3456/api/model/water",
                       data: {
                         action: "stop",
-                        datasetID: currentModelStatus.datasetKey,
-                        pid: currentModelStatus.pid,
+                        modelID: currentModelStatus.modelID,
                       },
                     }).then(() => {
                       message.error("模型停止运行", 10);
@@ -221,10 +231,10 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                     }).then((response) => {
                       if (response.data.status === "success") {
                         updateModelStatus(model, "datasetKey", response.data.content[0]);
-                        updateModelStatus(model, "pid", response.data.content[1]);
+                        updateModelStatus(model, "modelID", response.data.content[1]);
                         updateModelStatus(model, "resultKeys", response.data.content[2]);
                         updateModelStatus(model, "isRunning", true);
-                        getPercent(response.data.content[2][0]);
+                        getPercent(response.data.content[1]);
                         message.success("模型开始运行", 10);
                       } else {
                         message.error("模型输入参数错误", 10);

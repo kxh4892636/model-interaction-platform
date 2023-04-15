@@ -67,19 +67,18 @@ const main = async () => {
   //   },
   // });
   // await prisma.$queryRaw`UPDATE data SET data = replace(data,'/temp/','/case/hydrodynamics_result/') WHERE temp = true`;
-  // await prisma.data.deleteMany({});
-  // await prisma.dataset.deleteMany({});
-  // await prisma.project.deleteMany({});
-  // prisma.$queryRaw``;
-  // const data = await prisma.data.findMany({});
-  // const dataset = await prisma.dataset.findMany();
-  // const project = await prisma.project.findMany();
-  // console.log(project);
-  // console.log(dataset);
-  // console.log(data);
-  // console.log(project.length);
-  // console.log(dataset.length);
-  // console.log(data.length);
+  await prisma.data.deleteMany({});
+  await prisma.dataset.deleteMany({});
+  await prisma.project.deleteMany({});
+  const data = await prisma.data.findMany({});
+  const dataset = await prisma.dataset.findMany();
+  const project = await prisma.project.findMany();
+  console.log(project);
+  console.log(dataset);
+  console.log(data);
+  console.log(project.length);
+  console.log(dataset.length);
+  console.log(data.length);
   // npx ts-node prisma.ts
 };
 

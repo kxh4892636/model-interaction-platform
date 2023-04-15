@@ -60,17 +60,19 @@ const water = async (req: Request, res: Response) => {
         res
       );
     } else if (type === "stop") {
-      const result = await modelService.stopModel(
-        req.body.datasetID as string,
-        req.body.pid as string,
-        res
-      );
+      const result = await modelService.stopModel(req.body.modelID as string);
+      res.status(200).json(result);
+    } else if (type === "info") {
+      const result = await modelService.getModel(req.body.modelID as string);
+      res.status(200).json(result);
     }
   } catch (error) {
+    const type = req.body.action;
     if (error instanceof Error) {
       console.log(error.message);
-
-      res.status(200).json({ status: "fail", content: error.message });
+      if (type === "info" || type === "stop") {
+        res.status(200).json({ status: "fail", content: error.message });
+      } else;
     } else;
   }
 };

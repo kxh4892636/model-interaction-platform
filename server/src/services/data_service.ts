@@ -13,8 +13,8 @@ import { dataFoldURL } from "../config/global_data";
 import { execSync } from "child_process";
 import { basename, dirname, resolve } from "path";
 import { deleteSelectFilesInFolder } from "../utils/tools/fs_action";
-import { lstatSync, readFileSync, unlinkSync } from "fs";
 import { prisma } from "../utils/tools/prisma";
+import { lstat, readFile, unlink } from "fs/promises";
 
 const getDetail = async (id: string) => {
   const info = await prisma.data.findUnique({
@@ -59,7 +59,7 @@ const getJSON = async (id: string) => {
   });
   if (!info) throw new Error("can't find data by id");
   const filePath = dataFoldURL + info.path;
-  const buffer = readFileSync(filePath).toString();
+  const buffer = await readFile(filePath).toString();
   const json = JSON.parse(buffer);
   return { status: "success", content: json };
 };
@@ -299,9 +299,9 @@ const deleteData = async (dataID: string) => {
   // delete the record
   await prisma.data.delete({ where: { id: dataID } });
   // delete origin file path
-  unlinkSync(path);
+  await unlink(path);
   // delete transform file path
-  if (lstatSync(transformPath).isFile()) {
+  if ((await lstat(transformPath)).isFile()) {
     await deleteSelectFilesInFolder(dirname(transformPath), [timeStamp]);
   } else {
     await deleteSelectFilesInFolder(transformPath, [timeStamp]);
