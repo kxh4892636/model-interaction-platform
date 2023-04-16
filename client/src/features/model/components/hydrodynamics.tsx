@@ -74,7 +74,6 @@ export const Hydrodynamics = ({ model }: AppProps) => {
           modelID: modelID,
         },
       });
-      console.log(result.data);
       if (result.data.status === "fail") {
         axios({
           method: "post",
@@ -102,7 +101,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
         message.success("模型运行完毕", 10);
         return;
       } else;
-    }, 5000);
+    }, 10000);
     updateModelStatus(model, "intervalStore", percentInterval);
   };
 

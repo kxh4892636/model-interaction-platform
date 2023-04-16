@@ -285,6 +285,14 @@ const deleteData = async (dataID: string) => {
   const path = dataFoldURL + dataInfo.path;
   const transformPath = dataFoldURL + dataInfo.transformPath[0];
   const timeStamp = dataInfo.timeStamp;
+  // delete origin file path
+  await unlink(path);
+  // delete transform file path
+  if ((await lstat(transformPath)).isFile()) {
+    await deleteSelectFilesInFolder(dirname(transformPath), [timeStamp]);
+  } else {
+    await deleteSelectFilesInFolder(transformPath, [timeStamp]);
+  }
   // update the dataset record
   const datasetInfo = await prisma.dataset.findUnique({
     where: { id: dataInfo.dataset },
@@ -298,14 +306,6 @@ const deleteData = async (dataID: string) => {
   });
   // delete the record
   await prisma.data.delete({ where: { id: dataID } });
-  // delete origin file path
-  await unlink(path);
-  // delete transform file path
-  if ((await lstat(transformPath)).isFile()) {
-    await deleteSelectFilesInFolder(dirname(transformPath), [timeStamp]);
-  } else {
-    await deleteSelectFilesInFolder(transformPath, [timeStamp]);
-  }
 
   return { status: "success", content: "delete succeed" };
 };

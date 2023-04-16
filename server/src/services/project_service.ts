@@ -222,9 +222,11 @@ const deleteProject = async (projectID: string) => {
   if (imageKey) {
     const imageInfo = await prisma.data.findUnique({ where: { id: imageKey } });
     const imagePath = imageInfo!.path;
-    await prisma.data.delete({ where: { id: imageKey } });
     await unlink(dataFoldURL + imagePath);
+    await prisma.data.delete({ where: { id: imageKey } });
   } else;
+  // delete the folder of project
+  await deleteFolder(dataFoldURL + info.path);
   // delete the dataset
   const datasetIDs = info.data;
   for (let index = 0; index < datasetIDs.length; index++) {
@@ -234,8 +236,6 @@ const deleteProject = async (projectID: string) => {
   // delete the record of project
   await prisma.project.delete({ where: { id: projectID } });
   console.log(await readdir(dataFoldURL + info.path));
-  await deleteFolder(dataFoldURL + info.path);
-  // delete the folder of project
   return { status: "success", content: "delete project succeed" };
 };
 

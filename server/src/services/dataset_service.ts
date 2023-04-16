@@ -87,6 +87,8 @@ const deleteDataset = async (datasetID: string) => {
   if (!datasetInfo) throw new Error("can't find data by id");
   else;
   const path = dataFoldURL + datasetInfo.path;
+  // delete origin file path
+  deleteFolder(path);
   // update project
   const projectInfo = await prisma.project.findUnique({
     where: { id: datasetInfo!.project },
@@ -100,8 +102,6 @@ const deleteDataset = async (datasetID: string) => {
   // delete the record
   await prisma.data.deleteMany({ where: { dataset: datasetID } });
   await prisma.dataset.delete({ where: { id: datasetID } });
-  // delete origin file path
-  deleteFolder(path);
   return { status: "success", content: "delete succeed" };
 };
 

@@ -73,7 +73,6 @@ export const SandModelPanel = ({ model }: SandModelPanelProps) => {
           modelID: modelID,
         },
       });
-      console.log(result.data);
       if (result.data.status === "fail") {
         axios({
           method: "post",
@@ -101,7 +100,7 @@ export const SandModelPanel = ({ model }: SandModelPanelProps) => {
         message.success("模型运行完毕", 10);
         return;
       } else;
-    }, 5000);
+    }, 10000);
     updateModelStatus(model, "intervalStore", percentInterval);
   };
 

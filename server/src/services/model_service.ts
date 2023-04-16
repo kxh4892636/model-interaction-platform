@@ -454,6 +454,16 @@ const runQuality = async (
     let currentCount = 0;
     // create the record fo result
     let resultIDs: string[] = [];
+    const titles: string[] = [
+      "溶解氧",
+      "BOD",
+      "浮游植物",
+      "氨氮",
+      "硝酸盐氮",
+      "有机氮",
+      "无机磷",
+      "有机磷",
+    ];
     for (let index = 0; index < resultNum; index++) {
       const id = crypto.randomUUID();
       await prisma.data.create({
@@ -461,7 +471,7 @@ const runQuality = async (
           path: resultFolder + `/tnd${index + 1}.dat`,
           id: id,
           style: "quality",
-          title: `tnd${index}`,
+          title: `${index}_${titles[index]}`,
           type: "model",
           extent: extent!,
           dataset: datasetID,
@@ -488,7 +498,7 @@ const runQuality = async (
     await prisma.model_info.update({
       where: { id: modelID },
       data: {
-        progress: [currentCount, num * 5 + 3 * num * resultNum + 1],
+        progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
         pids: pids,
       },
     });
@@ -497,7 +507,7 @@ const runQuality = async (
       await prisma.model_info.update({
         where: { id: modelID },
         data: {
-          progress: [currentCount, num * 5 + 3 * num * resultNum + 1],
+          progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
           pids: [],
         },
       });
@@ -512,7 +522,7 @@ const runQuality = async (
         await prisma.model_info.update({
           where: { id: modelID },
           data: {
-            progress: [currentCount, num * 5 + 3 * num * resultNum + 1],
+            progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
             pids: pids,
           },
         });
@@ -554,7 +564,7 @@ const runQuality = async (
             await prisma.model_info.update({
               where: { id: modelID },
               data: {
-                progress: [currentCount, num * 5 + 3 * num * resultNum + 1],
+                progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
                 pids: pids,
               },
             });
@@ -595,12 +605,12 @@ const runQuality = async (
           pids.push(promise.pid!.toString());
           promise
             .then(async () => {
-              currentCount = currentCount + 1;
+              currentCount = currentCount + 3;
               pids = pids.filter((pid) => pid !== promise.pid!.toString());
               await prisma.model_info.update({
                 where: { id: modelID },
                 data: {
-                  progress: [currentCount, num * 5 + 3 * num * resultNum + 1],
+                  progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
                   pids: pids,
                 },
               });
@@ -611,14 +621,6 @@ const runQuality = async (
               await stopModel(modelID);
             });
           await promise;
-          currentCount = currentCount + 3;
-          await prisma.model_info.update({
-            where: { id: modelID },
-            data: {
-              progress: [currentCount, num * 5 + 3 * num * resultNum + 1],
-              pids: pids,
-            },
-          });
         }
       }
       // update record
@@ -638,7 +640,7 @@ const runQuality = async (
       await prisma.model_info.update({
         where: { id: modelID },
         data: {
-          progress: [currentCount, num * 5 + 3 * num * resultNum + 1],
+          progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
           pids: pids,
           is_running: false,
         },
@@ -718,7 +720,7 @@ const runSand = async (
         path: resultFolder + `/snd.dat`,
         id: sndID,
         style: "snd",
-        title: `snd`,
+        title: `泥沙`,
         type: "model",
         extent: extent!,
         dataset: datasetID,
@@ -731,7 +733,7 @@ const runSand = async (
         path: resultFolder + `/yuji.dat`,
         id: yujiID,
         style: "yuji",
-        title: `yuji`,
+        title: `淤积`,
         type: "model",
         extent: extent!,
         dataset: datasetID,
