@@ -8,7 +8,7 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import crypto from "crypto";
-import { copyFolder, deleteFolder } from "../utils/tools/fs_action";
+import { copyFolder, deleteFolder } from "../utils/tools/fs_extra";
 import { dataFoldURL } from "../config/global_data";
 import { prisma } from "../utils/tools/prisma";
 

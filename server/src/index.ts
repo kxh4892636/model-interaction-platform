@@ -14,7 +14,6 @@ import { projectRoute } from "./routes/project_route";
 import { datasetRoute } from "./routes/dataset_route";
 import { dataRoute } from "./routes/data_route";
 import { modelRoute } from "./routes/model_route";
-import { copyFile, copyFileSync } from "fs";
 
 const app = express();
 const port = 3456;

@@ -10,7 +10,7 @@ import {
   deleteFolder,
   deleteFolderFiles,
   deleteSelectFilesInFolder,
-} from "./utils/tools/fs_action";
+} from "./utils/tools/fs_extra";
 import { log } from "console";
 
 const prisma = new PrismaClient();

@@ -2,13 +2,15 @@ import { Request, Response } from "express";
 import { dataFoldURL } from "../config/global_data";
 import path, { dirname, resolve } from "path";
 import crypto from "crypto";
-import { spawn, execSync } from "child_process";
-import { copySelectFilesInFolder } from "../utils/tools/fs_action";
+import { spawn } from "child_process";
+import { copySelectFilesInFolder } from "../utils/tools/fs_extra";
 import { query } from "../utils/ewe/importEWE";
 import { CRUDdatabase, HandleReturn, FlowDiagram, ModifyDatabase } from "../utils/ewe/exportEWE";
 import { datasetService } from "./dataset_service";
 import { prisma } from "../utils/tools/prisma";
 import { copyFile, lstat, readFile, rename } from "fs/promises";
+import { execa } from "execa";
+import ADODB from "node-adodb";
 
 // 计算结果
 const R_test2 = async (req: Request, res: Response) => {
@@ -24,7 +26,9 @@ const R_test2 = async (req: Request, res: Response) => {
     const Fleet = req.body.Fleet;
     // 全部封到exportEWE中去
     await CRUDdatabase(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num);
-    const stdout = execSync(`Rscript ./src/utils/ewe/EcoPath.R '${num}'`, { windowsHide: true });
+    const { stdout } = await execa(`Rscript ./src/utils/ewe/EcoPath.R '${num}'`, {
+      windowsHide: true,
+    });
     // stdout.stdout!.on('end',()=>{
     //   // after
     // })
@@ -50,7 +54,9 @@ const R_test2 = async (req: Request, res: Response) => {
     const Fleet = req.body.Fleet;
     console.log("此次修改的数据为", ModifyData);
     await ModifyDatabase(ModifyData, num, Group, Fleet);
-    const stdout = execSync(`Rscript ./src/utils/ewe/EcoPath.R '${num}'`, { windowsHide: true });
+    const { stdout } = await execa(`Rscript ./src/utils/ewe/EcoPath.R '${num}'`, {
+      windowsHide: true,
+    });
     // [1] TRUE 长度为10 后面还跟着2个空格 10*n-1  5个最后为49  加上“[1] ” 从54开始
     // 如果图标那一块真的要使用图片进行传输的话，多了“pdf 2” 所以要从65开始
     let data = JSON.parse(stdout.toString().slice(54));
@@ -75,7 +81,6 @@ const R_test2 = async (req: Request, res: Response) => {
 
 // 从模型文件按中导入
 const R_test3 = async (req: Request, res: Response) => {
-  const ADODB = require("node-adodb");
   const info = await prisma.data.findUnique({ where: { id: req.body.id } });
   const connection = ADODB.open(
     `Provider=Microsoft.ACE.OLEDB.12.0;Data Source=${

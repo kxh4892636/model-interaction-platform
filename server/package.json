@@ -2,9 +2,11 @@
   "name": "server",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@prisma/client": "^4.10.1",
     "cors": "^2.8.5",
+    "execa": "^7.1.1",
     "express": "^4.18.2",
     "helmet": "^6.0.1",
     "jsonwebtoken": "^9.0.0",
@@ -26,7 +28,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
-    "start": "nodemon src/index.ts",
+    "start": "nodemon  src/index.ts",
     "start:prod": "pm2 start dist/index.js",
     "stop:prod": "pm2 stop dist/index.js"
   }

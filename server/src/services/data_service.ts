@@ -12,7 +12,7 @@ import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
 import { execSync } from "child_process";
 import { basename, dirname, resolve } from "path";
-import { deleteSelectFilesInFolder } from "../utils/tools/fs_action";
+import { deleteSelectFilesInFolder } from "../utils/tools/fs_extra";
 import { prisma } from "../utils/tools/prisma";
 import { lstat, readFile, unlink } from "fs/promises";
 

@@ -10,7 +10,7 @@
 import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
 import { datasetService } from "./dataset_service";
-import { deleteFolder } from "../utils/tools/fs_action";
+import { deleteFolder } from "../utils/tools/fs_extra";
 import { prisma } from "../utils/tools/prisma";
 import { mkdir, unlink } from "fs/promises";
 
