@@ -45,6 +45,12 @@ const App = (props) => {
           routekey: "model/EWEModel",
         },
         {
+          title: "模型计算",
+          key: "2-0-1",
+          routekey: "model/EcopathOutput",
+          // icon: ({ selected }) => (selected ? <CreditCardFilled /> : <CalendarOutlined />),
+        },
+        {
           title: "Ecopath",
           key: "0-3",
           // icon: <RightCircleOutlined />,
@@ -108,12 +114,6 @@ const App = (props) => {
               icon: <Loading3QuartersOutlined />,
               children: [
                 {
-                  title: "基本参数计算",
-                  key: "2-0-1",
-                  routekey: "model/EcopathOutput",
-                  icon: ({ selected }) => (selected ? <CreditCardFilled /> : <CalendarOutlined />),
-                },
-                {
                   title: "食物网结构",
                   key: "2-0-2",
                   routekey: "model/FlowDiagram",
@@ -137,16 +137,15 @@ const App = (props) => {
             {
               title: "生物量动态变化",
               key: "0-1-0",
-              routekey:"/model/EcoSim",
+              routekey: "/model/EcoSim",
               icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
             },
             {
               title: "生物量随时间变化",
               key: "0-1-1",
-              routekey:"/model/EcoSimPNG",
+              routekey: "/model/EcoSimPNG",
               icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
             },
-            
           ],
         },
         {
@@ -157,19 +156,19 @@ const App = (props) => {
             {
               title: "初级生产能流",
               key: "0-5-0",
-              routekey:"/model/Ecospace1",
+              routekey: "/model/Ecospace1",
               icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
             },
             {
               title: "碎屑的能流",
               key: "0-5-1",
-              routekey:"/model/Ecospace2",
+              routekey: "/model/Ecospace2",
               icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
             },
             {
               title: "综合能流",
               key: "0-5-2",
-              routekey:"/model/Ecospace3",
+              routekey: "/model/Ecospace3",
               icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
             },
           ],
@@ -182,7 +181,7 @@ const App = (props) => {
       <Tree
         showIcon
         // 默认展开指定的树节点
-        defaultExpandedKeys={["0-0-1", "2-0", "water"]}
+        defaultExpandedKeys={["0-2", "water"]}
         // 默认选中复选框的树节点
         // defaultSelectedKeys={['0-0-0']}
         switcherIcon={<DownOutlined />}

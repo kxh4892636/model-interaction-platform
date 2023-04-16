@@ -12,7 +12,7 @@ import { dataFoldURL } from "../config/global_data";
 import { datasetService } from "./dataset_service";
 import { deleteFolder } from "../utils/tools/fs_extra";
 import { prisma } from "../utils/tools/prisma";
-import { mkdir, unlink } from "fs/promises";
+import { lstat, mkdir, readdir, rmdir, unlink } from "fs/promises";
 
 /**
  * create project
@@ -233,8 +233,9 @@ const deleteProject = async (projectID: string) => {
   }
   // delete the record of project
   await prisma.project.delete({ where: { id: projectID } });
-  // delete the folder of project
+  console.log(await readdir(dataFoldURL + info.path));
   await deleteFolder(dataFoldURL + info.path);
+  // delete the folder of project
   return { status: "success", content: "delete project succeed" };
 };
 

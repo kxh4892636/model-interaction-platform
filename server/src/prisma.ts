@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
-import fs from "fs";
 import path, { dirname } from "path";
 import { title } from "process";
 import { dataFoldURL } from "./config/global_data";
@@ -12,6 +11,7 @@ import {
   deleteSelectFilesInFolder,
 } from "./utils/tools/fs_extra";
 import { log } from "console";
+import { rmdir } from "fs/promises";
 
 const prisma = new PrismaClient();
 

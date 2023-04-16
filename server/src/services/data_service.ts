@@ -10,11 +10,11 @@
 
 import crypto from "crypto";
 import { dataFoldURL } from "../config/global_data";
-import { execSync } from "child_process";
 import { basename, dirname, resolve } from "path";
 import { deleteSelectFilesInFolder } from "../utils/tools/fs_extra";
 import { prisma } from "../utils/tools/prisma";
 import { lstat, readFile, unlink } from "fs/promises";
+import { execa } from "execa";
 
 const getDetail = async (id: string) => {
   const info = await prisma.data.findUnique({
@@ -158,13 +158,13 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
     return id;
   } else;
   // get type and style of data
-  const output = execSync(
+  const { stdout } = await execa(
     `conda activate gis && python ${
       resolve("./").split("\\").join("/") + "/src/utils/tools/get_data_type_and_style.py"
     } ${filePath}`,
     { windowsHide: true }
   );
-  const [type, style] = output.toString().trimEnd().split(",");
+  const [type, style] = stdout.toString().trimEnd().split(",");
   let transform: string[] = [];
   let extent: number[] = [];
   // generate transform filed
@@ -181,7 +181,7 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
       .replace(/(?<=\d*)\\input/, "\\transform\\mesh");
     transform.push(pngPath.split("\\").join("/").split(dataFoldURL)[1]);
     // generate csv from mesh
-    execSync(
+    await execa(
       `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
         "/src/utils/water/mesh2csv.py" +
@@ -193,7 +193,7 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
       { windowsHide: true }
     );
     // generate mask from csv
-    execSync(
+    await execa(
       `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
         "/src/utils/water/mesh2mask.py" +
@@ -205,7 +205,7 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
       { windowsHide: true }
     );
     // generate png from csv and mask
-    const output = execSync(
+    const { stdout } = await execa(
       `conda activate gis && python ${
         resolve("./").split("\\").join("/") +
         "/src/utils/water/mesh2png.py" +
@@ -219,7 +219,7 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
       { windowsHide: true }
     );
     // get extent of mesh
-    extent = output
+    extent = stdout
       .toString()
       .trim()
       .replace("(", "")

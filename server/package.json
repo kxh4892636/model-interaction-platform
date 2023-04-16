@@ -29,7 +29,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
     "start": "nodemon  src/index.ts",
-    "start:prod": "pm2 start dist/index.js",
-    "stop:prod": "pm2 stop dist/index.js"
+    "start:prod": "pm2 start dist/index.js --node-args=--experimental-specifier-resolution=node",
+    "stop:prod": "pm2 stop dist/index.js --node-args=--experimental-specifier-resolution=node"
   }
 }
