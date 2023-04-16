@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { dataFoldURL } from "../config/global_data";
 import path, { dirname, resolve } from "path";
 import crypto from "crypto";
-import { spawn } from "child_process";
 import { copySelectFilesInFolder } from "../utils/tools/fs_extra";
 import { query } from "../utils/ewe/importEWE";
 import { CRUDdatabase, HandleReturn, FlowDiagram, ModifyDatabase } from "../utils/ewe/exportEWE";
@@ -170,8 +169,9 @@ const runHydrodynamics = async (
     let num = Number(paramContent[11].split(/\s/)[0]) * 24;
     let currentCount = 0;
     // run model
+    // NOTE execa
     const modelPath = dataFoldURL + datasetInfo!.path + "/model/elcirc.exe";
-    const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+    const outputModel = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,
       windowsHide: true,
     });
@@ -183,7 +183,7 @@ const runHydrodynamics = async (
         pids: pids,
       },
     });
-    outputModel.stderr.on("data", async () => {
+    outputModel.on("error", async () => {
       console.log("model failed");
       await prisma.model_info.update({
         where: { id: modelID },
@@ -194,7 +194,7 @@ const runHydrodynamics = async (
       });
       await stopModel(modelID);
     });
-    outputModel.stdout.on("data", async (chunk) => {
+    outputModel.stdout!.on("data", async (chunk) => {
       const content = chunk.toString();
       console.log(content);
       if (content.includes("nt,it")) {
@@ -215,7 +215,7 @@ const runHydrodynamics = async (
       pids.shift();
       console.log("model finished");
       // uvet2txt
-      const result = spawn(
+      const result = execa(
         `conda activate gis && python ${
           path.resolve("./").split("\\").join("/") +
           "/src/utils/water/uvet2txt.py" +
@@ -236,7 +236,7 @@ const runHydrodynamics = async (
         { shell: true, windowsHide: true }
       );
       pids.push(result.pid!.toString());
-      result.stderr.on("data", async () => {
+      result.on("error", async () => {
         console.log("model failed");
         await stopModel(modelID);
       });
@@ -254,7 +254,7 @@ const runHydrodynamics = async (
         });
         console.log("uvet2txt finished");
         // uvet2description
-        const result = spawn(
+        const result = execa(
           `conda activate gis && python ${
             path.resolve("./").split("\\").join("/") +
             "/src/utils/water/uvet2description.py" +
@@ -276,7 +276,7 @@ const runHydrodynamics = async (
           { shell: true, windowsHide: true }
         );
         pids.push(result.pid!.toString());
-        result.stderr.on("data", async () => {
+        result.on("error", async () => {
           console.log("model failed");
           await stopModel(modelID);
         });
@@ -311,16 +311,16 @@ const runHydrodynamics = async (
             resolve("./").split("\\").join("/") + "/src/utils/process/process.exe";
           const descriptionPath =
             dataFoldURL + datasetInfo!.path + "/transform/water/description_" + timeStamp + ".json";
-          const output = spawn(processPath + " " + descriptionPath, {
+          const output = execa(processPath + " " + descriptionPath, {
             shell: true,
             windowsHide: true,
           });
           pids.push(output.pid!.toString());
-          result.stderr.on("data", async () => {
+          result.on("error", async () => {
             console.log("model failed");
             await stopModel(modelID);
           });
-          output.stdout?.on("data", async (chunk) => {
+          output.stdout!.on("data", async (chunk) => {
             const content = chunk.toString();
             console.log(content);
             if (content.includes("uvet")) {
@@ -480,7 +480,7 @@ const runQuality = async (
     });
     // run quality model
     const modelPath = dataFoldURL + datasetInfo!.path + "/model/quality.exe";
-    const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+    const outputModel = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,
       windowsHide: true,
     });
@@ -492,7 +492,7 @@ const runQuality = async (
         pids: pids,
       },
     });
-    outputModel.stderr.on("data", async () => {
+    outputModel.on("error", async () => {
       console.log("model failed");
       await prisma.model_info.update({
         where: { id: modelID },
@@ -503,7 +503,7 @@ const runQuality = async (
       });
       await stopModel(modelID);
     });
-    outputModel.stdout.on("data", async (chunk) => {
+    outputModel.stdout!.on("data", async (chunk) => {
       const content = chunk.toString();
       console.log(content);
       if (content.includes("time")) {
@@ -524,50 +524,33 @@ const runQuality = async (
       pids.shift();
       console.log("model finished");
       // tnd2txt
-      const tnd2txtPromise = async (index: number) => {
-        return new Promise((resolve, reject) => {
-          let stdout = "";
-          let stderr = "";
-          const cp = spawn(
-            `conda activate gis && python ${
-              path.resolve("./").split("\\").join("/") +
-              "/src/utils/water/tnd2txt.py" +
-              " " +
-              `${dataFoldURL}${datasetInfo!.path}/model/tnd${index + 1}.dat` +
-              " " +
-              `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
-              " " +
-              `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string).replace(
-                "gr3",
-                "csv"
-              )}` +
-              " " +
-              num +
-              " " +
-              timeStamp
-            }`,
-            { shell: true, windowsHide: true }
-          );
-          cp.stdout.on("data", function (chunk) {
-            stdout += chunk;
-          });
-          cp.stderr.on("data", function (chunk) {
-            stderr += chunk;
-          });
-          cp.on("close", function (code) {
-            if (code === 0) {
-              resolve(stdout);
-            } else {
-              reject(stderr);
-            }
-          });
-        });
-      };
       let promises = [];
       for (let i = 0; i < resultNum; i++) {
-        promises.push(
-          tnd2txtPromise(i).then(async () => {
+        const promise = execa(
+          `conda activate gis && python ${
+            path.resolve("./").split("\\").join("/") +
+            "/src/utils/water/tnd2txt.py" +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/model/tnd${i + 1}.dat` +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string).replace(
+              "gr3",
+              "csv"
+            )}` +
+            " " +
+            num +
+            " " +
+            timeStamp
+          }`,
+          { shell: true, windowsHide: true }
+        );
+        pids.push(promise.pid!.toString());
+        promise
+          .then(async () => {
             currentCount = currentCount + 1;
+            pids = pids.filter((pid) => pid !== promise.pid!.toString());
             await prisma.model_info.update({
               where: { id: modelID },
               data: {
@@ -577,7 +560,11 @@ const runQuality = async (
             });
             resolve("1");
           })
-        );
+          .catch(async () => {
+            console.log("model failed");
+            await stopModel(modelID);
+          });
+        promises.push(promise);
       }
       await Promise.all(promises).catch(async () => {
         console.log("model failed");
@@ -585,11 +572,9 @@ const runQuality = async (
       });
       console.log("tnd2txt finished");
       // tnd2png
-      const tnd2pngPromise = async (i: number, j: number) => {
-        return new Promise((resolve, reject) => {
-          let stdout = "";
-          let stderr = "";
-          const cp = spawn(
+      for (let i = 0; i < num; i++) {
+        for (let j = 0; j < resultNum; j++) {
+          const promise = execa(
             `conda activate gis && python ${
               path.resolve("./").split("\\").join("/") +
               "/src/utils/water/tnd2png.py" +
@@ -607,28 +592,25 @@ const runQuality = async (
             }`,
             { shell: true, windowsHide: true }
           );
-          cp.stdout.on("data", function (chunk) {
-            stdout += chunk;
-          });
-          cp.stderr.on("data", function (chunk) {
-            stderr += chunk;
-          });
-          cp.on("close", function (code) {
-            if (code === 0) {
-              resolve(stdout);
-            } else {
-              reject(stderr);
-            }
-          });
-        });
-      };
-      // tnd2png
-      for (let i = 0; i < num; i++) {
-        for (let j = 0; j < resultNum; j++) {
-          await tnd2pngPromise(i, j).catch(async () => {
-            console.log("model failed");
-            await stopModel(modelID);
-          });
+          pids.push(promise.pid!.toString());
+          promise
+            .then(async () => {
+              currentCount = currentCount + 1;
+              pids = pids.filter((pid) => pid !== promise.pid!.toString());
+              await prisma.model_info.update({
+                where: { id: modelID },
+                data: {
+                  progress: [currentCount, num * 5 + 3 * num * resultNum + 1],
+                  pids: pids,
+                },
+              });
+              resolve("1");
+            })
+            .catch(async () => {
+              console.log("model failed");
+              await stopModel(modelID);
+            });
+          await promise;
           currentCount = currentCount + 3;
           await prisma.model_info.update({
             where: { id: modelID },
@@ -766,7 +748,7 @@ const runSand = async (
     });
     // run quality model
     const modelPath = dataFoldURL + datasetInfo!.path + "/model/sand.exe";
-    const outputModel = spawn(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+    const outputModel = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,
       windowsHide: true,
     });
@@ -778,7 +760,7 @@ const runSand = async (
         pids: pids,
       },
     });
-    outputModel.stderr.on("data", async () => {
+    outputModel.on("error", async () => {
       console.log("model failed");
       await prisma.model_info.update({
         where: { id: modelID },
@@ -789,7 +771,7 @@ const runSand = async (
       });
       await stopModel(modelID);
     });
-    outputModel.stdout.on("data", async (chunk) => {
+    outputModel.stdout!.on("data", async (chunk) => {
       const content = chunk.toString();
       console.log(content);
       if (content.includes("SED")) {
@@ -810,172 +792,30 @@ const runSand = async (
       pids.shift();
       console.log("model finished");
       // tnd2txt
-      const p1 = new Promise((resolve, reject) => {
-        let stdout = "";
-        let stderr = "";
-        const cp = spawn(
-          `conda activate gis && python ${
-            path.resolve("./").split("\\").join("/") +
-            "/src/utils/water/sand2txt.py" +
-            " " +
-            `${dataFoldURL}${datasetInfo!.path}/model/snd.dat` +
-            " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
-            " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string)!.replace(
-              "gr3",
-              "csv"
-            )}` +
-            " " +
-            num +
-            " " +
-            timeStamp
-          }`,
-          { shell: true, windowsHide: true }
-        );
-        cp.stdout.on("data", function (chunk) {
-          stdout += chunk;
-        });
-        cp.stderr.on("data", function (chunk) {
-          stderr += chunk;
-        });
-        cp.on("close", function (code) {
-          if (code === 0) {
-            resolve(stdout);
-          } else {
-            reject(stderr);
-          }
-        });
-      });
-      const p2 = new Promise((resolve, reject) => {
-        let stdout = "";
-        let stderr = "";
-        const cp = spawn(
-          `conda activate gis && python ${
-            path.resolve("./").split("\\").join("/") +
-            "/src/utils/water/sand2txt.py" +
-            " " +
-            `${dataFoldURL}${datasetInfo!.path}/model/yuji.dat` +
-            " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
-            " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string)!.replace(
-              "gr3",
-              "csv"
-            )}` +
-            " " +
-            num +
-            " " +
-            timeStamp
-          }`,
-          { shell: true, windowsHide: true }
-        );
-        cp.stdout.on("data", function (chunk) {
-          stdout += chunk;
-        });
-        cp.stderr.on("data", function (chunk) {
-          stderr += chunk;
-        });
-        cp.on("close", function (code) {
-          if (code === 0) {
-            resolve(stdout);
-          } else {
-            reject(stderr);
-          }
-        });
-      });
-      await Promise.all([p1, p2]).catch(async () => {
-        console.log("model failed");
-        await stopModel(modelID);
-      });
-      currentCount = currentCount + 2;
-      await prisma.model_info.update({
-        where: { id: modelID },
-        data: {
-          progress: [currentCount, num * 5 + 3],
-          pids: pids,
-        },
-      });
-      console.log("sand2txt finished");
-      // sand2png
-      const snd2pngPromise = async (i: number) => {
-        return new Promise((resolve, reject) => {
-          let stdout = "";
-          let stderr = "";
-          const cp = spawn(
-            `conda activate gis && python ${
-              path.resolve("./").split("\\").join("/") +
-              "/src/utils/water/sand2png.py" +
-              " " +
-              `${dataFoldURL}${datasetInfo!.path}/transform/sand/snd_${timeStamp}_${i}.txt` +
-              " " +
-              `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
-              " " +
-              `${dataFoldURL}${
-                datasetInfo!.path
-              }/transform/mesh/${(meshFileName as string)!.replace("gr3", "shp")}`
-            }`,
-            { shell: true, windowsHide: true }
-          );
-          cp.stdout.on("data", function (chunk) {
-            stdout += chunk;
-          });
-          cp.stderr.on("data", function (chunk) {
-            stderr += chunk;
-          });
-          cp.on("close", function (code) {
-            if (code === 0) {
-              resolve(stdout);
-            } else {
-              reject(stderr);
-            }
-          });
-        });
-      };
-      const yuji2pngPromise = async (i: number) => {
-        return new Promise((resolve, reject) => {
-          let stdout = "";
-          let stderr = "";
-          const cp = spawn(
-            `conda activate gis && python ${
-              path.resolve("./").split("\\").join("/") +
-              "/src/utils/water/sand2png.py" +
-              " " +
-              `${dataFoldURL}${datasetInfo!.path}/transform/sand/yuji_${timeStamp}_${i}.txt` +
-              " " +
-              `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
-              " " +
-              `${dataFoldURL}${
-                datasetInfo!.path
-              }/transform/mesh/${(meshFileName as string)!.replace("gr3", "shp")}`
-            }`,
-            { shell: true, windowsHide: true }
-          );
-          cp.stdout.on("data", function (chunk) {
-            stdout += chunk;
-          });
-          cp.stderr.on("data", function (chunk) {
-            stderr += chunk;
-          });
-          cp.on("close", function (code) {
-            if (code === 0) {
-              resolve(stdout);
-            } else {
-              reject(stderr);
-            }
-          });
-        });
-      };
-      for (let index = 0; index < num; index++) {
-        await yuji2pngPromise(index).catch(async () => {
-          console.log("model failed");
-          await stopModel(modelID);
-        });
-        await snd2pngPromise(index).catch(async () => {
-          console.log("model failed");
-          await stopModel(modelID);
-        });
-        currentCount = currentCount + 2;
+      const p1 = execa(
+        `conda activate gis && python ${
+          path.resolve("./").split("\\").join("/") +
+          "/src/utils/water/sand2txt.py" +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/model/snd.dat` +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string)!.replace(
+            "gr3",
+            "csv"
+          )}` +
+          " " +
+          num +
+          " " +
+          timeStamp
+        }`,
+        { shell: true, windowsHide: true }
+      );
+      pids.push(p1.pid!.toString());
+      p1.then(async () => {
+        currentCount = currentCount + 1;
+        pids = pids.filter((pid) => pid !== p1.pid!.toString());
         await prisma.model_info.update({
           where: { id: modelID },
           data: {
@@ -983,6 +823,120 @@ const runSand = async (
             pids: pids,
           },
         });
+        resolve("1");
+      }).catch(async () => {
+        console.log("model failed");
+        await stopModel(modelID);
+      });
+      const p2 = execa(
+        `conda activate gis && python ${
+          path.resolve("./").split("\\").join("/") +
+          "/src/utils/water/sand2txt.py" +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/model/yuji.dat` +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+          " " +
+          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string)!.replace(
+            "gr3",
+            "csv"
+          )}` +
+          " " +
+          num +
+          " " +
+          timeStamp
+        }`,
+        { shell: true, windowsHide: true }
+      );
+      pids.push(p2.pid!.toString());
+      p2.then(async () => {
+        currentCount = currentCount + 1;
+        pids = pids.filter((pid) => pid !== p2.pid!.toString());
+        await prisma.model_info.update({
+          where: { id: modelID },
+          data: {
+            progress: [currentCount, num * 5 + 3],
+            pids: pids,
+          },
+        });
+        resolve("1");
+      }).catch(async () => {
+        console.log("model failed");
+        await stopModel(modelID);
+      });
+      await Promise.all([p1, p2]).catch(async () => {
+        console.log("model failed");
+        await stopModel(modelID);
+      });
+      console.log("sand2txt finished");
+      // sand2png
+      for (let index = 0; index < num; index++) {
+        const p1 = execa(
+          `conda activate gis && python ${
+            path.resolve("./").split("\\").join("/") +
+            "/src/utils/water/sand2png.py" +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/sand/snd_${timeStamp}_${index}.txt` +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string)!.replace(
+              "gr3",
+              "shp"
+            )}`
+          }`,
+          { shell: true, windowsHide: true }
+        );
+        pids.push(p1.pid!.toString());
+        p1.then(async () => {
+          currentCount = currentCount + 1;
+          pids = pids.filter((pid) => pid !== p1.pid!.toString());
+          await prisma.model_info.update({
+            where: { id: modelID },
+            data: {
+              progress: [currentCount, num * 5 + 3],
+              pids: pids,
+            },
+          });
+          resolve("1");
+        }).catch(async () => {
+          console.log("model failed");
+          await stopModel(modelID);
+        });
+        await p1;
+        const p2 = execa(
+          `conda activate gis && python ${
+            path.resolve("./").split("\\").join("/") +
+            "/src/utils/water/sand2png.py" +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/sand/yuji_${timeStamp}_${index}.txt` +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
+            " " +
+            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string)!.replace(
+              "gr3",
+              "shp"
+            )}`
+          }`,
+          { shell: true, windowsHide: true }
+        );
+        pids.push(p2.pid!.toString());
+        p2.then(async () => {
+          currentCount = currentCount + 1;
+          pids = pids.filter((pid) => pid !== p2.pid!.toString());
+          await prisma.model_info.update({
+            where: { id: modelID },
+            data: {
+              progress: [currentCount, num * 5 + 3],
+              pids: pids,
+            },
+          });
+          resolve("1");
+        }).catch(async () => {
+          console.log("model failed");
+          await stopModel(modelID);
+        });
+        await p2;
       }
       console.log("sand2png finished");
       // update record
@@ -1103,29 +1057,9 @@ const stopModel = async (modelInfoID: string) => {
   });
   // NOTE
   // delete all programs by pid
-  const killPidPromise = async (pid: string) => {
-    return new Promise((resolve, reject) => {
-      let stdout = "";
-      let stderr = "";
-      const cp = spawn(`taskkill /f /t /pid ${pid}`, { shell: true, windowsHide: true });
-      cp.stdout.on("data", function (chunk) {
-        stdout += chunk;
-      });
-      cp.stderr.on("data", function (chunk) {
-        stderr += chunk;
-      });
-      cp.on("close", function (code) {
-        if (code === 0) {
-          resolve(stdout);
-        } else {
-          reject(stderr);
-        }
-      });
-    });
-  };
   for (let index = 0; index < modelInfo!.pids.length; index++) {
     const pid = modelInfo!.pids[index];
-    await killPidPromise(pid).catch(() => {});
+    await execa(`taskkill /f /t /pid ${pid}`, { shell: true, windowsHide: true }).catch(() => {});
   }
   // delete modelInfo
   await prisma.model_info.delete({
