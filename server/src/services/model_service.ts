@@ -26,6 +26,7 @@ const R_test2 = async (req: Request, res: Response) => {
     // 全部封到exportEWE中去
     await CRUDdatabase(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num);
     const { stdout } = await execa(`Rscript ./src/utils/ewe/EcoPath.R '${num}'`, {
+      shell: true,
       windowsHide: true,
     });
     // stdout.stdout!.on('end',()=>{
@@ -54,6 +55,7 @@ const R_test2 = async (req: Request, res: Response) => {
     console.log("此次修改的数据为", ModifyData);
     await ModifyDatabase(ModifyData, num, Group, Fleet);
     const { stdout } = await execa(`Rscript ./src/utils/ewe/EcoPath.R '${num}'`, {
+      shell: true,
       windowsHide: true,
     });
     // [1] TRUE 长度为10 后面还跟着2个空格 10*n-1  5个最后为49  加上“[1] ” 从54开始
