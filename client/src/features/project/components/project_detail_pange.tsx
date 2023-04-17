@@ -176,7 +176,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
         if (typeof res.data.content === "object") setData(res.data.content);
         else;
         if (!res.data.content.image) {
-          setImageUrl("http://localhost:3333/no_data.png");
+          setImageUrl(process.env.PUBLIC_URL + "/no_data.png");
         } else {
           dataAction.getData(res.data.content.image, "image", {}, "blob").then((res) => {
             const blob = new Blob([res]);

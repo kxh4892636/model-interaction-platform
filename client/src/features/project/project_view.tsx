@@ -398,7 +398,7 @@ export const ProjectView = () => {
 
   const getImageUrl = async (key: string) => {
     if (!key) {
-      return "http://localhost:3333/no_data.png";
+      return process.env.PUBLIC_URL + "/no_data.png";
     } else {
       const image = await dataAction.getData(key, "image", {}, "blob");
       const blob = new Blob([image]);

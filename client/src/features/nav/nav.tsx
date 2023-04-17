@@ -87,7 +87,7 @@ export const Nav = ({ items }: NavProps) => {
 
   const NavItems = items.map((value): JSX.Element => {
     return (
-      <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
+      <Tooltip placement="right" title={value.title} key={value.id}>
         <NavItem
           position={value.position}
           onClick={() => {

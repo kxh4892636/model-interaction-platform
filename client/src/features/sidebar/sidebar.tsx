@@ -80,7 +80,7 @@ export const Sidebar = ({ items }: SidebarProps) => {
 
   const sidebarItems = items.map((value): JSX.Element => {
     return (
-      <Tooltip placement="right" title={value.title} key={crypto.randomUUID()}>
+      <Tooltip placement="right" title={value.title} key={value.id}>
         <AsideItem
           onClick={() => {
             if (showItem && value.id !== showPanelID) {

@@ -459,27 +459,27 @@ export class FlowFieldManager {
     this.updateShader = await loadShader_url(
       gl,
       "update",
-      "http://localhost:3333/shaders/update.vert",
-      "http://localhost:3333/shaders/update.frag",
+      process.env.PUBLIC_URL + "/shaders/update.vert",
+      process.env.PUBLIC_URL + "/shaders/update.frag",
       ["newPosition", "aliveTime"]
     );
     this.drawShader = await loadShader_url(
       gl,
       "draw",
-      "http://localhost:3333/shaders/ribbonParticle.vert",
-      "http://localhost:3333/shaders/ribbonParticle.frag"
+      process.env.PUBLIC_URL + "/shaders/ribbonParticle.vert",
+      process.env.PUBLIC_URL + "/shaders/ribbonParticle.frag"
     );
     this.poolShader = await loadShader_url(
       gl,
       "textureDebug",
-      "http://localhost:3333/shaders/showPool.vert",
-      "http://localhost:3333/shaders/showPool.frag"
+      process.env.PUBLIC_URL + "/shaders/showPool.vert",
+      process.env.PUBLIC_URL + "/shaders/showPool.frag"
     );
     this.textureShader = await loadShader_url(
       gl,
       "textureDebug",
-      "http://localhost:3333/shaders/texture.vert",
-      "http://localhost:3333/shaders/texture.frag"
+      process.env.PUBLIC_URL + "/shaders/texture.vert",
+      process.env.PUBLIC_URL + "/shaders/texture.frag"
     );
 
     return true;
