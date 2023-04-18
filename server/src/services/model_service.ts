@@ -86,7 +86,8 @@ const R_test3 = async (req: Request, res: Response) => {
   const connection = ADODB.open(
     `Provider=Microsoft.ACE.OLEDB.12.0;Data Source=${
       dataFoldURL + info!.path
-    };Persist Security Info=False;`
+    };Persist Security Info=False;`,
+    true
   );
   const result = await query(connection);
   return result;
