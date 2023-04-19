@@ -32,6 +32,4 @@ app.use("/api/dataset", datasetRoute);
 app.use("/api/data", dataRoute);
 app.use("/api/model", modelRoute);
 
-app.listen(port, () => {
-  console.log(serverHost + "");
-});
+app.listen(port, () => {});
