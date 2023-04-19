@@ -20,6 +20,7 @@ import { useMapStore } from "../../stores/map_store";
 import { useInit } from "../../hooks";
 import { useLayersStore, useModalStore } from "../../stores";
 import { useManualRefreshStore } from "../../stores/refresh_store";
+import { serverHost } from "../../config/global_variable";
 
 const { Meta } = Card;
 const ProjectViewContainer = styled.div`
@@ -98,7 +99,7 @@ const ProjectInfoModal = () => {
           return;
         } else;
         const result = await axios.request({
-          url: "http://localhost:3456/api/project/action",
+          url: serverHost + "/api/project/action",
           method: "post",
           data: {
             action: "create",
@@ -243,7 +244,7 @@ const CardList = ({ dataList }: { dataList: ProjectListData[] }) => {
           onConfirm={() => {
             axios
               .request({
-                url: "http://localhost:3456/api/project/action",
+                url: serverHost + "/api/project/action",
                 method: "post",
                 data: {
                   action: "delete",
@@ -279,7 +280,7 @@ const CardList = ({ dataList }: { dataList: ProjectListData[] }) => {
               initAction.clearStoreDataExcludeMapAndProject();
               await axios
                 .request({
-                  url: "http://localhost:3456/api/project/project",
+                  url: serverHost + "/api/project/project",
                   params: {
                     action: "layer",
                     id: data.key,
@@ -306,7 +307,7 @@ const CardList = ({ dataList }: { dataList: ProjectListData[] }) => {
               initAction.clearStoreDataExcludeMapAndProject();
               await axios
                 .request({
-                  url: "http://localhost:3456/api/project/project",
+                  url: serverHost + "/api/project/project",
                   params: {
                     action: "layer",
                     id: data.key,
@@ -408,7 +409,7 @@ export const ProjectView = () => {
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3456/api/project/list").then(async (res) => {
+    axios.get(serverHost + "/api/project/list").then(async (res) => {
       const result: ServerProject[] = res.data.content;
       let projectListData: ProjectListData[] = [];
       for (let index = 0; index < result.length; index++) {

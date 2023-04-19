@@ -15,6 +15,7 @@ import { useLayersStatusStore } from "../../../../stores";
 import { useEffect } from "react";
 import axios from "axios";
 import { useManualRefreshStore } from "../../../../stores/refresh_store";
+import { serverHost } from "../../../../config/global_variable";
 
 const { DirectoryTree } = Tree;
 
@@ -62,7 +63,7 @@ export const DataTree = ({ children }: DataTreeProps) => {
   useEffect(() => {
     axios
       .request({
-        url: "http://localhost:3456/api/project/project",
+        url: serverHost + "/api/project/project",
         params: {
           action: "layer",
           id: projectKey,

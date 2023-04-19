@@ -13,6 +13,7 @@ import { useLayersStatusStore } from "../../../stores/layers_status_store";
 import { useKeys } from "../../../hooks";
 import { Layer } from "../../../types";
 import axios from "axios";
+import { serverHost } from "../../../config/global_variable";
 
 /**
  * @description DataPanel action
@@ -53,7 +54,7 @@ export const useDataActions = () => {
     if (!layersSelected["data"].group) {
       // delete single layer
       axios.request({
-        url: "http://localhost:3456/api/data/action",
+        url: serverHost + "/api/data/action",
         method: "post",
         data: {
           action: "delete",
@@ -67,7 +68,7 @@ export const useDataActions = () => {
     } else {
       // delete layer group
       axios.request({
-        url: "http://localhost:3456/api/dataset/action",
+        url: serverHost + "/api/dataset/action",
         method: "post",
         data: {
           action: "delete",
@@ -101,7 +102,7 @@ export const useDataActions = () => {
       updateLayer(layersSelected["data"].key, "data", "title", title);
       if (layersSelected["data"].group) {
         axios.request({
-          url: "http://localhost:3456/api/dataset/action",
+          url: serverHost + "/api/dataset/action",
           method: "post",
           data: {
             action: "rename",
@@ -111,7 +112,7 @@ export const useDataActions = () => {
         });
       } else {
         axios.request({
-          url: "http://localhost:3456/api/data/action",
+          url: serverHost + "/api/data/action",
           method: "post",
           data: {
             action: "rename",
@@ -128,7 +129,7 @@ export const useDataActions = () => {
    */
   const createLayerGroup = async (title: string = "group", projectKey: string) => {
     const result = await axios.request({
-      url: "http://localhost:3456/api/dataset/action",
+      url: serverHost + "/api/dataset/action",
       method: "post",
       data: {
         action: "create",

@@ -21,6 +21,7 @@ import { Layer } from "../../../types";
 import axios from "axios";
 import { useModelsStatus } from "../stores/models_status";
 import { useProjectStatusStore } from "../../../stores/project_status_store";
+import { serverHost } from "../../../config/global_variable";
 
 const createSelectOptions = (layers: Layer[]) => {
   interface optionType {
@@ -68,7 +69,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
     const percentInterval = setInterval(async () => {
       const result = await axios({
         method: "post",
-        baseURL: "http://localhost:3456/api/model/water",
+        baseURL: serverHost + "/api/model/water",
         data: {
           action: "info",
           modelID: modelID,
@@ -77,7 +78,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
       if (result.data.status === "fail") {
         axios({
           method: "post",
-          baseURL: "http://localhost:3456/api/model/water",
+          baseURL: serverHost + "/api/model/water",
           data: {
             action: "stop",
             modelID: modelID,
@@ -207,7 +208,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                     updateModelStatus(model, "title", "");
                     axios({
                       method: "post",
-                      baseURL: "http://localhost:3456/api/model/water",
+                      baseURL: serverHost + "/api/model/water",
                       data: {
                         action: "stop",
                         modelID: currentModelStatus.modelID,
@@ -219,7 +220,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                   else {
                     axios({
                       method: "post",
-                      baseURL: "http://localhost:3456/api/model/water",
+                      baseURL: serverHost + "/api/model/water",
                       data: {
                         action: "hydrodynamics",
                         paramKeys: currentModelStatus!.hydrodynamicsParamKeys,

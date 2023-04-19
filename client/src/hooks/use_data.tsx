@@ -17,6 +17,7 @@ import { ImageSource } from "mapbox-gl";
 import { useAnimatedStatusStore } from "../stores/animated_status_store";
 import { FlowFieldManager } from "../utils/customLayer/flowfield";
 import { FlowLayer } from "../utils/customLayer/flowLayer";
+import { serverHost } from "../config/global_variable";
 
 /**
  * @description return the function that curd data
@@ -38,7 +39,7 @@ export const useData = () => {
    */
   const getDataDetail = async (id: string): Promise<ServerData> => {
     const data = await axios
-      .get("http://localhost:3456/api/data/detail?id=" + id, { timeout: 1000 })
+      .get(serverHost + "/api/data/detail?id=" + id, { timeout: 1000 })
       .then((res) => {
         return res.data.content as ServerData;
       });

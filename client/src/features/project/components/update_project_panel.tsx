@@ -14,6 +14,7 @@ import { useMapPositionStore } from "../../../stores/map_postion_store";
 import { useProjectStatusStore } from "../../../stores/project_status_store";
 import TextArea from "antd/es/input/TextArea";
 import { useMapStore } from "../../../stores";
+import { serverHost } from "../../../config/global_variable";
 
 /**
  * @description UpdateProjectPanel
@@ -61,7 +62,7 @@ export const UpdateProjectPanel = ({
             param.append("datasetID", "assets");
             param.append("file", file);
             result = await axios.request({
-              url: "http://localhost:3456/api/data/upload",
+              url: serverHost + "/api/data/upload",
               method: "post",
               headers: { "Content-Type": "multipart/form-data" },
               data: param,
@@ -69,7 +70,7 @@ export const UpdateProjectPanel = ({
           } else;
           axios
             .request({
-              url: "http://localhost:3456/api/project/action",
+              url: serverHost + "/api/project/action",
               method: "post",
               data: {
                 action: "updateInfo",

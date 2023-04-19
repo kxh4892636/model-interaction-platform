@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import styled from "styled-components/macro";
 import { ServerProject } from "../../../types";
 import { useData } from "../../../hooks";
+import { serverHost } from "../../../config/global_variable";
 
 // ProjectPage Container sytle
 const ProjectContainer = styled.div`
@@ -166,7 +167,7 @@ export const ProjectDetailPage = ({ id }: ProjectDetailPageProps) => {
   useEffect(() => {
     axios
       .request({
-        url: "http://localhost:3456/api/project/project",
+        url: serverHost + "/api/project/project",
         params: {
           id: id,
           action: "data",

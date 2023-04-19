@@ -28,6 +28,7 @@ import {
   selectedEWEModelID,
 } from "../store";
 import { useLayersStore } from "../../../stores/layers_store";
+import { serverHost } from "../../../config/global_variable";
 import axios from "axios";
 const EditableContext = React.createContext(null);
 const EditableRow = ({ index, ...props }) => {
@@ -374,7 +375,7 @@ export default function App() {
     message.loading({ content: "数据加载中", key: "Mloading" });
     axios({
       method: "post",
-      baseURL: "http://localhost:3456/api/model/R_test3",
+      baseURL: serverHost + "/api/model/R_test3",
       data: { id: id },
     }).then((response) => {
       if (response.status === 200) {

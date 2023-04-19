@@ -1,4 +1,3 @@
-import React from "react";
 import { Table, Button, message, Alert } from "antd";
 import {
   Basic,
@@ -16,6 +15,7 @@ import {
   fakedataV,
 } from "../store";
 import axios from "axios";
+import { serverHost } from "../../../config/global_variable";
 // 模型平衡与否 已极不平衡时的功能组名称
 let status = "";
 let statusname = "";
@@ -128,7 +128,7 @@ export default function App() {
     }
     axios({
       method: "post",
-      baseURL: "http://localhost:3456/api/model/R_test2",
+      baseURL: serverHost + "/api/model/R_test2",
       // 根据第一次还是修改，传输不同的数据
       data:
         ModelState === "Start"

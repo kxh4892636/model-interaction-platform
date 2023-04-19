@@ -21,6 +21,7 @@ import { Layer } from "../../../types";
 import axios from "axios";
 import { useModelsStatus } from "../stores/models_status";
 import { useProjectStatusStore } from "../../../stores/project_status_store";
+import { serverHost } from "../../../config/global_variable";
 
 const createSelectOptions = (layers: Layer[]) => {
   interface optionType {
@@ -67,7 +68,7 @@ export const SandModelPanel = ({ model }: SandModelPanelProps) => {
     const percentInterval = setInterval(async () => {
       const result = await axios({
         method: "post",
-        baseURL: "http://localhost:3456/api/model/water",
+        baseURL: serverHost + "/api/model/water",
         data: {
           action: "info",
           modelID: modelID,
@@ -76,7 +77,7 @@ export const SandModelPanel = ({ model }: SandModelPanelProps) => {
       if (result.data.status === "fail") {
         axios({
           method: "post",
-          baseURL: "http://localhost:3456/api/model/water",
+          baseURL: serverHost + "/api/model/water",
           data: {
             action: "stop",
             modelID: modelID,
@@ -222,7 +223,7 @@ export const SandModelPanel = ({ model }: SandModelPanelProps) => {
                     updateModelStatus(model, "title", null);
                     axios({
                       method: "post",
-                      baseURL: "http://localhost:3456/api/model/water",
+                      baseURL: serverHost + "/api/model/water",
                       data: {
                         action: "stop",
                         modelID: currentModelStatus.modelID,
@@ -234,7 +235,7 @@ export const SandModelPanel = ({ model }: SandModelPanelProps) => {
                   else {
                     axios({
                       method: "post",
-                      baseURL: "http://localhost:3456/api/model/water",
+                      baseURL: serverHost + "/api/model/water",
                       data: {
                         action: "sand",
                         paramKeys: [

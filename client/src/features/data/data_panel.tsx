@@ -30,6 +30,7 @@ import Modal from "antd/es/modal/Modal";
 import Upload from "antd/es/upload/Upload";
 import { useManualRefreshStore } from "../../stores/refresh_store";
 import { useData } from "../../hooks";
+import { serverHost } from "../../config/global_variable";
 
 /**
  * @description UploadPanel component
@@ -64,7 +65,7 @@ const UploadPanel = () => {
       <Upload
         name="file"
         headers={{ authorization: "authorization-text" }}
-        action={"http://localhost:3456/api/data/upload"}
+        action={serverHost + "/api/data/upload"}
         data={{ datasetID: layerKey["data"]!.key }}
         method="post"
         multiple

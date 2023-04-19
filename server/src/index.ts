@@ -33,5 +33,5 @@ app.use("/api/data", dataRoute);
 app.use("/api/model", modelRoute);
 
 app.listen(port, () => {
-  console.log("http://localhost:3456");
+  console.log(serverHost + "");
 });
