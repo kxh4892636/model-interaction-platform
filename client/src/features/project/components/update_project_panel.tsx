@@ -56,8 +56,6 @@ export const UpdateProjectPanel = ({
             let file = new File([url], `logo.png`, {
               type: "image/png",
             });
-            // NOTE 私有访问不到
-            // 其余参数必须在前面?
             let param = new FormData();
             param.append("datasetID", "assets");
             param.append("file", file);

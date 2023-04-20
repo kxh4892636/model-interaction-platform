@@ -137,7 +137,6 @@ const runHydrodynamics = async (
     );
     if (!meshFileName) {
       await stopModel(modelID);
-      // NOTE
       throw new Error("mesh 参数文件不存在");
     } else;
     if (!extent) {
@@ -172,7 +171,6 @@ const runHydrodynamics = async (
     let num = Number(paramContent[11].split(/\s/)[0]) * 24;
     let currentCount = 0;
     // run model
-    // NOTE execa
     const modelPath = dataFoldURL + datasetInfo!.path + "/model/elcirc.exe";
     const outputModel = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,
@@ -211,7 +209,6 @@ const runHydrodynamics = async (
         });
       }
     });
-    // NOTE
     outputModel.on("exit", async (code) => {
       if (code) return;
       else;
@@ -283,7 +280,6 @@ const runHydrodynamics = async (
           console.log("model failed");
           await stopModel(modelID);
         });
-        // NOTE
         result.on("exit", async (code) => {
           if (code) return;
           else;
@@ -1060,7 +1056,6 @@ const stopModel = async (modelInfoID: string) => {
   const modelInfo = await prisma.model_info.findUnique({
     where: { id: modelInfoID },
   });
-  // NOTE
   // delete all programs by pid
   for (let index = 0; index < modelInfo!.pids.length; index++) {
     const pid = modelInfo!.pids[index];

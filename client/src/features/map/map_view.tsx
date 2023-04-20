@@ -42,11 +42,9 @@ export const MapView = ({ display }: { display: boolean }) => {
         style: "mapbox://styles/mapbox/streets-v12",
         center: [position[0], position[1]],
         zoom: position[2],
-        // NOTE
         preserveDrawingBuffer: true,
       }
     );
-    // // NOTE
     mapRef.current.addControl(
       new MapboxLanguage({
         defaultLanguage: "zh-Hans",

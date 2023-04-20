@@ -28,7 +28,6 @@ const StyledNav = styled.nav`
   width: 60px;
 `;
 // nav item style
-// NOTE
 const NavItem = styled.div<{ position: string | undefined }>`
   margin-top: ${(props) => props.position && "auto"};
   padding: 14px 0;

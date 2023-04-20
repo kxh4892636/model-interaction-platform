@@ -145,7 +145,6 @@ const ProjectInfoModal = () => {
  * @export module: TagsPanel
  */
 const TagsPanel = ({ tags }: { tags: string[] }) => {
-  // NOTE
   const tagRef = useRef<HTMLDivElement | null>(null);
   const intervalRef = useRef<NodeJS.Timer>();
   const colors = [
@@ -162,7 +161,6 @@ const TagsPanel = ({ tags }: { tags: string[] }) => {
     "purple",
   ];
 
-  // NOTE
   const autoScroll = () => {
     const scroll = () => {
       if (!tagRef.current) return;

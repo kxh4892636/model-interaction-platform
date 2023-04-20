@@ -1,5 +1,3 @@
-// NOTE promise api
-// NOTE array.map and promise.all
 import fs from "fs";
 import path from "path";
 

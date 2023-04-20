@@ -96,7 +96,6 @@ const getText = async (req: Request, res: Response) => {
  * @param req request
  * @param res response
  */
-// NOTE req.file
 const uploadData = async (req: Request, res: Response) => {
   try {
     res.status(200).json(await dataService.uploadData(req.file!, req.body.datasetID as string));

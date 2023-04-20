@@ -8,6 +8,7 @@
 .env
 prisma
 app
+config
 
 # dependencies
 node_modules

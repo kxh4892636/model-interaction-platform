@@ -13,7 +13,6 @@ import { useAnimatedStatusStore } from "../../src/stores/animated_status_store";
 import { useMapStore } from "../../src/stores/map_store";
 import { useData } from "./";
 
-// NOtE can't alert each other between hooks
 export const useAnimate = () => {
   const map = useMapStore((state) => state.map);
   const dataAction = useData();
