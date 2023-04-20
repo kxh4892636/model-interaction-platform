@@ -2,6 +2,7 @@ import axios from "axios";
 import mapboxgl from "mapbox-gl";
 import { ServerData } from "../../types";
 import { Shader } from "../renderUtils/shader";
+import { serverHost } from "../../config/global_variable";
 
 // create random positions and velocities.
 const rand = (min: number, max: number) => {
@@ -239,7 +240,7 @@ export class FlowFieldManager {
     console.log("prepare");
 
     await axios
-      .get(`http://localhost:3456/api/data/model?id=` + this.id, {
+      .get(serverHost + `/api/data/model?id=` + this.id, {
         params: { type: "description" },
       })
       .then(async (response) => {
@@ -285,7 +286,7 @@ export class FlowFieldManager {
         // Load textures of flow fields
         for (let i = startValue; i <= endValue; i++) {
           await axios
-            .get(`http://localhost:3456/api/data/model?id=` + this.id, {
+            .get(serverHost + `/api/data/model?id=` + this.id, {
               params: { currentImage: i, type: "uv" },
               responseType: "blob",
             })
@@ -298,7 +299,7 @@ export class FlowFieldManager {
         // Load textures of area masks
         for (let i = startValue; i <= endValue; i++) {
           await axios
-            .get(`http://localhost:3456/api/data/model?id=` + this.id, {
+            .get(serverHost + `/api/data/model?id=` + this.id, {
               params: { currentImage: i, type: "mask" },
               responseType: "blob",
             })
@@ -311,7 +312,7 @@ export class FlowFieldManager {
         // Load textures of valid address
         for (let i = startValue; i <= endValue; i++) {
           await axios
-            .get(`http://localhost:3456/api/data/model?id=` + this.id, {
+            .get(serverHost + `/api/data/model?id=` + this.id, {
               params: { currentImage: i, type: "valid" },
               responseType: "blob",
             })

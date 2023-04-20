@@ -59,7 +59,7 @@ export const useData = () => {
     responseType: string = "json"
   ) => {
     const data = await axios
-      .get(`http://localhost:3456/api/data/${dataType}?id=` + id, {
+      .get(serverHost + `/api/data/${dataType}?id=` + id, {
         params: params,
         responseType: responseType as any,
       })
