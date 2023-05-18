@@ -25,7 +25,7 @@ import { serverHost } from "../../config/global_variable";
 const { Meta } = Card;
 const ProjectViewContainer = styled.div`
   position: relative;
-  height: 91vh;
+  height: 94vh;
   background: #fff;
   z-index: 10;
   display: flex;

@@ -84,10 +84,10 @@ export const UpdateProjectPanel = ({
             .then((res) => {
               const result = res.data;
               if (result.status === "success") {
-                message.success("项目保存成功", 10);
+                message.success("项目保存成功");
                 setIsShowSaveInfo(false);
               } else {
-                message.error("项目保存失败", 10);
+                message.error("项目保存失败");
               }
               setIsLoading(false);
               setIsPosition(false);
@@ -95,7 +95,7 @@ export const UpdateProjectPanel = ({
             });
         }}
         onFinishFailed={() => {
-          message.error("项目保存失败", 10);
+          message.error("项目保存失败");
           setIsLoading(false);
           setIsSpinning(false);
         }}

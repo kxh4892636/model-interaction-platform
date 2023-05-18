@@ -98,10 +98,10 @@ export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
       if (!result.data.content.is_running) {
         clearInterval(percentInterval);
         removeModelStatus(model);
-        message.success("模型运行完毕", 10);
+        message.success("模型运行完毕");
         return;
       } else;
-    }, 10000);
+    }, 3456);
     updateModelStatus(model, "intervalStore", percentInterval);
   };
 
@@ -121,6 +121,8 @@ export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
       modelID: null,
       datasetKey: null,
       title: "",
+      source: null,
+      textAreaRef: null,
     });
   });
 
@@ -253,9 +255,9 @@ export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
                         updateModelStatus(model, "resultKeys", response.data.content[2]);
                         updateModelStatus(model, "isRunning", true);
                         getPercent(response.data.content[1]);
-                        message.success("模型开始运行", 10);
+                        message.success("模型开始运行");
                       } else {
-                        message.error("模型输入参数错误", 10);
+                        message.error("模型输入参数错误");
                         removeModelStatus(model);
                       }
                     });

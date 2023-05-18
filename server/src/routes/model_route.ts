@@ -17,4 +17,4 @@ modelRoute.post("/R_test2", modelController.R_Test2);
 // /api/model/R_test3
 modelRoute.post("/R_test3", modelController.R_Test3);
 // /api/model/water
-modelRoute.post("/water", modelController.water);
+modelRoute.get("/water", modelController.water);

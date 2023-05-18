@@ -31,6 +31,8 @@ interface ModelStatus {
   percent: number;
   intervalStore: NodeJS.Timer | null;
   modelID: number | null;
+  source: EventSource | null;
+  textAreaRef: HTMLTextAreaElement | null;
 }
 
 interface ModelStatusStore {
@@ -51,8 +53,18 @@ interface ModelStatusStore {
       | "datasetKey"
       | "percent"
       | "intervalStore"
-      | "modelID",
-    value: string | string[] | boolean | number | NodeJS.Timer | null
+      | "modelID"
+      | "source"
+      | "textAreaRef",
+    value:
+      | string
+      | string[]
+      | boolean
+      | number
+      | NodeJS.Timer
+      | EventSource
+      | HTMLTextAreaElement
+      | null
   ) => void;
   removeModelStatus: (model: string) => void;
 }

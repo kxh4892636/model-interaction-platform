@@ -41,7 +41,7 @@ const PanelContainer = styled.div`
   flex-flow: column;
   width: 360px;
   background: #fff;
-  max-height: 91vh;
+  max-height: 94vh;
 `;
 
 /**

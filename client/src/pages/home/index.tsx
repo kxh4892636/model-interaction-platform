@@ -24,7 +24,7 @@ import { useViewStore } from "../../stores/view_store";
 import { useProjectStatusStore } from "../../stores/project_status_store";
 import { Nav } from "../../features/nav";
 import { ProjectInfoPanel, ProjectView } from "../../features/project";
-import { useLayersStore, useModalStore } from "../../stores";
+import { useAnimatedStatusStore, useLayersStore, useModalStore } from "../../stores";
 import { MapView, MapStatus } from "../../features/map";
 import { DataPanel } from "../../features/data";
 import { LayerPanel } from "../../features/layer";
@@ -54,7 +54,7 @@ const TitleBarContainer = styled.div`
 // conent container
 const ContentContainer = styled.div`
   display: flex;
-  height: 91vh;
+  height: 94vh;
 `;
 // MapContainer 样式
 const ViewContainer = styled.div`
@@ -89,6 +89,7 @@ export const Home: React.FC = () => {
   const navigate = useNavigate();
   const layers = useLayersStore((state) => state.layers);
   const modelStatus = useModelsStatus((state) => state.modelStatus);
+  const animatedStatus = useAnimatedStatusStore((state) => state.animatedStatus);
 
   // 侧边栏数据
   const navItems = projectKey.includes("-")
@@ -159,7 +160,14 @@ export const Home: React.FC = () => {
 
   return (
     <View>
-      <TitleBarContainer>港口水环境与生态动力学精细化模拟平台</TitleBarContainer>
+      <TitleBarContainer
+        onClick={() => {
+          console.log(animatedStatus);
+          console.log(modelStatus);
+        }}
+      >
+        港口水环境与生态动力学精细化模拟平台
+      </TitleBarContainer>
       <Spin spinning={isSpinning} size="large" delay={500} tip="请稍等">
         <ContentContainer>
           <Nav items={navItems} />
@@ -171,15 +179,6 @@ export const Home: React.FC = () => {
           <Sidebar items={projectKey.includes("-") ? sidebarItems : []}></Sidebar>
         </ContentContainer>
       </Spin>
-      <StatusBarContainer
-        onClick={() => {
-          console.log(projectKey);
-          console.log(layers);
-          console.log(modelStatus);
-        }}
-      >
-        {modalTag ? "弹窗" : "2"}
-      </StatusBarContainer>
       {modalTag ? modal : <></>}
     </View>
   );

@@ -34,13 +34,16 @@ const R_Test3 = async (req: Request, res: Response) => {
 
 const water = async (req: Request, res: Response) => {
   try {
-    const type = req.body.action;
+    // set sse
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    const type = req.query.action;
     if (type === "hydrodynamics") {
       const result = await modelService.runHydrodynamics(
-        req.body.paramKeys as string[],
-        req.body.projKey as string,
-        req.body.title as string,
-        req.body.projectID as string,
+        req.query.paramKeys as string,
+        req.query.projKey as string,
+        req.query.title as string,
+        req.query.projectID as string,
         res
       );
     } else if (type === "quality") {
@@ -60,10 +63,10 @@ const water = async (req: Request, res: Response) => {
         res
       );
     } else if (type === "stop") {
-      const result = await modelService.stopModel(req.body.modelID as string);
+      const result = await modelService.stopModel(req.query.modelID as string);
       res.status(200).json(result);
     } else if (type === "info") {
-      const result = await modelService.getModel(req.body.modelID as string);
+      const result = await modelService.getModel(req.query.modelID as string);
       res.status(200).json(result);
     }
   } catch (error) {

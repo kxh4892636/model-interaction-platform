@@ -48,7 +48,6 @@ const StylePanel = () => {
   const animateActions = useAnimate();
   const map = useMapStore((state) => state.map);
   const dataActions = useData();
-  
 
   useEffect(() => {
     // Update the value of slide when the value of selected is changed
@@ -156,7 +155,6 @@ const StylePanel = () => {
                 updateAnimatedStatus(key, "startValue", startValue);
                 updateAnimatedStatus(key, "endValue", endValue);
                 updateAnimatedStatus(key, "currentCount", currentCountNow);
-                animateActions.continueAnimate(key, currentCountNow, startValue, endValue);
               } else if (style === "water") {
                 // Re-render the flow field
                 updateAnimatedStatus(key, "startValue", startValue);
