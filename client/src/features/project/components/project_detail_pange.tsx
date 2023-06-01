@@ -84,7 +84,7 @@ const TagsContainer = styled.div`
  */
 const TagsPanel = ({ tags }: { tags: string[] }) => {
   const tagRef = useRef<HTMLDivElement | null>(null);
-  const intervalRef = useRef<NodeJS.Timer>();
+  const intervalRef = useRef<number>(0);
   const colors = [
     "magenta",
     "red",
@@ -100,25 +100,39 @@ const TagsPanel = ({ tags }: { tags: string[] }) => {
   ];
 
   const autoScroll = () => {
-    const scroll = () => {
+    async function sleep(delay: number) {
+      return new Promise((resolve) => setTimeout(resolve, delay));
+    }
+    const scroll = async () => {
       if (!tagRef.current) return;
       else;
       if (tagRef.current.scrollWidth <= tagRef.current.clientWidth) return;
       else;
       if (tagRef.current.scrollLeft + tagRef.current.clientWidth === tagRef.current.scrollWidth) {
+        await sleep(500);
         tagRef.current.scrollLeft = 0;
+        cancelAnimationFrame(intervalRef.current);
+      } else if (tagRef.current.scrollLeft === 0) {
+        await sleep(500);
+        tagRef.current.scrollLeft += 1;
+        cancelAnimationFrame(intervalRef.current);
       } else {
-        tagRef.current.scrollLeft += 2;
+        tagRef.current.scrollLeft += 1;
       }
+      intervalRef.current = requestAnimationFrame(scroll);
     };
+
     if (!tagRef.current) return;
     else;
-    intervalRef.current = setInterval(scroll, 100);
+    intervalRef.current = requestAnimationFrame(scroll);
+    tagRef.current.onmousemove = () => {
+      cancelAnimationFrame(intervalRef.current);
+    };
     tagRef.current.onmouseenter = () => {
-      clearInterval(intervalRef.current);
+      cancelAnimationFrame(intervalRef.current);
     };
     tagRef.current.onmouseleave = () => {
-      intervalRef.current = setInterval(scroll, 100);
+      intervalRef.current = requestAnimationFrame(scroll);
     };
   };
 
@@ -134,7 +148,7 @@ const TagsPanel = ({ tags }: { tags: string[] }) => {
   useEffect(() => {
     autoScroll();
     return () => {
-      clearInterval(intervalRef.current);
+      cancelAnimationFrame(intervalRef.current);
     };
   }, []);
 

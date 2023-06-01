@@ -9,7 +9,7 @@
  */
 
 import { Button, Select, SelectProps, Progress, message, Input } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   PanelContainer,
   PanelContentContainer,
@@ -68,6 +68,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
 
   const getPercent = (modelID: string) => {
     const percentInterval = setInterval(async () => {
+      // get progress of model
       const result = await axios({
         method: "get",
         baseURL: serverHost + "/api/model/water",
@@ -130,6 +131,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
       source: null,
       textAreaRef: textAreaRef.current,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -180,15 +182,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
           />
         </>
         <>
-          <div
-            onClick={() => {
-              console.log(textAreaRef);
-              console.log(currentModelStatus!.textAreaRef!);
-            }}
-            style={{ padding: "10px 12px" }}
-          >
-            模型运行进度
-          </div>
+          <div style={{ padding: "10px 12px" }}>模型运行进度</div>
           <textarea
             className="tteexxtt"
             ref={textAreaRef}
@@ -197,7 +191,10 @@ export const Hydrodynamics = ({ model }: AppProps) => {
               height: "180px",
               margin: "10px 12px",
               width: "100%",
-              border: "1px solid #bfbfbf",
+              border: "1px solid #262626",
+              padding: "8px 6px",
+              background: "#434343",
+              color: "#f0f0f0",
             }}
             id={Date.now().toString()}
             readOnly
@@ -263,7 +260,6 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                       "message",
                       (e) => {
                         const data = e.data as string;
-                        console.log(data);
                         const currentModelStatus = getModelStatus(model);
                         if (data.includes("success")) {
                           const data = JSON.parse(e.data);
@@ -275,13 +271,13 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                           sessionStorage.setItem("hydrodynamics", "");
                           message.success("模型开始运行");
                         } else if (data.includes("fail")) {
+                          clearInterval(currentModelStatus!.intervalStore!);
                           message.error("模型输入参数错误");
                           source.close();
                           removeModelStatus(model);
                           sessionStorage.clear();
                           currentModelStatus!.textAreaRef!.value = "";
                         } else {
-                          // TODO 自动滚动失败
                           const output = sessionStorage.getItem("hydrodynamics");
                           sessionStorage.setItem("hydrodynamics", output + data + "\n");
                           currentModelStatus!.textAreaRef!.value = output + data + "\n";

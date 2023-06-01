@@ -126,7 +126,8 @@ const runHydrodynamics = async (
       },
     });
     res.write(
-      `data:  ${JSON.stringify({ status: "success", content: [datasetID, modelID, [uvID]] })}\n\n`
+      `id: ${Date.now()}\n` +
+        `data:  ${JSON.stringify({ status: "success", content: [datasetID, modelID, [uvID]] })}\n\n`
     );
     // define keys of param
     let keys: string[] = paramKeys.split(",");
@@ -221,8 +222,8 @@ const runHydrodynamics = async (
       if (code) return;
       else;
       pids.shift();
-      console.log("model finished");
-      res.write(`data: model finished\n\n`);
+      console.log("model finish");
+      res.write(`data: model finish\n\n`);
       // uvet2txt
       const result = execa(
         `conda activate gis && python ${
@@ -262,8 +263,8 @@ const runHydrodynamics = async (
             pids: pids,
           },
         });
-        console.log("uvet2txt finished");
-        res.write(`data: uvet2txt finished\n\n`);
+        console.log("uvet2txt finish");
+        res.write(`data: uvet2txt finish\n\n`);
         // uvet2description
         const result = execa(
           `conda activate gis && python ${
@@ -304,8 +305,8 @@ const runHydrodynamics = async (
               pids: pids,
             },
           });
-          console.log("uvet2description finished");
-          res.write(`data: uvet2description finished\n\n`);
+          console.log("uvet2description finish");
+          res.write(`data: uvet2description finish\n\n`);
           // uvet process
           await prisma.data.update({
             where: {
@@ -352,8 +353,8 @@ const runHydrodynamics = async (
             if (code) return;
             else;
             pids.shift();
-            console.log("process finished");
-            res.write(`data: process finished\n\n`);
+            console.log("process finish");
+            res.write(`data: process finish\n\n`);
             // rename
             const descriptionPath = `${dataFoldURL}${
               datasetInfo!.path
@@ -395,8 +396,8 @@ const runHydrodynamics = async (
                 is_running: false,
               },
             });
-            console.log("all finished");
-            res.write(`data: all finished\n\n`);
+            console.log("all finish");
+            res.write(`data: all finish\n\n`);
           });
         });
       });
@@ -411,7 +412,7 @@ const runHydrodynamics = async (
 };
 
 const runQuality = async (
-  paramKeys: string[],
+  paramKeys: string,
   projKey: string,
   title: string,
   projectID: string,
@@ -438,23 +439,29 @@ const runQuality = async (
         progress: [0, 1],
       },
     });
-    res.status(200).json({ status: "success", content: [datasetID, modelID, []] });
+    res.write(
+      `id: ${Date.now()}\n` +
+        `data:  ${JSON.stringify({ status: "success", content: [datasetID, modelID, []] })}\n\n`
+    );
     // define keys of param
-    let keys: string[] = paramKeys;
+    let keys: string[] = paramKeys.split(",");
     projKey && keys.push(projKey);
+
     // copy model data by key
     const [meshFileName, extent] = await copyModelData(
       datasetID,
       modelID,
       datasetInfo!.path,
       datasetInfo!.timeStamp,
-      paramKeys
+      paramKeys.split(",")
     );
     if (!meshFileName) {
+      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
       await stopModel(modelID);
       throw new Error("mesh 参数文件不存在");
     } else;
     if (!extent) {
+      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
       await stopModel(modelID);
       throw new Error("未成功获取 mesh 的范围");
     }
@@ -528,11 +535,13 @@ const runQuality = async (
           pids: [],
         },
       });
+      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
       await stopModel(modelID);
     });
     outputModel.stdout!.on("data", async (chunk) => {
       const content = iconv.decode(chunk, "gbk");
       console.log(content);
+      res.write(`id: ${Date.now()}\n` + `data:  ${content}\n\n`);
       if (content.includes("time")) {
         // update the progress of result
         currentCount = currentCount + 5;
@@ -549,7 +558,8 @@ const runQuality = async (
       if (code) return;
       else;
       pids.shift();
-      console.log("model finished");
+      console.log("model finish");
+      res.write(`id: ${Date.now()}\n` + `data: model finish\n\n`);
       // tnd2txt
       let promises = [];
       for (let i = 0; i < resultNum; i++) {
@@ -585,10 +595,12 @@ const runQuality = async (
                 pids: pids,
               },
             });
+            res.write(`id: ${Date.now()}\n` + `data:  ${`tnd_${i} finish`}\n\n`);
             resolve("1");
           })
           .catch(async () => {
             console.log("model failed");
+            res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
             await stopModel(modelID);
           });
         promises.push(promise);
@@ -597,7 +609,8 @@ const runQuality = async (
         console.log("model failed");
         await stopModel(modelID);
       });
-      console.log("tnd2txt finished");
+      console.log("tnd2txt finish");
+      res.write(`id: ${Date.now()}\n` + `data:  ${`tnd2txt finish`}\n\n`);
       // tnd2png
       for (let i = 0; i < num; i++) {
         for (let j = 0; j < resultNum; j++) {
@@ -631,10 +644,12 @@ const runQuality = async (
                   pids: pids,
                 },
               });
+              res.write(`id: ${Date.now()}\n` + `data:  ${`tnd_${j}_${i} to png finish`}\n\n`);
               resolve("1");
             })
             .catch(async () => {
               console.log("model failed");
+              res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
               await stopModel(modelID);
             });
           await promise;
@@ -662,9 +677,11 @@ const runQuality = async (
           is_running: false,
         },
       });
-      console.log("all finished");
+      console.log("all finish");
+      res.write(`id: ${Date.now()}\n` + `data:  ${`all finish`}\n\n`);
     });
   } catch (error) {
+    res.write(`data:  ${JSON.stringify({ status: "fail" })}\n\n`);
     await stopModel(modelID);
     if (error instanceof Error) {
       console.log(error.message);
@@ -673,7 +690,7 @@ const runQuality = async (
 };
 
 const runSand = async (
-  paramKeys: string[],
+  paramKeys: string,
   projKey: string,
   title: string,
   projectID: string,
@@ -702,9 +719,15 @@ const runSand = async (
         progress: [0, 1],
       },
     });
-    res.status(200).json({ status: "success", content: [datasetID, modelID, [sndID, yujiID]] });
+    res.write(
+      `id: ${Date.now()}\n` +
+        `data:  ${JSON.stringify({
+          status: "success",
+          content: [datasetID, modelID, [sndID, yujiID]],
+        })}\n\n`
+    );
     // define keys of param
-    let keys: string[] = paramKeys;
+    let keys: string[] = paramKeys.split(",");
     projKey && keys.push(projKey);
     // copy model data by key
     const [meshFileName, extent] = await copyModelData(
@@ -712,13 +735,15 @@ const runSand = async (
       modelID,
       datasetInfo!.path,
       datasetInfo!.timeStamp,
-      paramKeys
+      paramKeys.split(",")
     );
     if (!meshFileName) {
+      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
       await stopModel(modelID);
       throw new Error("mesh 参数文件不存在");
     } else;
     if (!extent) {
+      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
       await stopModel(modelID);
       throw new Error("未成功获取 mesh 的范围");
     }
@@ -781,6 +806,7 @@ const runSand = async (
     });
     outputModel.on("error", async () => {
       console.log("model failed");
+      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
       await prisma.model_info.update({
         where: { id: modelID },
         data: {
@@ -793,6 +819,7 @@ const runSand = async (
     outputModel.stdout!.on("data", async (chunk) => {
       const content = chunk.toString();
       console.log(content);
+      res.write(`id: ${Date.now()}\n` + `data:  ${content}\n\n`);
       if (content.includes("SED")) {
         // update the progress of result
         currentCount = currentCount + 3;
@@ -809,7 +836,8 @@ const runSand = async (
       if (code) return;
       else;
       pids.shift();
-      console.log("model finished");
+      console.log("model finish");
+      res.write(`id: ${Date.now()}\n` + `data:  model finish\n\n`);
       // tnd2txt
       const p1 = execa(
         `conda activate gis && python ${
@@ -842,9 +870,11 @@ const runSand = async (
             pids: pids,
           },
         });
+        res.write(`id: ${Date.now()}\n` + `data:  snd2txt finish\n\n`);
         resolve("1");
       }).catch(async () => {
         console.log("model failed");
+        res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
         await stopModel(modelID);
       });
       const p2 = execa(
@@ -871,6 +901,7 @@ const runSand = async (
       p2.then(async () => {
         currentCount = currentCount + 1;
         pids = pids.filter((pid) => pid !== p2.pid!.toString());
+        res.write(`id: ${Date.now()}\n` + `data:  yuji2txt finish\n\n`);
         await prisma.model_info.update({
           where: { id: modelID },
           data: {
@@ -881,13 +912,16 @@ const runSand = async (
         resolve("1");
       }).catch(async () => {
         console.log("model failed");
+        res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
         await stopModel(modelID);
       });
       await Promise.all([p1, p2]).catch(async () => {
+        res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
         console.log("model failed");
         await stopModel(modelID);
       });
-      console.log("sand2txt finished");
+      console.log("sand2txt finish");
+      res.write(`id: ${Date.now()}\n` + `data:  sand2txt finish\n\n`);
       // sand2png
       for (let index = 0; index < num; index++) {
         const p1 = execa(
@@ -910,6 +944,7 @@ const runSand = async (
         p1.then(async () => {
           currentCount = currentCount + 1;
           pids = pids.filter((pid) => pid !== p1.pid!.toString());
+          res.write(`id: ${Date.now()}\n` + `data:  snd_${index}2png finish\n\n`);
           await prisma.model_info.update({
             where: { id: modelID },
             data: {
@@ -920,6 +955,7 @@ const runSand = async (
           resolve("1");
         }).catch(async () => {
           console.log("model failed");
+          res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
           await stopModel(modelID);
         });
         await p1;
@@ -943,6 +979,7 @@ const runSand = async (
         p2.then(async () => {
           currentCount = currentCount + 1;
           pids = pids.filter((pid) => pid !== p2.pid!.toString());
+          res.write(`id: ${Date.now()}\n` + `data:  yuji_${index}2png finish\n\n`);
           await prisma.model_info.update({
             where: { id: modelID },
             data: {
@@ -953,11 +990,13 @@ const runSand = async (
           resolve("1");
         }).catch(async () => {
           console.log("model failed");
+          res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
           await stopModel(modelID);
         });
         await p2;
       }
-      console.log("sand2png finished");
+      console.log("sand2png finish");
+      res.write(`id: ${Date.now()}\n` + `data: sand2png finish\n\n`);
       // update record
       await prisma.data.updateMany({
         where: {
@@ -980,9 +1019,11 @@ const runSand = async (
           is_running: false,
         },
       });
-      console.log("all finished");
+      console.log("all finish");
+      res.write(`id: ${Date.now()}\n` + `data: all finish\n\n`);
     });
   } catch (error) {
+    res.write(`data:  ${JSON.stringify({ status: "fail" })}\n\n`);
     await stopModel(modelID);
     if (error instanceof Error) {
       console.log(error.message);

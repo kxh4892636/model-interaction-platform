@@ -9,7 +9,7 @@
  */
 
 import { Button, Select, SelectProps, Progress, message, Input } from "antd";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   PanelContainer,
   PanelContentContainer,
@@ -50,6 +50,7 @@ const createSelectOptions = (layers: Layer[]) => {
  * @export module: QualityModelPanel
  */
 interface QualityModelPanelProps {
+  title: string;
   model: string;
 }
 export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
@@ -63,22 +64,24 @@ export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
   const currentModelStatus = getModelStatus(model);
   const setIsSpinning = useProjectStatusStore((state) => state.setIsSpinning);
   const projectKey = useProjectStatusStore((state) => state.key);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const getPercent = (modelID: string) => {
     const percentInterval = setInterval(async () => {
+      // get progress of model
       const result = await axios({
-        method: "post",
+        method: "get",
         baseURL: serverHost + "/api/model/water",
-        data: {
+        params: {
           action: "info",
           modelID: modelID,
         },
       });
       if (result.data.status === "fail") {
         axios({
-          method: "post",
+          method: "get",
           baseURL: serverHost + "/api/model/water",
-          data: {
+          params: {
             action: "stop",
             modelID: modelID,
           },
@@ -106,7 +109,11 @@ export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
   };
 
   useEffect(() => {
-    if (getModelStatus(model)) return;
+    if (getModelStatus(model)) {
+      updateModelStatus(model, "textAreaRef", textAreaRef.current);
+      textAreaRef.current!.value = sessionStorage.getItem("quality") || "";
+      return;
+    }
     console.log(modelStatus);
     addModelStatus({
       intervalStore: null,
@@ -191,6 +198,22 @@ export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
         </>
         <>
           <div style={{ padding: "10px 12px" }}>模型运行进度</div>
+          <textarea
+            className="tteexxtt"
+            ref={textAreaRef}
+            disabled={!currentModelStatus?.isRunning}
+            style={{
+              height: "180px",
+              margin: "10px 12px",
+              width: "100%",
+              border: "1px solid #262626",
+              padding: "8px 6px",
+              background: "#434343",
+              color: "#f0f0f0",
+            }}
+            id={Date.now().toString()}
+            readOnly
+          ></textarea>
           <PanelToolsContainer style={{ border: "0px" }}>
             <PanelToolContainer>
               <Progress
@@ -222,45 +245,74 @@ export const QualityModelPanel = ({ model }: QualityModelPanelProps) => {
                     updateModelStatus(model, "sandParamKeys", []);
                     updateModelStatus(model, "qualityParamKeys", []);
                     updateModelStatus(model, "resultKeys", null);
-                    updateModelStatus(model, "title", null);
+                    updateModelStatus(model, "title", "");
+                    currentModelStatus!.source!.close();
                     axios({
-                      method: "post",
+                      method: "get",
                       baseURL: serverHost + "/api/model/water",
-                      data: {
+                      params: {
                         action: "stop",
                         modelID: currentModelStatus.modelID,
                       },
                     }).then(() => {
                       message.error("模型停止运行", 10);
                     });
+                    sessionStorage.clear();
+                    currentModelStatus.textAreaRef!.value = "";
                   } // run the model
                   else {
-                    axios({
-                      method: "post",
-                      baseURL: serverHost + "/api/model/water",
-                      data: {
-                        action: "quality",
-                        paramKeys: [
-                          ...currentModelStatus!.hydrodynamicsParamKeys!,
+                    const source = new EventSource(
+                      serverHost +
+                        "/api/model/water" +
+                        "?action=quality" +
+                        `&paramKeys=${[
                           ...currentModelStatus!.qualityParamKeys!,
-                        ],
-                        projKey: currentModelStatus!.projKey,
-                        title: currentModelStatus!.title,
-                        projectID: projectKey,
+                          ...currentModelStatus!.hydrodynamicsParamKeys!,
+                        ]}` +
+                        `&projKey=${currentModelStatus!.projKey}` +
+                        `&title=${currentModelStatus!.title}` +
+                        `&projectID=${projectKey}`
+                    );
+                    updateModelStatus(model, "source", source);
+                    source.addEventListener(
+                      "message",
+                      (e) => {
+                        const data = e.data as string;
+                        const currentModelStatus = getModelStatus(model);
+                        if (data.includes("success")) {
+                          const data = JSON.parse(e.data);
+                          updateModelStatus(model, "datasetKey", data.content[0]);
+                          updateModelStatus(model, "modelID", data.content[1]);
+                          updateModelStatus(model, "resultKeys", data.content[2]);
+                          updateModelStatus(model, "isRunning", true);
+                          getPercent(data.content[1]);
+                          sessionStorage.setItem("quality", "");
+                          message.success("模型开始运行");
+                        } else if (data.includes("fail")) {
+                          clearInterval(currentModelStatus!.intervalStore!);
+                          message.error("模型输入参数错误");
+                          source.close();
+                          removeModelStatus(model);
+                          sessionStorage.clear();
+                          currentModelStatus!.textAreaRef!.value = "";
+                        } else {
+                          const output = sessionStorage.getItem("quality");
+                          sessionStorage.setItem("quality", output + data + "\n");
+                          currentModelStatus!.textAreaRef!.value = output + data + "\n";
+                          currentModelStatus!.textAreaRef!.scrollTop =
+                            currentModelStatus!.textAreaRef!.scrollHeight -
+                            currentModelStatus!.textAreaRef!.clientHeight;
+                          // setTextAreaValue(output + data + "\n");
+                        }
+                        if (data.includes("all finished")) {
+                          source.close();
+                          removeModelStatus(model);
+                          sessionStorage.clear();
+                          currentModelStatus!.textAreaRef!.value = "";
+                        }
                       },
-                    }).then((response) => {
-                      if (response.data.status === "success") {
-                        updateModelStatus(model, "datasetKey", response.data.content[0]);
-                        updateModelStatus(model, "modelID", response.data.content[1]);
-                        updateModelStatus(model, "resultKeys", response.data.content[2]);
-                        updateModelStatus(model, "isRunning", true);
-                        getPercent(response.data.content[1]);
-                        message.success("模型开始运行");
-                      } else {
-                        message.error("模型输入参数错误");
-                        removeModelStatus(model);
-                      }
-                    });
+                      false
+                    );
                   }
                   setIsSpinning(false);
                 }}
