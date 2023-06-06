@@ -17,7 +17,7 @@ const isVisualized = async (req: Request, res: Response) => {
     const key = query.key;
     res
       .status(200)
-      .json(await visualizationService.visualizeMesh(key as string));
+      .json(await visualizationService.isVisualized(key as string));
   } catch (error) {
     if (error instanceof Error) {
       res.status(200).json({ status: "fail", content: error.message });
