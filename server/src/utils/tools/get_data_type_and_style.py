@@ -5,10 +5,10 @@ import sys
 
 def getDataType(filePath: str) -> str:
     type: dict = {
-        'uvet.dat': 'uvet', '.gr3': 'mesh', '.json': 'json', '.eweaccdb': 'ewemodel', '.ewemdb': 'ewemodel'
+        'uvet': 'uvet', '.gr3': 'mesh', '.json': 'json', '.eweaccdb': 'ewemodel', '.ewemdb': 'ewemodel',"tang_info":'point',"in_node":'point',"cedian":'point',"toufang":'point'
     }
     for key, value in type.items():
-        if (filePath.endswith(key)):
+        if (key in filePath):
             return value
         else:
             pass
@@ -18,10 +18,10 @@ def getDataType(filePath: str) -> str:
 
 def getDataStyle(filePath: str) -> str:
     style: dict = {
-        'uvet.dat': 'uvet', '.gr3': 'raster', '.json': getVectorStyle(filePath), '.eweaccdb': 'echarts', '.ewemdb': 'echarts'}
+        'uvet': 'uvet', '.gr3': 'raster', '.json': getVectorStyle(filePath), '.eweaccdb': 'echarts', '.ewemdb': 'echarts',"tang_info":'circle',"in_node":'circle',"cedian":'circle',"toufang":'circle'}
 
     for key, value in style.items():
-        if (filePath.endswith(key)):
+        if (key in filePath):
             return value
         else:
             pass
@@ -45,6 +45,26 @@ def getVectorStyle(filePath: str) -> str:
         return 'text'
 
 
+# def getDataTypeAndStyleAndKind(filePath: str) -> tuple[str, str]:
+#     try:
+#         type = ''
+#         style = ''
+#         with open(filePath, 'r', encoding='utf8') as f:
+#             content = ''
+#             for i in range(20):
+#                 line = f.readline()
+#                 if not line:
+#                     break
+#                 content += line
+#             if ('gr3' in filePath):
+#                 type = 'mesh'
+#                 style = 'raster'
+
+#         return (type, style)
+#     except:
+#         return ('text', 'text')
+
+
 if __name__ == '__main__':
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
     try:
@@ -58,9 +78,13 @@ if __name__ == '__main__':
         #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\mesh31.json",
         #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\test.json",
         #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\sanshawan.th",
-        #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\New model.eweaccdb"
+        #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\New model.eweaccdb",
+        #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\tang_info.dat",
+        #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\in_node.dat",
+        #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\cedian.dat",
+        #          r"d:\project\001_model_interaction_platform\data\test\get_data_type_and_style\toufang.dat",
         #          ]
-        # for path in paths:
+        # for path in paths:  
         #     type = getDataType(path)
         #     style = getDataStyle(path)
         #     print(type, ',', style, sep='')

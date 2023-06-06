@@ -85,31 +85,45 @@ const getModel = async (id: string, type: string, currentImage: number) => {
   if (!info) throw new Error("can't find data by id");
   else if (type === "description")
     content =
-      dataFoldURL + info.transformPath[0] + `/flow_field_description_${info.transformPath[2]}.json`;
+      dataFoldURL +
+      info.transformPath[0] +
+      `/flow_field_description_${info.transformPath[2]}.json`;
   else if (type === "uv")
     content =
-      dataFoldURL + info.transformPath[0] + `/uv_${info.transformPath[2]}_${currentImage}.png`;
+      dataFoldURL +
+      info.transformPath[0] +
+      `/uv_${info.transformPath[2]}_${currentImage}.png`;
   else if (type === "mask")
     content =
-      dataFoldURL + info.transformPath[0] + `/mask_${info.transformPath[2]}_${currentImage}.png`;
+      dataFoldURL +
+      info.transformPath[0] +
+      `/mask_${info.transformPath[2]}_${currentImage}.png`;
   else if (type === "valid")
     content =
-      dataFoldURL + info.transformPath[0] + `/valid_${info.transformPath[2]}_${currentImage}.png`;
+      dataFoldURL +
+      info.transformPath[0] +
+      `/valid_${info.transformPath[2]}_${currentImage}.png`;
   else if (type === "quality") {
     content =
       dataFoldURL +
       info.transformPath[0] +
-      `/${basename(info.path!).split(".")[0]}_${info.transformPath[2]}_${currentImage}.png`;
+      `/${basename(info.path!).split(".")[0]}_${
+        info.transformPath[2]
+      }_${currentImage}.png`;
   } else if (type === "snd") {
     content =
       dataFoldURL +
       info.transformPath[0] +
-      `/${basename(info.path!).split(".")[0]}_${info.transformPath[2]}_${currentImage}.png`;
+      `/${basename(info.path!).split(".")[0]}_${
+        info.transformPath[2]
+      }_${currentImage}.png`;
   } else if (type === "yuji") {
     content =
       dataFoldURL +
       info.transformPath[0] +
-      `/${basename(info.path!).split(".")[0]}_${info.transformPath[2]}_${currentImage}.png`;
+      `/${basename(info.path!).split(".")[0]}_${
+        info.transformPath[2]
+      }_${currentImage}.png`;
   }
   return { status: "success", content: content };
 };
@@ -160,7 +174,8 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
   // get type and style of data
   const { stdout } = await execa(
     `conda activate gis && python ${
-      resolve("./").split("\\").join("/") + "/src/utils/tools/get_data_type_and_style.py"
+      resolve("./").split("\\").join("/") +
+      "/src/utils/tools/get_data_type_and_style.py"
     } ${filePath}`,
     { shell: true, windowsHide: true }
   );

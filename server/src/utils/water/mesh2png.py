@@ -123,10 +123,10 @@ if __name__ == '__main__':
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
     try:
         # sys.argv
-        # [src, dst, mask] = sys.argv[1:4]
-        src = r"d:\project\001_model_interaction_platform\data\test\mesh2png\mesh31.csv"
-        dst = r"d:\project\001_model_interaction_platform\data\test\mesh2png\mesh31.png"
-        mask = r"d:\project\001_model_interaction_platform\data\test\mesh2png\mesh31.shp"
+        [src, dst, mask] = sys.argv[1:4]
+        # src = r"d:\project\001_model_interaction_platform\data\test\mesh2png\mesh31.csv"
+        # dst = r"d:\project\001_model_interaction_platform\data\test\mesh2png\mesh31.png"
+        # mask = r"d:\project\001_model_interaction_platform\data\test\mesh2png\mesh31.shp"
         extent: tuple = mesh2png(src, dst, mask)
         print(extent)
     except:

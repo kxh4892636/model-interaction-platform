@@ -28,11 +28,19 @@ export const useData = () => {
   const map = useMapStore((state) => state.map);
   const layers = useLayersStore((state) => state.layers);
   const addLayer = useLayersStore((state) => state.addLayer);
-  const addLayersChecked = useLayersStatusStore((state) => state.addLayersChecked);
-  const addLayersExpanded = useLayersStatusStore((state) => state.addLayersExpanded);
+  const addLayersChecked = useLayersStatusStore(
+    (state) => state.addLayersChecked
+  );
+  const addLayersExpanded = useLayersStatusStore(
+    (state) => state.addLayersExpanded
+  );
   const getKeys = useKeys();
-  const addAnimatedStatus = useAnimatedStatusStore((state) => state.addAnimatedStatus);
-  const updateAnimatedStatus = useAnimatedStatusStore((state) => state.updateAnimatedStatus);
+  const addAnimatedStatus = useAnimatedStatusStore(
+    (state) => state.addAnimatedStatus
+  );
+  const updateAnimatedStatus = useAnimatedStatusStore(
+    (state) => state.updateAnimatedStatus
+  );
   /**
    * get data by id
    * @param id data id
@@ -135,12 +143,19 @@ export const useData = () => {
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const extent = dataDetail.extent;
-      const imageCount: number = Number(res.transformNum) ? Number(res.transformNum) : 100;
+      const imageCount: number = Number(res.transformNum)
+        ? Number(res.transformNum)
+        : 100;
       const startValue = 0;
       const endValue = imageCount - 1;
       let currentCount = startValue;
       if (style === "quality" || style === "yuji" || style === "snd") {
-        getData(id, "model", { currentImage: currentCount, type: style }, "blob").then((res) => {
+        getData(
+          id,
+          "model",
+          { currentImage: currentCount, type: style },
+          "blob"
+        ).then((res) => {
           const blob = new Blob([res]);
           const url = window.URL.createObjectURL(blob);
           map!.addSource(id, {
@@ -164,7 +179,12 @@ export const useData = () => {
         });
         const intervalFunc = setInterval(() => {
           updateAnimatedStatus(id, "currentCount", currentCount);
-          getData(id, "model", { currentImage: currentCount, type: style }, "blob")!.then((res) => {
+          getData(
+            id,
+            "model",
+            { currentImage: currentCount, type: style },
+            "blob"
+          )!.then((res) => {
             const blob = new Blob([res]);
             const url = window.URL.createObjectURL(blob);
             (map!.getSource(id) as ImageSource).updateImage({ url: url });
@@ -253,7 +273,12 @@ export const useData = () => {
       } else if (type === "mesh" && Number(dataDetail.transformNum)) {
         addMeshToMap(id);
       } else if (type === "model" && Number(dataDetail.transformNum)) {
-        if (style === "quality" || style === "water" || style === "yuji" || style === "snd") {
+        if (
+          style === "quality" ||
+          style === "water" ||
+          style === "yuji" ||
+          style === "snd"
+        ) {
           addModelToMap(id, style);
         } else {
           console.error("the style of uvet is wrong");

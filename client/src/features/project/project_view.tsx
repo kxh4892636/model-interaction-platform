@@ -8,7 +8,16 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import styled from "styled-components/macro";
-import { Button, Card, message, Popconfirm, Modal, Input, Space, Tag } from "antd";
+import {
+  Button,
+  Card,
+  message,
+  Popconfirm,
+  Modal,
+  Input,
+  Space,
+  Tag,
+} from "antd";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ServerProject } from "../../types";
@@ -170,7 +179,10 @@ const TagsPanel = ({ tags }: { tags: string[] }) => {
       else;
       if (tagRef.current.scrollWidth <= tagRef.current.clientWidth) return;
       else;
-      if (tagRef.current.scrollLeft + tagRef.current.clientWidth === tagRef.current.scrollWidth) {
+      if (
+        tagRef.current.scrollLeft + tagRef.current.clientWidth ===
+        tagRef.current.scrollWidth
+      ) {
         await sleep(500);
         tagRef.current.scrollLeft = 0;
         cancelAnimationFrame(intervalRef.current);
@@ -280,7 +292,11 @@ const CardList = ({ dataList }: { dataList: ProjectListData[] }) => {
           <Button
             type="primary"
             danger
-            style={{ marginInlineEnd: "auto", marginInlineStart: "10px", fontSize: "14px" }}
+            style={{
+              marginInlineEnd: "auto",
+              marginInlineStart: "10px",
+              fontSize: "14px",
+            }}
           >
             删除项目
           </Button>
@@ -302,7 +318,10 @@ const CardList = ({ dataList }: { dataList: ProjectListData[] }) => {
                 .then((res) => setLayers(res.data.content, "data"));
               setProjectKey(data.key);
               setViewTag(false);
-              map!.setCenter([Number(data.position[0]), Number(data.position[1])]);
+              map!.setCenter([
+                Number(data.position[0]),
+                Number(data.position[1]),
+              ]);
               map!.setZoom(Number(data.position[2]));
               message.success("加载项目完成");
             }}
@@ -329,7 +348,10 @@ const CardList = ({ dataList }: { dataList: ProjectListData[] }) => {
                 .then((res) => setLayers(res.data.content, "data"));
               setProjectKey(data.key);
               setViewTag(false);
-              map!.setCenter([Number(data.position[0]), Number(data.position[1])]);
+              map!.setCenter([
+                Number(data.position[0]),
+                Number(data.position[1]),
+              ]);
               map!.setZoom(Number(data.position[2]));
               message.success("加载项目完成");
             }}
@@ -340,7 +362,10 @@ const CardList = ({ dataList }: { dataList: ProjectListData[] }) => {
         ),
       ]}
     >
-      <Meta title={data.title} description={<TagsPanel tags={data.tags}></TagsPanel>} />
+      <Meta
+        title={data.title}
+        description={<TagsPanel tags={data.tags}></TagsPanel>}
+      />
     </Card>
   ));
 

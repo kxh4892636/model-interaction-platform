@@ -4,7 +4,12 @@ import path, { dirname, resolve } from "path";
 import crypto from "crypto";
 import { copySelectFilesInFolder } from "../utils/tools/fs_extra";
 import { query } from "../utils/ewe/importEWE";
-import { CRUDdatabase, HandleReturn, FlowDiagram, ModifyDatabase } from "../utils/ewe/exportEWE";
+import {
+  CRUDdatabase,
+  HandleReturn,
+  FlowDiagram,
+  ModifyDatabase,
+} from "../utils/ewe/exportEWE";
 import { datasetService } from "./dataset_service";
 import { prisma } from "../utils/tools/prisma";
 import { copyFile, lstat, readFile, rename } from "fs/promises";
@@ -26,11 +31,23 @@ const R_test2 = async (req: Request, res: Response) => {
     const Discard = req.body.Discard;
     const Fleet = req.body.Fleet;
     // 全部封到exportEWE中去
-    await CRUDdatabase(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num);
-    const { stdout } = await execa(`Rscript ./src/utils/ewe/EcoPath.R '${num}'`, {
-      shell: true,
-      windowsHide: true,
-    });
+    await CRUDdatabase(
+      Group,
+      Fleet,
+      Diet,
+      Detritus,
+      DiscardFate,
+      Land,
+      Discard,
+      num
+    );
+    const { stdout } = await execa(
+      `Rscript ./src/utils/ewe/EcoPath.R '${num}'`,
+      {
+        shell: true,
+        windowsHide: true,
+      }
+    );
     // stdout.stdout!.on('end',()=>{
     //   // after
     // })
@@ -56,10 +73,13 @@ const R_test2 = async (req: Request, res: Response) => {
     const Fleet = req.body.Fleet;
     console.log("此次修改的数据为", ModifyData);
     await ModifyDatabase(ModifyData, num, Group, Fleet);
-    const { stdout } = await execa(`Rscript ./src/utils/ewe/EcoPath.R '${num}'`, {
-      shell: true,
-      windowsHide: true,
-    });
+    const { stdout } = await execa(
+      `Rscript ./src/utils/ewe/EcoPath.R '${num}'`,
+      {
+        shell: true,
+        windowsHide: true,
+      }
+    );
     // [1] TRUE 长度为10 后面还跟着2个空格 10*n-1  5个最后为49  加上“[1] ” 从54开始
     // 如果图标那一块真的要使用图片进行传输的话，多了“pdf 2” 所以要从65开始
     let data = JSON.parse(stdout.toString().slice(54));
@@ -127,7 +147,10 @@ const runHydrodynamics = async (
     });
     res.write(
       `id: ${Date.now()}\n` +
-        `data:  ${JSON.stringify({ status: "success", content: [datasetID, modelID, [uvID]] })}\n\n`
+        `data:  ${JSON.stringify({
+          status: "success",
+          content: [datasetID, modelID, [uvID]],
+        })}\n\n`
     );
     // define keys of param
     let keys: string[] = paramKeys.split(",");
@@ -172,7 +195,9 @@ const runHydrodynamics = async (
       },
     });
     // get model param
-    const paramContent = (await readFile(dataFoldURL + datasetInfo!.path + "/model/paramhk.in"))
+    const paramContent = (
+      await readFile(dataFoldURL + datasetInfo!.path + "/model/paramhk.in")
+    )
       .toString()
       .split("\r\n");
     let num = Number(paramContent[11].split(/\s/)[0]) * 24;
@@ -234,10 +259,9 @@ const runHydrodynamics = async (
           " " +
           `${dataFoldURL}${datasetInfo!.path}/transform/water` +
           " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string).replace(
-            "gr3",
-            "csv"
-          )}` +
+          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(
+            meshFileName as string
+          ).replace("gr3", "csv")}` +
           " " +
           num +
           " " +
@@ -271,7 +295,9 @@ const runHydrodynamics = async (
             path.resolve("./").split("\\").join("/") +
             "/src/utils/water/uvet2description.py" +
             " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/water/description_${timeStamp}.json` +
+            `${dataFoldURL}${
+              datasetInfo!.path
+            }/transform/water/description_${timeStamp}.json` +
             " " +
             `${datasetInfo!.path}/transform/water/` +
             " " +
@@ -321,9 +347,14 @@ const runHydrodynamics = async (
             },
           });
           const processPath =
-            resolve("./").split("\\").join("/") + "/src/utils/process/process.exe";
+            resolve("./").split("\\").join("/") +
+            "/src/utils/process/process.exe";
           const descriptionPath =
-            dataFoldURL + datasetInfo!.path + "/transform/water/description_" + timeStamp + ".json";
+            dataFoldURL +
+            datasetInfo!.path +
+            "/transform/water/description_" +
+            timeStamp +
+            ".json";
           const output = execa(processPath + " " + descriptionPath, {
             shell: true,
             windowsHide: true,
@@ -360,7 +391,9 @@ const runHydrodynamics = async (
               datasetInfo!.path
             }/transform/water/flow_field_description.json`;
             for (let index = 0; index < num; index++) {
-              const uvPath = `${dataFoldURL}${datasetInfo!.path}/transform/water/uv_${index}.png`;
+              const uvPath = `${dataFoldURL}${
+                datasetInfo!.path
+              }/transform/water/uv_${index}.png`;
               const maskPath = `${dataFoldURL}${
                 datasetInfo!.path
               }/transform/water/mask_${index}.png`;
@@ -369,15 +402,24 @@ const runHydrodynamics = async (
               }/transform/water/valid_${index}.png`;
               await rename(
                 uvPath,
-                uvPath.replace(`uv_${index}.png`, `uv_${timeStamp}_${index}.png`)
+                uvPath.replace(
+                  `uv_${index}.png`,
+                  `uv_${timeStamp}_${index}.png`
+                )
               );
               await rename(
                 maskPath,
-                maskPath.replace(`mask_${index}.png`, `mask_${timeStamp}_${index}.png`)
+                maskPath.replace(
+                  `mask_${index}.png`,
+                  `mask_${timeStamp}_${index}.png`
+                )
               );
               await rename(
                 validPath,
-                validPath.replace(`valid_${index}.png`, `valid_${timeStamp}_${index}.png`)
+                validPath.replace(
+                  `valid_${index}.png`,
+                  `valid_${timeStamp}_${index}.png`
+                )
               );
             }
             await rename(
@@ -441,7 +483,10 @@ const runQuality = async (
     });
     res.write(
       `id: ${Date.now()}\n` +
-        `data:  ${JSON.stringify({ status: "success", content: [datasetID, modelID, []] })}\n\n`
+        `data:  ${JSON.stringify({
+          status: "success",
+          content: [datasetID, modelID, []],
+        })}\n\n`
     );
     // define keys of param
     let keys: string[] = paramKeys.split(",");
@@ -456,21 +501,31 @@ const runQuality = async (
       paramKeys.split(",")
     );
     if (!meshFileName) {
-      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+      res.write(
+        `id: ${Date.now()}\n` +
+          `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+      );
       await stopModel(modelID);
       throw new Error("mesh 参数文件不存在");
     } else;
     if (!extent) {
-      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+      res.write(
+        `id: ${Date.now()}\n` +
+          `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+      );
       await stopModel(modelID);
       throw new Error("未成功获取 mesh 的范围");
     }
     // get model param
-    const datContent = await readFile(dataFoldURL + datasetInfo!.path + "/model/初始浓度.dat");
+    const datContent = await readFile(
+      dataFoldURL + datasetInfo!.path + "/model/初始浓度.dat"
+    );
     const resultNum = datContent.toString().split("\r\n").length;
     const resultFolder = datasetInfo!.path + "/model";
     const paramContent = (
-      await readFile(dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat")
+      await readFile(
+        dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat"
+      )
     )
       .toString()
       .split("\r\n");
@@ -531,11 +586,17 @@ const runQuality = async (
       await prisma.model_info.update({
         where: { id: modelID },
         data: {
-          progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
+          progress: [
+            currentCount,
+            num * 5 + 3 * num * resultNum + resultNum + 1,
+          ],
           pids: [],
         },
       });
-      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+      res.write(
+        `id: ${Date.now()}\n` +
+          `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+      );
       await stopModel(modelID);
     });
     outputModel.stdout!.on("data", async (chunk) => {
@@ -548,7 +609,10 @@ const runQuality = async (
         await prisma.model_info.update({
           where: { id: modelID },
           data: {
-            progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
+            progress: [
+              currentCount,
+              num * 5 + 3 * num * resultNum + resultNum + 1,
+            ],
             pids: pids,
           },
         });
@@ -572,10 +636,9 @@ const runQuality = async (
             " " +
             `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
             " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string).replace(
-              "gr3",
-              "csv"
-            )}` +
+            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(
+              meshFileName as string
+            ).replace("gr3", "csv")}` +
             " " +
             num +
             " " +
@@ -591,16 +654,24 @@ const runQuality = async (
             await prisma.model_info.update({
               where: { id: modelID },
               data: {
-                progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
+                progress: [
+                  currentCount,
+                  num * 5 + 3 * num * resultNum + resultNum + 1,
+                ],
                 pids: pids,
               },
             });
-            res.write(`id: ${Date.now()}\n` + `data:  ${`tnd_${i} finish`}\n\n`);
+            res.write(
+              `id: ${Date.now()}\n` + `data:  ${`tnd_${i} finish`}\n\n`
+            );
             resolve("1");
           })
           .catch(async () => {
             console.log("model failed");
-            res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+            res.write(
+              `id: ${Date.now()}\n` +
+                `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+            );
             await stopModel(modelID);
           });
         promises.push(promise);
@@ -625,10 +696,9 @@ const runQuality = async (
               " " +
               `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
               " " +
-              `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string).replace(
-                "gr3",
-                "shp"
-              )}`
+              `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(
+                meshFileName as string
+              ).replace("gr3", "shp")}`
             }`,
             { shell: true, windowsHide: true }
           );
@@ -640,16 +710,25 @@ const runQuality = async (
               await prisma.model_info.update({
                 where: { id: modelID },
                 data: {
-                  progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
+                  progress: [
+                    currentCount,
+                    num * 5 + 3 * num * resultNum + resultNum + 1,
+                  ],
                   pids: pids,
                 },
               });
-              res.write(`id: ${Date.now()}\n` + `data:  ${`tnd_${j}_${i} to png finish`}\n\n`);
+              res.write(
+                `id: ${Date.now()}\n` +
+                  `data:  ${`tnd_${j}_${i} to png finish`}\n\n`
+              );
               resolve("1");
             })
             .catch(async () => {
               console.log("model failed");
-              res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+              res.write(
+                `id: ${Date.now()}\n` +
+                  `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+              );
               await stopModel(modelID);
             });
           await promise;
@@ -672,7 +751,10 @@ const runQuality = async (
       await prisma.model_info.update({
         where: { id: modelID },
         data: {
-          progress: [currentCount, num * 5 + 3 * num * resultNum + resultNum + 1],
+          progress: [
+            currentCount,
+            num * 5 + 3 * num * resultNum + resultNum + 1,
+          ],
           pids: pids,
           is_running: false,
         },
@@ -738,19 +820,27 @@ const runSand = async (
       paramKeys.split(",")
     );
     if (!meshFileName) {
-      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+      res.write(
+        `id: ${Date.now()}\n` +
+          `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+      );
       await stopModel(modelID);
       throw new Error("mesh 参数文件不存在");
     } else;
     if (!extent) {
-      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+      res.write(
+        `id: ${Date.now()}\n` +
+          `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+      );
       await stopModel(modelID);
       throw new Error("未成功获取 mesh 的范围");
     }
     // get model param
     const resultFolder = datasetInfo!.path + "/model";
     const paramContent = (
-      await readFile(dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat")
+      await readFile(
+        dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat"
+      )
     )
       .toString()
       .split("\r\n");
@@ -806,7 +896,10 @@ const runSand = async (
     });
     outputModel.on("error", async () => {
       console.log("model failed");
-      res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+      res.write(
+        `id: ${Date.now()}\n` +
+          `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+      );
       await prisma.model_info.update({
         where: { id: modelID },
         data: {
@@ -848,10 +941,9 @@ const runSand = async (
           " " +
           `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
           " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string)!.replace(
-            "gr3",
-            "csv"
-          )}` +
+          `${dataFoldURL}${
+            datasetInfo!.path
+          }/transform/mesh/${(meshFileName as string)!.replace("gr3", "csv")}` +
           " " +
           num +
           " " +
@@ -874,7 +966,10 @@ const runSand = async (
         resolve("1");
       }).catch(async () => {
         console.log("model failed");
-        res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+        res.write(
+          `id: ${Date.now()}\n` +
+            `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+        );
         await stopModel(modelID);
       });
       const p2 = execa(
@@ -886,10 +981,9 @@ const runSand = async (
           " " +
           `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
           " " +
-          `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string)!.replace(
-            "gr3",
-            "csv"
-          )}` +
+          `${dataFoldURL}${
+            datasetInfo!.path
+          }/transform/mesh/${(meshFileName as string)!.replace("gr3", "csv")}` +
           " " +
           num +
           " " +
@@ -912,11 +1006,17 @@ const runSand = async (
         resolve("1");
       }).catch(async () => {
         console.log("model failed");
-        res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+        res.write(
+          `id: ${Date.now()}\n` +
+            `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+        );
         await stopModel(modelID);
       });
       await Promise.all([p1, p2]).catch(async () => {
-        res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+        res.write(
+          `id: ${Date.now()}\n` +
+            `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+        );
         console.log("model failed");
         await stopModel(modelID);
       });
@@ -929,14 +1029,15 @@ const runSand = async (
             path.resolve("./").split("\\").join("/") +
             "/src/utils/water/sand2png.py" +
             " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/sand/snd_${timeStamp}_${index}.txt` +
+            `${dataFoldURL}${
+              datasetInfo!.path
+            }/transform/sand/snd_${timeStamp}_${index}.txt` +
             " " +
             `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
             " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string)!.replace(
-              "gr3",
-              "shp"
-            )}`
+            `${dataFoldURL}${
+              datasetInfo!.path
+            }/transform/mesh/${(meshFileName as string)!.replace("gr3", "shp")}`
           }`,
           { shell: true, windowsHide: true }
         );
@@ -944,7 +1045,9 @@ const runSand = async (
         p1.then(async () => {
           currentCount = currentCount + 1;
           pids = pids.filter((pid) => pid !== p1.pid!.toString());
-          res.write(`id: ${Date.now()}\n` + `data:  snd_${index}2png finish\n\n`);
+          res.write(
+            `id: ${Date.now()}\n` + `data:  snd_${index}2png finish\n\n`
+          );
           await prisma.model_info.update({
             where: { id: modelID },
             data: {
@@ -955,7 +1058,10 @@ const runSand = async (
           resolve("1");
         }).catch(async () => {
           console.log("model failed");
-          res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+          res.write(
+            `id: ${Date.now()}\n` +
+              `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+          );
           await stopModel(modelID);
         });
         await p1;
@@ -964,14 +1070,15 @@ const runSand = async (
             path.resolve("./").split("\\").join("/") +
             "/src/utils/water/sand2png.py" +
             " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/sand/yuji_${timeStamp}_${index}.txt` +
+            `${dataFoldURL}${
+              datasetInfo!.path
+            }/transform/sand/yuji_${timeStamp}_${index}.txt` +
             " " +
             `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
             " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(meshFileName as string)!.replace(
-              "gr3",
-              "shp"
-            )}`
+            `${dataFoldURL}${
+              datasetInfo!.path
+            }/transform/mesh/${(meshFileName as string)!.replace("gr3", "shp")}`
           }`,
           { shell: true, windowsHide: true }
         );
@@ -979,7 +1086,9 @@ const runSand = async (
         p2.then(async () => {
           currentCount = currentCount + 1;
           pids = pids.filter((pid) => pid !== p2.pid!.toString());
-          res.write(`id: ${Date.now()}\n` + `data:  yuji_${index}2png finish\n\n`);
+          res.write(
+            `id: ${Date.now()}\n` + `data:  yuji_${index}2png finish\n\n`
+          );
           await prisma.model_info.update({
             where: { id: modelID },
             data: {
@@ -990,7 +1099,10 @@ const runSand = async (
           resolve("1");
         }).catch(async () => {
           console.log("model failed");
-          res.write(`id: ${Date.now()}\n` + `data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+          res.write(
+            `id: ${Date.now()}\n` +
+              `data:  ${JSON.stringify({ status: "fail" })}\n\n`
+          );
           await stopModel(modelID);
         });
         await p2;
@@ -1069,13 +1181,18 @@ const copyModelData = async (
       return;
     } else;
     // copy model data
-    const datasetTimeStampOfFile = fileInfo.path.match(/\d*(?=.input)/)!.toString();
+    const datasetTimeStampOfFile = fileInfo.path
+      .match(/\d*(?=.input)/)!
+      .toString();
     const src = dataFoldURL + fileInfo.path;
     const dst = src.replace(datasetTimeStampOfFile!, datasetTimeStamp);
     if (datasetTimeStampOfFile !== datasetTimeStamp) {
       await copyFile(src, dst);
     } else;
-    await copyFile(src, dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, ""));
+    await copyFile(
+      src,
+      dst.replace("input", "model").replace(`_${fileInfo.timeStamp}`, "")
+    );
     // copy transform
     const transform = fileInfo.transformPath;
     if (transform.length) {
@@ -1086,7 +1203,9 @@ const copyModelData = async (
       const target = source.replace(datasetTimeStampOfFile!, datasetTimeStamp);
       if (datasetTimeStampOfFile !== datasetTimeStamp) {
         if ((await lstat(source)).isFile()) {
-          await copySelectFilesInFolder(dirname(source), dirname(target), [fileInfo.timeStamp]);
+          await copySelectFilesInFolder(dirname(source), dirname(target), [
+            fileInfo.timeStamp,
+          ]);
         } else {
           await copySelectFilesInFolder(source, target, [fileInfo.timeStamp]);
         }
@@ -1103,7 +1222,9 @@ const copyModelData = async (
 };
 
 const getModel = async (modelInfoID: string) => {
-  const modelInfo = await prisma.model_info.findUnique({ where: { id: modelInfoID } });
+  const modelInfo = await prisma.model_info.findUnique({
+    where: { id: modelInfoID },
+  });
   if (!modelInfo) {
     return { status: "fail", content: "模型信息不存在" };
   } else;
@@ -1118,7 +1239,10 @@ const stopModel = async (modelInfoID: string) => {
   // delete all programs by pid
   for (let index = 0; index < modelInfo!.pids.length; index++) {
     const pid = modelInfo!.pids[index];
-    await execa(`taskkill /f /t /pid ${pid}`, { shell: true, windowsHide: true }).catch(() => {});
+    await execa(`taskkill /f /t /pid ${pid}`, {
+      shell: true,
+      windowsHide: true,
+    }).catch(() => {});
   }
   // delete modelInfo
   await prisma.model_info.delete({
