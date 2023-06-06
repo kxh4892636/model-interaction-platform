@@ -3,7 +3,7 @@
  * @Author: xiaohan kong
  * @Date: 2023-02-16
  * @LastEditors: xiaohan kong
- * @LastEditTime: 2023-04-09
+ * @LastEditTime: 2023-06-06
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
@@ -25,7 +25,11 @@ import { DataTools } from "./components/data_tools";
 import { DataTree } from "./components/data_tree/data_tree";
 import { DataTreeMenu } from "./components/data_tree_menu";
 import { useDataActions } from "./hooks/use_data_actions";
-import { useLayersStatusStore, useModalStore, useProjectStatusStore } from "../../stores";
+import {
+  useLayersStatusStore,
+  useModalStore,
+  useProjectStatusStore,
+} from "../../stores";
 import Modal from "antd/es/modal/Modal";
 import Upload from "antd/es/upload/Upload";
 import { useManualRefreshStore } from "../../stores/refresh_store";
@@ -127,6 +131,56 @@ const RenameInput = () => {
 };
 
 /**
+ * @description Visualization component, visualize data and then add to map
+ * @Author xiaohan kong
+ */
+const Visualization = () => {
+  const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const dataActions = useDataActions();
+  const modalTag = useModalStore((state) => state.modalTag);
+  const setModalTag = useModalStore((state) => state.setModalTag);
+  const setModal = useModalStore((state) => state.setModal);
+  const layerKey = useLayersStatusStore((state) => state.layersSelected);
+
+  return (
+    <Modal
+      title="可视化面板"
+      cancelText="取消"
+      okText="确认"
+      centered
+      style={{ top: "-10vh" }}
+      confirmLoading={isLoading}
+      open={modalTag}
+      onOk={async () => {
+        await dataActions.renameLayer(inputValue, layerKey["data"]!.key);
+        message.success("添加成功");
+        setModalTag(false);
+        setIsLoading(false);
+        setModal(<></>);
+      }}
+      onCancel={() => {
+        message.error("添加失败");
+        setModalTag(false);
+        setIsLoading(false);
+        setModal(<></>);
+      }}
+    >
+      <Input
+        style={{
+          width: "320px",
+          marginBlockEnd: "10px",
+        }}
+        placeholder="请选择对应的 mesh 文件"
+        onChange={(e) => {
+          setInputValue(e.target.value);
+        }}
+      />
+    </Modal>
+  );
+};
+
+/**
  * @description create the layer group, define it's title
  * @Author xiaohan kong
  */
@@ -216,7 +270,10 @@ export const DataPanel = () => {
         },
       ];
     } else;
-    if (layersSelected.data.type === "text" || layersSelected.data!.layerStyle === "text") {
+    if (
+      layersSelected.data.type === "text" ||
+      layersSelected.data!.layerStyle === "text"
+    ) {
       return [
         {
           key: "rename",
@@ -237,9 +294,22 @@ export const DataPanel = () => {
       {
         key: "add",
         label: "添加至地图",
-        action: () => {
-          data.addDataToMap(layersSelected.data!.key);
-          data.addDataToLayerTree(layersSelected.data!.key);
+        action: async () => {
+          if (layersSelected.data!.type === "mesh") {
+            const state = await data.isVisualized(layersSelected.data!.key);
+            if (!state) {
+              message.info("正在可视化中");
+              const status = await data.visualizeData(layersSelected.data!.key);
+              if (status === "success") {
+                message.success("可视化成功");
+              } else {
+                message.error("可视化失败");
+              }
+            } else;
+            data.addDataToMap(layersSelected.data!.key);
+            data.addDataToLayerTree(layersSelected.data!.key);
+          } else if (layersSelected.data!.type === "point") {
+          } else;
         },
       },
       {

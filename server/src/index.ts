@@ -14,6 +14,7 @@ import { projectRoute } from "./routes/project_route";
 import { datasetRoute } from "./routes/dataset_route";
 import { dataRoute } from "./routes/data_route";
 import { modelRoute } from "./routes/model_route";
+import { visualizationRoute } from "./routes/visualization_route";
 
 const app = express();
 const port = 3456;
@@ -31,5 +32,6 @@ app.use("/api/project", projectRoute);
 app.use("/api/dataset", datasetRoute);
 app.use("/api/data", dataRoute);
 app.use("/api/model", modelRoute);
+app.use("/api/visualization", visualizationRoute);
 
 app.listen(port, () => {});

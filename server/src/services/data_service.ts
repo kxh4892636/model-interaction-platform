@@ -182,67 +182,6 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
   const [type, style] = stdout.toString().trimEnd().split(",");
   let transform: string[] = [];
   let extent: number[] = [];
-  // generate transform filed
-  if (type === "mesh") {
-    const fileName = file.filename.split(".")[0];
-    const csvPath = filePath
-      .replace(file.filename, `${fileName}.csv`)
-      .replace(/(?<=\d*)\\input/, "\\transform\\mesh");
-    const maskPath = filePath
-      .replace(file.filename, `${fileName}.shp`)
-      .replace(/(?<=\d*)\\input/, "\\transform\\mesh");
-    const pngPath = filePath
-      .replace(file.filename, `${fileName}.png`)
-      .replace(/(?<=\d*)\\input/, "\\transform\\mesh");
-    transform.push(pngPath.split("\\").join("/").split(dataFoldURL)[1]);
-    // generate csv from mesh
-    await execa(
-      `conda activate gis && python ${
-        resolve("./").split("\\").join("/") +
-        "/src/utils/water/mesh2csv.py" +
-        " " +
-        filePath +
-        " " +
-        csvPath
-      }`,
-      { shell: true, windowsHide: true }
-    );
-    // generate mask from csv
-    await execa(
-      `conda activate gis && python ${
-        resolve("./").split("\\").join("/") +
-        "/src/utils/water/mesh2mask.py" +
-        " " +
-        csvPath +
-        " " +
-        maskPath
-      }`,
-      { shell: true, windowsHide: true }
-    );
-    // generate png from csv and mask
-    const { stdout } = await execa(
-      `conda activate gis && python ${
-        resolve("./").split("\\").join("/") +
-        "/src/utils/water/mesh2png.py" +
-        " " +
-        csvPath +
-        " " +
-        pngPath +
-        " " +
-        maskPath
-      }`,
-      { shell: true, windowsHide: true }
-    );
-    // get extent of mesh
-    extent = stdout
-      .toString()
-      .trim()
-      .replace("(", "")
-      .replace(")", "")
-      .split(",")
-      .map((value) => Number(value));
-  } else {
-  }
   // write data into database
   const timeStamp = filePath.match(/(?<=\_)\d*(?=\.)/)?.toString();
   await prisma.data.create({

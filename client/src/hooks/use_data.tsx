@@ -312,10 +312,38 @@ export const useData = () => {
     });
   };
 
+  const isVisualized = async (key: string) => {
+    const data = (
+      await axios({
+        method: "get",
+        url: serverHost + "/api/visualization/state",
+        params: {
+          key: key,
+        },
+      })
+    ).data;
+    return data.status === "success" ? true : false;
+  };
+
+  const visualizeData = async (key: string) => {
+    const data = (
+      await axios({
+        method: "post",
+        url: serverHost + "/api/visualization/mesh",
+        data: {
+          key: key,
+        },
+      })
+    ).data;
+    return data.status;
+  };
+
   return {
     getData,
     getDataDetail,
     addDataToMap,
     addDataToLayerTree,
+    isVisualized,
+    visualizeData,
   };
 };
