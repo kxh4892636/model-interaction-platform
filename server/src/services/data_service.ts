@@ -58,8 +58,10 @@ const getJSON = async (id: string) => {
     },
   });
   if (!info) throw new Error("can't find data by id");
-  const filePath = dataFoldURL + info.path;
-  const buffer = await readFile(filePath).toString();
+  const filePath =
+    dataFoldURL +
+    (info.transformPath.length !== 0 ? info.transformPath[0] : info.path);
+  const buffer = (await readFile(filePath)).toString();
   const json = JSON.parse(buffer);
   return { status: "success", content: json };
 };

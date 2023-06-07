@@ -18,6 +18,7 @@ import { useAnimatedStatusStore } from "../stores/animated_status_store";
 import { FlowFieldManager } from "../utils/customLayer/flowfield";
 import { FlowLayer } from "../utils/customLayer/flowLayer";
 import { serverHost } from "../config/global_variable";
+import { useLayerColorStore } from "../features/data/store/layer_color_store";
 
 /**
  * @description return the function that curd data
@@ -41,6 +42,8 @@ export const useData = () => {
   const updateAnimatedStatus = useAnimatedStatusStore(
     (state) => state.updateAnimatedStatus
   );
+  const getColor = useLayerColorStore((state) => state.getColor);
+
   /**
    * get data by id
    * @param id data id
@@ -53,6 +56,7 @@ export const useData = () => {
       });
     return data;
   };
+
   /**
    * get data by id
    * @param id data id
@@ -76,20 +80,23 @@ export const useData = () => {
       });
     return data;
   };
+
   /**
    * add json to map by id
    * @param id data id
    */
   const addJSONToMap = (id: string) => {
+    const color = getColor();
     getDataDetail(id).then((res) => {
       const dataDetail: ServerData = res;
       const style = dataDetail.style;
       if (style === "text") return;
       else;
+
       getData(id, "json").then((res) => {
         map!.addSource(id, {
           type: "geojson",
-          data: res,
+          data: res.content,
         });
         map!.addLayer({
           id: id,
@@ -97,6 +104,10 @@ export const useData = () => {
           source: id,
           layout: {
             visibility: "visible",
+          },
+          paint: {
+            "circle-color": color,
+            "circle-radius": 4,
           },
         });
       });
@@ -285,7 +296,8 @@ export const useData = () => {
         }
       } else if (type === "image") {
         addImageToMap(id);
-      } else if (type === "text") {
+      } else if (type === "point") {
+        addJSONToMap(id);
       } else if (type === "ewemodel") {
       } else {
         console.error("the type of data is unknown");
@@ -325,7 +337,7 @@ export const useData = () => {
     return data.status === "success" ? true : false;
   };
 
-  const visualizeData = async (key: string) => {
+  const visualizeMesh = async (key: string) => {
     const data = (
       await axios({
         method: "post",
@@ -336,6 +348,33 @@ export const useData = () => {
       })
     ).data;
     return data.status;
+  };
+
+  const visualizePoint = async (pointKey: string, meshKey: string) => {
+    const data = (
+      await axios({
+        method: "post",
+        url: serverHost + "/api/visualization/point",
+        data: {
+          pointKey: pointKey,
+          meshKey: meshKey,
+        },
+      })
+    ).data;
+    return data.status;
+  };
+
+  const visualizeData = async (key: string, meshKey?: string) => {
+    return await getDataDetail(key).then((res) => {
+      const dataDetail: ServerData = res;
+      const type = dataDetail.type;
+      if (type.includes("mesh")) {
+        return visualizeMesh(key);
+      } else if (type.includes("point")) {
+        return visualizePoint(key, meshKey!);
+      } else;
+      return { status: "fail" };
+    });
   };
 
   return {

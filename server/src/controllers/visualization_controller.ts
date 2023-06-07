@@ -39,4 +39,23 @@ const visualizeMesh = async (req: Request, res: Response) => {
   }
 };
 
-export const visualizationController = { isVisualized, visualizeMesh };
+const visualizePoint = async (req: Request, res: Response) => {
+  try {
+    const body = req.body;
+    const meshKey = body.meshKey as string;
+    const pointKey = body.pointKey as string;
+    res
+      .status(200)
+      .json(await visualizationService.visualizePoint(pointKey, meshKey));
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    }
+  }
+};
+
+export const visualizationController = {
+  isVisualized,
+  visualizeMesh,
+  visualizePoint,
+};

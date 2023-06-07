@@ -17,3 +17,5 @@ export const visualizationRoute = express.Router();
 visualizationRoute.get("/state", visualizationController.isVisualized);
 // /api/visualization/mesh
 visualizationRoute.post("/mesh", visualizationController.visualizeMesh);
+// /api/visualization/point
+visualizationRoute.post("/point", visualizationController.visualizePoint);

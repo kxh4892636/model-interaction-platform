@@ -14,7 +14,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
-import { Button, Input, message } from "antd";
+import { Button, Input, Select, message } from "antd";
 import {
   PanelContainer,
   PanelContentContainer,
@@ -27,6 +27,7 @@ import { DataTreeMenu } from "./components/data_tree_menu";
 import { useDataActions } from "./hooks/use_data_actions";
 import {
   useLayersStatusStore,
+  useLayersStore,
   useModalStore,
   useProjectStatusStore,
 } from "../../stores";
@@ -35,6 +36,34 @@ import Upload from "antd/es/upload/Upload";
 import { useManualRefreshStore } from "../../stores/refresh_store";
 import { useData } from "../../hooks";
 import { serverHost } from "../../config/global_variable";
+import { Layer } from "../../types";
+
+/**
+ * generate the select options of all mesh
+ * @param layers layers
+ * @returns select option
+ */
+const createSelectOptions = (layers: Layer[]) => {
+  interface optionType {
+    label: string;
+    options: { value: string; label: string }[];
+  }
+  let selectOptions: optionType[] = [];
+  for (let index = 0; index < layers.length; index++) {
+    const layer = layers[index];
+    selectOptions.push({ label: layer.title, options: [] });
+    layer.children.forEach((layer) => {
+      if (layer.type === "mesh") {
+        selectOptions[index].options.push({
+          label: layer.title,
+          value: layer.key,
+        });
+      } else;
+    });
+  }
+  const result = selectOptions.filter((value) => value.options.length !== 0);
+  return result;
+};
 
 /**
  * @description UploadPanel component
@@ -135,13 +164,15 @@ const RenameInput = () => {
  * @Author xiaohan kong
  */
 const Visualization = () => {
-  const [inputValue, setInputValue] = useState("");
+  const [selectValue, setSelectValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const dataActions = useDataActions();
   const modalTag = useModalStore((state) => state.modalTag);
   const setModalTag = useModalStore((state) => state.setModalTag);
   const setModal = useModalStore((state) => state.setModal);
-  const layerKey = useLayersStatusStore((state) => state.layersSelected);
+  const layers = useLayersStore((state) => state.layers);
+  const options = createSelectOptions(layers.data);
+  const layersSelected = useLayersStatusStore((state) => state.layersSelected);
+  const data = useData();
 
   return (
     <Modal
@@ -152,29 +183,42 @@ const Visualization = () => {
       style={{ top: "-10vh" }}
       confirmLoading={isLoading}
       open={modalTag}
+      okButtonProps={{ disabled: !selectValue }}
       onOk={async () => {
-        await dataActions.renameLayer(inputValue, layerKey["data"]!.key);
-        message.success("添加成功");
+        if (selectValue) {
+          message.success("开始可视化");
+          const status = await data.visualizeData(
+            layersSelected.data!.key,
+            selectValue
+          );
+          if (status === "success") {
+            message.success("可视化成功");
+          } else {
+            message.error("可视化失败");
+          }
+
+          data.addDataToMap(layersSelected.data!.key);
+          data.addDataToLayerTree(layersSelected.data!.key);
+        } else;
         setModalTag(false);
         setIsLoading(false);
         setModal(<></>);
       }}
       onCancel={() => {
-        message.error("添加失败");
         setModalTag(false);
         setIsLoading(false);
         setModal(<></>);
       }}
     >
-      <Input
-        style={{
-          width: "320px",
-          marginBlockEnd: "10px",
-        }}
+      <Select
+        style={{ margin: "6px 0px", width: "80%" }}
         placeholder="请选择对应的 mesh 文件"
-        onChange={(e) => {
-          setInputValue(e.target.value);
+        value={selectValue}
+        onChange={(value) => {
+          console.log(value);
+          setSelectValue(value);
         }}
+        options={options}
       />
     </Modal>
   );
@@ -309,6 +353,14 @@ export const DataPanel = () => {
             data.addDataToMap(layersSelected.data!.key);
             data.addDataToLayerTree(layersSelected.data!.key);
           } else if (layersSelected.data!.type === "point") {
+            const state = await data.isVisualized(layersSelected.data!.key);
+            if (!state) {
+              setModalTag(true);
+              setModal(<Visualization />);
+            } else {
+              data.addDataToMap(layersSelected.data!.key);
+              data.addDataToLayerTree(layersSelected.data!.key);
+            }
           } else;
         },
       },

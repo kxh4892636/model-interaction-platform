@@ -61,23 +61,26 @@ def dat2json(dataDict: dict, ids: list[str], dstPath) -> None:
 if __name__ == '__main__':
     try:
         # sys.argv
-        # [mesh, txt, dst] = sys.argv[1:4]
-        mesh = r"d:\project\001_model_interaction_platform\data\test\dat2json\mesh31.csv"
-        txt = [
-            r"d:\project\001_model_interaction_platform\data\test\dat2json\tang_info.dat",
-            r"d:\project\001_model_interaction_platform\data\test\dat2json\in_node.dat",
-            r"d:\project\001_model_interaction_platform\data\test\dat2json\cedian.dat",
-            r"d:\project\001_model_interaction_platform\data\test\dat2json\toufang.dat",]
-        dst = [
-            r"d:\project\001_model_interaction_platform\data\test\dat2json\tang_info.json",
-            r"d:\project\001_model_interaction_platform\data\test\dat2json\in_node.json",
-            r"d:\project\001_model_interaction_platform\data\test\dat2json\cedian.json",
-            r"d:\project\001_model_interaction_platform\data\test\dat2json\toufang.json",]
+        [mesh, dat, dst] = sys.argv[1:4]
         dataDict = resolveCSV(mesh)
-        for i in range(4):
-            ids = resolveDat(txt[i])
-            dat2json(dataDict, ids, dst[i])
+        ids = resolveDat(dat)
+        dat2json(dataDict, ids, dst)
+        # mesh = r"d:\project\001_model_interaction_platform\data\test\dat2json\mesh31.csv"
+        # txt = [
+        #     r"d:\project\001_model_interaction_platform\data\test\dat2json\tang_info.dat",
+        #     r"d:\project\001_model_interaction_platform\data\test\dat2json\in_node.dat",
+        #     r"d:\project\001_model_interaction_platform\data\test\dat2json\cedian.dat",
+        #     r"d:\project\001_model_interaction_platform\data\test\dat2json\toufang.dat",]
+        # dst = [
+        #     r"d:\project\001_model_interaction_platform\data\test\dat2json\tang_info.json",
+        #     r"d:\project\001_model_interaction_platform\data\test\dat2json\in_node.json",
+        #     r"d:\project\001_model_interaction_platform\data\test\dat2json\cedian.json",
+        #     r"d:\project\001_model_interaction_platform\data\test\dat2json\toufang.json",]
+        # dataDict = resolveCSV(mesh)
+        # for i in range(4):
+        #     ids = resolveDat(dat[i])
+        #     dat2json(dataDict, ids, dst[i])
 
         print('success')
     except:
-        print('failed')
+        print('fail')
