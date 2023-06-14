@@ -79,6 +79,7 @@ const water = async (req: Request, res: Response) => {
     const type = req.body.action;
     if (error instanceof Error) {
       console.log(error.message);
+      console.log(error.stack);
       if (type === "info" || type === "stop") {
         res.status(200).json({ status: "fail", content: error.message });
       } else;

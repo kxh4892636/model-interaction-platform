@@ -34,7 +34,10 @@ const createSelectOptions = (layers: Layer[]) => {
     selectOptions.push({ label: layer.title, options: [] });
     layer.children.forEach((layer) => {
       if (layer.input) {
-        selectOptions[index].options.push({ label: layer.title, value: layer.key });
+        selectOptions[index].options.push({
+          label: layer.title,
+          value: layer.key,
+        });
       } else;
     });
   }
@@ -96,7 +99,11 @@ export const Hydrodynamics = ({ model }: AppProps) => {
       const progress = result.data.content.progress;
       // stop model if failed to run model
       // update progress of model
-      updateModelStatus(model, "percent", ((progress[0] / progress[1]) * 100).toFixed(2));
+      updateModelStatus(
+        model,
+        "percent",
+        ((progress[0] / progress[1]) * 100).toFixed(2)
+      );
       // add result if model is finished
       if (!result.data.content.is_running) {
         clearInterval(percentInterval);
@@ -104,14 +111,15 @@ export const Hydrodynamics = ({ model }: AppProps) => {
         message.success("模型运行完毕");
         return;
       } else;
-    }, 3456);
+    }, 5000);
     updateModelStatus(model, "intervalStore", percentInterval);
   };
 
   useEffect(() => {
     if (getModelStatus(model)) {
       updateModelStatus(model, "textAreaRef", textAreaRef.current);
-      textAreaRef.current!.value = sessionStorage.getItem("hydrodynamics") || "";
+      textAreaRef.current!.value =
+        sessionStorage.getItem("hydrodynamics") || "";
       return;
     }
     console.log(modelStatus);
@@ -195,6 +203,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
               padding: "8px 6px",
               background: "#434343",
               color: "#f0f0f0",
+              borderRadius: "4px",
             }}
             id={Date.now().toString()}
             readOnly
@@ -202,8 +211,14 @@ export const Hydrodynamics = ({ model }: AppProps) => {
           <PanelToolsContainer style={{ border: "0px" }}>
             <PanelToolContainer>
               <Progress
-                percent={currentModelStatus?.percent ? currentModelStatus.percent : 0}
-                style={{ minWidth: "15vw", marginRight: "auto", marginLeft: "12px" }}
+                percent={
+                  currentModelStatus?.percent ? currentModelStatus.percent : 0
+                }
+                style={{
+                  minWidth: "15vw",
+                  marginRight: "auto",
+                  marginLeft: "12px",
+                }}
               />
             </PanelToolContainer>
             <PanelToolContainer>
@@ -219,7 +234,11 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                 }
                 onClick={() => {
                   setIsSpinning(true);
-                  updateModelStatus(model, "isRunning", !currentModelStatus?.isRunning);
+                  updateModelStatus(
+                    model,
+                    "isRunning",
+                    !currentModelStatus?.isRunning
+                  );
                   // stop the model
                   if (currentModelStatus?.isRunning) {
                     clearInterval(currentModelStatus.intervalStore!);
@@ -250,7 +269,9 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                       serverHost +
                         "/api/model/water" +
                         "?action=hydrodynamics" +
-                        `&paramKeys=${currentModelStatus!.hydrodynamicsParamKeys}` +
+                        `&paramKeys=${
+                          currentModelStatus!.hydrodynamicsParamKeys
+                        }` +
                         `&projKey=${currentModelStatus!.projKey}` +
                         `&title=${currentModelStatus!.title}` +
                         `&projectID=${projectKey}`
@@ -263,9 +284,17 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                         const currentModelStatus = getModelStatus(model);
                         if (data.includes("success")) {
                           const data = JSON.parse(e.data);
-                          updateModelStatus(model, "datasetKey", data.content[0]);
+                          updateModelStatus(
+                            model,
+                            "datasetKey",
+                            data.content[0]
+                          );
                           updateModelStatus(model, "modelID", data.content[1]);
-                          updateModelStatus(model, "resultKeys", data.content[2]);
+                          updateModelStatus(
+                            model,
+                            "resultKeys",
+                            data.content[2]
+                          );
                           updateModelStatus(model, "isRunning", true);
                           getPercent(data.content[1]);
                           sessionStorage.setItem("hydrodynamics", "");
@@ -278,15 +307,20 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                           sessionStorage.clear();
                           currentModelStatus!.textAreaRef!.value = "";
                         } else {
-                          const output = sessionStorage.getItem("hydrodynamics");
-                          sessionStorage.setItem("hydrodynamics", output + data + "\n");
-                          currentModelStatus!.textAreaRef!.value = output + data + "\n";
+                          const output =
+                            sessionStorage.getItem("hydrodynamics");
+                          sessionStorage.setItem(
+                            "hydrodynamics",
+                            output + data + "\n"
+                          );
+                          currentModelStatus!.textAreaRef!.value =
+                            output + data + "\n";
                           currentModelStatus!.textAreaRef!.scrollTop =
                             currentModelStatus!.textAreaRef!.scrollHeight -
                             currentModelStatus!.textAreaRef!.clientHeight;
                           // setTextAreaValue(output + data + "\n");
                         }
-                        if (data.includes("all finished")) {
+                        if (data.includes("all finish")) {
                           source.close();
                           removeModelStatus(model);
                           sessionStorage.clear();

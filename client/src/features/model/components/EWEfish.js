@@ -113,7 +113,9 @@ const EditableCell = ({
 };
 export default function App() {
   const [SelectOptions, setSelectOptions] = useState([]);
-  const setselectEWEModelID = selectedEWEModelID((state) => state.setEWEModelID);
+  const setselectEWEModelID = selectedEWEModelID(
+    (state) => state.setEWEModelID
+  );
   // 生成select下拉框内容
   const layers = useLayersStore((state) => state.layers);
   const createSelectOptions = (layers) => {
@@ -236,7 +238,10 @@ export default function App() {
       // _, record 代表当前值和所在的全部值
       render: (_, record) =>
         GroupData.length >= 1 ? (
-          <Popconfirm title="Sure to delete?" onConfirm={() => GroupTableDelete(record.key)}>
+          <Popconfirm
+            title="Sure to delete?"
+            onConfirm={() => GroupTableDelete(record.key)}
+          >
             <Button type="link">Delete</Button>
           </Popconfirm>
         ) : null,
@@ -266,11 +271,15 @@ export default function App() {
 
   // Fleet弹出框
   // 点击ok的同时将DiscardFateData的内容也进行更新状态
-  const setDiscardFateData = FisheryDiscardFate((state) => state.setDiscardFateData);
+  const setDiscardFateData = FisheryDiscardFate(
+    (state) => state.setDiscardFateData
+  );
   // 点击ok的同时将LandCol的表头更新
   const setLandColumns = FisheryLandCol((state) => state.setLandColumns);
   // 点击ok的同时将DiscardCol的表头更新
-  const setDiscardColumns = FisheryDiscardCol((state) => state.setDiscardColumns);
+  const setDiscardColumns = FisheryDiscardCol(
+    (state) => state.setDiscardColumns
+  );
 
   // 确定完成Fleet的编辑
   const FleethandleOk = () => {
@@ -323,7 +332,10 @@ export default function App() {
       // _, record 代表当前值和所在的全部值
       render: (_, record) =>
         FleetData.length >= 1 ? (
-          <Popconfirm title="Sure to delete?" onConfirm={() => FleetTableDelete(record.key)}>
+          <Popconfirm
+            title="Sure to delete?"
+            onConfirm={() => FleetTableDelete(record.key)}
+          >
             <Button type="link">Delete</Button>
           </Popconfirm>
         ) : null,
@@ -430,6 +442,33 @@ export default function App() {
             options={SelectOptions}
           />
         </Space>
+        <div
+          style={{
+            marginTop: "10px",
+            padding: "10px",
+            width: "340px",
+            border: "1px solid #bfbfbf",
+            borderRadius: "4px",
+            color: "#595959",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "16px",
+              paddingLeft: "0px",
+              paddingBottom: "4px",
+            }}
+          >
+            生态模块数据解释
+          </div>
+          <ol style={{ paddingLeft: "10px" }}>
+            <li>各功能组的生物量</li>
+            <li>生产量/生物量（P/B）</li>
+            <li>消耗量/生物量（Q/B）</li>
+            <li>各功能组食物构成矩阵</li>
+            <li>捕捞数据</li>
+          </ol>
+        </div>
       </div>
       <div style={{ display: displaystate }}>
         <Space>

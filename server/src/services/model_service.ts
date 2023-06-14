@@ -203,6 +203,9 @@ const runHydrodynamics = async (
     let num = Number(paramContent[11].split(/\s/)[0]) * 24;
     let currentCount = 0;
     // run model
+    res.write(
+      `id: ${Date.now()}\n` + `data:  ${"导入输入参数完成, 开始运行模型"}\n\n`
+    );
     const modelPath = dataFoldURL + datasetInfo!.path + "/model/elcirc.exe";
     const outputModel = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,
@@ -493,6 +496,7 @@ const runQuality = async (
     projKey && keys.push(projKey);
 
     // copy model data by key
+    res.write(`id: ${Date.now()}\n` + `data:  ${"开始导入输入参数"}\n\n`);
     const [meshFileName, extent] = await copyModelData(
       datasetID,
       modelID,
@@ -516,6 +520,7 @@ const runQuality = async (
       await stopModel(modelID);
       throw new Error("未成功获取 mesh 的范围");
     }
+
     // get model param
     const datContent = await readFile(
       dataFoldURL + datasetInfo!.path + "/model/初始浓度.dat"
@@ -568,6 +573,9 @@ const runQuality = async (
       },
     });
     // run quality model
+    res.write(
+      `id: ${Date.now()}\n` + `data:  ${"导入输入参数完成, 开始运行模型"}\n\n`
+    );
     const modelPath = dataFoldURL + datasetInfo!.path + "/model/quality.exe";
     const outputModel = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,
@@ -812,6 +820,7 @@ const runSand = async (
     let keys: string[] = paramKeys.split(",");
     projKey && keys.push(projKey);
     // copy model data by key
+    res.write(`id: ${Date.now()}\n` + `data:  ${"开始导入输入参数"}\n\n`);
     const [meshFileName, extent] = await copyModelData(
       datasetID,
       modelID,
@@ -881,6 +890,9 @@ const runSand = async (
       },
     });
     // run quality model
+    res.write(
+      `id: ${Date.now()}\n` + `data:  ${"导入输入参数完成, 开始运行模型"}\n\n`
+    );
     const modelPath = dataFoldURL + datasetInfo!.path + "/model/sand.exe";
     const outputModel = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,

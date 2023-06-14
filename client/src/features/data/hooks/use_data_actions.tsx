@@ -10,10 +10,11 @@
 
 import { useLayersStore } from "../../../stores/layers_store";
 import { useLayersStatusStore } from "../../../stores/layers_status_store";
-import { useKeys } from "../../../hooks";
+import { useAnimate, useKeys } from "../../../hooks";
 import { Layer } from "../../../types";
 import axios from "axios";
 import { serverHost } from "../../../config/global_variable";
+import { useMapStore } from "../../../stores/map_store";
 
 /**
  * @description DataPanel action
@@ -25,12 +26,24 @@ export const useDataActions = () => {
   const deleteLayerByKey = useLayersStore((state) => state.deleteLayer);
   const updateLayer = useLayersStore((state) => state.updateLayer);
   const getKeys = useKeys();
-  const setLayersExpanded = useLayersStatusStore((state) => state.setLayersExpanded);
-  const addLayersExpanded = useLayersStatusStore((state) => state.addLayersExpanded);
-  const deleteLayersChecked = useLayersStatusStore((state) => state.deleteLayersChecked);
-  const deleteLayersExpanded = useLayersStatusStore((state) => state.deleteLayersExpanded);
+  const setLayersExpanded = useLayersStatusStore(
+    (state) => state.setLayersExpanded
+  );
+  const addLayersExpanded = useLayersStatusStore(
+    (state) => state.addLayersExpanded
+  );
+  const deleteLayersChecked = useLayersStatusStore(
+    (state) => state.deleteLayersChecked
+  );
+  const deleteLayersExpanded = useLayersStatusStore(
+    (state) => state.deleteLayersExpanded
+  );
   const layersSelected = useLayersStatusStore((state) => state.layersSelected);
-  const setLayersSelected = useLayersStatusStore((state) => state.setLayersSelected);
+  const setLayersSelected = useLayersStatusStore(
+    (state) => state.setLayersSelected
+  );
+  const map = useMapStore((state) => state.map);
+  const animate = useAnimate();
 
   /**
    * expand or collapse all layers by expand
@@ -64,7 +77,17 @@ export const useDataActions = () => {
       deleteLayersChecked(layersSelected["data"].key, "data");
       deleteLayersExpanded(layersSelected["data"].key, "data");
       deleteLayerByKey(layersSelected["data"].key, "data");
+      deleteLayerByKey(layersSelected["data"].key, "map");
       setLayersSelected(undefined, "data");
+      // delete single layer
+      if (map!.getLayer(layersSelected["data"].key))
+        map!.removeLayer(layersSelected["data"].key);
+      else;
+      if (map!.getSource(layersSelected["data"].key))
+        map!.removeSource(layersSelected["data"].key);
+      else;
+      animate.removeAnimate(layersSelected["data"].key);
+      setLayersSelected(undefined, "map");
     } else {
       // delete layer group
       axios.request({
@@ -81,7 +104,15 @@ export const useDataActions = () => {
         deleteLayersChecked(key, "data");
         deleteLayersExpanded(key, "data");
         deleteLayerByKey(key, "data");
+        deleteLayerByKey(key, "map");
         setLayersSelected(undefined, "data");
+        // delete single layer
+        if (map!.getLayer(key)) map!.removeLayer(key);
+        else;
+        if (map!.getSource(key)) map!.removeSource(key);
+        else;
+        animate.removeAnimate(key);
+        setLayersSelected(undefined, "map");
       });
       groupKeys!.forEach((key: string) => {
         deleteLayersChecked(key, "data");
@@ -127,7 +158,10 @@ export const useDataActions = () => {
   /**
    * create layer group
    */
-  const createLayerGroup = async (title: string = "group", projectKey: string) => {
+  const createLayerGroup = async (
+    title: string = "group",
+    projectKey: string
+  ) => {
     const result = await axios.request({
       url: serverHost + "/api/dataset/action",
       method: "post",

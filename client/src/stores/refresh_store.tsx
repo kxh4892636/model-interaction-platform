@@ -5,7 +5,10 @@ interface ManualRefreshStore {
   manualRefresh: () => void;
 }
 
+// note
+
 export const useManualRefreshStore = create<ManualRefreshStore>((set) => ({
   refreshTag: 0,
-  manualRefresh: () => set((state: ManualRefreshStore) => ({ refreshTag: state.refreshTag + 1 })),
+  manualRefresh: () =>
+    set((state: ManualRefreshStore) => ({ refreshTag: state.refreshTag + 1 })),
 }));

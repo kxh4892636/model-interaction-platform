@@ -113,7 +113,7 @@ const UploadPanel = () => {
  * @description ReanmeInput component, pop up it after clicking rename in layerMenu
  * @Author xiaohan kong
  */
-const RenameInput = () => {
+const RenameInput = ({ defaultValue }: { defaultValue: string }) => {
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const dataActions = useDataActions();
@@ -121,6 +121,7 @@ const RenameInput = () => {
   const setModalTag = useModalStore((state) => state.setModalTag);
   const setModal = useModalStore((state) => state.setModal);
   const layerKey = useLayersStatusStore((state) => state.layersSelected);
+  const manualRefresh = useManualRefreshStore((state) => state.manualRefresh);
 
   return (
     <Modal
@@ -137,6 +138,7 @@ const RenameInput = () => {
         setModalTag(false);
         setIsLoading(false);
         setModal(<></>);
+        manualRefresh();
       }}
       onCancel={() => {
         message.error("重命名失败");
@@ -151,6 +153,7 @@ const RenameInput = () => {
           marginBlockEnd: "10px",
         }}
         placeholder="请输入重命名后的名称"
+        defaultValue={defaultValue}
         onChange={(e) => {
           setInputValue(e.target.value);
         }}
@@ -304,7 +307,7 @@ export const DataPanel = () => {
           label: "重命名该文件夹",
           action: () => {
             setModalTag(true);
-            setModal(<RenameInput />);
+            setModal(<RenameInput defaultValue={layersSelected.data!.title} />);
           },
         },
         {
@@ -316,7 +319,8 @@ export const DataPanel = () => {
     } else;
     if (
       layersSelected.data.type === "text" ||
-      layersSelected.data!.layerStyle === "text"
+      layersSelected.data!.layerStyle === "text" ||
+      layersSelected.data.type === "ewemodel"
     ) {
       return [
         {
@@ -324,7 +328,7 @@ export const DataPanel = () => {
           label: "重命名该文件",
           action: () => {
             setModalTag(true);
-            setModal(<RenameInput />);
+            setModal(<RenameInput defaultValue={layersSelected.data!.title} />);
           },
         },
         {
@@ -339,6 +343,7 @@ export const DataPanel = () => {
         key: "add",
         label: "添加至地图",
         action: async () => {
+          console.log(layersSelected);
           if (layersSelected.data!.type === "mesh") {
             const state = await data.isVisualized(layersSelected.data!.key);
             if (!state) {
@@ -361,6 +366,9 @@ export const DataPanel = () => {
               data.addDataToMap(layersSelected.data!.key);
               data.addDataToLayerTree(layersSelected.data!.key);
             }
+          } else if (layersSelected.data!.type === "model") {
+            data.addDataToMap(layersSelected.data!.key);
+            data.addDataToLayerTree(layersSelected.data!.key);
           } else;
         },
       },
@@ -369,7 +377,7 @@ export const DataPanel = () => {
         label: "重命名该文件",
         action: () => {
           setModalTag(true);
-          setModal(<RenameInput />);
+          setModal(<RenameInput defaultValue={layersSelected.data!.title} />);
         },
       },
       {
@@ -407,7 +415,7 @@ export const DataPanel = () => {
           }}
         />
       </PanelToolsContainer>
-      <PanelContentContainer>
+      <PanelContentContainer style={{ overflow: "auto" }}>
         <DataTree>
           <DataTreeMenu layerMenuItems={layerMenuItems()} />
         </DataTree>

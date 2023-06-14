@@ -24,7 +24,11 @@ import { useViewStore } from "../../stores/view_store";
 import { useProjectStatusStore } from "../../stores/project_status_store";
 import { Nav } from "../../features/nav";
 import { ProjectInfoPanel, ProjectView } from "../../features/project";
-import { useAnimatedStatusStore, useLayersStore, useModalStore } from "../../stores";
+import {
+  useAnimatedStatusStore,
+  useLayersStore,
+  useModalStore,
+} from "../../stores";
 import { MapView, MapStatus } from "../../features/map";
 import { DataPanel } from "../../features/data";
 import { LayerPanel } from "../../features/layer";
@@ -61,14 +65,6 @@ const ViewContainer = styled.div`
   position: relative;
   flex: 1 1 0;
 `;
-// TitleBar container
-const StatusBarContainer = styled.div`
-  height: 3vh;
-  display: flex;
-  background: #f5f5f5;
-  border-top: 1px solid #d9d9d9;
-  align-items: center;
-`;
 
 /**
  * @description Home 组件
@@ -87,9 +83,10 @@ export const Home: React.FC = () => {
   const projectKey = useProjectStatusStore((state) => state.key);
   const isSpinning = useProjectStatusStore((state) => state.isSpinning);
   const navigate = useNavigate();
-  const layers = useLayersStore((state) => state.layers);
   const modelStatus = useModelsStatus((state) => state.modelStatus);
-  const animatedStatus = useAnimatedStatusStore((state) => state.animatedStatus);
+  const animatedStatus = useAnimatedStatusStore(
+    (state) => state.animatedStatus
+  );
 
   // 侧边栏数据
   const navItems = projectKey.includes("-")
@@ -97,28 +94,36 @@ export const Home: React.FC = () => {
         {
           title: "项目",
           id: "project",
-          icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
+          icon: (
+            <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />
+          ),
           panel: <ProjectView />,
           type: "view",
         },
         {
           title: "数据",
           id: "data",
-          icon: <DatabaseOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
+          icon: (
+            <DatabaseOutlined style={{ color: "#fafafa", fontSize: "24px" }} />
+          ),
           panel: <DataPanel />,
           type: "panel",
         },
         {
           title: "图层",
           id: "layer",
-          icon: <LayerOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
+          icon: (
+            <LayerOutlined style={{ color: "#fafafa", fontSize: "24px" }} />
+          ),
           panel: <LayerPanel />,
           type: "panel",
         },
         {
           title: "模型",
           id: "model",
-          icon: <MediumOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
+          icon: (
+            <MediumOutlined style={{ color: "#fafafa", fontSize: "24px" }} />
+          ),
           panel: <Model />,
           type: "view",
         },
@@ -135,7 +140,9 @@ export const Home: React.FC = () => {
         {
           title: "项目",
           id: "project",
-          icon: <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />,
+          icon: (
+            <AppstoreOutlined style={{ color: "#fafafa", fontSize: "24px" }} />
+          ),
           panel: <ProjectView />,
           type: "view",
         },
@@ -176,7 +183,9 @@ export const Home: React.FC = () => {
             <MapStatus position={position} />
             {viewTag ? view : <></>}
           </ViewContainer>
-          <Sidebar items={projectKey.includes("-") ? sidebarItems : []}></Sidebar>
+          <Sidebar
+            items={projectKey.includes("-") ? sidebarItems : []}
+          ></Sidebar>
         </ContentContainer>
       </Spin>
       {modalTag ? modal : <></>}
