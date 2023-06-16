@@ -128,6 +128,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
       isRunning: false,
       model: model,
       hydrodynamicsParamKeys: [],
+      waterParamKey: null,
       qualityParamKeys: [],
       sandParamKeys: [],
       percent: 0,
@@ -246,6 +247,7 @@ export const Hydrodynamics = ({ model }: AppProps) => {
                     updateModelStatus(model, "percent", 0);
                     updateModelStatus(model, "modelID", null);
                     updateModelStatus(model, "hydrodynamicsParamKeys", []);
+                    updateModelStatus(model, "waterParamKey", null);
                     updateModelStatus(model, "sandParamKeys", []);
                     updateModelStatus(model, "qualityParamKeys", []);
                     updateModelStatus(model, "resultKeys", null);

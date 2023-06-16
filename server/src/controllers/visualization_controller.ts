@@ -22,6 +22,7 @@ const isVisualized = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       res.status(200).json({ status: "fail", content: error.message });
     }
+    console.log(error);
   }
 };
 
@@ -36,6 +37,7 @@ const visualizeMesh = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       res.status(200).json({ status: "fail", content: error.message });
     }
+    console.log(error);
   }
 };
 
@@ -51,6 +53,7 @@ const visualizePoint = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       res.status(200).json({ status: "fail", content: error.message });
     }
+    console.log(error);
   }
 };
 

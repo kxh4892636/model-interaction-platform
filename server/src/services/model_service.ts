@@ -16,7 +16,7 @@ import { copyFile, lstat, readFile, rename } from "fs/promises";
 import { execa } from "execa";
 import ADODB from "node-adodb";
 import iconv from "iconv-lite";
-import { resourceLimits } from "worker_threads";
+import { visualizationService } from "./visualization_service";
 
 // 计算结果
 const R_test2 = async (req: Request, res: Response) => {
@@ -156,10 +156,9 @@ const runHydrodynamics = async (
     let keys: string[] = paramKeys.split(",");
     projKey && keys.push(projKey);
     // copy model data by key
-    const [meshFileName, extent] = await copyModelData(
-      datasetID,
+    res.write(`id: ${Date.now()}\n` + `data:  ${"开始导入输入参数"}\n\n`);
+    const [meshFileName, extent, meshKey] = await copyModelData(
       modelID,
-      datasetInfo!.path,
       datasetInfo!.timeStamp,
       paramKeys.split(",")
     );
@@ -186,6 +185,7 @@ const runHydrodynamics = async (
         dataset: datasetID,
         input: false,
         timeStamp: timeStamp,
+        params: paramKeys.split(","),
       },
     });
     await prisma.dataset.update({
@@ -252,6 +252,7 @@ const runHydrodynamics = async (
       pids.shift();
       console.log("model finish");
       res.write(`data: model finish\n\n`);
+
       // uvet2txt
       const result = execa(
         `conda activate gis && python ${
@@ -349,6 +350,7 @@ const runHydrodynamics = async (
               ],
             },
           });
+
           const processPath =
             resolve("./").split("\\").join("/") +
             "/src/utils/process/process.exe";
@@ -358,6 +360,7 @@ const runHydrodynamics = async (
             "/transform/water/description_" +
             timeStamp +
             ".json";
+          console.log(processPath + " " + descriptionPath);
           const output = execa(processPath + " " + descriptionPath, {
             shell: true,
             windowsHide: true,
@@ -457,6 +460,7 @@ const runHydrodynamics = async (
 };
 
 const runQuality = async (
+  waterKey: string,
   paramKeys: string,
   projKey: string,
   title: string,
@@ -472,6 +476,16 @@ const runQuality = async (
     const datasetInfo = await prisma.dataset.findUnique({
       where: {
         id: datasetID,
+      },
+    });
+    const waterKeyInfo = await prisma.data.findUnique({
+      where: {
+        id: waterKey,
+      },
+    });
+    const waterInfo = await prisma.dataset.findUnique({
+      where: {
+        id: waterKeyInfo!.dataset,
       },
     });
     let pids: string[] = [];
@@ -497,12 +511,10 @@ const runQuality = async (
 
     // copy model data by key
     res.write(`id: ${Date.now()}\n` + `data:  ${"开始导入输入参数"}\n\n`);
-    const [meshFileName, extent] = await copyModelData(
-      datasetID,
+    const [meshFileName, extent, meshKey] = await copyModelData(
       modelID,
-      datasetInfo!.path,
-      datasetInfo!.timeStamp,
-      paramKeys.split(",")
+      waterInfo!.timeStamp,
+      [...paramKeys.split(","), ...waterKeyInfo!.params]
     );
     if (!meshFileName) {
       res.write(
@@ -523,13 +535,13 @@ const runQuality = async (
 
     // get model param
     const datContent = await readFile(
-      dataFoldURL + datasetInfo!.path + "/model/初始浓度.dat"
+      dataFoldURL + waterInfo!.path + "/model/初始浓度.dat"
     );
     const resultNum = datContent.toString().split("\r\n").length;
     const resultFolder = datasetInfo!.path + "/model";
     const paramContent = (
       await readFile(
-        dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat"
+        dataFoldURL + waterInfo!.path + "/model/wuran-gongkuang.dat"
       )
     )
       .toString()
@@ -576,7 +588,7 @@ const runQuality = async (
     res.write(
       `id: ${Date.now()}\n` + `data:  ${"导入输入参数完成, 开始运行模型"}\n\n`
     );
-    const modelPath = dataFoldURL + datasetInfo!.path + "/model/quality.exe";
+    const modelPath = dataFoldURL + waterInfo!.path + "/model/quality.exe";
     const outputModel = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,
       windowsHide: true,
@@ -640,11 +652,11 @@ const runQuality = async (
             path.resolve("./").split("\\").join("/") +
             "/src/utils/water/tnd2txt.py" +
             " " +
-            `${dataFoldURL}${datasetInfo!.path}/model/tnd${i + 1}.dat` +
+            `${dataFoldURL}${waterInfo!.path}/model/tnd${i + 1}.dat` +
             " " +
             `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
             " " +
-            `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(
+            `${dataFoldURL}${waterInfo!.path}/transform/mesh/${(
               meshFileName as string
             ).replace("gr3", "csv")}` +
             " " +
@@ -704,7 +716,7 @@ const runQuality = async (
               " " +
               `${dataFoldURL}${datasetInfo!.path}/transform/quality` +
               " " +
-              `${dataFoldURL}${datasetInfo!.path}/transform/mesh/${(
+              `${dataFoldURL}${waterInfo!.path}/transform/mesh/${(
                 meshFileName as string
               ).replace("gr3", "shp")}`
             }`,
@@ -774,12 +786,13 @@ const runQuality = async (
     res.write(`data:  ${JSON.stringify({ status: "fail" })}\n\n`);
     await stopModel(modelID);
     if (error instanceof Error) {
-      console.log(error.message);
+      console.log(error);
     } else;
   }
 };
 
 const runSand = async (
+  waterKey: string,
   paramKeys: string,
   projKey: string,
   title: string,
@@ -797,6 +810,16 @@ const runSand = async (
     const datasetInfo = await prisma.dataset.findUnique({
       where: {
         id: datasetID,
+      },
+    });
+    const waterKeyInfo = await prisma.data.findUnique({
+      where: {
+        id: waterKey,
+      },
+    });
+    const waterInfo = await prisma.dataset.findUnique({
+      where: {
+        id: waterKeyInfo!.dataset,
       },
     });
     let pids: string[] = [];
@@ -821,12 +844,10 @@ const runSand = async (
     projKey && keys.push(projKey);
     // copy model data by key
     res.write(`id: ${Date.now()}\n` + `data:  ${"开始导入输入参数"}\n\n`);
-    const [meshFileName, extent] = await copyModelData(
-      datasetID,
+    const [meshFileName, extent, meshKey] = await copyModelData(
       modelID,
-      datasetInfo!.path,
-      datasetInfo!.timeStamp,
-      paramKeys.split(",")
+      waterInfo!.timeStamp,
+      [...paramKeys.split(","), ...waterKeyInfo!.params]
     );
     if (!meshFileName) {
       res.write(
@@ -848,7 +869,7 @@ const runSand = async (
     const resultFolder = datasetInfo!.path + "/model";
     const paramContent = (
       await readFile(
-        dataFoldURL + datasetInfo!.path + "/model/wuran-gongkuang.dat"
+        dataFoldURL + waterInfo!.path + "/model/wuran-gongkuang.dat"
       )
     )
       .toString()
@@ -893,7 +914,7 @@ const runSand = async (
     res.write(
       `id: ${Date.now()}\n` + `data:  ${"导入输入参数完成, 开始运行模型"}\n\n`
     );
-    const modelPath = dataFoldURL + datasetInfo!.path + "/model/sand.exe";
+    const modelPath = dataFoldURL + waterInfo!.path + "/model/sand.exe";
     const outputModel = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
       shell: true,
       windowsHide: true,
@@ -949,12 +970,12 @@ const runSand = async (
           path.resolve("./").split("\\").join("/") +
           "/src/utils/water/sand2txt.py" +
           " " +
-          `${dataFoldURL}${datasetInfo!.path}/model/snd.dat` +
+          `${dataFoldURL}${waterInfo!.path}/model/snd.dat` +
           " " +
           `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
           " " +
           `${dataFoldURL}${
-            datasetInfo!.path
+            waterInfo!.path
           }/transform/mesh/${(meshFileName as string)!.replace("gr3", "csv")}` +
           " " +
           num +
@@ -989,12 +1010,12 @@ const runSand = async (
           path.resolve("./").split("\\").join("/") +
           "/src/utils/water/sand2txt.py" +
           " " +
-          `${dataFoldURL}${datasetInfo!.path}/model/yuji.dat` +
+          `${dataFoldURL}${waterInfo!.path}/model/yuji.dat` +
           " " +
           `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
           " " +
           `${dataFoldURL}${
-            datasetInfo!.path
+            waterInfo!.path
           }/transform/mesh/${(meshFileName as string)!.replace("gr3", "csv")}` +
           " " +
           num +
@@ -1048,7 +1069,7 @@ const runSand = async (
             `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
             " " +
             `${dataFoldURL}${
-              datasetInfo!.path
+              waterInfo!.path
             }/transform/mesh/${(meshFileName as string)!.replace("gr3", "shp")}`
           }`,
           { shell: true, windowsHide: true }
@@ -1089,7 +1110,7 @@ const runSand = async (
             `${dataFoldURL}${datasetInfo!.path}/transform/sand` +
             " " +
             `${dataFoldURL}${
-              datasetInfo!.path
+              waterInfo!.path
             }/transform/mesh/${(meshFileName as string)!.replace("gr3", "shp")}`
           }`,
           { shell: true, windowsHide: true }
@@ -1150,22 +1171,21 @@ const runSand = async (
     res.write(`data:  ${JSON.stringify({ status: "fail" })}\n\n`);
     await stopModel(modelID);
     if (error instanceof Error) {
-      console.log(error.message);
+      console.log(error);
     } else;
   }
 };
 
 const copyModelData = async (
-  datasetID: string,
   modelInfoID: string,
-  datasetPath: string,
   datasetTimeStamp: string,
   paramKeys: string[]
-) => {
+): Promise<[string, number[], string] | undefined[]> => {
   let meshFileName: string | undefined = undefined;
   let extent: number[] | undefined = undefined;
+  let meshKey: string | undefined = undefined;
   const promises = paramKeys.map(async (key) => {
-    const fileInfo = await prisma.data.findUnique({
+    let fileInfo = await prisma.data.findUnique({
       where: {
         id: key,
       },
@@ -1176,21 +1196,25 @@ const copyModelData = async (
     } else;
     // copy uvet data
     if (fileInfo.style === "water") {
-      const datasetOfFile = await prisma.dataset.findUnique({
+      return;
+    } else;
+    // find mesh and visualize it
+    if (fileInfo.type === "mesh") {
+      // mesh2csv
+      (await visualizationService.isVisualized(key)).status === "success" ||
+        (await visualizationService.visualizeMesh(key));
+      fileInfo = await prisma.data.findUnique({
         where: {
-          id: fileInfo.dataset,
+          id: key,
         },
       });
-      const src1 = dataFoldURL + datasetOfFile!.path + "/model/et.dat";
-      const src2 = dataFoldURL + datasetOfFile!.path + "/model/vn.dat";
-      const src3 = dataFoldURL + datasetOfFile!.path + "/model/vt.dat";
-      const dst1 = dataFoldURL + datasetPath + "/model/et.dat";
-      const dst2 = dataFoldURL + datasetPath + "/model/vn.dat";
-      const dst3 = dataFoldURL + datasetPath + "/model/vt.dat";
-      await copyFile(src1, dst1);
-      await copyFile(src2, dst2);
-      await copyFile(src3, dst3);
-      return;
+      if (!fileInfo) {
+        await stopModel(modelInfoID);
+        return;
+      } else;
+      meshKey = key;
+      meshFileName = path.basename(fileInfo.path);
+      extent = fileInfo.extent;
     } else;
     // copy model data
     const datasetTimeStampOfFile = fileInfo.path
@@ -1223,14 +1247,9 @@ const copyModelData = async (
         }
       } else;
     } else;
-    // find mesh
-    if (fileInfo.type === "mesh") {
-      meshFileName = path.basename(fileInfo.path);
-      extent = fileInfo.extent;
-    } else;
   });
   await Promise.all(promises);
-  return [meshFileName, extent];
+  return [meshFileName, extent, meshKey];
 };
 
 const getModel = async (modelInfoID: string) => {

@@ -19,6 +19,7 @@ const R_Test2 = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       res.status(200).json({ status: "fail", content: error.message });
     } else;
+    console.log(error);
   }
 };
 
@@ -29,6 +30,7 @@ const R_Test3 = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       res.status(200).json({ status: "fail", content: error.message });
     } else;
+    console.log(error);
   }
 };
 
@@ -51,6 +53,7 @@ const water = async (req: Request, res: Response) => {
       res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
       const result = await modelService.runQuality(
+        req.query.waterKey as string,
         req.query.paramKeys as string,
         req.query.projKey as string,
         req.query.title as string,
@@ -62,6 +65,7 @@ const water = async (req: Request, res: Response) => {
       res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
       const result = await modelService.runSand(
+        req.query.waterKey as string,
         req.query.paramKeys as string,
         req.query.projKey as string,
         req.query.title as string,
@@ -84,6 +88,7 @@ const water = async (req: Request, res: Response) => {
         res.status(200).json({ status: "fail", content: error.message });
       } else;
     } else;
+    console.log(error);
   }
 };
 

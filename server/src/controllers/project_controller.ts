@@ -25,9 +25,13 @@ const getProject = async (req: Request, res: Response) => {
   try {
     const type = req.query.action;
     if (type === "data") {
-      res.status(200).json(await projectService.getProject(req.query.id as string));
+      res
+        .status(200)
+        .json(await projectService.getProject(req.query.id as string));
     } else if (type === "layer") {
-      res.status(200).json(await projectService.getProjectDataLayer(req.query.id as string));
+      res
+        .status(200)
+        .json(await projectService.getProjectDataLayer(req.query.id as string));
     } else {
       throw new Error("don't have this action");
     }
@@ -35,6 +39,7 @@ const getProject = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       res.status(200).json({ status: "fail", content: error.message });
     }
+    console.log(error);
   }
 };
 
@@ -65,6 +70,7 @@ const projectAction = async (req: Request, res: Response) => {
     if (error instanceof Error) {
       res.status(200).json({ status: "fail", content: error.message });
     }
+    console.log(error);
   }
 };
 

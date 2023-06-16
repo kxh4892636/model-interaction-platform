@@ -22,6 +22,7 @@ interface ModelStatus {
   model: string;
   title: string;
   hydrodynamicsParamKeys: string[] | null;
+  waterParamKey: string | null;
   qualityParamKeys: string[] | null;
   sandParamKeys: string[] | null;
   projKey: string | null;
@@ -45,6 +46,7 @@ interface ModelStatusStore {
       | "model"
       | "title"
       | "hydrodynamicsParamKeys"
+      | "waterParamKey"
       | "qualityParamKeys"
       | "sandParamKeys"
       | "projKey"
@@ -80,7 +82,9 @@ export const useModelsStatus = create<ModelStatusStore>((set, get) => ({
   },
   getModelStatus: (model) => {
     const modelStatus = get().modelStatus;
-    const ms: ModelStatus | undefined = modelStatus.filter((ms) => ms.model === model)[0];
+    const ms: ModelStatus | undefined = modelStatus.filter(
+      (ms) => ms.model === model
+    )[0];
     return ms;
   },
   updateModelStatus: (model, prop, value) => {
@@ -97,7 +101,9 @@ export const useModelsStatus = create<ModelStatusStore>((set, get) => ({
   removeModelStatus: (model) => {
     set(
       produce((draft: ModelStatusStore) => {
-        draft.modelStatus = draft.modelStatus.filter((ms) => ms.model !== model);
+        draft.modelStatus = draft.modelStatus.filter(
+          (ms) => ms.model !== model
+        );
       })
     );
   },

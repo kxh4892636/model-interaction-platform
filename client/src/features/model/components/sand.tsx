@@ -45,6 +45,28 @@ const createSelectOptions = (layers: Layer[]) => {
   return result;
 };
 
+const createWaterSelectOptions = (layers: Layer[]) => {
+  interface optionType {
+    label: string;
+    options: { value: string; label: string }[];
+  }
+  let selectOptions: optionType[] = [];
+  for (let index = 0; index < layers.length; index++) {
+    const layer = layers[index];
+    selectOptions.push({ label: layer.title, options: [] });
+    layer.children.forEach((layer) => {
+      if (layer.layerStyle === "water") {
+        selectOptions[index].options.push({
+          label: layer.title,
+          value: layer.key,
+        });
+      } else;
+    });
+  }
+  const result = selectOptions.filter((value) => value.options.length !== 0);
+  return result;
+};
+
 /**
  * @description SandModelPanel
  * @module SandModelPanel
@@ -59,6 +81,9 @@ interface SandModelPanelProps {
 export const SandModelPanel = ({ model }: SandModelPanelProps) => {
   const layers = useLayersStore((state) => state.layers);
   const options: SelectProps["options"] = createSelectOptions(layers.data);
+  const waterOptions: SelectProps["options"] = createWaterSelectOptions(
+    layers.data
+  );
   const modelStatus = useModelsStatus((state) => state.modelStatus);
   const addModelStatus = useModelsStatus((state) => state.addModelStatus);
   const getModelStatus = useModelsStatus((state) => state.getModelStatus);
@@ -130,6 +155,7 @@ export const SandModelPanel = ({ model }: SandModelPanelProps) => {
       isRunning: false,
       model: model,
       hydrodynamicsParamKeys: [],
+      waterParamKey: null,
       qualityParamKeys: [],
       sandParamKeys: [],
       percent: 0,
@@ -160,19 +186,18 @@ export const SandModelPanel = ({ model }: SandModelPanelProps) => {
           />
         </>
         <>
-          <div style={{ padding: "10px 12px" }}>水动力模型参数</div>
+          <div style={{ padding: "10px 12px" }}>水动力模型输出结果</div>
           <Select
-            mode="multiple"
             disabled={currentModelStatus?.isRunning}
             allowClear
             style={{ margin: "6px 12px", width: "100%" }}
-            placeholder="请选择模型参数"
-            value={currentModelStatus?.hydrodynamicsParamKeys}
+            placeholder="请选择模型结果"
+            value={currentModelStatus?.waterParamKey}
             onChange={(values) => {
-              updateModelStatus(model, "hydrodynamicsParamKeys", values);
+              updateModelStatus(model, "waterParamKey", values);
               updateModelStatus(model, "percent", 0);
             }}
-            options={options}
+            options={waterOptions}
           />
         </>
         <>
@@ -263,6 +288,7 @@ export const SandModelPanel = ({ model }: SandModelPanelProps) => {
                     updateModelStatus(model, "percent", 0);
                     updateModelStatus(model, "modelID", null);
                     updateModelStatus(model, "hydrodynamicsParamKeys", []);
+                    updateModelStatus(model, "waterParamKey", null);
                     updateModelStatus(model, "sandParamKeys", []);
                     updateModelStatus(model, "qualityParamKeys", []);
                     updateModelStatus(model, "resultKeys", null);
@@ -288,8 +314,8 @@ export const SandModelPanel = ({ model }: SandModelPanelProps) => {
                         "?action=sand" +
                         `&paramKeys=${[
                           ...currentModelStatus!.sandParamKeys!,
-                          ...currentModelStatus!.hydrodynamicsParamKeys!,
                         ]}` +
+                        `&waterKey=${currentModelStatus!.waterParamKey}` +
                         `&projKey=${currentModelStatus!.projKey}` +
                         `&title=${currentModelStatus!.title}` +
                         `&projectID=${projectKey}`
