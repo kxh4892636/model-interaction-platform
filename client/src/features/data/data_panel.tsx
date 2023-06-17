@@ -114,7 +114,7 @@ const UploadPanel = () => {
  * @Author xiaohan kong
  */
 const RenameInput = ({ defaultValue }: { defaultValue: string }) => {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(defaultValue);
   const [isLoading, setIsLoading] = useState(false);
   const dataActions = useDataActions();
   const modalTag = useModalStore((state) => state.modalTag);

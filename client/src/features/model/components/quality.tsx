@@ -33,7 +33,7 @@ const createSelectOptions = (layers: Layer[]) => {
     const layer = layers[index];
     selectOptions.push({ label: layer.title, options: [] });
     layer.children.forEach((layer) => {
-      if (layer.input || layer.layerStyle === "water") {
+      if (layer.input) {
         selectOptions[index].options.push({
           label: layer.title,
           value: layer.key,
