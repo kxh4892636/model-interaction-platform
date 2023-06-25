@@ -8,17 +8,17 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import axios from "axios";
-import { useMapStore } from "../stores/map_store";
-import { useLayersStore } from "../stores/layers_store";
-import { useLayersStatusStore } from "../stores/layers_status_store";
-import { useKeys } from "./";
-import { Layer, ServerData } from "../types";
 import { ImageSource } from "mapbox-gl";
-import { useAnimatedStatusStore } from "../stores/animated_status_store";
-import { FlowFieldManager } from "../utils/customLayer/flowfield";
-import { FlowLayer } from "../utils/customLayer/flowLayer";
 import { serverHost } from "../config/global_variable";
 import { useLayerColorStore } from "../features/data/store/layer_color_store";
+import { useAnimatedStatusStore } from "../stores/animated_status_store";
+import { useLayersStatusStore } from "../stores/layers_status_store";
+import { useLayersStore } from "../stores/layers_store";
+import { useMapStore } from "../stores/map_store";
+import { Layer, ServerData } from "../types";
+import { FlowLayer } from "../utils/customLayer/flowLayer";
+import { FlowFieldManager } from "../utils/customLayer/flowfield";
+import { useKeys } from "./";
 
 /**
  * @description return the function that curd data
@@ -317,6 +317,7 @@ export const useData = () => {
         layerStyle: dataDetail.style,
         group: false,
         children: [],
+        input:dataDetail.input
       };
       addLayer(treeData, "map");
       addLayersChecked(id, "map");

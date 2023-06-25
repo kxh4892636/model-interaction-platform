@@ -1,18 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import crypto from "crypto";
-import path, { dirname } from "path";
-import { title } from "process";
-import { dataFoldURL } from "./config/global_data";
-import { spawn } from "child_process";
-import {
-  copyFolder,
-  deleteFolder,
-  deleteFolderFiles,
-  deleteSelectFilesInFolder,
-} from "./utils/tools/fs_extra";
-import { log } from "console";
-import { rmdir } from "fs/promises";
-import multer from "multer";
 
 const prisma = new PrismaClient();
 

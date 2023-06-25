@@ -7,13 +7,13 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import express from "express";
 import cors from "cors";
+import express from "express";
 import helmet from "helmet";
-import { projectRoute } from "./routes/project_route";
-import { datasetRoute } from "./routes/dataset_route";
 import { dataRoute } from "./routes/data_route";
+import { datasetRoute } from "./routes/dataset_route";
 import { modelRoute } from "./routes/model_route";
+import { projectRoute } from "./routes/project_route";
 import { visualizationRoute } from "./routes/visualization_route";
 
 const app = express();

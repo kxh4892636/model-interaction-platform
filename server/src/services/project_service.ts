@@ -8,11 +8,11 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import crypto from "crypto";
+import { mkdir, readdir, unlink } from "fs/promises";
 import { dataFoldURL } from "../config/global_data";
-import { datasetService } from "./dataset_service";
 import { deleteFolder } from "../utils/tools/fs_extra";
 import { prisma } from "../utils/tools/prisma";
-import { lstat, mkdir, readdir, rmdir, unlink } from "fs/promises";
+import { datasetService } from "./dataset_service";
 
 /**
  * create project
@@ -133,6 +133,7 @@ const getProjectDataLayer = async (projectID: string) => {
       layerStyle: "text",
       group: true,
       children: [],
+      input:true,
     };
     const dataInfo = await prisma.data.findMany({
       where: {
@@ -142,6 +143,21 @@ const getProjectDataLayer = async (projectID: string) => {
         title: "asc",
       },
     });
+    dataInfo.every((value)=>{
+      if(!value.input){
+        layers[index] = {
+          title: dataset.title,
+          key: dataset.id,
+          type: "text",
+          layerStyle: "text",
+          group: true,
+          children: [],
+          input:false,
+        };
+        return true
+      }else;
+      return false
+    })
     dataInfo.forEach((data) => {
       (layers[index].children as object[]).push({
         title: (data.input ? "输入" : "输出") + " - " + data.title,

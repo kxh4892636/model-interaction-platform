@@ -5,7 +5,7 @@ export type Layer = {
   layerStyle: string;
   group: boolean;
   children: Layer[];
-  input?: boolean;
+  input: boolean;
 };
 
 export type ServerProject = {

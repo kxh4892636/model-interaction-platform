@@ -8,35 +8,35 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import styled from "styled-components/macro";
 import {
   AppstoreOutlined,
   BgColorsOutlined,
+  DatabaseOutlined,
   MediumOutlined,
   SaveOutlined,
-  DatabaseOutlined,
 } from "@ant-design/icons";
 import { Spin } from "antd";
-import { useNavigate } from "react-router-dom";
 import React, { useEffect } from "react";
-import { useMapPositionStore } from "../../stores/map_postion_store";
-import { useViewStore } from "../../stores/view_store";
-import { useProjectStatusStore } from "../../stores/project_status_store";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components/macro";
+import { LayerOutlined } from "../../components/icons";
+import { DataPanel } from "../../features/data";
+import { LayerPanel } from "../../features/layer";
+import { MapStatus, MapView } from "../../features/map";
+import Model from "../../features/model/App";
+import { useModelsStatus } from "../../features/model/stores";
 import { Nav } from "../../features/nav";
 import { ProjectInfoPanel, ProjectView } from "../../features/project";
+import { Sidebar } from "../../features/sidebar";
+import { StylePanel } from "../../features/style";
 import {
   useAnimatedStatusStore,
   useLayersStore,
-  useModalStore,
+  useModalStore
 } from "../../stores";
-import { MapView, MapStatus } from "../../features/map";
-import { DataPanel } from "../../features/data";
-import { LayerPanel } from "../../features/layer";
-import { LayerOutlined } from "../../components/icons";
-import Model from "../../features/model/App";
-import { useModelsStatus } from "../../features/model/stores";
-import { StylePanel } from "../../features/style";
-import { Sidebar } from "../../features/sidebar";
+import { useMapPositionStore } from "../../stores/map_postion_store";
+import { useProjectStatusStore } from "../../stores/project_status_store";
+import { useViewStore } from "../../stores/view_store";
 
 const View = styled.div`
   position: relative;
@@ -87,6 +87,7 @@ export const Home: React.FC = () => {
   const animatedStatus = useAnimatedStatusStore(
     (state) => state.animatedStatus
   );
+  const layersStore = useLayersStore(state=>state.layers)
 
   // 侧边栏数据
   const navItems = projectKey.includes("-")
@@ -171,6 +172,7 @@ export const Home: React.FC = () => {
         onClick={() => {
           console.log(animatedStatus);
           console.log(modelStatus);
+          console.log(layersStore);
         }}
       >
         港口水环境与生态动力学精细化模拟平台

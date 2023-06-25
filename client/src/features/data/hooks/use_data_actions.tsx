@@ -8,13 +8,13 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import { useLayersStore } from "../../../stores/layers_store";
-import { useLayersStatusStore } from "../../../stores/layers_status_store";
-import { useAnimate, useKeys } from "../../../hooks";
-import { Layer } from "../../../types";
 import axios from "axios";
 import { serverHost } from "../../../config/global_variable";
+import { useAnimate, useKeys } from "../../../hooks";
+import { useLayersStatusStore } from "../../../stores/layers_status_store";
+import { useLayersStore } from "../../../stores/layers_store";
 import { useMapStore } from "../../../stores/map_store";
+import { Layer } from "../../../types";
 
 /**
  * @description DataPanel action
@@ -179,6 +179,7 @@ export const useDataActions = () => {
       layerStyle: "text",
       group: true,
       children: [],
+      input:true,
     };
     addLayer(layerGroup, "data");
     addLayersExpanded(key, "data");

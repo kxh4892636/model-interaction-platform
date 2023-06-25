@@ -8,21 +8,21 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import styled from "styled-components/macro";
 import { Tree } from "antd";
-import { useLayersStore, useProjectStatusStore } from "../../../../stores";
-import { useLayersStatusStore } from "../../../../stores";
-import { useEffect } from "react";
 import axios from "axios";
-import { useManualRefreshStore } from "../../../../stores/refresh_store";
+import { useEffect } from "react";
+import styled from "styled-components/macro";
 import { serverHost } from "../../../../config/global_variable";
+import { useLayersStatusStore, useLayersStore, useProjectStatusStore } from "../../../../stores";
+import { useManualRefreshStore } from "../../../../stores/refresh_store";
+import { Layer } from "../../../../types";
 
 const { DirectoryTree } = Tree;
 
 // modify sytle of antd tree component
 const StyledTree = styled(DirectoryTree)`
   && {
-    padding: 10px 10px;
+    padding: 6px 2px;
   }
   // antd tree icon's style
   // put the icon at the far right
@@ -50,8 +50,8 @@ const StyledTree = styled(DirectoryTree)`
  * @param menu DataMenu component
  * @export module: DataTree
  */
-type DataTreeProps = { children: JSX.Element };
-export const DataTree = ({ children }: DataTreeProps) => {
+type DataTreeProps = { children: JSX.Element, input:boolean };
+export const DataTree = ({ children, input }: DataTreeProps) => {
   const layers = useLayersStore((state) => state.layers);
   const setLayers = useLayersStore((state) => state.setLayers);
   const layersExpanded = useLayersStatusStore((state) => state.layersExpanded);
@@ -59,6 +59,19 @@ export const DataTree = ({ children }: DataTreeProps) => {
   const setLayersSelected = useLayersStatusStore((state) => state.setLayersSelected);
   const projectKey = useProjectStatusStore((state) => state.key);
   const refreshTag = useManualRefreshStore((state) => state.refreshTag);
+
+  const createTreeData=(type:boolean)=>{
+    let input:Layer[] = []
+    let output:Layer[] = []
+    layers.data.forEach((value)=>{
+      if(value.input){
+        input.push(value)
+      }else{
+        output.push(value)
+      }
+    })
+    return type ? input : output
+  }
 
   useEffect(() => {
     axios
@@ -91,7 +104,7 @@ export const DataTree = ({ children }: DataTreeProps) => {
           setLayersSelected(e.node as any, "data");
         }
       }}
-      treeData={layers["data"]}
+      treeData={createTreeData(input)}
     />
   );
 };

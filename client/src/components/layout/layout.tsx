@@ -24,6 +24,7 @@ export const PanelContainer = styled.div`
  * panel title container
  */
 export const PanelTitleContainer = styled.div`
+  font-size: 16px;
   height: 48px;
   line-height: 48px;
   padding: 0 12px;

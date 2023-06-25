@@ -9,34 +9,43 @@
  */
 import {
   FolderAddOutlined,
-  VerticalAlignTopOutlined,
-  VerticalAlignBottomOutlined,
   UploadOutlined,
+  VerticalAlignBottomOutlined,
+  VerticalAlignTopOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
 import { Button, Input, Select, message } from "antd";
+import Modal from "antd/es/modal/Modal";
+import Upload from "antd/es/upload/Upload";
+import { useState } from "react";
+import styled from "styled-components";
 import {
   PanelContainer,
   PanelContentContainer,
   PanelTitleContainer,
   PanelToolsContainer,
 } from "../../components/layout";
-import { DataTools } from "./components/data_tools";
-import { DataTree } from "./components/data_tree/data_tree";
-import { DataTreeMenu } from "./components/data_tree_menu";
-import { useDataActions } from "./hooks/use_data_actions";
+import { serverHost } from "../../config/global_variable";
+import { useData } from "../../hooks";
 import {
   useLayersStatusStore,
   useLayersStore,
   useModalStore,
   useProjectStatusStore,
 } from "../../stores";
-import Modal from "antd/es/modal/Modal";
-import Upload from "antd/es/upload/Upload";
 import { useManualRefreshStore } from "../../stores/refresh_store";
-import { useData } from "../../hooks";
-import { serverHost } from "../../config/global_variable";
 import { Layer } from "../../types";
+import { DataTools } from "./components/data_tools";
+import { DataTree } from "./components/data_tree/data_tree";
+import { DataTreeMenu } from "./components/data_tree_menu";
+import { useDataActions } from "./hooks/use_data_actions";
+
+const TreeTitle = styled.div`
+  font-size: 14px;
+  height: 20px;
+  line-height: 20px;
+  padding: 0px 10px;
+  background: #fff;
+`
 
 /**
  * generate the select options of all mesh
@@ -292,7 +301,7 @@ export const DataPanel = () => {
   const layerMenuItems = () => {
     if (!layersSelected.data) return [];
     else;
-    if (layersSelected.data.group) {
+    if (layersSelected.data.group && layersSelected.data.input) {
       return [
         {
           key: "upload",
@@ -316,8 +325,7 @@ export const DataPanel = () => {
           action: dataActions.deleteLayer,
         },
       ];
-    } else;
-    if (
+    } else if(
       layersSelected.data.type === "text" ||
       layersSelected.data!.layerStyle === "text" ||
       layersSelected.data.type === "ewemodel"
@@ -415,8 +423,15 @@ export const DataPanel = () => {
           }}
         />
       </PanelToolsContainer>
-      <PanelContentContainer style={{ overflow: "auto" }}>
-        <DataTree>
+      <PanelContentContainer style={{ margin:'6px',border:'1px solid #bfbfbf', padding:'6px 0px', overflow: "auto", height:'47vh',borderBottom:'1px solid #bfbfbf' }}>
+        <TreeTitle>输入数据面板</TreeTitle>
+        <DataTree input={true}>
+          <DataTreeMenu layerMenuItems={layerMenuItems()} />
+        </DataTree>
+      </PanelContentContainer>
+      <PanelContentContainer style={{ margin:'0px 6px 6px',border:'1px solid #bfbfbf', padding:'6px 0px', overflow: "auto", height:'47vh'}}>
+        <TreeTitle>输出数据面板</TreeTitle>
+        <DataTree input={false}>
           <DataTreeMenu layerMenuItems={layerMenuItems()} />
         </DataTree>
       </PanelContentContainer>
