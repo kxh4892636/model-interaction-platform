@@ -40,7 +40,7 @@ import { DataTreeMenu } from "./components/data_tree_menu";
 import { useDataActions } from "./hooks/use_data_actions";
 
 const TreeTitle = styled.div`
-  font-size: 14px;
+  font-size: 15px;
   height: 20px;
   line-height: 20px;
   padding: 0px 10px;
@@ -351,7 +351,6 @@ export const DataPanel = () => {
         key: "add",
         label: "添加至地图",
         action: async () => {
-          console.log(layersSelected);
           if (layersSelected.data!.type === "mesh") {
             const state = await data.isVisualized(layersSelected.data!.key);
             if (!state) {
@@ -397,7 +396,7 @@ export const DataPanel = () => {
   };
 
   return (
-    <PanelContainer>
+    <PanelContainer style={{background:'#f0f0f0'}}>
       <PanelTitleContainer>数据面板</PanelTitleContainer>
       <PanelToolsContainer>
         <DataTools
@@ -423,14 +422,14 @@ export const DataPanel = () => {
           }}
         />
       </PanelToolsContainer>
-      <PanelContentContainer style={{ margin:'6px',border:'1px solid #bfbfbf', padding:'6px 0px', overflow: "auto", height:'47vh',borderBottom:'1px solid #bfbfbf' }}>
-        <TreeTitle>输入数据面板</TreeTitle>
+      <PanelContentContainer style={{ margin:'4px',border:'1px solid #bfbfbf', padding:'6px 0px', overflow: "auto", height:'47vh',borderBottom:'1px solid #bfbfbf' }}>
+        <TreeTitle>输入</TreeTitle>
         <DataTree input={true}>
           <DataTreeMenu layerMenuItems={layerMenuItems()} />
         </DataTree>
       </PanelContentContainer>
-      <PanelContentContainer style={{ margin:'0px 6px 6px',border:'1px solid #bfbfbf', padding:'6px 0px', overflow: "auto", height:'47vh'}}>
-        <TreeTitle>输出数据面板</TreeTitle>
+      <PanelContentContainer style={{ margin:'0px 4px 4px',border:'1px solid #bfbfbf', padding:'6px 0px', overflow: "auto", height:'47vh'}}>
+        <TreeTitle>输出</TreeTitle>
         <DataTree input={false}>
           <DataTreeMenu layerMenuItems={layerMenuItems()} />
         </DataTree>

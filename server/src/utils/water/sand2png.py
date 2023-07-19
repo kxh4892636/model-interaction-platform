@@ -1,7 +1,8 @@
 import os
 import sys
-import json
-from osgeo import gdal, osr, ogr
+import time
+
+from osgeo import gdal, ogr, osr
 
 
 def resolveTXT(src: str) -> list[tuple[str, float, float, float]]:
@@ -19,7 +20,6 @@ def resolveTXT(src: str) -> list[tuple[str, float, float, float]]:
 
 def sand2png(srcPath, dstPath: str, maskPath: str) -> tuple:
     dataList = resolveTXT(srcPath)
-
     # create shp file from the csv file
     driver: ogr.Driver = ogr.GetDriverByName('ESRI Shapefile')
     ds: ogr.DataSource = driver.CreateDataSource('/vsimem/temp.shp')
@@ -29,53 +29,23 @@ def sand2png(srcPath, dstPath: str, maskPath: str) -> tuple:
     layer: ogr.Layer = ds.CreateLayer(
         'mesh', srs, ogr.wkbPoint, options=["ENCODING=UTF-8"])
     # create fields of shp
-    layer.CreateField(ogr.FieldDefn('ID', ogr.OFTString))
-    layer.CreateField(ogr.FieldDefn('X', ogr.OFTReal))
-    layer.CreateField(ogr.FieldDefn('Y', ogr.OFTReal))
     layer.CreateField(ogr.FieldDefn('Z', ogr.OFTReal))
     # create features
     featureDefn: ogr.FeatureDefn = layer.GetLayerDefn()
-    dataListLength = len(dataList)
-    ratio10000 = int(dataListLength/40000)
-    if (ratio10000 <= 1):
-        for data in dataList:
-            id = str(data[0])
-            x = float(data[1])
-            y = float(data[2])
-            z = float(data[3])
-            # create feature
-            feature: ogr.Feature = ogr.Feature(featureDefn)
-            feature.SetField("ID", id)
-            feature.SetField("X", x)
-            feature.SetField("Y", y)
-            feature.SetField("Z", z)
-            # create geometry
-            point = ogr.Geometry(ogr.wkbPoint)
-            point.AddPoint(x, y)
-            # set geometry
-            feature.SetGeometry(point)
-            layer.CreateFeature(feature)
-            del feature
-    else:
-        for i in range(0, dataListLength, ratio10000):
-            data = dataList[i]
-            id = str(data[0])
-            x = float(data[1])
-            y = float(data[2])
-            z = float(data[3])
-            # create feature
-            feature: ogr.Feature = ogr.Feature(featureDefn)
-            feature.SetField("ID", id)
-            feature.SetField("X", x)
-            feature.SetField("Y", y)
-            feature.SetField("Z", z)
-            # create geometry
-            point = ogr.Geometry(ogr.wkbPoint)
-            point.AddPoint(x, y)
-            # set geometry
-            feature.SetGeometry(point)
-            layer.CreateFeature(feature)
-            del feature
+    for data in dataList:
+        x = float(data[1])
+        y = float(data[2])
+        z = float(data[3])
+        # create feature
+        feature: ogr.Feature = ogr.Feature(featureDefn)
+        feature.SetField("Z", z)
+        # create geometry
+        point = ogr.Geometry(ogr.wkbPoint)
+        point.AddPoint(x, y)
+        # set geometry
+        feature.SetGeometry(point)
+        layer.CreateFeature(feature)
+        del feature
     # get the meta of shp
     extent: tuple = layer.GetExtent()
     ratio = abs(((extent[3]-extent[2])/(extent[1]-extent[0])))

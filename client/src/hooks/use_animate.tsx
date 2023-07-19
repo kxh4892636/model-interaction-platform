@@ -97,9 +97,11 @@ export const useAnimate = () => {
 
   const removeAnimate = (id: string) => {
     animatedStatus.forEach((value) => {
-      if (value.key === id && value.intervalFunction) {
+      if (value.key === id) {
+        if(value.intervalFunction){
+          clearInterval(value.intervalFunction);
+        } 
         removeAnimatedStatus(id);
-        clearInterval(value.intervalFunction);
       }
     });
   };

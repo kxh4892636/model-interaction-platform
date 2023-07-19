@@ -7,8 +7,8 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import { Button, Slider, Select } from "antd";
-import { useState, useEffect } from "react";
+import { Button, Select, Slider } from "antd";
+import { useEffect, useState } from "react";
 import {
   PanelContainer,
   PanelContentContainer,
@@ -22,8 +22,8 @@ import { useLayersStatusStore } from "../../stores/layers_status_store";
 import { useLayersStore } from "../../stores/layers_store";
 import { useMapStore } from "../../stores/map_store";
 import { Layer } from "../../types";
-import { FlowFieldManager } from "../../utils/customLayer/flowfield";
 import { FlowLayer } from "../../utils/customLayer/flowLayer";
+import { FlowFieldManager } from "../../utils/customLayer/flowfield";
 
 /**
  * @description StylePanel
@@ -118,26 +118,16 @@ const StylePanel = () => {
       </PanelContentContainer>
       <PanelToolsContainer style={{ border: "0px" }}>
         <PanelToolContainer>
-          {/* <Button type="primary" danger style={{ marginBottom: "10px" }}>
-            取消
-          </Button> */}
         </PanelToolContainer>
         <PanelToolContainer>
-          {/* <Button
-            type="primary"
-            onClick={() => {
-              console.log(layerSelected);
-            }}
-            style={{ marginBottom: "10px" }}
-          >
-            应用
-          </Button> */}
         </PanelToolContainer>
         <PanelToolContainer>
           <Button
             type="primary"
             style={{ marginBottom: "10px", marginLeft: "auto", marginRight: "12px" }}
             onClick={() => {
+              if(selectOptions.length===0) return;
+              else;
               // Update the animatedStatus of selected layer
               const style = layerSelected.map!.layerStyle;
               const startValue = sliderValue[0] - 1;
@@ -155,6 +145,7 @@ const StylePanel = () => {
                 updateAnimatedStatus(key, "startValue", startValue);
                 updateAnimatedStatus(key, "endValue", endValue);
                 updateAnimatedStatus(key, "currentCount", currentCountNow);
+                animateActions.continueAnimate(key,currentCountNow,startValue,endValue)
               } else if (style === "water") {
                 // Re-render the flow field
                 updateAnimatedStatus(key, "startValue", startValue);

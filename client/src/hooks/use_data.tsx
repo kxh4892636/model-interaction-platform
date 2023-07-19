@@ -158,7 +158,7 @@ export const useData = () => {
         ? Number(res.transformNum)
         : 100;
       const startValue = 0;
-      const endValue = imageCount - 1;
+      const endValue = (imageCount - 1) > 23 ? 23 : imageCount - 1;
       let currentCount = startValue;
       if (style === "quality" || style === "yuji" || style === "snd") {
         getData(
@@ -215,7 +215,7 @@ export const useData = () => {
       } else if (style === "water") {
         let flowFieldManager = new FlowFieldManager(id, dataDetail, {
           startValue: 0,
-          endValue: res.transformNum ? Number(res.transformNum) - 1 : 59,
+          endValue: res.transformNum ? ((Number(res.transformNum) - 1) > 23 ? 23 : Number(res.transformNum) - 1) : 59,
         });
         const flowLayer = new FlowLayer(id, "2d", flowFieldManager);
         map!.addLayer(flowLayer);
@@ -227,7 +227,7 @@ export const useData = () => {
             imageCount: res.transformNum ? Number(res.transformNum) : 60,
             intervalFunction: null,
             startValue: 0,
-            endValue: res.transformNum ? Number(res.transformNum) - 1 : 59,
+            endValue: res.transformNum ? ((Number(res.transformNum) - 1) > 23 ? 23 : Number(res.transformNum) - 1) : 59,
             isInterval: false,
             style: style,
           });

@@ -8,10 +8,10 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import { useMapStore } from "../../../stores/map_store";
-import { useLayersStore } from "../../../stores/layers_store";
-import { useLayersStatusStore } from "../../../stores/layers_status_store";
 import { useAnimate, useKeys } from "../../../hooks";
+import { useLayersStatusStore } from "../../../stores/layers_status_store";
+import { useLayersStore } from "../../../stores/layers_store";
+import { useMapStore } from "../../../stores/map_store";
 import { Layer } from "../../../types";
 
 /**
@@ -164,6 +164,8 @@ export const useLayerActions = () => {
       else;
       if (map.getSource(layersSelected.map.key)) map.removeSource(layersSelected.map.key);
       else;
+      console.log(layersSelected.map.key);
+      
       animate.removeAnimate(layersSelected.map.key);
       setLayersSelected(undefined, "map");
     } else {

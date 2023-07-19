@@ -1,4 +1,7 @@
 import sys
+import time
+import traceback
+
 from osgeo import gdal, ogr, osr
 
 
@@ -24,24 +27,17 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
     srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
     srs.ImportFromEPSG(4326)
     layer: ogr.Layer = ds.CreateLayer(
-        'mesh', srs, ogr.wkbPoint, options=["ENCODING=UTF-8"])
+        'mesh', srs, ogr.wkbPoint)
     # create fields of shp
-    layer.CreateField(ogr.FieldDefn('ID', ogr.OFTString))
-    layer.CreateField(ogr.FieldDefn('X', ogr.OFTReal))
-    layer.CreateField(ogr.FieldDefn('Y', ogr.OFTReal))
     layer.CreateField(ogr.FieldDefn('Z', ogr.OFTReal))
     # create features
     featureDefn: ogr.FeatureDefn = layer.GetLayerDefn()
     for data in dataList:
-        id = str(data[0])
         x = float(data[1])
         y = float(data[2])
         z = float(data[3])
         # create feature
         feature: ogr.Feature = ogr.Feature(featureDefn)
-        feature.SetField("ID", id)
-        feature.SetField("X", x)
-        feature.SetField("Y", y)
         feature.SetField("Z", z)
         # create geometry
         point = ogr.Geometry(ogr.wkbPoint)
@@ -130,4 +126,5 @@ if __name__ == '__main__':
         extent: tuple = mesh2png(src, dst, mask)
         print(extent)
     except:
+        traceback.print_exc()
         print('输入参数错误, 请输入文件 url')

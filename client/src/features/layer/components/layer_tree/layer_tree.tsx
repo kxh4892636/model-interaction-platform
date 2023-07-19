@@ -8,10 +8,10 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 
-import styled from "styled-components/macro";
 import { Tree } from "antd";
-import { useLayersStore } from "../../../../stores/layers_store";
+import styled from "styled-components/macro";
 import { useLayersStatusStore } from "../../../../stores/layers_status_store";
+import { useLayersStore } from "../../../../stores/layers_store";
 import { useLayerActions } from "../../hooks/use_layer_actions";
 
 // modify sytle of antd tree component
@@ -72,12 +72,6 @@ const LayerTree = ({ children }: AppProps) => {
         setLayersExpanded(expandedKeys as string[], "map");
       }}
       expandedKeys={layersExpanded.map}
-      // TODO drag
-      // draggable
-      // onDrop={(info) => {
-      //   // drag Layer
-      //   layerActions.dragLayer(info);
-      // }}
       blockNode
       onSelect={(key, e) => {
         // get selected layer node data
