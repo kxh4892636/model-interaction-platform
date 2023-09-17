@@ -133,7 +133,7 @@ const getProjectDataLayer = async (projectID: string) => {
       layerStyle: "text",
       group: true,
       children: [],
-      input:true,
+      input: true,
     };
     const dataInfo = await prisma.data.findMany({
       where: {
@@ -143,8 +143,8 @@ const getProjectDataLayer = async (projectID: string) => {
         title: "asc",
       },
     });
-    dataInfo.every((value)=>{
-      if(!value.input){
+    dataInfo.every((value) => {
+      if (!value.input) {
         layers[index] = {
           title: dataset.title,
           key: dataset.id,
@@ -152,12 +152,12 @@ const getProjectDataLayer = async (projectID: string) => {
           layerStyle: "text",
           group: true,
           children: [],
-          input:false,
+          input: false,
         };
-        return true
-      }else;
-      return false
-    })
+        return true;
+      } else;
+      return false;
+    });
     dataInfo.forEach((data) => {
       (layers[index].children as object[]).push({
         title: (data.input ? "输入" : "输出") + " - " + data.title,
@@ -194,7 +194,7 @@ const updateProjectInfo = async (
     where: { id: projectID },
   });
   if (!projectInfo) throw new Error("can't find project by id");
-  else;
+
   if (image && projectInfo.image) {
     const imageInfo = await prisma.data.findUnique({
       where: {
@@ -233,6 +233,7 @@ const deleteProject = async (projectID: string) => {
   if (!info) {
     throw new Error("can't find project by id");
   } else;
+
   // delete the image
   const imageKey = info.image;
   if (imageKey) {
@@ -241,15 +242,18 @@ const deleteProject = async (projectID: string) => {
     await unlink(dataFoldURL + imagePath);
     await prisma.data.delete({ where: { id: imageKey } });
   } else;
+
   // delete the dataset
   const datasetIDs = info.data;
   for (let index = 0; index < datasetIDs.length; index++) {
     const datasetID = datasetIDs[index];
     await datasetService.deleteDataset(datasetID);
   }
+
   // delete the record of project
   await prisma.project.delete({ where: { id: projectID } });
   console.log(await readdir(dataFoldURL + info.path));
+
   // delete the folder of project
   await deleteFolder(dataFoldURL + info.path);
   return { status: "success", content: "delete project succeed" };

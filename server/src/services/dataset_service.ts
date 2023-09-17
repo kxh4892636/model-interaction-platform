@@ -8,8 +8,8 @@
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
 import crypto from "crypto";
-import { copyFolder, deleteFolder } from "../utils/tools/fs_extra";
 import { dataFoldURL } from "../config/global_data";
+import { copyFolder, deleteFolder } from "../utils/tools/fs_extra";
 import { prisma } from "../utils/tools/prisma";
 
 /**
@@ -44,7 +44,10 @@ const addDataset = async (title: string, projectID: string) => {
     where: { id: projectID },
   });
   const path = projectInfo!.path + `/${timeStamp}`;
-  await copyFolder(dataFoldURL + "/template/dataset_template", dataFoldURL + path);
+  await copyFolder(
+    dataFoldURL + "/template/dataset_template",
+    dataFoldURL + path
+  );
   await prisma.dataset.create({
     data: {
       id: id,
@@ -83,12 +86,15 @@ const renameDataset = async (id: string, title: string) => {
 };
 
 const deleteDataset = async (datasetID: string) => {
-  const datasetInfo = await prisma.dataset.findUnique({ where: { id: datasetID } });
+  const datasetInfo = await prisma.dataset.findUnique({
+    where: { id: datasetID },
+  });
   if (!datasetInfo) throw new Error("can't find data by id");
-  else;
+
   const path = dataFoldURL + datasetInfo.path;
   // delete origin file path
   deleteFolder(path);
+
   // update project
   const projectInfo = await prisma.project.findUnique({
     where: { id: datasetInfo!.project },
@@ -99,10 +105,16 @@ const deleteDataset = async (datasetID: string) => {
       data: projectInfo!.data.filter((value) => value !== datasetID),
     },
   });
+
   // delete the record
   await prisma.data.deleteMany({ where: { dataset: datasetID } });
   await prisma.dataset.delete({ where: { id: datasetID } });
   return { status: "success", content: "delete succeed" };
 };
 
-export const datasetService = { getList, addDataset, renameDataset, deleteDataset };
+export const datasetService = {
+  getList,
+  addDataset,
+  renameDataset,
+  deleteDataset,
+};

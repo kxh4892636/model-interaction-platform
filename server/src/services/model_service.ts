@@ -152,9 +152,11 @@ const runHydrodynamics = async (
           content: [datasetID, modelID, [uvID]],
         })}\n\n`
     );
+
     // define keys of param
     let keys: string[] = paramKeys.split(",");
     projKey && keys.push(projKey);
+
     // copy model data by key
     res.write(`id: ${Date.now()}\n` + `data:  ${"开始导入输入参数"}\n\n`);
     const [meshFileName, extent, meshKey] = await copyModelData(
@@ -172,6 +174,7 @@ const runHydrodynamics = async (
       await stopModel(modelID);
       throw new Error("未成功获取 mesh 的范围");
     }
+
     // create the record fo result
     const uvetPath = datasetInfo!.path + "/model/uvet.dat";
     await prisma.data.create({
@@ -194,6 +197,7 @@ const runHydrodynamics = async (
         data: [...datasetInfo!.data, uvID],
       },
     });
+
     // get model param
     const paramContent = (
       await readFile(dataFoldURL + datasetInfo!.path + "/model/paramhk.in")
@@ -202,6 +206,7 @@ const runHydrodynamics = async (
       .split("\r\n");
     let num = Number(paramContent[11].split(/\s/)[0]) * 24;
     let currentCount = 0;
+
     // run model
     res.write(
       `id: ${Date.now()}\n` + `data:  ${"导入输入参数完成, 开始运行模型"}\n\n`
@@ -219,6 +224,7 @@ const runHydrodynamics = async (
         pids: pids,
       },
     });
+
     outputModel.on("error", async () => {
       console.log("model failed");
       await prisma.model_info.update({
@@ -231,6 +237,7 @@ const runHydrodynamics = async (
       res.write(`data:  ${JSON.stringify({ status: "fail" })}\n\n`);
       await stopModel(modelID);
     });
+
     outputModel.stdout!.on("data", async (chunk) => {
       const content = chunk.toString();
       console.log(content);
@@ -246,6 +253,7 @@ const runHydrodynamics = async (
         });
       }
     });
+
     outputModel.on("exit", async (code) => {
       if (code) return;
       else;
@@ -274,11 +282,13 @@ const runHydrodynamics = async (
         { shell: true, windowsHide: true }
       );
       pids.push(result.pid!.toString());
+
       result.on("error", async () => {
         console.log("model failed");
         res.write(`data:  ${JSON.stringify({ status: "fail" })}\n\n`);
         await stopModel(modelID);
       });
+
       result.on("exit", async (code) => {
         if (code) return;
         else;
@@ -291,8 +301,10 @@ const runHydrodynamics = async (
             pids: pids,
           },
         });
+
         console.log("uvet2txt finish");
         res.write(`data: uvet2txt finish\n\n`);
+
         // uvet2description
         const result = execa(
           `conda activate gis && python ${
@@ -317,12 +329,15 @@ const runHydrodynamics = async (
           }`,
           { shell: true, windowsHide: true }
         );
+
         pids.push(result.pid!.toString());
+
         result.on("error", async () => {
           console.log("model failed");
           res.write(`data:  ${JSON.stringify({ status: "fail" })}\n\n`);
           await stopModel(modelID);
         });
+
         result.on("exit", async (code) => {
           if (code) return;
           else;
@@ -337,6 +352,7 @@ const runHydrodynamics = async (
           });
           console.log("uvet2description finish");
           res.write(`data: uvet2description finish\n\n`);
+
           // uvet process
           await prisma.data.update({
             where: {
@@ -366,11 +382,13 @@ const runHydrodynamics = async (
             windowsHide: true,
           });
           pids.push(output.pid!.toString());
+
           result.on("error", async () => {
             console.log("model failed");
             res.write(`data:  ${JSON.stringify({ status: "fail" })}\n\n`);
             await stopModel(modelID);
           });
+
           output.stdout!.on("data", async (chunk) => {
             const content = chunk.toString();
             console.log(content);
@@ -386,12 +404,14 @@ const runHydrodynamics = async (
               });
             } else;
           });
+
           output.on("exit", async (code) => {
             if (code) return;
             else;
             pids.shift();
             console.log("process finish");
             res.write(`data: process finish\n\n`);
+
             // rename
             const descriptionPath = `${dataFoldURL}${
               datasetInfo!.path
@@ -436,6 +456,7 @@ const runHydrodynamics = async (
               )
             );
             currentCount = currentCount + 1;
+
             await prisma.model_info.update({
               where: { id: modelID },
               data: {
@@ -444,6 +465,7 @@ const runHydrodynamics = async (
                 is_running: false,
               },
             });
+
             console.log("all finish");
             res.write(`data: all finish\n\n`);
           });
@@ -452,7 +474,9 @@ const runHydrodynamics = async (
     });
   } catch (error) {
     res.write(`data:  ${JSON.stringify({ status: "fail" })}\n\n`);
+
     await stopModel(modelID);
+
     if (error instanceof Error) {
       console.log(error.message);
     } else;
@@ -1267,6 +1291,7 @@ const stopModel = async (modelInfoID: string) => {
   const modelInfo = await prisma.model_info.findUnique({
     where: { id: modelInfoID },
   });
+
   // delete all programs by pid
   for (let index = 0; index < modelInfo!.pids.length; index++) {
     const pid = modelInfo!.pids[index];
@@ -1275,12 +1300,14 @@ const stopModel = async (modelInfoID: string) => {
       windowsHide: true,
     }).catch(() => {});
   }
+
   // delete modelInfo
   await prisma.model_info.delete({
     where: {
       id: modelInfoID,
     },
   });
+
   // delete dataset
   setTimeout(async () => {
     await datasetService.deleteDataset(modelInfo!.dataset!);

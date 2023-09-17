@@ -54,31 +54,19 @@ const main = async () => {
   //   },
   // });
   // await prisma.$queryRaw`UPDATE data SET data = replace(data,'/temp/','/case/hydrodynamics_result/') WHERE temp = true`;
-  // await prisma.data.deleteMany({});
-  // await prisma.dataset.deleteMany({});
-  // await prisma.project.deleteMany({});
-  // const data = await prisma.data.findMany({});
-  // const dataset = await prisma.dataset.findMany();
-  // const project = await prisma.project.findMany();
+  await prisma.data.deleteMany({});
+  await prisma.dataset.deleteMany({});
+  await prisma.project.deleteMany({});
+  await prisma.model_info.deleteMany({})
+  const data = await prisma.data.findMany({});
+  const dataset = await prisma.dataset.findMany();
+  const project = await prisma.project.findMany();
   // console.log(project);
   // console.log(dataset);
   // console.log(data);
-  // console.log(project.length);
-  // console.log(dataset.length);
-  // console.log(data.length);
-  const datasetInfo = await prisma.dataset.findUnique({
-    where: {
-      id: "c503ca19-61ae-4530-ac12-277ba93b811c",
-    },
-  });
-  await prisma.data.update({
-    where: {
-      id: "baa044f8-92ff-4de6-90c8-4552aeac35e9",
-    },
-    data: {
-      params: datasetInfo?.data,
-    },
-  });
+  console.log(project.length);
+  console.log(dataset.length);
+  console.log(data.length);
   // npx ts-node prisma.ts
 };
 

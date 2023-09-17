@@ -139,7 +139,7 @@ const StylePanel = () => {
                   ? currentCount
                   : currentCount < startValue
                   ? startValue
-                  : endValue) - 1;
+                  : endValue);
               if (style === "quality" || style === "yuji" || style === "snd") {
                 animateActions.pauseAnimate(key);
                 updateAnimatedStatus(key, "startValue", startValue);
