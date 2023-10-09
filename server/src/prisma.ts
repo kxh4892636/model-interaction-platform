@@ -57,7 +57,7 @@ const main = async () => {
   await prisma.data.deleteMany({});
   await prisma.dataset.deleteMany({});
   await prisma.project.deleteMany({});
-  await prisma.model_info.deleteMany({})
+  await prisma.model_info.deleteMany({});
   const data = await prisma.data.findMany({});
   const dataset = await prisma.dataset.findMany();
   const project = await prisma.project.findMany();

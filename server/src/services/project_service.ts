@@ -116,6 +116,7 @@ const getProjectDataLayer = async (projectID: string) => {
       data: true,
       id: true,
       title: true,
+      status: true,
     },
     orderBy: {
       title: "asc",
@@ -126,6 +127,10 @@ const getProjectDataLayer = async (projectID: string) => {
   let layers: any[] = [];
   for (let index = 0; index < datasetInfo.length; index++) {
     const dataset = datasetInfo[index];
+    if (dataset.status === 0) {
+      continue;
+    }
+
     layers[index] = {
       title: dataset.title,
       key: dataset.id,

@@ -29,6 +29,7 @@ const getList = async (projectID: string) => {
       title: true,
     },
   });
+  return data;
 };
 
 /**
@@ -56,6 +57,7 @@ const addDataset = async (title: string, projectID: string) => {
       title: title,
       data: [],
       path: path,
+      status: 1,
     },
   });
   await prisma.project.update({

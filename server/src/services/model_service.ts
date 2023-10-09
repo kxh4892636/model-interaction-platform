@@ -466,6 +466,15 @@ const runHydrodynamics = async (
               },
             });
 
+            await prisma.dataset.update({
+              where: {
+                id: datasetID,
+              },
+              data: {
+                status: 1,
+              },
+            });
+
             console.log("all finish");
             res.write(`data: all finish\n\n`);
           });
@@ -801,6 +810,15 @@ const runQuality = async (
           ],
           pids: pids,
           is_running: false,
+        },
+      });
+
+      await prisma.dataset.update({
+        where: {
+          id: datasetID,
+        },
+        data: {
+          status: 1,
         },
       });
       console.log("all finish");
@@ -1186,6 +1204,15 @@ const runSand = async (
           progress: [currentCount, num * 5 + 3],
           pids: pids,
           is_running: false,
+        },
+      });
+
+      await prisma.dataset.update({
+        where: {
+          id: datasetID,
+        },
+        data: {
+          status: 1,
         },
       });
       console.log("all finish");
