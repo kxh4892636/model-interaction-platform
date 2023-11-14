@@ -11,7 +11,10 @@ class CustomLayer implements mapboxgl.CustomLayerInterface {
    * @param id layer id
    * @param renderingMode '2d' or '3d'
    */
-  constructor(public id: string, public renderingMode: "2d" | "3d" | undefined) {
+  constructor(
+    public id: string,
+    public renderingMode: "2d" | "3d" | undefined
+  ) {
     this.type = "custom";
   }
 
@@ -59,7 +62,9 @@ function SetRenderingContext(gl: WebGL2RenderingContext) {
 }
 
 function changeRenderingContext(): void {
-  if (mapboxgl.Map.prototype._setupPainter.toString().indexOf("webgl2") === -1) {
+  if (
+    mapboxgl.Map.prototype._setupPainter.toString().indexOf("webgl2") === -1
+  ) {
     const _setupPainter_old = mapboxgl.Map.prototype._setupPainter;
     mapboxgl.Map.prototype._setupPainter = function () {
       const getContext_old = this._canvas.getContext;
@@ -76,7 +81,11 @@ function changeRenderingContext(): void {
   }
 }
 
-function GetMap(accessToken: string, mapOption: MapboxOptions, needChangeContext = true): Map {
+function GetMap(
+  accessToken: string,
+  mapOption: MapboxOptions,
+  needChangeContext = true
+): Map {
   if (needChangeContext) {
     changeRenderingContext();
   }
@@ -86,4 +95,4 @@ function GetMap(accessToken: string, mapOption: MapboxOptions, needChangeContext
   return new mapboxgl.Map(mapOption);
 }
 
-export { CustomLayer, SetRenderingContext, GetMap };
+export { CustomLayer, GetMap, SetRenderingContext };

@@ -32,7 +32,7 @@ import { StylePanel } from "../../features/style";
 import {
   useAnimatedStatusStore,
   useLayersStore,
-  useModalStore
+  useModalStore,
 } from "../../stores";
 import { useMapPositionStore } from "../../stores/map_postion_store";
 import { useProjectStatusStore } from "../../stores/project_status_store";
@@ -87,7 +87,7 @@ export const Home: React.FC = () => {
   const animatedStatus = useAnimatedStatusStore(
     (state) => state.animatedStatus
   );
-  const layersStore = useLayersStore(state=>state.layers)
+  const layersStore = useLayersStore((state) => state.layers);
 
   // 侧边栏数据
   const navItems = projectKey.includes("-")
@@ -168,13 +168,7 @@ export const Home: React.FC = () => {
 
   return (
     <View>
-      <TitleBarContainer
-        onClick={() => {
-          console.log(animatedStatus);
-          console.log(modelStatus);
-          console.log(layersStore);
-        }}
-      >
+      <TitleBarContainer onClick={() => {}}>
         港口水环境与生态动力学精细化模拟平台
       </TitleBarContainer>
       <Spin spinning={isSpinning} size="large" delay={500} tip="请稍等">

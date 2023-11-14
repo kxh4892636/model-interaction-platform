@@ -16,7 +16,9 @@ var pool = new Pool(config);
 function sqlstr(num, dx) {
   let sqlstr = "(";
   for (let i = num; i < num + dx; i++) {
-    i === num + dx - 1 ? (sqlstr = sqlstr + "$" + i) : (sqlstr = sqlstr + "$" + i + ",");
+    i === num + dx - 1
+      ? (sqlstr = sqlstr + "$" + i)
+      : (sqlstr = sqlstr + "$" + i + ",");
   }
   sqlstr += "),";
   return sqlstr;
@@ -38,7 +40,10 @@ function deconstruct(Data, dx) {
     const tmp = Object.values(Data[index]);
     ReturnData.push(...tmp);
   }
-  return { Data: ReturnData, Sql: sqlString.substring(0, sqlString.length - 1) };
+  return {
+    Data: ReturnData,
+    Sql: sqlString.substring(0, sqlString.length - 1),
+  };
 }
 // 直接结构了
 function Basic(Group, singleID) {
@@ -52,19 +57,47 @@ function Basic(Group, singleID) {
     // 存一个ID，用于全部取出来
     tmp.push(singleID);
     tmp.push(index + 1);
-    tmp.push(element.name === null || !elKey.includes("name") ? -9999 : element.name);
-    tmp.push(element.type === null || !elKey.includes("type") ? -9999 : element.type);
-    tmp.push(element.Biomass === null || !elKey.includes("Biomass") ? -9999 : element.Biomass);
-    tmp.push(element.prodbiom === null || !elKey.includes("prodbiom") ? -9999 : element.prodbiom);
-    tmp.push(element.consbiom === null || !elKey.includes("consbiom") ? -9999 : element.consbiom);
+    tmp.push(
+      element.name === null || !elKey.includes("name") ? -9999 : element.name
+    );
+    tmp.push(
+      element.type === null || !elKey.includes("type") ? -9999 : element.type
+    );
+    tmp.push(
+      element.Biomass === null || !elKey.includes("Biomass")
+        ? -9999
+        : element.Biomass
+    );
+    tmp.push(
+      element.prodbiom === null || !elKey.includes("prodbiom")
+        ? -9999
+        : element.prodbiom
+    );
+    tmp.push(
+      element.consbiom === null || !elKey.includes("consbiom")
+        ? -9999
+        : element.consbiom
+    );
     tmp.push(
       element.ecoefficiency === null || !elKey.includes("ecoefficiency")
         ? -9999
         : element.ecoefficiency
     );
-    tmp.push(element.ProdCons === null || !elKey.includes("ProdCons") ? -9999 : element.ProdCons);
-    tmp.push(element.BiomAcc === null || !elKey.includes("BiomAcc") ? 0 : element.BiomAcc);
-    tmp.push(element.Unassim === null || !elKey.includes("Unassim") ? 0.2 : element.Unassim);
+    tmp.push(
+      element.ProdCons === null || !elKey.includes("ProdCons")
+        ? -9999
+        : element.ProdCons
+    );
+    tmp.push(
+      element.BiomAcc === null || !elKey.includes("BiomAcc")
+        ? 0
+        : element.BiomAcc
+    );
+    tmp.push(
+      element.Unassim === null || !elKey.includes("Unassim")
+        ? 0.2
+        : element.Unassim
+    );
     GroupData.push(...tmp);
   });
   return { Data: GroupData, Sql: sqlString.substring(0, sqlString.length - 1) };
@@ -92,7 +125,8 @@ function DietComposition(GroupID, Group, Diet, Detritus, singleID) {
         tmp.Diet = el[key] === "NA" ? 0 : el[key];
         // 其实Detritus[index]["Detritus"]可以直接换成1，中国南海数据库里的定义应该只有0，1两个值
         // GroupID[el.name]-1 不能单纯用index，永远通过名字去定位。id是索引加1 这里需要减去1
-        tmp["Detritus"] = key === "Detritus" ? Detritus[GroupID[el.name] - 1]["Detritus"] : 0;
+        tmp["Detritus"] =
+          key === "Detritus" ? Detritus[GroupID[el.name] - 1]["Detritus"] : 0;
         Data.push(tmp);
         // 每push一次，record就加1
         recordid += 1;
@@ -171,17 +205,35 @@ function FleetDiscardFate(GroupID, FleetID, DiscardFate, singleID) {
   // console.log(Data)
   return Data;
 }
-function CRUDFunc(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num) {
+function CRUDFunc(
+  Group,
+  Fleet,
+  Diet,
+  Detritus,
+  DiscardFate,
+  Land,
+  Discard,
+  num
+) {
   const GroupID = genID(Group);
   const FleetID = genID(Fleet);
   // 自动解构Group Basic
   const BasicSql = Basic(Group, num);
   // Diet (predid,preyid,diet,Detritus) dx 4
-  const DietSql = deconstruct(DietComposition(GroupID, Group, Diet, Detritus, num), 6);
+  const DietSql = deconstruct(
+    DietComposition(GroupID, Group, Diet, Detritus, num),
+    6
+  );
   // FleetLandDisc (Groupid,Fleetid,landing,discards) dx 4
-  const LandDiscSql = deconstruct(FleetLandDisc(GroupID, FleetID, Land, Discard, num), 6);
+  const LandDiscSql = deconstruct(
+    FleetLandDisc(GroupID, FleetID, Land, Discard, num),
+    6
+  );
   // DiscardFate (Groupid,fleetid,Discardfate) dx 3
-  const DiscardFateSql = deconstruct(FleetDiscardFate(GroupID, FleetID, DiscardFate, num), 5);
+  const DiscardFateSql = deconstruct(
+    FleetDiscardFate(GroupID, FleetID, DiscardFate, num),
+    5
+  );
 
   // SQL语句
   const InsertGroup = `INSERT INTO EcopathGroup(ID,GroupID,GroupName,Type,Biomass,ProdBiom,ConsBiom,EcoEfficiency,ProdCons,BiomAcc,Unassim) VALUES `;
@@ -196,13 +248,17 @@ function CRUDFunc(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num)
           // 插入Group数据
           .query(`INSERT INTO ewecase(ID) VALUES ($1)`, [num])
           .then(() => {
-            client.query(InsertGroup + BasicSql.Sql, BasicSql.Data, (err, res) => {
-              if (err) {
-                console.log(err);
+            client.query(
+              InsertGroup + BasicSql.Sql,
+              BasicSql.Data,
+              (err, res) => {
+                if (err) {
+                  console.log(err);
+                }
+                // client.release()
+                console.log("插入Group数据");
               }
-              // client.release()
-              console.log("插入Group数据");
-            });
+            );
           })
           .then(() => {
             // 插入Diet数据
@@ -216,24 +272,32 @@ function CRUDFunc(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num)
           })
           .then(() => {
             // 插入Catch LD数据
-            client.query(InsertCatch + LandDiscSql.Sql, LandDiscSql.Data, (err, res) => {
-              if (err) {
-                console.log(err);
+            client.query(
+              InsertCatch + LandDiscSql.Sql,
+              LandDiscSql.Data,
+              (err, res) => {
+                if (err) {
+                  console.log(err);
+                }
+                // client.release()
+                console.log("插入Catch数据");
               }
-              // client.release()
-              console.log("插入Catch数据");
-            });
+            );
           })
           .then(() => {
             // 插入discard fate数据
-            client.query(InsertDF + DiscardFateSql.Sql, DiscardFateSql.Data, (err, res) => {
-              if (err) {
-                console.log(err);
+            client.query(
+              InsertDF + DiscardFateSql.Sql,
+              DiscardFateSql.Data,
+              (err, res) => {
+                if (err) {
+                  console.log(err);
+                }
+                console.log("插入Fate数据");
+                reslove("完成插入");
+                client.release();
               }
-              console.log("插入Fate数据");
-              reslove("完成插入");
-              client.release();
-            });
+            );
           })
           .catch((err) => {
             client.release();
@@ -243,7 +307,16 @@ function CRUDFunc(Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num)
     });
   });
 }
-export const CRUDdatabase = (Group, Fleet, Diet, Detritus, DiscardFate, Land, Discard, num) => {
+export const CRUDdatabase = (
+  Group,
+  Fleet,
+  Diet,
+  Detritus,
+  DiscardFate,
+  Land,
+  Discard,
+  num
+) => {
   return new Promise((reslove, reject) => {
     pool.connect().then((client) => {
       return client

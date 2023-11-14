@@ -45,7 +45,7 @@ const TreeTitle = styled.div`
   line-height: 20px;
   padding: 0px 10px;
   background: #fff;
-`
+`;
 
 /**
  * generate the select options of all mesh
@@ -227,7 +227,6 @@ const Visualization = () => {
         placeholder="请选择对应的 mesh 文件"
         value={selectValue}
         onChange={(value) => {
-          console.log(value);
           setSelectValue(value);
         }}
         options={options}
@@ -325,7 +324,7 @@ export const DataPanel = () => {
           action: dataActions.deleteLayer,
         },
       ];
-    } else if(
+    } else if (
       layersSelected.data.type === "text" ||
       layersSelected.data!.layerStyle === "text" ||
       layersSelected.data.type === "ewemodel"
@@ -396,7 +395,7 @@ export const DataPanel = () => {
   };
 
   return (
-    <PanelContainer style={{background:'#f0f0f0'}}>
+    <PanelContainer style={{ background: "#f0f0f0" }}>
       <PanelTitleContainer>数据面板</PanelTitleContainer>
       <PanelToolsContainer>
         <DataTools
@@ -422,13 +421,30 @@ export const DataPanel = () => {
           }}
         />
       </PanelToolsContainer>
-      <PanelContentContainer style={{ margin:'4px',border:'1px solid #bfbfbf', padding:'6px 0px', overflow: "auto", height:'47vh',borderBottom:'1px solid #bfbfbf' }}>
+      <PanelContentContainer
+        style={{
+          margin: "4px",
+          border: "1px solid #bfbfbf",
+          padding: "6px 0px",
+          overflow: "auto",
+          height: "47vh",
+          borderBottom: "1px solid #bfbfbf",
+        }}
+      >
         <TreeTitle>输入</TreeTitle>
         <DataTree input={true}>
           <DataTreeMenu layerMenuItems={layerMenuItems()} />
         </DataTree>
       </PanelContentContainer>
-      <PanelContentContainer style={{ margin:'0px 4px 4px',border:'1px solid #bfbfbf', padding:'6px 0px', overflow: "auto", height:'47vh'}}>
+      <PanelContentContainer
+        style={{
+          margin: "0px 4px 4px",
+          border: "1px solid #bfbfbf",
+          padding: "6px 0px",
+          overflow: "auto",
+          height: "47vh",
+        }}
+      >
         <TreeTitle>输出</TreeTitle>
         <DataTree input={false}>
           <DataTreeMenu layerMenuItems={layerMenuItems()} />

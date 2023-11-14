@@ -34,7 +34,7 @@ conn = dbDriver("PostgreSQL")
 #建立连接
 con <- dbConnect(conn ,
                  host = "localhost", #主机名，默认localhost
-                 port = '5432', #端口号，默认5432
+                 port = '5432', #端口号，默认5433
                  dbname = 'model',  #数据库
                  user = 'postgres', #用户名
                  password = '1216') #安装的时候设的postgresql的密码
