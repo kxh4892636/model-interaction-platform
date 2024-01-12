@@ -9,7 +9,15 @@
  */
 
 const LayerOutlined: React.FC<{ style: React.CSSProperties }> = ({ style }) => (
-  <span style={{ padding: "0px", lineHeight: "0px", fontSize: "14px", color: "#595959", ...style }}>
+  <span
+    style={{
+      padding: "0px",
+      lineHeight: "0px",
+      fontSize: "14px",
+      color: "#595959",
+      ...style,
+    }}
+  >
     <svg
       className="icon"
       viewBox="64 64 896 896"
