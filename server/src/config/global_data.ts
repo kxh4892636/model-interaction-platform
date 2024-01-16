@@ -1,1 +1,2 @@
-export const dataFoldURL: string = process.cwd().replace("server", "data").split("\\").join("/");
+// export const dataFoldURL: string = process.cwd().replace("server", "data").split("\\").join("/");
+export const dataFoldURL: string = "G:/fhm/postgraduate/yanyi_down/GitUse/model_interaction_platform/data"

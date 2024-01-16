@@ -6,114 +6,11 @@ import iconv from "iconv-lite";
 import ADODB from "node-adodb";
 import path, { dirname, resolve } from "path";
 import { dataFoldURL } from "../config/global_data";
-import {
-  CRUDdatabase,
-  FlowDiagram,
-  HandleReturn,
-  ModifyDatabase,
-} from "../utils/ewe/exportEWE";
-import { query } from "../utils/ewe/importEWE";
 import { copySelectFilesInFolder } from "../utils/tools/fs_extra";
 import { prisma } from "../utils/tools/prisma";
 import { datasetService } from "./dataset_service";
 import { visualizationService } from "./visualization_service";
 
-// 计算结果
-const R_test2 = async (req: Request, res: Response) => {
-  const ModelState = req.body.ModelState;
-  const num = req.body.singleID;
-  if (ModelState === "Start") {
-    const Group = req.body.Group;
-    const Diet = req.body.Diet;
-    const Detritus = req.body.Detritus;
-    const DiscardFate = req.body.DiscardFate;
-    const Land = req.body.Land;
-    const Discard = req.body.Discard;
-    const Fleet = req.body.Fleet;
-    // 全部封到exportEWE中去
-    await CRUDdatabase(
-      Group,
-      Fleet,
-      Diet,
-      Detritus,
-      DiscardFate,
-      Land,
-      Discard,
-      num
-    );
-    const { stdout } = await execa(
-      `Rscript ./src/utils/ewe/EcoPath.R '${num}'`,
-      {
-        shell: true,
-        windowsHide: true,
-      }
-    );
-    // stdout.stdout!.on('end',()=>{
-    //   // after
-    // })
-
-    // [1] TRUE 长度为10 后面还跟着2个空格 10*n-1  5个最后为49  加上“[1] ” 从54开始
-    // 如果图标那一块真的要使用图片进行传输的话，多了“pdf 2” 所以要从65开始
-    let data = JSON.parse(stdout.toString().slice(54));
-    // 得弄两次，第一次弄完还是字符串string类型
-    data = JSON.parse(data);
-    data.Basic = JSON.parse(data.Basic);
-    data.InputFlag = JSON.parse(data.InputFlag);
-    data.link = JSON.parse(data.link);
-    data.prenode = JSON.parse(data.prenode);
-    return {
-      BasicEst: HandleReturn(data.Basic, data.InputFlag),
-      Graph: FlowDiagram(data.prenode, data.link),
-      status: data.status,
-      statusname: data.statusname,
-    };
-  } else if (ModelState === "Modify") {
-    const ModifyData = req.body.ModifyData;
-    const Group = req.body.Group;
-    const Fleet = req.body.Fleet;
-    console.log("此次修改的数据为", ModifyData);
-    await ModifyDatabase(ModifyData, num, Group, Fleet);
-    const { stdout } = await execa(
-      `Rscript ./src/utils/ewe/EcoPath.R '${num}'`,
-      {
-        shell: true,
-        windowsHide: true,
-      }
-    );
-    // [1] TRUE 长度为10 后面还跟着2个空格 10*n-1  5个最后为49  加上“[1] ” 从54开始
-    // 如果图标那一块真的要使用图片进行传输的话，多了“pdf 2” 所以要从65开始
-    let data = JSON.parse(stdout.toString().slice(54));
-    // 得弄两次，第一次弄完还是字符串string类型
-    data = JSON.parse(data);
-    // console.log(data.statusname)
-    data.Basic = JSON.parse(data.Basic);
-    data.InputFlag = JSON.parse(data.InputFlag);
-    data.link = JSON.parse(data.link);
-    data.prenode = JSON.parse(data.prenode);
-    // res.send(data)
-    return {
-      BasicEst: HandleReturn(data.Basic, data.InputFlag),
-      Graph: FlowDiagram(data.prenode, data.link),
-      status: data.status,
-      statusname: data.statusname,
-    };
-  } else {
-    return "请勿重复执行";
-  }
-};
-
-// 从模型文件按中导入
-const R_test3 = async (req: Request, res: Response) => {
-  const info = await prisma.data.findUnique({ where: { id: req.body.id } });
-  const connection = ADODB.open(
-    `Provider=Microsoft.ACE.OLEDB.12.0;Data Source=${
-      dataFoldURL + info!.path
-    };Persist Security Info=False;`,
-    true
-  );
-  const result = await query(connection);
-  return result;
-};
 
 // 水动力模型计算接口
 const runHydrodynamics = async (
@@ -1343,8 +1240,6 @@ const stopModel = async (modelInfoID: string) => {
 };
 
 export const modelService = {
-  R_test2,
-  R_test3,
   runHydrodynamics,
   runQuality,
   runSand,

@@ -1,104 +1,140 @@
-import Group from "./components/Group";
-import Diet from "./components/Diet";
-import Detritus from "./components/Detritus";
-import FisheryDiscFate from "./components/FisheryDiscFate";
-import FisheryLand from "./components/FisheryLand";
-import FisheryDiscard from "./components/FisheryDiscard";
-import EcopathOutput from "./components/EcopathOutput";
-import FlowDiagram from "./components/FlowDiagram";
-import EWEModel from "./components/EWEfish";
-import EWELog from "./components/EWElog";
-import EcoSim from "./components/EcoSim"
-import EcoSimPNG from "./components/EcoSimPNG"
-import Ecospace1 from "./components/Ecospace1"
-import Ecospace2 from "./components/Ecospace2"
-import Ecospace3 from "./components/Ecospace3"
-import EcopathPNG from "./components/EcopathPNG"
-import { Navigate } from "react-router-dom";
+
 import { Hydrodynamics } from "./components/hydrodynamics";
 import { QualityModelPanel } from "./components/quality";
 import { SandModelPanel } from "./components/sand";
 
+import EWEModel from "./components/EWEModel";
+import BasicInput from "./components/EcoPath/BasicInput"
+import StanzeGroupJS from "./components/EcoPath/StanzeGroup"
+import Diet from "./components/EcoPath/Diet"
+import DetritusFate from "./components/EcoPath/DetritusFate"
+import FishDiscardFate from "./components/EcoPath/FishDiscardFate"
+import FishLanding from "./components/EcoPath/FishLanding"
+import FishDiscard from "./components/EcoPath/FishDiscard"
+import BasicEstimate from "./components/EcoPath/Basic_Estimate"
+import FlowDiagram from "./components/EcoPath/FlowDiagram"
+import AntvG6T from "./components/EcoPath/AtvG6T"
+import Mortality from "./components/EcoPath/Mortality"
+import MixedTrophic from "./components/EcoPath/MixedTrophic"
+
+import Timeseries from "./components/EcoSim/Timeseries"
+import ForcingFunction from "./components/EcoSim/ForcingFunction"
+import EggProduction from "./components/EcoSim/EggProduction"
+import EcoSimResults from "./components/EcoSim/Results"
+import RunEcoSimPlot from "./components/EcoSim/RunEcoSimPlot"
+import GroupPlot from "./components/EcoSim/GroupPlot"
+import FleetPlot from "./components/EcoSim/FleetPlot"
+import { Navigate } from "react-router-dom"
+
+import RunEcosSpace from "./components/EcoSpace/RunEcosSpace"
+import EcoSpaceResult from "./components/EcoSpace/EcoSpaceResult"
+
+
+
 const routes = [
-  {
-    path: "/model/hydrodynamics",
-    element: <Hydrodynamics model="hydrodynamics" />,
-  },
-  {
-    path: "/model/quality",
-    element: <QualityModelPanel model="quality" />,
-  },
-  {
-    path: "/model/sand",
-    element: <SandModelPanel model="sand" />,
-  },
-  {
-    path: "/model/Group",
-    element: <Group />,
-  },
-  {
-    path: "/model/Diet",
-    element: <Diet />,
-  },
-  {
-    path: "/model/DetritusFate",
-    element: <Detritus />,
-  },
-  {
-    path: "/model/Landing",
-    element: <FisheryLand />,
-  },
-  {
-    path: "/model/Discards",
-    element: <FisheryDiscard />,
-  },
-  {
-    path: "/model/DiscardFate",
-    element: <FisheryDiscFate />,
-  },
-  {
-    path: "/model/EcopathOutput",
-    element: <EcopathOutput />,
-  },
-  {
-    path: "/model/FlowDiagram",
-    element: <FlowDiagram />,
-  },
-  {
-    path: "/model/EWEModel",
-    element: <EWEModel />,
-  },
-  {
-    path: "/model/EcoSim",
-    element: <EcoSim />,
-  },
-  {
-    path: "/model/EcoSimPNG",
-    element: <EcoSimPNG />,
-  },
-  {
-    path: "/model/Ecospace1",
-    element: <Ecospace1 />,
-  },
-  {
-    path: "/model/Ecospace2",
-    element: <Ecospace2 />,
-  },
-  {
-    path: "/model/Ecospace3",
-    element: <Ecospace3 />,
-  },
-  {
-    path: "/model/EcopathPNG",
-    element: <EcopathPNG />,
-  },
-  {
-    path: "/model",
-    element: <EWELog />,
-  },
-  {
-    path: "/",
-    element: <Navigate to="/model/EWElog" />,
-  },
-];
-export default routes;
+    {
+      path: "/model/hydrodynamics",
+      element: <Hydrodynamics model="hydrodynamics" />,
+    },
+    {
+      path: "/model/quality",
+      element: <QualityModelPanel model="quality" />,
+    },
+    {
+      path: "/model/sand",
+      element: <SandModelPanel model="sand" />,
+    },
+    {
+        path:'model/EWEModel',
+        element:<EWEModel/>
+    },
+    {
+        path:'model/BasicInput',
+        element:<BasicInput/>
+    },
+    {
+        path:'model/StanzeGroup',
+        element:<StanzeGroupJS/>
+    },
+    {
+        path:'model/Diet',
+        element:<Diet/>
+    },    
+    {
+        path:'model/DetritusFate',
+        element:<DetritusFate/>
+    },
+    {
+        path:'model/Landing',
+        element:<FishLanding />
+    },  
+    {
+        path:'model/Discards',
+        element:<FishDiscard/>
+    },
+    {
+        path:'model/DiscardFate',
+        element:<FishDiscardFate/>
+    },  
+    {
+        path:'model/EcopathOutput',
+        element:<BasicEstimate/>
+    },
+    {
+        path:'model/FlowDiagram',
+        element:<FlowDiagram/>
+    },
+    {
+        path:'model/AntvG6T',
+        element:<AntvG6T/>
+    },
+    {
+        path:'model/Mortality',
+        element:<Mortality/>
+    },
+    {
+        path:'model/MixedTrophicImapct',
+        element:<MixedTrophic/>
+    },
+    {
+        path:'model/Timeseries',
+        element:<Timeseries/>
+    },
+    {
+        path:'model/ForcingFunction',
+        element:<ForcingFunction/>
+    },
+    {
+        path:'model/EggProduction',
+        element:<EggProduction/>
+    },
+    {
+        path:'model/EcoSimResults',
+        element:<EcoSimResults/>
+    },
+    {
+        path:'model/RunEcoSim',
+        element:<RunEcoSimPlot/>
+    },
+    {
+        path:'model/GroupPlot',
+        element:<GroupPlot/>
+    },
+    {
+        path:'model/FleetPlot',
+        element:<FleetPlot/>
+    },
+    {
+        path:'model/Run_EcoSpace',
+        element:<RunEcosSpace/>
+    },
+    {
+        path:'model/EcoSpace_Result',
+        element:<EcoSpaceResult/>
+    },
+    {
+        path:'/',
+        element:<Navigate to='/Group'/>
+    }
+]
+export default routes 

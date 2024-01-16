@@ -1,439 +1,668 @@
-import { create } from "zustand";
-// 处理饮食结构的表头
-const genDietCol = (modalarray) => {
-  // 将type为 消费者 生产者
-  const modalfordiet = modalarray.filter(
-    (element) => element.type === 0 || element.type === 1 || element.name === "Detritus"
-  );
-  // 拼defaultColumns
-  const defaultColumns = [];
-  defaultColumns.push({
-    title: "Predator \\ Prey",
-    dataIndex: "name",
-    key: "group",
-    fixed: "left",
-  });
-  modalfordiet.map((element) => {
-    let tmp = {};
-    tmp.title = element.name;
-    tmp.dataIndex = element.name;
-    tmp.key = element.name;
-    tmp.editable = true;
-    defaultColumns.push(tmp);
-    return element;
-  });
-  defaultColumns.push(
-    { title: "Import", dataIndex: "Import", key: "Import", editable: true },
-    { title: "Sum", dataIndex: "Sum", key: "Sum", editable: true },
-    { title: "(1-Sum)", dataIndex: "(1-Sum)", key: "(1-Sum)", editable: true }
-  );
-  return defaultColumns;
-};
-// 处理饮食结构,單純只有每一行的名字。在通过EWE数据库文件加载不需要这一步
-const genDiet = (modalarray) => {
-  // 将不是舰队的选出来
-  const modalfordiet = modalarray.filter((element) => element.type === 0);
-  const datasource = [];
-  modalfordiet.map((element) => {
-    let tmp2 = {};
-    tmp2.key = element.name;
-    tmp2.name = element.name;
-    datasource.push(tmp2);
-    return element;
-  });
-  return datasource;
-};
-
-// 处理Fishery中的Landing表头，在通过EWE数据库文件加载不需要这一步
-const genLandCol = (modalarray) => {
-  const defaultColumns = [];
-  defaultColumns.push({ title: "Group Name", dataIndex: "name", key: "group", fixed: "left" });
-  modalarray.map((element) => {
-    let tmp = {};
-    tmp.title = element.name;
-    tmp.dataIndex = element.name;
-    tmp.key = element.name;
-    tmp.editable = true;
-    defaultColumns.push(tmp);
-    return element;
-  });
-  defaultColumns.push({ title: "Sum", dataIndex: "Sum", key: "Sum" });
-  return defaultColumns;
-};
-// 处理Fishery中的Landing数据，單純只有每一行的名字。
-const genLand = (modalarray) => {
-  const datasource = [];
-  modalarray.map((element) => {
-    let tmp2 = {};
-    tmp2.key = element.name;
-    tmp2.name = element.name;
-    datasource.push(tmp2);
-    return element;
-  });
-  return datasource;
-};
-
-// Define Group中的data状态
-const useStore = create((set, get) => ({
-  GroupData: [
-    {
-      key: "0",
-      name: "Detritus",
-      age: "32",
-      address: "London, Park Lane no. 0",
-      stgroup: "stgroup",
-      type: 1,
-    },
-  ],
-  setGroupData: (newData) =>
+import {create} from "zustand";
+import axios from "axios";
+import { serverHost } from "../../config/global_variable";
+//选择的EWEmodel
+const selectedEWEModelID = create((set, get) => ({
+  Data:"",
+  setEWEModelID: (newData) =>{
     set((state) => ({
-      GroupData: [...newData],
+      Data: newData
+}))},
+}));
+// 控制Import组件的显隐
+const ImportFlag = create((set, get) => ({
+    Flag:false,
+    setFlag: (newData) =>
+        set((state) => ({
+            Flag: newData
+    })),
+  }));
+// 是否Import操作
+const ImportClick = create((set, get) => ({
+  Flag:false,
+  setFlag: (newData) =>
+      set((state) => ({
+          Flag: newData
+  })),
+}));
+
+  // 是否EcoPath
+const EcoPathClick = create((set, get) => ({
+    Flag:false,
+    setFlag: (newData) =>
+        set((state) => ({
+            Flag: newData
+    })),
+  }));
+  // 是否EcoSim操作
+const EcoSimClick = create((set, get) => ({
+    Flag:false,
+    setFlag: (newData) =>
+        set((state) => ({
+            Flag: newData
+    })),
+  }));
+  // 是否EcoSpace操作
+const EcoSpaceClick = create((set, get) => ({
+    Flag:false,
+    setFlag: (newData) =>
+        set((state) => ({
+            Flag: newData
+    })),
+  }));
+// 控制表格的显隐
+const TableFlag = create((set, get) => ({
+    Flag:false,
+    setFlag: (newData) =>
+        set((state) => ({
+            Flag: newData
     })),
 }));
 
-// Define Fleet
-const FleetModal = create((set, get) => ({
-  FleetData: [
-    {
-      key: "0",
-      name: "Fleet0",
-      type: 3,
-    },
-  ],
-  setFleetData: (newData) =>
-    set((state) => ({
-      FleetData: [...newData],
-    })),
-}));
 // Basic Input中的状态
 const Basic = create((set, get) => ({
-  GroupTData: [
-    {
-      key: "0",
-      name: "Detritus",
-      age: "32",
-      address: "London, Park Lane no. 0",
-      stgroup: "stgroup",
-      type: 1,
-    },
-  ],
-  setGroupTData: (newData) =>
-    set((state) => ({
-      GroupTData: [...newData],
+    BasicData:[],
+    setBasicData: (newData) =>
+        set((state) => ({
+            BasicData: [...newData]
     })),
 }));
 
-// 饮食结构中的data数据
-const Diet = create((set, get) => ({
-  DietData: [
-    {
-      key: "0",
-      name: "Detritus",
-      age: "32",
-      address: "London, Park Lane no. 0",
-      stgroup: "stgroup",
-      type: 1,
-    },
-  ],
-  setDietData: (newData) => {
-    newData = genDiet(newData);
-    // console.log(newData)
-    set((state) => ({
-      DietData: [...newData],
-    }));
-  },
-  // 单纯更新状态
-  setDietData2: (newData) => {
-    set((state) => ({
-      DietData: [...newData],
-    }));
-  },
+//StanzeSelect
+const StanzeSelect = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//StanzeSelectedValue
+const StanzeSelectedValue = create((set, get) => ({
+    Data:"",
+    setData: (newData) =>
+        set((state) => ({
+            Data: newData
+    })),
+}));
+//StanzeGroup
+const StanzeGroup = create((set, get) => ({
+    Data:{},
+    setData: (newData) =>
+        set((state) => ({
+            Data: {...newData}
+    })),
 }));
 
-// 饮食结构中的Columns数据
-const DietCol = create((set, get) => ({
-  DietColumns: [
-    {
-      title: "Predator \\ Prey",
-      dataIndex: "name",
-      key: "group",
-      fixed: "left",
-    },
-    {
-      title: "Import",
-      dataIndex: "Import",
-      key: "Import",
-      editable: true,
-    },
-    {
-      title: "Sum",
-      dataIndex: "Sum",
-      key: "Sum",
-      editable: true,
-    },
-    {
-      title: "(1-Sum)",
-      dataIndex: "(1-Sum)",
-      key: "(1-Sum)",
-      editable: true,
-    },
-  ],
-  setDietColumns: (newData) => {
-    newData = genDietCol(newData);
-    set((state) => ({
-      DietColumns: [...newData],
-    }));
-  },
-  // 单纯更新状态
-  setDietColumns2: (newData) => {
-    set((state) => ({
-      DietColumns: [...newData],
-    }));
-  },
+//StanzeTable
+const StanzeTable = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//StanzePlotOption
+const StanzePlotOption = create((set, get) => ({
+    Data:{},
+    setData: (newData) =>
+        set((state) => ({
+            Data: {...newData}
+    })),
+}));
+//Diet Cloumns
+const Diet_Cloumns = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
 }));
 
-// Detritus
-const Detritus = create((set, get) => ({
-  DetritusData: [
-    {
-      name: "Detritus",
-      Detritus: 0,
-      key: "Detritus",
-      Export: 1,
-      Sum: 1,
-    },
-  ],
-  // 单纯更新状态
-  setDetritusData: (newData) => {
-    set((state) => ({
-      DetritusData: [...newData],
-    }));
-  },
+//Diet Data
+const Diet_Data = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
 }));
-// FisheryDiscardFate
-const FisheryDiscardFate = create((set, get) => ({
-  DiscardFateData: [
-    {
-      name: "Fleet1",
-      Detritus: 1,
-      key: "Fleet1",
-      Export: 0,
-      Sum: 1,
-    },
-  ],
-  // 单纯更新状态
-  setDiscardFateData: (newData) => {
-    set((state) => ({
-      DiscardFateData: [...newData],
-    }));
-  },
+//DetritusFate
+const DetritusFate = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
 }));
 
-// FisheryLand
-const FisheryLand = create((set, get) => ({
-  LandData: [
-    {
-      name: "Detritus",
-      key: "Detritus",
-      Total: 0,
-    },
-  ],
-  setLandData: (newData) => {
-    newData = genLand(newData);
-    // console.log("DietCol",newData)
-    set((state) => ({
-      LandData: [...newData],
-    }));
-  },
-  // 单纯更新状态
-  setLandData2: (newData) => {
-    set((state) => ({
-      LandData: [...newData],
-    }));
-  },
+//FleetsCloums
+const FleetsCloums = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
 }));
 
-// FisheryLandCol
-const FisheryLandCol = create((set, get) => ({
-  LandColumns: [
-    {
-      title: "Group Name",
-      dataIndex: "name",
-      key: "group",
-      fixed: "left",
-    },
-    {
-      title: "Sum",
-      dataIndex: "Sum",
-      key: "Sum",
-      editable: true,
-    },
-  ],
-  setLandColumns: (newData) => {
-    newData = genLandCol(newData);
-    // console.log("DietCol",newData)
-    set((state) => ({
-      LandColumns: [...newData],
-    }));
-  },
-  // 单纯更新状态
-  setLandColumns2: (newData) => {
-    set((state) => ({
-      LandColumns: [...newData],
-    }));
-  },
+//Landings
+const Landings = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
 }));
 
-// FisheryDiscard
-const FisheryDiscard = create((set, get) => ({
-  DiscardData: [
-    {
-      name: "Detritus",
-      key: "Detritus",
-      Total: 0,
-    },
-  ],
-  // 单纯更新状态
-  setDiscardData: (newData) => {
-    newData = genLand(newData);
-    // console.log("DietCol",newData)
-    set((state) => ({
-      DiscardData: [...newData],
-    }));
-  },
-  // 单纯更新状态
-  setDiscardData2: (newData) => {
-    set((state) => ({
-      DiscardData: [...newData],
-    }));
-  },
+//FishDiscard
+const Discard = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
 }));
 
-// FisheryDiscardCol
-const FisheryDiscardCol = create((set, get) => ({
-  DiscardColumns: [
-    {
-      title: "Group Name",
-      dataIndex: "name",
-      key: "group",
-      fixed: "left",
-    },
-    {
-      title: "Sum",
-      dataIndex: "Sum",
-      key: "Sum",
-      editable: true,
-    },
-  ],
-  setDiscardColumns: (newData) => {
-    newData = genLandCol(newData);
-    // console.log("DiscardColumn",newData)
-    set((state) => ({
-      DiscardColumns: [...newData],
-    }));
-  },
-  // 单纯更新状态
-  setDiscardColumns2: (newData) => {
-    set((state) => ({
-      DiscardColumns: [...newData],
-    }));
-  },
+//DiscardFate
+const DiscardFate = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
 }));
 
-// Ecopath output
-const EcopathOutput = create((set, get) => ({
-  EcopathOutputData: [],
-  // 单纯更新状态
-  setEcopathOutputData: (newData) => {
-    set((state) => ({
-      EcopathOutputData: [...newData],
-    }));
-  },
+//控制Ecopath result的显隐
+const EcopathResultFlag = create((set, get) => ({
+    Flag:false,
+    setFlag: (newData) =>
+        set((state) => ({
+            Flag: newData
+    })),
 }));
-
-// Flow Diagram
+//Basic_Estimate
+const Basic_Estimate = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//FlowDiagram
 const FlowDiagram = create((set, get) => ({
-  Graph: {},
-  // 单纯更新状态
-  setGraphData: (newData) => {
-    // console.log("Graph",newData)
-    set((state) => ({
-      Graph: { ...newData },
-    }));
-  },
+    Data:{},
+    setData: (newData) =>
+        set((state) => ({
+            Data: {...newData}
+    })),
+}));
+//Antv6画的营养等级图
+const Lindman_spine = create((set, get) => ({
+    Data:{},
+    setData: (newData) =>{
+        // console.log("my",newData)
+        set((state) => ({
+            Data: {...newData}
+    }))},
+}));
+//Mortalities
+const Mortalities = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>{
+        // console.log("my",newData)
+        set((state) => ({
+            Data: [...newData]
+    }))},
+}));
+//PredationMortalities
+const PredationMortalities = create((set, get) => ({
+    Data:{},
+    setData: (newData) =>{
+        // console.log("my",newData)
+        set((state) => ({
+            Data: {...newData}
+    }))},
+}));
+//FishingMortalities
+const FishingMortalities = create((set, get) => ({
+    Data:{},
+    setData: (newData) =>{
+        // console.log("my",newData)
+        set((state) => ({
+            Data: {...newData}
+    }))},
 }));
 
-// Run Model 三种状态
-// 1 start：第一次全部存入数据
-// 2 end： 改变后多次点击将不再响应计算，避免重复点击
-// 3 modify：改变某个表后的，修改对应数据库中的数据。再执行
-const RunModelState = create((set, get) => ({
-  State:"Start",
-  // 单纯更新状态
-  setState: (newData) =>{
-    // console.log("State",newData)
-    set((state) => ({
-      State: newData
-}))},
+//MixedTrophicData
+const MixedTrophicData = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>{
+        // console.log("my",newData)
+        set((state) => ({
+            Data: [...newData]
+    }))},
 }));
-const ModifyState = create((set, get) => ({
-  ModifyData:[],
-  // 单纯更新状态
-  setModifyData: (newData) =>{
-    // console.log("ModifyData",newData)
-    set((state) => ({
-      ModifyData: [...newData]
-}))},
+
+//From predators detritus All
+const FromEvery = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>{
+        // console.log("my",newData)
+        set((state) => ({
+            Data: [...newData]
+    }))},
+}));
+
+//TimeSelect
+const TimeSelect = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//TimeSeries
+const TimeSeriesData = create((set, get) => ({
+    Data:{},
+    setData: (newData) =>
+        set((state) => ({
+            Data: {...newData}
+    })),
+}));
+//TimeYearData
+const TimeYearData = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//TimeSeriesPlot
+const TimeSeriesPlot = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//TimeSelected
+const TimeSelected = create((set, get) => ({
+    Data:"",
+    setData: (newData) =>
+        set((state) => ({
+            Data: newData
+    })),
+}));
+//ForcingFunction
+const ForcingFunctionData = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//EggProduction
+const EggProductionData = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//EcoSimResult Group
+const EcoSimResult_Group = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+
+//EcoSimResult Fleet
+const EcoSimResult_Fleet = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
 }));
 
 
-const EWEModelID = create((set, get) => ({
-  EWEModelID:[],
-  // 单纯更新状态
-  setEWEModelID: (newData) =>{
-    // console.log("ModifyData",newData)
-    set((state) => ({
-      EWEModelID: [...newData]
-}))},
+//EcoSimResult Indices
+const EcoSimResult_Indices = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//RunEcoSim Option
+const RunEcoSim_Option = create((set, get) => ({
+    Data:{},
+    setData: (newData) =>
+        set((state) => ({
+            Data: {...newData}
+    })),
 }));
 
-const selectedEWEModelID = create((set, get) => ({
-  selectedEWEModelID:"",
-  // 单纯更新状态
-  setEWEModelID: (newData) =>{
-    // console.log("ModifyData",newData)
-    set((state) => ({
-      selectedEWEModelID: newData
-}))},
+
+//EcoSim Group Plot
+const EcoSimGroup_Plot= create((set, get) => ({
+    Data:{},
+    setData: (newData) =>
+        set((state) => ({
+            Data: {...newData}
+    })),
+}));
+function ListItem(props) {
+    const newData = props.data
+    const setERGroupOption = EcoSimGroup_Plot((state) => state.setData );
+    const setERGroupPred = EcoSimGroup_PlotColorPred((state) => state.setData );
+    const setERGroupPrey = EcoSimGroup_PlotColorPrey((state) => state.setData );
+    const setERGroupFleet = EcoSimGroup_PlotColorFleet((state) => state.setData );
+    const test= (item)=>{ 
+    axios({
+        method: "post",
+        baseURL: serverHost + "/api/model/GroupPlot_Switch",
+        data: { name: item.target.childNodes[1].data },
+    }).then((response) => {
+        if (response.status === 200) {
+            setERGroupOption(response.data.Option)
+            setERGroupPred(response.data.Color.Predatorsranked)
+            setERGroupPrey(response.data.Color.Preyranked)
+            setERGroupFleet(response.data.Color.Fleets)
+        } 
+        else {
+            console.log("GroupPlot Error")
+        }
+    });}
+    const result = Object.keys(newData).map(item => 
+        <li key={item+"0"} onClick={(item)=>test(item)} style={{listStyleType:"none",cursor:"pointer"}}>
+            <span style={{width:"20px",height:"10px",background:newData[item],display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
+            {item}
+        </li>)
+    // console.log(result)
+  return (
+    result
+  )
+}
+//Ecosim Group Plot Color
+const EcoSimGroup_PlotColor= create((set, get) => ({
+    Data:<></>,
+    setData: (newData) =>{
+        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+        if(newData.key===null)
+        {
+            return set((state) => ({Data: <></>}))
+        }
+        set((state) => ({
+            Data: <ListItem data={newData}></ListItem>
+        }))
+    }
+}));
+//Ecosim Group Plot Color Prey
+const EcoSimGroup_PlotColorPrey= create((set, get) => ({
+    Data:<></>,
+    setData: (newData) =>{
+        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+        if(newData.key===null)
+        {
+            return set((state) => ({Data: <></>}))
+        }
+        const result = newData.map(item => 
+            <li key={item.Name+"1"} style={{listStyleType:"none"}}>
+                <span style={{width:"20px",height:"10px",background:item.color,display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
+                {item.Name}
+            </li>)
+        set((state) => ({
+            Data: result
+        }))
+    }
+}));
+//Ecosim Group Plot Color Pred
+const EcoSimGroup_PlotColorPred= create((set, get) => ({
+    Data:<></>,
+    setData: (newData) =>{
+        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+        if(newData.key===null)
+        {
+            return set((state) => ({Data: <></>}))
+        }
+        const result = newData.map(item => 
+            <li key={item.Name+"2"} style={{listStyleType:"none"}}>
+                <span style={{width:"20px",height:"10px",background:item.color,display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
+                {item.Name}
+            </li>)
+        set((state) => ({
+            Data: result
+        }))
+
+    }
+}));
+//Ecosim Group Plot Color Fleet
+const EcoSimGroup_PlotColorFleet= create((set, get) => ({
+    Data:<></>,
+    setData: (newData) =>{
+        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+        if(newData.key===null)
+        {
+            return set((state) => ({Data: <></>}))
+        }
+        const result = newData.map(item => 
+            <li key={item.Name+"3"} style={{listStyleType:"none"}}>
+                <span style={{width:"20px",height:"10px",background:item.color,display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
+                {item.Name}
+            </li>)
+        set((state) => ({
+            Data: result
+        }))
+    }
 }));
 
-const fakedataV = create((set, get) => ({
-  fakedataV:false,
-  // 单纯更新状态
-  setfakedataV: (newData) =>{
-    // console.log("ModifyData",newData)
-    set((state) => ({
-      fakedataV: newData
-}))},
+//EcoSim Fleet Plot
+const EcoSimFleet_Plot= create((set, get) => ({
+    Data:{},
+    setData: (newData) =>
+        set((state) => ({
+            Data: {...newData}
+    })),
+}));
+function ListItemF(props){
+    const newData = props.data
+    const setERFleetOption = EcoSimFleet_Plot((state) => state.setData );
+    const setERFleetGroup = EcoSimFleet_PlotColorGroup((state) => state.setData );
+    const test= (item)=>{ 
+    axios({
+        method: "post",
+        baseURL: serverHost + "/api/model/FleetPlot_Switch",
+        data: { name: item.target.childNodes[1].data },
+    }).then((response) => {
+        if (response.status === 200) {
+            setERFleetOption(response.data.Option)
+            setERFleetGroup(response.data.Color)
+        } 
+        else {
+            console.log("FleetPlot Error")
+        }
+    });}
+    const result = Object.keys(newData).map(item => 
+        <li key={item+"0"} onClick={(item)=>test(item)} style={{listStyleType:"none",cursor:"pointer"}}>
+            <span style={{width:"20px",height:"10px",background:newData[item],display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
+            {item}
+        </li>)
+    return result
+}
+//Ecosim Fleet Plot Color
+const EcoSimFleet_PlotColor= create((set, get) => ({
+    Data:<></>,
+    setData: (newData) =>{
+        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+        if(newData.key===null)
+        {
+            return set((state) => ({Data: <></>}))
+        }
+        set((state) => ({
+            Data: <ListItemF data={newData}></ListItemF>
+        }))
+    }
+}));
+//Ecosim Fleet Plot Color Group
+const EcoSimFleet_PlotColorGroup= create((set, get) => ({
+    Data:<></>,
+    setData: (newData) =>{
+        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+        if(newData.key===null)
+        {
+            return set((state) => ({Data: <></>}))
+        }
+        const result = newData.map(item => 
+            <li key={item.Name+"1"} style={{listStyleType:"none"}}>
+                <span style={{width:"20px",height:"10px",background:item.color,display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
+                {item.Name}
+            </li>)
+        set((state) => ({
+            Data: result
+        }))
+    }
 }));
 
-export {
-  useStore,
-  Basic,
-  Diet,
-  DietCol,
-  FleetModal,
-  Detritus,
-  FisheryDiscardFate,
-  FisheryLand,
-  FisheryLandCol,
-  FisheryDiscard,
-  FisheryDiscardCol,
-  EcopathOutput,
-  FlowDiagram,
-  RunModelState,
-  ModifyState,
-  EWEModelID,
-  selectedEWEModelID,
-  fakedataV
-};
+//EcoSpaceResult Group
+const EcoSpaceResult_Group = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    }))
+}));
+//EcoSpaceResult Fleet
+const EcoSpaceResult_Fleet = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//EcoSpaceResult Region
+const EcoSpaceResult_Region = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//RunEcoSpace Option
+const RunEcoSpace_Option = create((set, get) => ({
+    Data:{},
+    setData: (newData) =>{
+        // console.log(newData)
+                set((state) => ({
+            Data: {...newData}
+    }))
+    }
+
+}));
+
+//RcoSpace Map
+//Depth
+const EcoSpaceMap_Depth = create((set, get) => ({
+    Data:[[0]],
+    setData: (newData) =>
+    {
+        // console.log("EcoSpaceMap_Depth")
+        set((state) => ({
+            Data: [...newData]
+        }))
+    }
+}));
+//用于选择群组的SelectOption
+const RunEcoSpacae_SelectOption = create((set, get) => ({
+    Data:[],
+    setData: (newData) =>
+        set((state) => ({
+            Data: [...newData]
+    })),
+}));
+//用于选择群组的SelectOption default_value
+const RunEcoSpacae_DefaultSelect = create((set, get) => ({
+    Data:"",
+    setData: (newData) =>{
+        // console.log(newData)
+                set((state) => ({
+            Data: newData
+    }))
+    }
+}));
+//Plot Map
+const RunEcoSpacae_PlotMap = create((set, get) => ({
+    Data:{id:"none",data:[[0]]},
+    setData: (newData) =>
+        set((state) => ({
+            Data: {...newData}
+    })),
+}));
+
+//EcoSpaceTime
+const EcoSpaceTime = create((set, get) => ({
+    Data:0,
+    setData: (newData) =>
+        set((state) => ({
+            Data: newData
+    })),
+}));
+export { 
+    selectedEWEModelID,
+    ImportFlag,
+    ImportClick,
+    EcoPathClick,
+    EcoSimClick,
+    EcoSpaceClick,
+    Basic,
+    StanzeSelect,
+    StanzeSelectedValue,
+    StanzeGroup,
+    StanzeTable,
+    StanzePlotOption,
+    TableFlag,
+    Diet_Cloumns,
+    Diet_Data,
+    DetritusFate,
+    FleetsCloums,
+    Landings,
+    Discard,
+    DiscardFate,
+    Basic_Estimate,
+    EcopathResultFlag,
+    Mortalities,
+    MixedTrophicData,
+    PredationMortalities,
+    FishingMortalities,
+    FlowDiagram,
+    Lindman_spine,
+    FromEvery,
+    TimeSelect,
+    TimeYearData,
+    TimeSeriesData,
+    TimeSeriesPlot,
+    TimeSelected,
+    ForcingFunctionData,
+    EggProductionData,
+    EcoSimResult_Group,
+    EcoSimResult_Fleet,
+    EcoSimResult_Indices,
+    RunEcoSim_Option,
+    EcoSimGroup_Plot,
+    EcoSimGroup_PlotColor,
+    EcoSimGroup_PlotColorFleet,
+    EcoSimGroup_PlotColorPrey,
+    EcoSimGroup_PlotColorPred,
+    EcoSimFleet_Plot,
+    EcoSimFleet_PlotColor,
+    EcoSimFleet_PlotColorGroup,
+    EcoSpaceResult_Group,
+    EcoSpaceResult_Fleet,
+    EcoSpaceResult_Region,
+    RunEcoSpace_Option,
+    EcoSpaceMap_Depth,
+    RunEcoSpacae_SelectOption,
+    RunEcoSpacae_PlotMap,
+    RunEcoSpacae_DefaultSelect,
+    EcoSpaceTime}

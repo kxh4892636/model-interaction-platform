@@ -10,11 +10,12 @@
 
 import { Request, Response } from "express";
 import { modelService } from "../services/model_service";
+import { eweService } from "../services/ewe_service";
 
-//
-const R_Test2 = async (req: Request, res: Response) => {
+
+const Import = async (req: Request, res: Response) => {
   try {
-    res.status(200).send(await modelService.R_test2(req, res));
+    res.status(200).send(await eweService.Import_Model(req, res));
   } catch (error) {
     if (error instanceof Error) {
       res.status(200).json({ status: "fail", content: error.message });
@@ -22,10 +23,79 @@ const R_Test2 = async (req: Request, res: Response) => {
     console.log(error);
   }
 };
-
-const R_Test3 = async (req: Request, res: Response) => {
+const RunEcoPath = async (req: Request, res: Response) => {
   try {
-    res.status(200).send(await modelService.R_test3(req, res));
+    res.status(200).send(await eweService.RunEcoPath(req, res));
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    } else;
+    console.log(error);
+  }
+};
+const RunEcoSim = async (req: Request, res: Response) => {
+  try {
+    res.status(200).send(await eweService.RunEcoSim(req, res));
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    } else;
+    console.log(error);
+  }
+};
+const RunEcoSim_Switch = async (req: Request, res: Response) => {
+  try {
+    res.status(200).send(await eweService.RunEcoSim_Switch(req, res));
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    } else;
+    console.log(error);
+  }
+};
+const GroupPlot_Switch = async (req: Request, res: Response) => {
+  try {
+    res.status(200).send(await eweService.GroupPlot_Switch(req, res));
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    } else;
+    console.log(error);
+  }
+};
+const FleetPlot_Switch = async (req: Request, res: Response) => {
+  try {
+    res.status(200).send(await eweService.FleetPlot_Switch(req, res));
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    } else;
+    console.log(error);
+  }
+};
+const RunEcoSpace = async (req: Request, res: Response) => {
+  try {
+    res.status(200).send(await eweService.RunEcoSpace(req, res));
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    } else;
+    console.log(error);
+  }
+};
+const RunEcoSpace_Switch = async (req: Request, res: Response) => {
+  try {
+    res.status(200).send(await eweService.RunEcoSpace_Switch(req, res));
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(200).json({ status: "fail", content: error.message });
+    } else;
+    console.log(error);
+  }
+};
+const RunEcoSpace_SwitchMap = async (req: Request, res: Response) => {
+  try {
+    res.status(200).send(await eweService.RunEcoSpace_SwitchMap(req, res));
   } catch (error) {
     if (error instanceof Error) {
       res.status(200).json({ status: "fail", content: error.message });
@@ -92,7 +162,17 @@ const water = async (req: Request, res: Response) => {
   }
 };
 
-export const modelController = { R_Test2, R_Test3, water };
+export const modelController = 
+{ Import,
+  RunEcoPath,
+  RunEcoSim,
+  RunEcoSim_Switch,
+  GroupPlot_Switch,
+  FleetPlot_Switch,
+  RunEcoSpace,
+  RunEcoSpace_Switch,
+  RunEcoSpace_SwitchMap,
+  water };
 
 // DELETE FROM public.ecopathcatch
 // DELETE FROM public.ecopathdiet

@@ -175,7 +175,7 @@ const uploadData = async (file: Express.Multer.File, datasetID: string) => {
   } else;
   // get type and style of data
   const { stdout } = await execa(
-    `conda activate gis && python ${
+    `activate gis && python ${
       resolve("./").split("\\").join("/") +
       "/src/utils/tools/get_data_type_and_style.py"
     } ${filePath}`,

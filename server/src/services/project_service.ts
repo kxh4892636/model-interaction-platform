@@ -171,6 +171,7 @@ const getProjectDataLayer = async (projectID: string) => {
         layerStyle: data.style,
         group: false,
         input: data.input,
+        path: data.path
       });
     });
   }
