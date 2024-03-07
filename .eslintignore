@@ -3,10 +3,8 @@ data
 config
 docs
 
-# Temporary file
-*demo*
-*temp*
-prisma
+# Local File
+pnpm-lock.yaml
 
 # IDE config
 .vscode
