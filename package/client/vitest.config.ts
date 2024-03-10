@@ -6,7 +6,6 @@ export default defineConfig({
     environment: 'jsdom',
     alias: {
       '@': path.resolve(process.cwd(), './src'),
-      '@type': path.resolve(process.cwd(), '../type'),
     },
     coverage: {
       include: ['**/src/**'],
