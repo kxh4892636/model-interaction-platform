@@ -5,7 +5,6 @@ export default defineConfig({
   test: {
     alias: {
       '@': path.resolve(process.cwd(), './src'),
-      '@type': path.resolve(process.cwd(), '../type'),
     },
     coverage: {
       include: ['**/src/**'],

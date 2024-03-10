@@ -1,4 +1,4 @@
 import { startApp } from './app/server'
-import { port } from './config/env'
+import { PORT } from './config/env'
 
-startApp(port)
+startApp(PORT)

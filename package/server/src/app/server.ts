@@ -1,11 +1,16 @@
+import { datasetRoute } from '@/feature/dataset/dataset.route'
+import { dataRoute } from '@/feature/modal-data/data.route'
+import { modelRoute } from '@/feature/model/model.route'
+import { projectRoute } from '@/feature/project/project.route'
+import { templateRoute } from '@/feature/template/template.route'
 import cors from '@fastify/cors'
 import formbody from '@fastify/formbody'
 import helmet from '@fastify/helmet'
 import multipart from '@fastify/multipart'
+import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 import { fastify, FastifyInstance } from 'fastify'
-import { testRoutes } from './test.route'
 
-const initializeMiddleware = (app: FastifyInstance) => {
+const initializeMiddleware = async (app: FastifyInstance) => {
   // cors
   app.register(cors)
   // helmet
@@ -14,10 +19,37 @@ const initializeMiddleware = (app: FastifyInstance) => {
   app.register(formbody)
   // parse multipart/*
   app.register(multipart)
+  // swagger
+  await app.register(import('@fastify/swagger'), {
+    openapi: {
+      openapi: '3.0.3',
+      info: {
+        title: 'openapi',
+        version: '0.1.0',
+      },
+    },
+  })
+  await app.register(import('@fastify/swagger-ui'), {
+    routePrefix: '/api-doc',
+  })
 }
 
 const initializeRoutes = (app: FastifyInstance) => {
-  app.register(testRoutes)
+  app.register(templateRoute, {
+    prefix: '/api/v1/template',
+  })
+  app.register(projectRoute, {
+    prefix: '/api/v1/project',
+  })
+  app.register(datasetRoute, {
+    prefix: '/api/v1/dataset',
+  })
+  app.register(dataRoute, {
+    prefix: '/api/v1/data',
+  })
+  app.register(modelRoute, {
+    prefix: '/api/v1/model',
+  })
 }
 
 export const startApp = async (port: number) => {
@@ -29,8 +61,8 @@ export const startApp = async (port: number) => {
           ? process.cwd() + '/log/info.txt'
           : undefined,
     },
-  })
-  initializeMiddleware(app)
+  }).withTypeProvider<TypeBoxTypeProvider>()
+  await initializeMiddleware(app)
   initializeRoutes(app)
 
   try {
