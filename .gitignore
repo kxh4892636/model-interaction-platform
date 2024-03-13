@@ -5,7 +5,8 @@ docs
 
 # Temporary file
 *demo*
-*temp*
+
+# ORM config
 prisma
 
 # IDE config

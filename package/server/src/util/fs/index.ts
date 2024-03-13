@@ -33,7 +33,6 @@ export const copyFolder = async (source: string, target: string) => {
       return promise
     })
     await Promise.all(promises)
-    console.log('文件夹复制成功')
   } catch (error) {
     console.error('文件夹复制失败', error)
   }

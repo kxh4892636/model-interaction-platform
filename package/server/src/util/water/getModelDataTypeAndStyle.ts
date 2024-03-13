@@ -37,3 +37,19 @@ export const getModelDataTypeAndStyle = (
     return result1 as [ModelDataTypeType, ModelDataStyleType]
   }
 }
+
+export const getModelDataExtentAndVisualization = (
+  fileName: string,
+  extname: string,
+): [[number, number, number, number], string[]] | [[], []] => {
+  const extentAndVisualization: Map<
+    string,
+    [[number, number, number, number], string[]]
+  > = new Map([
+    ['mesh31.gr3', [[119.54, 120.21, 26.34, 26.94], ['mesh31.png']]],
+  ])
+
+  const result = extentAndVisualization.get(fileName)
+
+  return result || [[], []]
+}

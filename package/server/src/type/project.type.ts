@@ -5,7 +5,6 @@ import { generateResponseSchema } from './util'
 export const ProjectSchema = Type.Object({
   projectId: Type.String(),
   projectName: Type.String(),
-  projectCoverImage: Type.String(),
   projectPositionZoom: Type.Array(Type.Number()),
   projectTag: Type.Array(Type.String()),
   datasetIDArray: Type.Array(Type.String()),
@@ -38,6 +37,11 @@ export const ProjectTreeSchema = Type.Recursive((This) =>
   ),
 )
 export type ProjectTreeType = Static<typeof ProjectTreeSchema>
+export const ProjectTreeParamsSchema = Type.Object({ projectID: Type.String() })
+export type ProjectTreeParamsType = Static<typeof ProjectParamsSchema>
+export const ProjectTreeResponseSchema =
+  generateResponseSchema(ProjectTreeSchema)
+export type ProjectTreeResponseType = Static<typeof ProjectTreeResponseSchema>
 
 // /action
 export const ProjectActionSchema = Type.Union([
