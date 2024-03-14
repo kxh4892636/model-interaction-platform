@@ -1,22 +1,43 @@
+import {
+  DataInfoParamsSchema,
+  DataInfoParamsType,
+  DataInfoResponseSchema,
+  DataInfoResponseType,
+} from '@/type/data.type'
+import { checkTypeBoxSchema, generateResponse } from '@/util/app'
 import { FastifyInstance } from 'fastify'
-import { dataActionSchema, dataDetailSchema, dataSchema } from './data.schema'
+import { dataService } from './data.service'
 
 export const dataRoute = async (app: FastifyInstance) => {
   app.route({
     method: 'get',
-    url: '/text/:dataID',
-    schema: dataSchema,
-    handler: async () => {
-      return 'Hello World!'
+    url: '/info/:dataID',
+    schema: {
+      tags: ['data'],
+      params: DataInfoParamsSchema,
+      response: {
+        200: DataInfoResponseSchema,
+      },
     },
-  })
-
-  app.route({
-    method: 'get',
-    url: '/json/:dataID',
-    schema: dataSchema,
-    handler: async () => {
-      return 'Hello World!'
+    preHandler: async (req, res) => {
+      const params = req.params
+      const result = checkTypeBoxSchema(DataInfoParamsSchema, params)
+      if (!result)
+        res
+          .send(500)
+          .send(
+            generateResponse(0, 'the params of this request is wrong', null),
+          )
+    },
+    handler: async (req, res) => {
+      try {
+        const params = req.params as DataInfoParamsType
+        const result = await dataService.getDataInfo(params.dataID)
+        const response: DataInfoResponseType = generateResponse(1, '', result)
+        return response
+      } catch (error) {
+        res.send(500).send(generateResponse(0, '', null))
+      }
     },
   })
 
@@ -24,8 +45,8 @@ export const dataRoute = async (app: FastifyInstance) => {
   // NOTE fastify swagger 写法
   app.route({
     method: 'get',
-    url: '/blob/:dataID',
-    schema: dataSchema,
+    url: '/mesh/:dataID',
+
     handler: async () => {
       return 'Hello World!'
     },
@@ -33,8 +54,62 @@ export const dataRoute = async (app: FastifyInstance) => {
 
   app.route({
     method: 'get',
-    url: '/detail/:dataID',
-    schema: dataDetailSchema,
+    url: '/text/:dataID',
+
+    handler: async () => {
+      return 'Hello World!'
+    },
+  })
+
+  app.route({
+    method: 'get',
+    url: '/geojson/:dataID',
+
+    handler: async () => {
+      return 'Hello World!'
+    },
+  })
+
+  app.route({
+    method: 'get',
+    url: '/uvet/:dataID',
+
+    handler: async () => {
+      return 'Hello World!'
+    },
+  })
+
+  app.route({
+    method: 'get',
+    url: '/tcd/:dataID',
+
+    handler: async () => {
+      return 'Hello World!'
+    },
+  })
+
+  app.route({
+    method: 'get',
+    url: '/tnd/:dataID',
+
+    handler: async () => {
+      return 'Hello World!'
+    },
+  })
+
+  app.route({
+    method: 'get',
+    url: '/snd/:dataID',
+
+    handler: async () => {
+      return 'Hello World!'
+    },
+  })
+
+  app.route({
+    method: 'get',
+    url: '/yuji/:dataID',
+
     handler: async () => {
       return 'Hello World!'
     },
@@ -43,7 +118,6 @@ export const dataRoute = async (app: FastifyInstance) => {
   app.route({
     method: 'post',
     url: '/action',
-    schema: dataActionSchema,
     handler: async () => {
       return 'Hello World!'
     },

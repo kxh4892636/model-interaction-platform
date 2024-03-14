@@ -1,13 +1,13 @@
 export type ModelDataTypeType =
   | 'mesh'
-  | 'txt'
+  | 'text'
   | 'geojson'
   | 'uvet'
   | 'tcd'
   | 'tnd'
   | 'snd'
   | 'yuji'
-  | 'png'
+  | 'image'
   | 'shp'
 
-export type ModelDataStyleType = 'txt' | 'raster' | 'circle' | 'uvet' | 'none'
+export type ModelDataStyleType = 'text' | 'raster' | 'circle' | 'uvet' | 'none'

@@ -56,6 +56,45 @@ export const projectRoute = async (app: FastifyInstance) => {
 
   app.route({
     method: 'get',
+    url: '/cover/:projectID',
+    schema: {
+      tags: ['project'],
+      params: ProjectInfoParamsSchema,
+      response: {
+        200: {
+          content: {
+            'application/octet-stream': {
+              schema: {},
+            },
+          },
+        },
+      },
+    },
+    preHandler: async (req, res) => {
+      const params = req.params
+      const result = checkTypeBoxSchema(ProjectInfoParamsSchema, params)
+      if (!result) {
+        return res
+          .code(500)
+          .send(
+            generateResponse(0, 'the params of this request is wrong', null),
+          )
+      }
+    },
+    handler: async (req, res) => {
+      try {
+        const params = req.params as ProjectInfoParamsType
+        const cs = await projectService.getProjectCoverImage(params.projectID)
+        if (!cs) throw new Error()
+        return res.type('image/png').send(cs)
+      } catch (error) {
+        return res.code(500).send(generateResponse(0, '', null))
+      }
+    },
+  })
+
+  app.route({
+    method: 'get',
     url: '/list',
     schema: {
       tags: ['project'],

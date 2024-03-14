@@ -1,3 +1,4 @@
+import { DataInfoType } from '@/type/data.type'
 import { getModelDataTypeAndStyle } from '@/util/water'
 import { getModelDataExtentAndVisualization } from '@/util/water/getModelDataTypeAndStyle'
 import { randomUUID } from 'crypto'
@@ -45,6 +46,20 @@ export const dataService = {
       }
     }
 
+    return result
+  },
+
+  getDataInfo: async (dataID: string) => {
+    const dataInfo = await dataDao.getDataInfo(dataID)
+    if (!dataInfo) return null
+    const result: DataInfoType = {
+      dataExtent: dataInfo.data_extent,
+      dataID: dataInfo.data_id,
+      dataName: dataInfo.data_name,
+      dataStyle: dataInfo.data_style,
+      dataType: dataInfo.data_type,
+      isInput: dataInfo.data_input,
+    }
     return result
   },
 }

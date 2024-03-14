@@ -7,15 +7,15 @@ export const getModelDataTypeAndStyle = (
   const typeAndStyleMap: Map<string, [ModelDataTypeType, ModelDataStyleType]> =
     new Map([
       ['mesh31.gr3', ['mesh', 'raster']],
-      ['paramhk.in', ['txt', 'txt']],
-      ['gongkuang.dat', ['txt', 'txt']],
-      ['sanshawan.th', ['txt', 'txt']],
-      ['vgridhk.in', ['txt', 'txt']],
-      ['wudaodi.dat', ['txt', 'txt']],
-      ['wuran-gongkuang.dat', ['txt', 'txt']],
-      ['初始浓度.dat', ['txt', 'txt']],
-      ['wqm_para.dat', ['txt', 'txt']],
-      ['vgridzsh.in', ['txt', 'txt']],
+      ['paramhk.in', ['text', 'text']],
+      ['gongkuang.dat', ['text', 'text']],
+      ['sanshawan.th', ['text', 'text']],
+      ['vgridhk.in', ['text', 'text']],
+      ['wudaodi.dat', ['text', 'text']],
+      ['wuran-gongkuang.dat', ['text', 'text']],
+      ['初始浓度.dat', ['text', 'text']],
+      ['wqm_para.dat', ['text', 'text']],
+      ['vgridzsh.in', ['text', 'text']],
       ['tang_info.dat', ['geojson', 'circle']],
       ['in_node.dat', ['geojson', 'circle']],
       ['cedian.dat', ['geojson', 'circle']],
@@ -25,7 +25,7 @@ export const getModelDataTypeAndStyle = (
       ['tnd.dat', ['tnd', 'raster']],
       ['snd.dat', ['snd', 'raster']],
       ['yuji.dat', ['yuji', 'raster']],
-      ['.png', ['png', 'raster']],
+      ['.image', ['image', 'raster']],
       ['.shp', ['shp', 'none']],
     ])
 
@@ -46,7 +46,7 @@ export const getModelDataExtentAndVisualization = (
     string,
     [[number, number, number, number], string[]]
   > = new Map([
-    ['mesh31.gr3', [[119.54, 120.21, 26.34, 26.94], ['mesh31.png']]],
+    ['mesh31.gr3', [[119.54, 120.21, 26.34, 26.94], ['mesh31.image']]],
   ])
 
   const result = extentAndVisualization.get(fileName)

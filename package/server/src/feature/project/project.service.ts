@@ -5,6 +5,7 @@ import {
   ProjectTreeType,
 } from '@/type/project.type'
 import { randomUUID } from 'crypto'
+import { createReadStream } from 'fs'
 import { mkdir, rm } from 'fs/promises'
 import path from 'path'
 import { datasetDao } from '../dataset/dataset.dao'
@@ -89,6 +90,17 @@ export const projectService = {
     await Promise.all(promiseList)
 
     return result
+  },
+
+  getProjectCoverImage: async (projectID: string) => {
+    const projectInfo = await projectDao.getProject(projectID)
+    if (!projectInfo) return null
+    const imagePath = path.join(
+      DATA_FOLDER_PATH,
+      projectInfo.project_cover_image,
+    )
+    const cs = createReadStream(imagePath)
+    return cs
   },
 
   generateProjectTree: async (projectID: string): Promise<ProjectTreeType> => {

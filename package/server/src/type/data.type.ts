@@ -1,29 +1,34 @@
-// CREATE TABLE public.data
-// (
-//     data_id uuid NOT NULL,
-//     data_name text NOT NULL,
-//     data_type text NOT NULL,
-//     data_style text NOT NULL,
-//     data_extent double precision[] NOT NULL,
-//     data_timestamp text NOT NULL,
-//     data_file_path text NOT NULL,
-//     data_input boolean NOT NULL,
-//     data_transform text[],
-//     status text NOT NULL,
-//     update_time text NOT NULL,
-//     create_time text NOT NULL,
-//     PRIMARY KEY (data_id)
-// );
+// model data {
+//   data_id            String   @id @db.Uuid
+//   data_name          String
+//   data_type          String
+//   data_style         String
+//   data_extent        Float[]
+//   data_timestamp     String
+//   data_file_path     String
+//   data_input         Boolean
+//   data_visualization String[]
+//   status             String
+//   update_time        String
+//   create_time        String
+// }
 
 import { Static, Type } from '@sinclair/typebox'
+import { generateResponseSchema } from './util'
 
-// /detail
-export const DataDetailSchema = Type.Object({
+// /info
+export const DataInfoSchema = Type.Object({
   dataID: Type.String(),
   dataName: Type.String(),
   dataType: Type.String(),
   dataStyle: Type.String(),
   dataExtent: Type.Array(Type.Number()),
-  isPut: Type.Boolean(),
+  isInput: Type.Boolean(),
 })
-export type DataDetailType = Static<typeof DataDetailSchema>
+export type DataInfoType = Static<typeof DataInfoSchema>
+export const DataInfoParamsSchema = Type.Object({
+  dataID: Type.String(),
+})
+export type DataInfoParamsType = Static<typeof DataInfoParamsSchema>
+export const DataInfoResponseSchema = generateResponseSchema(DataInfoSchema)
+export type DataInfoResponseType = Static<typeof DataInfoResponseSchema>
