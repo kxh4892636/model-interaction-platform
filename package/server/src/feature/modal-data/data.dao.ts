@@ -28,4 +28,33 @@ export const dataDao = {
       },
     })
   },
+
+  getDataInfo: async (dataID: string) => {
+    const result = await prisma.data.findUnique({
+      where: {
+        data_id: dataID,
+      },
+      select: {
+        data_extent: true,
+        data_file_path: true,
+        data_id: true,
+        data_input: true,
+        data_name: true,
+        data_style: true,
+        data_timestamp: true,
+        data_type: true,
+        data_visualization: true,
+      },
+    })
+
+    return result
+  },
+
+  deleteData: async (dataID: string) => {
+    await prisma.data.delete({
+      where: {
+        data_id: dataID,
+      },
+    })
+  },
 }

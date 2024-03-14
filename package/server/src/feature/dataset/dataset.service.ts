@@ -1,8 +1,9 @@
 import { DATA_FOLDER_PATH } from '@/config/env'
 import { copyFolder } from '@/util/fs'
 import { randomUUID } from 'crypto'
-import { mkdir } from 'fs/promises'
+import { mkdir, rm } from 'fs/promises'
 import path from 'path'
+import { dataDao } from '../modal-data/data.dao'
 import { datasetDao } from './dataset.dao'
 
 export const datasetService = {
@@ -46,5 +47,27 @@ export const datasetService = {
       )
     }
     await Promise.all(promiseList)
+  },
+
+  deleteDataset: async (datasetID: string) => {
+    const datasetInfo = await datasetDao.getDatasetInfo(datasetID)
+    if (!datasetInfo) return
+    const dataIDList = await datasetDao.getDataIDListOfDataset(datasetID)
+
+    // delete db record
+    await datasetDao.deleteDataset(datasetID)
+    await datasetDao.deleteDatasetData(datasetID)
+    for (const dataID of dataIDList) {
+      await dataDao.deleteData(dataID)
+    }
+
+    // delete disk data
+    const folderPath = path.join(
+      DATA_FOLDER_PATH,
+      datasetInfo.dataset_folder_path,
+    )
+    await rm(folderPath, {
+      recursive: true,
+    })
   },
 }

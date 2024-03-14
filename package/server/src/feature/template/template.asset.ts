@@ -28,6 +28,6 @@ export const San_Sha_Wan_Template: TemplateInterface = {
   },
 }
 
-export const Template_LIST: Record<string, TemplateInterface> = {
+export const Template_LIST: Record<string, TemplateInterface | undefined> = {
   'c5a08bb6-5185-4dab-8da4-a041324a6287': San_Sha_Wan_Template,
 }

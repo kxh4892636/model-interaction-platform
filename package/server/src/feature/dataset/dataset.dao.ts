@@ -38,4 +38,50 @@ export const datasetDao = {
       },
     })
   },
+
+  getDatasetInfo: async (datasetID: string) => {
+    const result = await prisma.dataset.findUnique({
+      where: {
+        dataset_id: datasetID,
+      },
+      select: {
+        dataset_folder_path: true,
+        dataset_id: true,
+        dataset_input: true,
+        dataset_name: true,
+        dataset_timestamp: true,
+      },
+    })
+
+    return result
+  },
+
+  getDataIDListOfDataset: async (datasetID: string) => {
+    const result = await prisma.dataset_data.findMany({
+      where: {
+        dataset_id: datasetID,
+      },
+      select: {
+        data_id: true,
+      },
+    })
+
+    return result.map((value) => value.data_id)
+  },
+
+  deleteDataset: async (datasetID: string) => {
+    await prisma.dataset.delete({
+      where: {
+        dataset_id: datasetID,
+      },
+    })
+  },
+
+  deleteDatasetData: async (datasetID: string) => {
+    await prisma.dataset_data.deleteMany({
+      where: {
+        dataset_id: datasetID,
+      },
+    })
+  },
 }

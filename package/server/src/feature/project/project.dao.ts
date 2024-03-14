@@ -49,7 +49,7 @@ export const projectDao = {
     return result
   },
 
-  getProjectByProjectID: async (projectID: string) => {
+  getProject: async (projectID: string) => {
     const result = await prisma.project.findUnique({
       where: {
         project_id: projectID,
@@ -68,14 +68,35 @@ export const projectDao = {
       },
     })
 
-    return result
+    return result.map((value) => value.dataset_id)
   },
 
-  updateProject: async (projectName: string, projectID: string) => {
-    //
+  updateProjectName: async (projectID: string, projectName: string) => {
+    const timeStamp = Date.now()
+    await prisma.project.update({
+      where: {
+        project_id: projectID,
+      },
+      data: {
+        project_name: projectName,
+        update_time: timeStamp.toString(),
+      },
+    })
   },
 
-  deleteProjectByProjectID: async (projectID: string) => {
-    //
+  deleteProject: async (projectID: string) => {
+    await prisma.project.delete({
+      where: {
+        project_id: projectID,
+      },
+    })
+  },
+
+  deleteProjectDataset: async (projectID: string) => {
+    await prisma.project_dataset.deleteMany({
+      where: {
+        project_id: projectID,
+      },
+    })
   },
 }

@@ -6,18 +6,25 @@ import { templateDao } from './template.dao'
 
 export const templateService = {
   getTemplateList: async (): Promise<TemplateListType> => {
-    const result = (await templateDao.getAllTemplate()).map((info) => ({
-      templateId: info.templateID,
-      templateName: info.templateName,
-      templatePositionZoom: info.templatePositionAndZoom,
-      templateTag: info.templateTag,
-    }))
+    const result = (await templateDao.getAllTemplate())
+      .map((info) => {
+        if (!info) return null
+        const result = {
+          templateId: info.templateID,
+          templateName: info.templateName,
+          templatePositionZoom: info.templatePositionAndZoom,
+          templateTag: info.templateTag,
+        }
+        return result
+      })
+      .filter((value) => value) as TemplateListType
 
     return result
   },
 
   createTemplate: async (templateID: string, projectName: string) => {
     const templateInfo = await templateDao.getTemplateByTemplateID(templateID)
+    if (!templateInfo) return
     const { id: projectID, path: projectPath } =
       await projectService.createProject(
         projectName,

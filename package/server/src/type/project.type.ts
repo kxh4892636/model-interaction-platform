@@ -1,22 +1,23 @@
 import { Static, Type } from '@sinclair/typebox'
 import { generateResponseSchema } from './util'
 
-// /detail/:projectID
-export const ProjectSchema = Type.Object({
+// /info/:projectID
+export const ProjectInfoSchema = Type.Object({
   projectId: Type.String(),
   projectName: Type.String(),
   projectPositionZoom: Type.Array(Type.Number()),
   projectTag: Type.Array(Type.String()),
   datasetIDArray: Type.Array(Type.String()),
 })
-export type ProjectType = Static<typeof ProjectSchema>
-export const ProjectParamsSchema = Type.Object({ projectID: Type.String() })
-export type ProjectParamsType = Static<typeof ProjectParamsSchema>
-export const ProjectResponseSchema = generateResponseSchema(ProjectSchema)
-export type ProjectResponseType = Static<typeof ProjectResponseSchema>
+export type ProjectInfoType = Static<typeof ProjectInfoSchema>
+export const ProjectInfoParamsSchema = Type.Object({ projectID: Type.String() })
+export type ProjectInfoParamsType = Static<typeof ProjectInfoParamsSchema>
+export const ProjectInfoResponseSchema =
+  generateResponseSchema(ProjectInfoSchema)
+export type ProjectInfoResponseType = Static<typeof ProjectInfoResponseSchema>
 
 // /list
-export const ProjectListSchema = Type.Array(ProjectSchema)
+export const ProjectListSchema = Type.Array(ProjectInfoSchema)
 export type ProjectListType = Static<typeof ProjectListSchema>
 export const ProjectListResponseSchema =
   generateResponseSchema(ProjectListSchema)
@@ -38,7 +39,7 @@ export const ProjectTreeSchema = Type.Recursive((This) =>
 )
 export type ProjectTreeType = Static<typeof ProjectTreeSchema>
 export const ProjectTreeParamsSchema = Type.Object({ projectID: Type.String() })
-export type ProjectTreeParamsType = Static<typeof ProjectParamsSchema>
+export type ProjectTreeParamsType = Static<typeof ProjectInfoParamsSchema>
 export const ProjectTreeResponseSchema =
   generateResponseSchema(ProjectTreeSchema)
 export type ProjectTreeResponseType = Static<typeof ProjectTreeResponseSchema>
@@ -52,7 +53,7 @@ export type ProjectActionType = Static<typeof ProjectActionSchema>
 export const ProjectActionBodySchema = Type.Object({
   projectID: Type.String(),
   action: Type.Union([Type.Literal('update'), Type.Literal('delete')]),
-  projectName: Type.Union([Type.String(), Type.Null()]),
+  projectName: Type.String(),
 })
 export type ProjectActionBodyType = Static<typeof ProjectActionBodySchema>
 export const ProjectActionResponseSchema =

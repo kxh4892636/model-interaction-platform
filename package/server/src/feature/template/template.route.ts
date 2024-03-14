@@ -28,7 +28,7 @@ export const templateRoute = async (app: FastifyInstance) => {
           '',
           result,
         )
-        return res.code(200).send(response)
+        return response
       } catch (error) {
         return res.code(500).send(generateResponse(0, '', null))
       }
@@ -46,7 +46,7 @@ export const templateRoute = async (app: FastifyInstance) => {
       },
     },
     preHandler: async (req, res) => {
-      const body = req.body as TemplateActionBodyType
+      const body = req.body
       const result = checkTypeBoxSchema(TemplateActionBodySchema, body)
       if (!result) {
         return res
@@ -64,7 +64,7 @@ export const templateRoute = async (app: FastifyInstance) => {
           '',
           'success',
         )
-        return res.code(200).send(response)
+        return response
       } catch (error) {
         return res.code(500).send(generateResponse(0, '', null))
       }
