@@ -1,4 +1,5 @@
 import { DATA_FOLDER_PATH } from '@/config/env'
+import { DatasetListType } from '@/type/dataset.type'
 import { copyFolder } from '@/util/fs'
 import { randomUUID } from 'crypto'
 import { mkdir, rm } from 'fs/promises'
@@ -49,12 +50,35 @@ export const datasetService = {
     await Promise.all(promiseList)
   },
 
+  getDatasetList: async (): Promise<DatasetListType> => {
+    const datasetList = await datasetDao.getDatasetList()
+    const promiseList = datasetList.map(async (datasetInfo) => {
+      const dataIDList = await datasetDao.getDataIDListOfDataset(
+        datasetInfo.dataset_id,
+      )
+      const result = {
+        datasetID: datasetInfo.dataset_id,
+        datasetName: datasetInfo.dataset_name,
+        isInput: datasetInfo.dataset_input,
+        dataIDList,
+      }
+      return result
+    })
+    const result: DatasetListType = await Promise.all(promiseList)
+    return result
+  },
+
+  updateDatasetName: async (datasetID: string, datasetName: string) => {
+    await datasetDao.updateDatasetName(datasetID, datasetName)
+  },
+
   deleteDataset: async (datasetID: string) => {
     const datasetInfo = await datasetDao.getDatasetInfo(datasetID)
     if (!datasetInfo) return
     const dataIDList = await datasetDao.getDataIDListOfDataset(datasetID)
 
     // delete db record
+    await datasetDao.deleteProjectDataset(datasetID)
     await datasetDao.deleteDataset(datasetID)
     await datasetDao.deleteDatasetData(datasetID)
     for (const dataID of dataIDList) {

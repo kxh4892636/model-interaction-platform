@@ -56,6 +56,19 @@ export const datasetDao = {
     return result
   },
 
+  getDatasetList: async () => {
+    const result = await prisma.dataset.findMany({
+      select: {
+        dataset_folder_path: true,
+        dataset_id: true,
+        dataset_input: true,
+        dataset_name: true,
+        dataset_timestamp: true,
+      },
+    })
+    return result
+  },
+
   getDataIDListOfDataset: async (datasetID: string) => {
     const result = await prisma.dataset_data.findMany({
       where: {
@@ -67,6 +80,27 @@ export const datasetDao = {
     })
 
     return result.map((value) => value.data_id)
+  },
+
+  updateDatasetName: async (datasetID: string, datasetName: string) => {
+    const timeStamp = Date.now().toString()
+    await prisma.dataset.update({
+      where: {
+        dataset_id: datasetID,
+      },
+      data: {
+        dataset_name: datasetName,
+        update_time: timeStamp.toString(),
+      },
+    })
+  },
+
+  deleteProjectDataset: async (datasetID: string) => {
+    await prisma.project_dataset.deleteMany({
+      where: {
+        dataset_id: datasetID,
+      },
+    })
   },
 
   deleteDataset: async (datasetID: string) => {

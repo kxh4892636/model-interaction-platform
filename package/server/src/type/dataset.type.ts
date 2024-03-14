@@ -7,7 +7,7 @@ export const DatasetListSchema = Type.Array(
     datasetID: Type.String(),
     datasetName: Type.String(),
     isInput: Type.Boolean(),
-    dataID: Type.String(),
+    dataIDList: Type.Array(Type.String()),
   }),
 )
 export type DatasetListType = Static<typeof DatasetListSchema>
@@ -16,7 +16,10 @@ export const DatasetListResponseSchema =
 export type DatasetListResponseType = Static<typeof DatasetListResponseSchema>
 
 // /action
-export const DatasetActionSchema = Type.Null()
+export const DatasetActionSchema = Type.Union([
+  Type.Literal('success'),
+  Type.Literal('fail'),
+])
 export type DatasetActionType = Static<typeof DatasetActionSchema>
 export const DatasetActionBodySchema = Type.Object({
   datasetID: Type.String(),
