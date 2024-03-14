@@ -1,7 +1,10 @@
+import { DATA_FOLDER_PATH } from '@/config/env'
 import { DataInfoType } from '@/type/data.type'
+import { prisma } from '@/util/db/prisma'
 import { getModelDataTypeAndStyle } from '@/util/water'
 import { getModelDataExtentAndVisualization } from '@/util/water/getModelDataTypeAndStyle'
 import { randomUUID } from 'crypto'
+import { createReadStream } from 'fs'
 import path from 'path'
 import { dataDao } from './data.dao'
 
@@ -27,7 +30,7 @@ export const dataService = {
           extname,
         )
         const visualizationPathList = visualization.map((fileName) =>
-          path.join(projectPath, 'output', fileName),
+          path.join(projectPath, datasetName, 'output', fileName),
         )
 
         // import dataset
@@ -59,7 +62,38 @@ export const dataService = {
       dataStyle: dataInfo.data_style,
       dataType: dataInfo.data_type,
       isInput: dataInfo.data_input,
+      visualizationNumber: dataInfo.data_visualization.length,
     }
     return result
+  },
+
+  getDataVisualizationData: async (dataID: string, index: number) => {
+    const dataInfo = await prisma.data.findUnique({
+      where: {
+        data_id: dataID,
+      },
+      select: {
+        data_file_path: true,
+        data_type: true,
+        data_visualization: true,
+      },
+    })
+    if (!dataInfo) return null
+
+    const length = dataInfo.data_visualization.length
+    if (length !== 0 && (index > length || index < 0)) return null
+
+    const relativePath =
+      length === 0
+        ? dataInfo.data_file_path
+        : dataInfo.data_visualization[index]
+    const filePath = path.join(DATA_FOLDER_PATH, relativePath)
+    const cs = createReadStream(filePath)
+
+    return cs
+  },
+
+  updateDataName: async (dataID: string, dataName: string) => {
+    await dataDao.updateDataName(dataID, dataName)
   },
 }

@@ -7,7 +7,8 @@ export type ModelDataTypeType =
   | 'tnd'
   | 'snd'
   | 'yuji'
-  | 'image'
-  | 'shp'
+// | 'image'
+// | 'shp'
 
-export type ModelDataStyleType = 'text' | 'raster' | 'circle' | 'uvet' | 'none'
+export type ModelDataStyleType = 'text' | 'raster' | 'circle' | 'uvet'
+// | 'none'

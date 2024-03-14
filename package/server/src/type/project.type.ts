@@ -45,10 +45,7 @@ export const ProjectTreeResponseSchema =
 export type ProjectTreeResponseType = Static<typeof ProjectTreeResponseSchema>
 
 // /action
-export const ProjectActionSchema = Type.Union([
-  Type.Literal('success'),
-  Type.Literal('fail'),
-])
+export const ProjectActionSchema = Type.Null()
 export type ProjectActionType = Static<typeof ProjectActionSchema>
 export const ProjectActionBodySchema = Type.Object({
   projectID: Type.String(),

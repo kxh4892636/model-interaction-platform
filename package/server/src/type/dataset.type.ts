@@ -16,10 +16,7 @@ export const DatasetListResponseSchema =
 export type DatasetListResponseType = Static<typeof DatasetListResponseSchema>
 
 // /action
-export const DatasetActionSchema = Type.Union([
-  Type.Literal('success'),
-  Type.Literal('fail'),
-])
+export const DatasetActionSchema = Type.Null()
 export type DatasetActionType = Static<typeof DatasetActionSchema>
 export const DatasetActionBodySchema = Type.Object({
   datasetID: Type.String(),

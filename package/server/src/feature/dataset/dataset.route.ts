@@ -28,7 +28,7 @@ export const datasetRoute = async (app: FastifyInstance) => {
         )
         return response
       } catch (error) {
-        return res.code(500).send(generateResponse(0, '', null))
+        return res.code(500).send(generateResponse(0, 'error', null))
       }
     },
   })
@@ -50,7 +50,7 @@ export const datasetRoute = async (app: FastifyInstance) => {
         return res
           .code(500)
           .send(
-            generateResponse(0, 'the params of this request is wrong', 'fail'),
+            generateResponse(0, 'the params of this request is wrong', null),
           )
       }
     },
@@ -70,11 +70,11 @@ export const datasetRoute = async (app: FastifyInstance) => {
         const response: DatasetActionResponseType = generateResponse(
           1,
           '',
-          'success',
+          null,
         )
         return response
       } catch (error) {
-        return res.code(500).send(generateResponse(0, '', 'fail'))
+        return res.code(500).send(generateResponse(0, 'error', null))
       }
     },
   })

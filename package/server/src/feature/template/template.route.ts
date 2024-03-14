@@ -30,7 +30,7 @@ export const templateRoute = async (app: FastifyInstance) => {
         )
         return response
       } catch (error) {
-        return res.code(500).send(generateResponse(0, '', null))
+        return res.code(500).send(generateResponse(0, 'error', null))
       }
     },
   })
@@ -62,11 +62,11 @@ export const templateRoute = async (app: FastifyInstance) => {
         const response: TemplateActionResponseType = generateResponse(
           1,
           '',
-          'success',
+          null,
         )
         return response
       } catch (error) {
-        return res.code(500).send(generateResponse(0, '', null))
+        return res.code(500).send(generateResponse(0, 'error', null))
       }
     },
   })

@@ -1,18 +1,3 @@
-// model data {
-//   data_id            String   @id @db.Uuid
-//   data_name          String
-//   data_type          String
-//   data_style         String
-//   data_extent        Float[]
-//   data_timestamp     String
-//   data_file_path     String
-//   data_input         Boolean
-//   data_visualization String[]
-//   status             String
-//   update_time        String
-//   create_time        String
-// }
-
 import { Static, Type } from '@sinclair/typebox'
 import { generateResponseSchema } from './util'
 
@@ -24,6 +9,7 @@ export const DataInfoSchema = Type.Object({
   dataStyle: Type.String(),
   dataExtent: Type.Array(Type.Number()),
   isInput: Type.Boolean(),
+  visualizationNumber: Type.Number(),
 })
 export type DataInfoType = Static<typeof DataInfoSchema>
 export const DataInfoParamsSchema = Type.Object({
@@ -32,3 +18,24 @@ export const DataInfoParamsSchema = Type.Object({
 export type DataInfoParamsType = Static<typeof DataInfoParamsSchema>
 export const DataInfoResponseSchema = generateResponseSchema(DataInfoSchema)
 export type DataInfoResponseType = Static<typeof DataInfoResponseSchema>
+
+// /visualization
+export const DataVisualizationQueryStringSchema = Type.Object({
+  dataID: Type.String(),
+  index: Type.Number(),
+})
+export type DataVisualizationQueryStringType = Static<
+  typeof DataVisualizationQueryStringSchema
+>
+
+// /action
+export const DataActionSchema = Type.Null()
+export type DataActionType = Static<typeof DataActionSchema>
+export const DataActionBodySchema = Type.Object({
+  dataID: Type.String(),
+  action: Type.Union([Type.Literal('rename')]),
+  dataName: Type.String(),
+})
+export type DataActionBodyType = Static<typeof DataActionBodySchema>
+export const DataActionResponseSchema = generateResponseSchema(DataActionSchema)
+export type DataActionResponseType = Static<typeof DataActionResponseSchema>

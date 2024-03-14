@@ -49,7 +49,7 @@ export const projectRoute = async (app: FastifyInstance) => {
         )
         return response
       } catch (error) {
-        return res.code(500).send(generateResponse(0, '', null))
+        return res.code(500).send(generateResponse(0, 'error', null))
       }
     },
   })
@@ -63,7 +63,7 @@ export const projectRoute = async (app: FastifyInstance) => {
       response: {
         200: {
           content: {
-            'application/octet-stream': {
+            'image/png': {
               schema: {},
             },
           },
@@ -88,7 +88,7 @@ export const projectRoute = async (app: FastifyInstance) => {
         if (!cs) throw new Error()
         return res.type('image/png').send(cs)
       } catch (error) {
-        return res.code(500).send(generateResponse(0, '', null))
+        return res.code(500).send(generateResponse(0, 'error', null))
       }
     },
   })
@@ -110,7 +110,7 @@ export const projectRoute = async (app: FastifyInstance) => {
         )
         return response
       } catch (error) {
-        return res.code(500).send(generateResponse(0, '', null))
+        return res.code(500).send(generateResponse(0, 'error', null))
       }
     },
   })
@@ -147,7 +147,7 @@ export const projectRoute = async (app: FastifyInstance) => {
         )
         return response
       } catch (error) {
-        return res.code(500).send(generateResponse(0, '', null))
+        return res.code(500).send(generateResponse(0, 'error', null))
       }
     },
   })
@@ -185,11 +185,11 @@ export const projectRoute = async (app: FastifyInstance) => {
         const response: ProjectActionResponseType = generateResponse(
           1,
           '',
-          'success',
+          null,
         )
         return response
       } catch (error) {
-        return res.code(500).send(generateResponse(0, '', null))
+        return res.code(500).send(generateResponse(0, 'error', null))
       }
     },
   })

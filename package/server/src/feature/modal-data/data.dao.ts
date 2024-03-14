@@ -50,6 +50,19 @@ export const dataDao = {
     return result
   },
 
+  updateDataName: async (dataID: string, dataName: string) => {
+    const timeStamp = Date.now().toString()
+    await prisma.data.update({
+      where: {
+        data_id: dataID,
+      },
+      data: {
+        data_name: dataName,
+        update_time: timeStamp,
+      },
+    })
+  },
+
   deleteData: async (dataID: string) => {
     await prisma.data.delete({
       where: {

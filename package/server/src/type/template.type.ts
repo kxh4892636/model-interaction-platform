@@ -17,10 +17,7 @@ export const TemplateListResponseSchema =
 export type TemplateListResponseType = Static<typeof TemplateListResponseSchema>
 
 // /template/action
-export const TemplateActionSchema = Type.Union([
-  Type.Literal('success'),
-  Type.Literal('fail'),
-])
+export const TemplateActionSchema = Type.Null()
 export type TemplateActionType = Static<typeof TemplateActionSchema>
 export const TemplateActionBodySchema = Type.Object({
   templateID: Type.String(),
