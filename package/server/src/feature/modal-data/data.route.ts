@@ -113,6 +113,7 @@ export const dataRoute = async (app: FastifyInstance) => {
         DataVisualizationQueryStringSchema,
         query,
       )
+      console.log(query)
       if (!result)
         res
           .code(500)
