@@ -3,7 +3,24 @@ import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef } from 'react'
 import { MapStatus } from './MapStatus'
-import { initMap } from './map.util'
+
+export const initMap = (
+  mapContainerRef: React.MutableRefObject<HTMLDivElement>,
+  position: [number, number, number],
+) => {
+  mapboxgl.accessToken =
+    'pk.eyJ1Ijoia3hoNDg5MjYzNiIsImEiOiJjbGFhcWYyNmcwNHF3M25vNXJqaW95bDZsIn0.ID03BpkSU7-I0OcehcrvlQ'
+
+  const map = new mapboxgl.Map({
+    container: mapContainerRef.current,
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [position[0], position[1]],
+    zoom: position[2],
+    preserveDrawingBuffer: true,
+  })
+
+  return map
+}
 
 interface AppProps {
   display: boolean
@@ -46,7 +63,7 @@ export const MapView = ({ display }: AppProps) => {
       <div
         ref={mapContainerRef}
         style={{
-          position: display ? 'absolute' : 'relative',
+          display: display ? undefined : 'none',
         }}
         className="h-full w-full"
       />

@@ -15,7 +15,7 @@ export const copyFolder = async (source: string, target: string) => {
   try {
     if (!(await existsPromise(target))) {
       await fs.promises.mkdir(target)
-    } else;
+    }
     const files = await fs.promises.readdir(source)
     const promises = files.map((file) => {
       const sourcePath = path.join(source, file)
