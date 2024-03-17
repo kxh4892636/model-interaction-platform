@@ -3,7 +3,7 @@ import {
   ProjectInfoType,
   ProjectListType,
   ProjectTreeType,
-} from '@/type/project.type'
+} from '@/feature/project/project.type'
 import { randomUUID } from 'crypto'
 import { createReadStream } from 'fs'
 import { mkdir, rm } from 'fs/promises'

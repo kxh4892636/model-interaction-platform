@@ -1,6 +1,6 @@
-import { FastifyInstance } from 'fastify'
+import { FastifyTypebox } from '@/type/app.type'
 
-export const modelRoute = async (app: FastifyInstance) => {
+export const modelRoute = async (app: FastifyTypebox) => {
   app.route({
     method: 'get',
     url: '/water',

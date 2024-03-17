@@ -1,5 +1,5 @@
 import { Static, Type } from '@sinclair/typebox'
-import { generateResponseSchema } from './util'
+import { generateResponseSchema } from '../../type/util'
 
 // /info/:projectID
 export const ProjectInfoSchema = Type.Object({

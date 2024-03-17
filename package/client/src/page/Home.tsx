@@ -21,7 +21,7 @@ export const Home = () => {
       id: 'project',
       icon: <AppstoreOutlined style={{ color: '#fafafa' }} />,
       action: () => {
-        //
+        navigate('/project')
       },
     },
     {

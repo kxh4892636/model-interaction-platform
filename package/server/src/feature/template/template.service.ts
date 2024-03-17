@@ -1,4 +1,4 @@
-import { TemplateListType } from '@/type/template.type'
+import { TemplateListType } from '@/feature/template/template.type'
 import { datasetService } from '../dataset/dataset.service'
 import { dataService } from '../modal-data/data.service'
 import { projectService } from '../project/project.service'

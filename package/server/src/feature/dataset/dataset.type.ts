@@ -1,5 +1,5 @@
 import { Static, Type } from '@sinclair/typebox'
-import { generateResponseSchema } from './util'
+import { generateResponseSchema } from '../../type/util'
 
 // /list
 export const DatasetListSchema = Type.Array(

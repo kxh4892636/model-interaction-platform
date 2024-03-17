@@ -1,5 +1,5 @@
 import { DATA_FOLDER_PATH } from '@/config/env'
-import { DatasetListType } from '@/type/dataset.type'
+import { DatasetListType } from '@/feature/dataset/dataset.type'
 import { copyFolder } from '@/util/fs'
 import { randomUUID } from 'crypto'
 import { mkdir, rm } from 'fs/promises'

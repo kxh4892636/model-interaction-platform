@@ -1,5 +1,5 @@
 import { DATA_FOLDER_PATH } from '@/config/env'
-import { DataInfoType } from '@/type/data.type'
+import { DataInfoType } from '@/feature/modal-data/data.type'
 import { prisma } from '@/util/db/prisma'
 import { getModelDataTypeAndStyle } from '@/util/water'
 import { getModelDataExtentAndVisualization } from '@/util/water/getModelDataTypeAndStyle'

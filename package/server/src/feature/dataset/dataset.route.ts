@@ -1,16 +1,15 @@
 import {
   DatasetActionBodySchema,
-  DatasetActionBodyType,
   DatasetActionResponseSchema,
   DatasetActionResponseType,
   DatasetListResponseSchema,
   DatasetListResponseType,
-} from '@/type/dataset.type'
-import { checkTypeBoxSchema, generateResponse } from '@/util/app'
-import { FastifyInstance } from 'fastify'
+} from '@/feature/dataset/dataset.type'
+import { FastifyTypebox } from '@/type/app.type'
+import { generateResponse } from '@/util/app'
 import { datasetService } from './dataset.service'
 
-export const datasetRoute = async (app: FastifyInstance) => {
+export const datasetRoute = async (app: FastifyTypebox) => {
   app.route({
     method: 'get',
     url: '/list',
@@ -18,18 +17,13 @@ export const datasetRoute = async (app: FastifyInstance) => {
       tags: ['dataset'],
       response: { 200: DatasetListResponseSchema },
     },
-    handler: async (_, res) => {
-      try {
-        const result = await datasetService.getDatasetList()
-        const response: DatasetListResponseType = generateResponse(
-          1,
-          '',
-          result,
-        )
-        return response
-      } catch (error) {
-        return res.code(500).send(generateResponse(0, 'error', null))
-      }
+    handler: async (): Promise<DatasetListResponseType> => {
+      const result = await datasetService.getDatasetList()
+      const response = generateResponse(1, 'success', result)
+      return response
+    },
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -43,39 +37,20 @@ export const datasetRoute = async (app: FastifyInstance) => {
         200: DatasetActionResponseSchema,
       },
     },
-    preHandler: async (req, res) => {
+    handler: async (req): Promise<DatasetActionResponseType> => {
       const body = req.body
-      const result = checkTypeBoxSchema(DatasetActionBodySchema, body)
-      if (!result) {
-        return res
-          .code(500)
-          .send(
-            generateResponse(0, 'the params of this request is wrong', null),
-          )
+      if (body.datasetAction === 'rename') {
+        await datasetService.updateDatasetName(body.datasetID, body.datasetName)
+      } else if (body.datasetAction === 'delete') {
+        await datasetService.deleteDataset(body.datasetID)
+      } else {
+        // TODO create 等到写 model 在做
       }
+      const response = generateResponse(1, 'success', null)
+      return response
     },
-    handler: async (req, res) => {
-      try {
-        const body = req.body as DatasetActionBodyType
-        if (body.datasetAction === 'rename') {
-          await datasetService.updateDatasetName(
-            body.datasetID,
-            body.datasetName,
-          )
-        } else if (body.datasetAction === 'delete') {
-          await datasetService.deleteDataset(body.datasetID)
-        } else {
-          // TODO create 等到写 model 在做
-        }
-        const response: DatasetActionResponseType = generateResponse(
-          1,
-          '',
-          null,
-        )
-        return response
-      } catch (error) {
-        return res.code(500).send(generateResponse(0, 'error', null))
-      }
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 }

@@ -1,20 +1,17 @@
 import {
   DataActionBodySchema,
-  DataActionBodyType,
   DataActionResponseSchema,
   DataActionResponseType,
   DataInfoParamsSchema,
-  DataInfoParamsType,
   DataInfoResponseSchema,
   DataInfoResponseType,
   DataVisualizationQueryStringSchema,
-  DataVisualizationQueryStringType,
-} from '@/type/data.type'
-import { checkTypeBoxSchema, generateResponse } from '@/util/app'
-import { FastifyInstance } from 'fastify'
+} from '@/feature/modal-data/data.type'
+import { FastifyTypebox } from '@/type/app.type'
+import { generateResponse } from '@/util/app'
 import { dataService } from './data.service'
 
-export const dataRoute = async (app: FastifyInstance) => {
+export const dataRoute = async (app: FastifyTypebox) => {
   app.route({
     method: 'get',
     url: '/info/:dataID',
@@ -25,25 +22,14 @@ export const dataRoute = async (app: FastifyInstance) => {
         200: DataInfoResponseSchema,
       },
     },
-    preHandler: async (req, res) => {
+    handler: async (req): Promise<DataInfoResponseType> => {
       const params = req.params
-      const result = checkTypeBoxSchema(DataInfoParamsSchema, params)
-      if (!result)
-        res
-          .code(500)
-          .send(
-            generateResponse(0, 'the params of this request is wrong', null),
-          )
+      const result = await dataService.getDataInfo(params.dataID)
+      const response = generateResponse(1, 'success', result)
+      return response
     },
-    handler: async (req, res) => {
-      try {
-        const params = req.params as DataInfoParamsType
-        const result = await dataService.getDataInfo(params.dataID)
-        const response: DataInfoResponseType = generateResponse(1, '', result)
-        return response
-      } catch (error) {
-        res.code(500).send(generateResponse(0, 'error', null))
-      }
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -63,31 +49,17 @@ export const dataRoute = async (app: FastifyInstance) => {
         },
       },
     },
-    preHandler: async (req, res) => {
-      const query = req.query
-      const result = checkTypeBoxSchema(
-        DataVisualizationQueryStringSchema,
-        query,
-      )
-      if (!result)
-        res
-          .code(500)
-          .send(
-            generateResponse(0, 'the params of this request is wrong', null),
-          )
-    },
     handler: async (req, res) => {
-      try {
-        const query = req.query as DataVisualizationQueryStringType
-        const cs = await dataService.getDataVisualizationData(
-          query.dataID,
-          query.index,
-        )
-        if (!cs) throw Error()
-        return res.type('image/png').send(cs)
-      } catch (error) {
-        return res.code(500).send(generateResponse(0, 'error', null))
-      }
+      const query = req.query
+      const cs = await dataService.getDataVisualizationData(
+        query.dataID,
+        query.index,
+      )
+      if (!cs) throw Error()
+      return res.type('image/png').send(cs)
+    },
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -107,32 +79,17 @@ export const dataRoute = async (app: FastifyInstance) => {
         },
       },
     },
-    preHandler: async (req, res) => {
-      const query = req.query
-      const result = checkTypeBoxSchema(
-        DataVisualizationQueryStringSchema,
-        query,
-      )
-      console.log(query)
-      if (!result)
-        res
-          .code(500)
-          .send(
-            generateResponse(0, 'the params of this request is wrong', null),
-          )
-    },
     handler: async (req, res) => {
-      try {
-        const query = req.query as DataVisualizationQueryStringType
-        const cs = await dataService.getDataVisualizationData(
-          query.dataID,
-          query.index,
-        )
-        if (!cs) throw Error()
-        return res.type('text/plain').send(cs)
-      } catch (error) {
-        return res.code(500).send(generateResponse(0, 'error', null))
-      }
+      const query = req.query
+      const cs = await dataService.getDataVisualizationData(
+        query.dataID,
+        query.index,
+      )
+      if (!cs) throw Error()
+      return res.type('text/plain').send(cs)
+    },
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -144,28 +101,16 @@ export const dataRoute = async (app: FastifyInstance) => {
       body: DataActionBodySchema,
       response: { 200: DataActionResponseSchema },
     },
-    preHandler: async (req, res) => {
+    handler: async (req): Promise<DataActionResponseType> => {
       const body = req.body
-      const result = checkTypeBoxSchema(DataActionBodySchema, body)
-      if (!result) {
-        return res
-          .code(500)
-          .send(
-            generateResponse(0, 'the params of this request is wrong', null),
-          )
+      if (body.action === 'rename') {
+        await dataService.updateDataName(body.dataID, body.dataName)
       }
+      const response = generateResponse(1, 'success', null)
+      return response
     },
-    handler: async (req, res) => {
-      try {
-        const body = req.body as DataActionBodyType
-        if (body.action === 'rename') {
-          await dataService.updateDataName(body.dataID, body.dataName)
-        }
-        const response: DataActionResponseType = generateResponse(1, '', null)
-        return response
-      } catch (error) {
-        return res.code(500).send(generateResponse(0, 'error', null))
-      }
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 }

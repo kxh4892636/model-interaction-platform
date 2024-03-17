@@ -1,4 +1,7 @@
-import { ModelDataStyleType, ModelDataTypeType } from '@/type/model.type'
+import {
+  ModelDataStyleType,
+  ModelDataTypeType,
+} from '@/feature/model/model.type'
 
 export const getModelDataTypeAndStyle = (
   fileName: string,

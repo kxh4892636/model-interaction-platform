@@ -32,6 +32,7 @@ export const MapView = ({ display }: AppProps) => {
   const setMap = useMapStore((state) => state.setMap)
   const position = useMapStore((state) => state.mapPosition)
   const setPosition = useMapStore((state) => state.setMapPosition)
+  console.log(display ? undefined : 'none')
 
   useEffect(() => {
     // init map
@@ -58,15 +59,14 @@ export const MapView = ({ display }: AppProps) => {
   })
 
   return (
-    <>
+    <div
+      style={{
+        display: display ? 'flex' : 'none',
+      }}
+      className="h-full w-full"
+    >
       <MapStatus position={position}></MapStatus>
-      <div
-        ref={mapContainerRef}
-        style={{
-          display: display ? undefined : 'none',
-        }}
-        className="h-full w-full"
-      />
-    </>
+      <div ref={mapContainerRef} className="h-full w-full" />
+    </div>
   )
 }

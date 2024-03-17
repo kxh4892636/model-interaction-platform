@@ -1,24 +1,21 @@
 import {
   ProjectActionBodySchema,
-  ProjectActionBodyType,
   ProjectActionResponseSchema,
   ProjectActionResponseType,
   ProjectInfoParamsSchema,
-  ProjectInfoParamsType,
   ProjectInfoResponseSchema,
   ProjectInfoResponseType,
   ProjectListResponseSchema,
   ProjectListResponseType,
   ProjectTreeParamsSchema,
-  ProjectTreeParamsType,
   ProjectTreeResponseSchema,
   ProjectTreeResponseType,
-} from '@/type/project.type'
-import { checkTypeBoxSchema, generateResponse } from '@/util/app'
-import { FastifyInstance } from 'fastify'
+} from '@/feature/project/project.type'
+import { FastifyTypebox } from '@/type/app.type'
+import { generateResponse } from '@/util/app'
 import { projectService } from './project.service'
 
-export const projectRoute = async (app: FastifyInstance) => {
+export const projectRoute = async (app: FastifyTypebox) => {
   app.route({
     method: 'get',
     url: '/info/:projectID',
@@ -27,30 +24,14 @@ export const projectRoute = async (app: FastifyInstance) => {
       params: ProjectInfoParamsSchema,
       response: { 200: ProjectInfoResponseSchema },
     },
-    preHandler: async (req, res) => {
-      const params = req.params
-      const result = checkTypeBoxSchema(ProjectInfoParamsSchema, params)
-      if (!result) {
-        return res
-          .code(500)
-          .send(
-            generateResponse(0, 'the params of this request is wrong', null),
-          )
-      }
+    handler: async (req): Promise<ProjectInfoResponseType> => {
+      const { projectID } = req.params
+      const result = await projectService.getProjectByProjectID(projectID)
+      const response = generateResponse(1, 'success', result)
+      return response
     },
-    handler: async (req, res) => {
-      try {
-        const { projectID } = req.params as ProjectInfoParamsType
-        const result = await projectService.getProjectByProjectID(projectID)
-        const response: ProjectInfoResponseType = generateResponse(
-          1,
-          '',
-          result,
-        )
-        return response
-      } catch (error) {
-        return res.code(500).send(generateResponse(0, 'error', null))
-      }
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -70,26 +51,14 @@ export const projectRoute = async (app: FastifyInstance) => {
         },
       },
     },
-    preHandler: async (req, res) => {
-      const params = req.params
-      const result = checkTypeBoxSchema(ProjectInfoParamsSchema, params)
-      if (!result) {
-        return res
-          .code(500)
-          .send(
-            generateResponse(0, 'the params of this request is wrong', null),
-          )
-      }
-    },
     handler: async (req, res) => {
-      try {
-        const params = req.params as ProjectInfoParamsType
-        const cs = await projectService.getProjectCoverImage(params.projectID)
-        if (!cs) throw new Error()
-        return res.type('image/png').send(cs)
-      } catch (error) {
-        return res.code(500).send(generateResponse(0, 'error', null))
-      }
+      const params = req.params
+      const cs = await projectService.getProjectCoverImage(params.projectID)
+      if (!cs) throw new Error()
+      return res.type('image/png').send(cs)
+    },
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -100,18 +69,13 @@ export const projectRoute = async (app: FastifyInstance) => {
       tags: ['project'],
       response: { 200: ProjectListResponseSchema },
     },
-    handler: async (_, res) => {
-      try {
-        const result = await projectService.getAllProject()
-        const response: ProjectListResponseType = generateResponse(
-          1,
-          '',
-          result,
-        )
-        return response
-      } catch (error) {
-        return res.code(500).send(generateResponse(0, 'error', null))
-      }
+    handler: async (): Promise<ProjectListResponseType> => {
+      const result = await projectService.getAllProject()
+      const response = generateResponse(1, 'success', result)
+      return response
+    },
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -123,32 +87,14 @@ export const projectRoute = async (app: FastifyInstance) => {
       params: ProjectTreeParamsSchema,
       response: { 200: ProjectTreeResponseSchema },
     },
-    preHandler: async (req, res) => {
+    handler: async (req): Promise<ProjectTreeResponseType> => {
       const params = req.params
-      const result = checkTypeBoxSchema(ProjectTreeParamsSchema, params)
-      if (!result) {
-        return res
-          .code(500)
-          .send(
-            generateResponse(0, 'the params of this request is wrong', null),
-          )
-      }
+      const result = await projectService.generateProjectTree(params.projectID)
+      const response = generateResponse(1, 'success', result)
+      return response
     },
-    handler: async (req, res) => {
-      try {
-        const params = req.params as ProjectTreeParamsType
-        const result = await projectService.generateProjectTree(
-          params.projectID,
-        )
-        const response: ProjectTreeResponseType = generateResponse(
-          1,
-          '',
-          result,
-        )
-        return response
-      } catch (error) {
-        return res.code(500).send(generateResponse(0, 'error', null))
-      }
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -160,37 +106,18 @@ export const projectRoute = async (app: FastifyInstance) => {
       body: ProjectActionBodySchema,
       response: { 200: ProjectActionResponseSchema },
     },
-    preHandler: async (req, res) => {
+    handler: async (req): Promise<ProjectActionResponseType> => {
       const body = req.body
-      const result = checkTypeBoxSchema(ProjectActionBodySchema, body)
-      if (!result) {
-        return res
-          .code(500)
-          .send(
-            generateResponse(0, 'the params of this request is wrong', null),
-          )
+      if (body.action === 'update') {
+        await projectService.updateProjectName(body.projectID, body.projectName)
+      } else {
+        await projectService.deleteProject(body.projectID)
       }
+      const response = generateResponse(1, 'success', null)
+      return response
     },
-    handler: async (req, res) => {
-      try {
-        const body = req.body as ProjectActionBodyType
-        if (body.action === 'update') {
-          await projectService.updateProjectName(
-            body.projectID,
-            body.projectName,
-          )
-        } else {
-          await projectService.deleteProject(body.projectID)
-        }
-        const response: ProjectActionResponseType = generateResponse(
-          1,
-          '',
-          null,
-        )
-        return response
-      } catch (error) {
-        return res.code(500).send(generateResponse(0, 'error', null))
-      }
+    onError: (_, res) => {
+      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 }
