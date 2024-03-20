@@ -1,4 +1,7 @@
+import { DATA_FOLDER_PATH } from '@/config/env'
 import { TemplateListType } from '@/feature/template/template.type'
+import { createReadStream } from 'fs'
+import path from 'path'
 import { datasetService } from '../dataset/dataset.service'
 import { dataService } from '../modal-data/data.service'
 import { projectService } from '../project/project.service'
@@ -49,5 +52,16 @@ export const templateService = {
     )
 
     await Promise.all([...promiseList0, ...promiseList1])
+  },
+
+  getTemplateCoverImage: async (templateID: string) => {
+    const templateInfo = await templateDao.getTemplateByTemplateID(templateID)
+    if (!templateInfo) return null
+    const imagePath = path.join(
+      DATA_FOLDER_PATH,
+      templateInfo.templateCoverImage,
+    )
+    const cs = createReadStream(imagePath)
+    return cs
   },
 }

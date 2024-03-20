@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.anticon svg {
+  vertical-align: baseline;
+}
+.ant-btn-primary {
+  background-color: #1677ff;
+}
+.ant-btn-default,
+.ant-btn-dashed {
+  background-color: white;
+}
+
+:where(.css-dev-only-do-not-override-12jzuas).ant-card .ant-card-actions {
+  background: transparent;
+}

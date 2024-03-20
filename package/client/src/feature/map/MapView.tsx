@@ -32,7 +32,6 @@ export const MapView = ({ display }: AppProps) => {
   const setMap = useMapStore((state) => state.setMap)
   const position = useMapStore((state) => state.mapPosition)
   const setPosition = useMapStore((state) => state.setMapPosition)
-  console.log(display ? undefined : 'none')
 
   useEffect(() => {
     // init map

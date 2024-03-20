@@ -1,6 +1,7 @@
 import { generateResponseSchema } from '@/type/util'
 import { Static, Type } from '@sinclair/typebox'
 
+// /template/info
 export const TemplateSchema = Type.Object({
   templateId: Type.String(),
   templateName: Type.String(),
@@ -15,6 +16,12 @@ export type TemplateListType = Static<typeof TemplateListSchema>
 export const TemplateListResponseSchema =
   generateResponseSchema(TemplateListSchema)
 export type TemplateListResponseType = Static<typeof TemplateListResponseSchema>
+
+// /template/cover
+export const TemplateCoverParamsSchema = Type.Object({
+  templateID: Type.String(),
+})
+export type TemplateCoverParamsType = Static<typeof TemplateCoverParamsSchema>
 
 // /template/action
 export const TemplateActionSchema = Type.Null()

@@ -30,9 +30,6 @@ export const projectRoute = async (app: FastifyTypebox) => {
       const response = generateResponse(1, 'success', result)
       return response
     },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
-    },
   })
 
   app.route({
@@ -57,9 +54,6 @@ export const projectRoute = async (app: FastifyTypebox) => {
       if (!cs) throw new Error()
       return res.type('image/png').send(cs)
     },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
-    },
   })
 
   app.route({
@@ -73,9 +67,6 @@ export const projectRoute = async (app: FastifyTypebox) => {
       const result = await projectService.getAllProject()
       const response = generateResponse(1, 'success', result)
       return response
-    },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -92,9 +83,6 @@ export const projectRoute = async (app: FastifyTypebox) => {
       const result = await projectService.generateProjectTree(params.projectID)
       const response = generateResponse(1, 'success', result)
       return response
-    },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -115,9 +103,6 @@ export const projectRoute = async (app: FastifyTypebox) => {
       }
       const response = generateResponse(1, 'success', null)
       return response
-    },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 }

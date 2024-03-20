@@ -3,24 +3,22 @@ import { dataRoute } from '@/feature/modal-data/data.route'
 import { modelRoute } from '@/feature/model/model.route'
 import { projectRoute } from '@/feature/project/project.route'
 import { templateRoute } from '@/feature/template/template.route'
-import cors from '@fastify/cors'
-import formbody from '@fastify/formbody'
-import helmet from '@fastify/helmet'
-import multipart from '@fastify/multipart'
+import { FastifyTypebox } from '@/type/app.type'
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
-import { fastify, FastifyInstance } from 'fastify'
+import { fastify } from 'fastify'
+import { globalErrorHandler } from './handler'
 
-const initializeMiddleware = async (app: FastifyInstance) => {
+const initializeFastifyPlugin = async (app: FastifyTypebox) => {
   // cors
-  app.register(cors)
+  app.register(import('@fastify/cors'))
   // helmet
-  app.register(helmet)
+  app.register(import('@fastify/helmet'))
   // parse application/x-www-form-urlencoded
-  app.register(formbody)
+  app.register(import('@fastify/formbody'))
   // parse multipart/*
-  app.register(multipart)
+  app.register(import('@fastify/multipart'))
   // swagger
-  await app.register(import('@fastify/swagger'), {
+  app.register(import('@fastify/swagger'), {
     openapi: {
       openapi: '3.0.3',
       info: {
@@ -29,12 +27,18 @@ const initializeMiddleware = async (app: FastifyInstance) => {
       },
     },
   })
-  await app.register(import('@fastify/swagger-ui'), {
+  app.register(import('@fastify/swagger-ui'), {
     routePrefix: '/api-doc',
   })
 }
 
-const initializeRoutes = (app: FastifyInstance) => {
+const initializeCustomPlugin = async (app: FastifyTypebox) => {
+  // errorHandler
+  // TODO setErrorHanler 和封装
+  app.register(globalErrorHandler)
+}
+
+const initializeRoutes = (app: FastifyTypebox) => {
   app.register(templateRoute, {
     prefix: '/api/v1/template',
   })
@@ -62,7 +66,9 @@ export const startApp = async (port: number) => {
           : undefined,
     },
   }).withTypeProvider<TypeBoxTypeProvider>()
-  await initializeMiddleware(app)
+
+  initializeFastifyPlugin(app)
+  initializeCustomPlugin(app)
   initializeRoutes(app)
 
   try {

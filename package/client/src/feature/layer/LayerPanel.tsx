@@ -15,7 +15,7 @@ export const LayerPanel = () => {
   return (
     <div className=" flex h-full w-[25rem] flex-auto flex-col bg-slate-200">
       <div className=" flex flex-auto flex-col border ">
-        <div className="m-1 flex flex-1 flex-col border border-slate-300">
+        <div className="mx-0.5 my-1 flex flex-1 flex-col border border-slate-300">
           <div
             className="flex h-10 items-center border-0 border-b
               border-b-slate-300 bg-white px-2"
@@ -26,7 +26,7 @@ export const LayerPanel = () => {
             <LayerTreeMenu layerMenuItems={layerMenuItems} />
           </LayerTree>
         </div>
-        <div className="mx-1 flex flex-1 flex-col border border-slate-300">
+        <div className="mx-0.5 flex flex-1 flex-col border border-slate-300">
           <div
             className="flex h-10 items-center border-0 border-b
               border-b-slate-300 bg-white px-2"

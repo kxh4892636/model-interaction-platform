@@ -20,8 +20,6 @@ export const ExtendRouter = ({ children }: AppProps) => {
     } else {
       setDisplay(false)
     }
-    console.log(location)
-    console.log(matches)
   }, [location.pathname])
 
   return children

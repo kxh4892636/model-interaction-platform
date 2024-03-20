@@ -1,8 +1,11 @@
 import { MapView } from '@/feature/map'
 import { Nav } from '@/feature/nav'
 import { NavItem } from '@/feature/nav/nav.type'
+import { getTemplateListData } from '@/feature/project/project.api'
+import { useForceUpdate } from '@/hook/useForceUpdate'
 import { ExtendRouter, route } from '@/router'
 import { useMapStore } from '@/store/mapStore'
+import { useModalStore } from '@/store/modalStore'
 import {
   AppstoreOutlined,
   DatabaseOutlined,
@@ -11,7 +14,14 @@ import {
 } from '@ant-design/icons'
 import { useNavigate, useRoutes } from 'react-router-dom'
 
+// TODO ref 是引用 ref.current 不是
+const test = (number: React.MutableRefObject<number>) => {
+  number.current++
+}
+
 export const Home = () => {
+  const modal = useModalStore((state) => state.modal)
+  const isModalDisplay = useModalStore((state) => state.isModalDisplay)
   const isDisplay = useMapStore((state) => state.isDisplay)
   const element = useRoutes(route)
   const navigate = useNavigate()
@@ -50,6 +60,11 @@ export const Home = () => {
       },
     },
   ]
+  const forceUpdate = useForceUpdate()
+
+  const testClick = async () => {
+    console.log(await getTemplateListData())
+  }
 
   return (
     <div className="relative flex h-screen w-screen flex-col">
@@ -58,8 +73,9 @@ export const Home = () => {
           tracking-widest text-white"
       >
         港口水环境与生态动力学精细化模拟平台
+        <button className="h-4 w-4 bg-red-400" onClick={testClick}></button>
       </div>
-      <div className="flex w-full flex-auto bg-pink-50">
+      <div className="flex flex-auto bg-pink-50">
         <div className="w-16 bg-red-50">
           <Nav items={navItems}></Nav>
         </div>
@@ -68,6 +84,7 @@ export const Home = () => {
           <MapView display={isDisplay}></MapView>
         </div>
       </div>
+      {isModalDisplay && modal}
     </div>
   )
 }

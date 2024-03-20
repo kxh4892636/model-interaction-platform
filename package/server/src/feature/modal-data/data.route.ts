@@ -28,9 +28,6 @@ export const dataRoute = async (app: FastifyTypebox) => {
       const response = generateResponse(1, 'success', result)
       return response
     },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
-    },
   })
 
   app.route({
@@ -57,9 +54,6 @@ export const dataRoute = async (app: FastifyTypebox) => {
       )
       if (!cs) throw Error()
       return res.type('image/png').send(cs)
-    },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 
@@ -88,9 +82,6 @@ export const dataRoute = async (app: FastifyTypebox) => {
       if (!cs) throw Error()
       return res.type('text/plain').send(cs)
     },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
-    },
   })
 
   app.route({
@@ -108,9 +99,6 @@ export const dataRoute = async (app: FastifyTypebox) => {
       }
       const response = generateResponse(1, 'success', null)
       return response
-    },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 }

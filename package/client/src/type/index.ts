@@ -7,3 +7,9 @@ export interface Layer {
   children: Layer[]
   input: boolean
 }
+
+export interface DataQueryHookInterface<T> {
+  status: 'pending' | 'error' | 'success'
+  data: T | null
+  error: string | null
+}

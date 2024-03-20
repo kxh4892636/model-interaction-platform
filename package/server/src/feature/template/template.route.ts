@@ -2,6 +2,7 @@ import {
   TemplateActionBodySchema,
   TemplateActionResponseSchema,
   TemplateActionResponseType,
+  TemplateCoverParamsSchema,
   TemplateListResponseSchema,
   TemplateListResponseType,
 } from '@/feature/template/template.type'
@@ -24,8 +25,29 @@ export const templateRoute = async (app: FastifyTypebox) => {
       const response = generateResponse(1, 'success', result)
       return response
     },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
+  })
+
+  app.route({
+    method: 'get',
+    url: '/cover/:templateID',
+    schema: {
+      tags: ['template'],
+      params: TemplateCoverParamsSchema,
+      response: {
+        200: {
+          content: {
+            'image/png': {
+              schema: {},
+            },
+          },
+        },
+      },
+    },
+    handler: async (req, res) => {
+      const params = req.params
+      const cs = await templateService.getTemplateCoverImage(params.templateID)
+      if (!cs) throw new Error()
+      return res.type('image/png').send(cs)
     },
   })
 
@@ -45,9 +67,6 @@ export const templateRoute = async (app: FastifyTypebox) => {
       await templateService.createTemplate(body.templateID, body.projectName)
       const response = generateResponse(1, 'success', null)
       return response
-    },
-    onError: (_, res) => {
-      return res.code(500).send(generateResponse(0, 'error', null))
     },
   })
 }
