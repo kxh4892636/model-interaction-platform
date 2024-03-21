@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { matchRoutes, useLocation } from 'react-router-dom'
 import { route } from './route'
 
+// NOTE useLocation matchRoutes
 interface AppProps {
   children: JSX.Element | null
 }

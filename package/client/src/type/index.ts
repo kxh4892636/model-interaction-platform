@@ -1,10 +1,10 @@
-export interface Layer {
+export interface LayerType {
   title: string
   key: string
   type: string
-  layerStyle: string
+  style: string
   group: boolean
-  children: Layer[]
+  children: LayerType[]
   input: boolean
 }
 

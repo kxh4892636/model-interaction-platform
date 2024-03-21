@@ -1,12 +1,12 @@
 import { EllipsisOutlined } from '@ant-design/icons'
 import { Dropdown, MenuProps } from 'antd'
-import { LayerMenuItem } from './layer.type'
+import { LayerMenuItemType } from './layer.type'
 
 interface AppProps {
-  layerMenuItems: LayerMenuItem[]
+  layerMenuItems: LayerMenuItemType[]
 }
 export const LayerTreeMenu = ({ layerMenuItems }: AppProps) => {
-  const createItems = (layerMenuItems: LayerMenuItem[]) => {
+  const createItems = (layerMenuItems: LayerMenuItemType[]) => {
     const array: MenuProps['items'] = []
     layerMenuItems.forEach((value) => {
       array.push({ key: value.key, label: value.label })

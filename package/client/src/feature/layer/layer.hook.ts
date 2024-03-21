@@ -10,7 +10,7 @@
 
 import { useLayersStore } from '@/store/layerStore'
 import { useMapStore } from '@/store/mapStore'
-import { Layer } from '@/type'
+import { LayerType } from '@/type'
 
 export const useLayerActions = () => {
   const map = useMapStore((state) => state.map)
@@ -24,9 +24,9 @@ export const useLayerActions = () => {
   const layersSelected = useLayersStore((state) => state.layersSelected)
   const setLayersSelected = useLayersStore((state) => state.setLayersSelected)
 
-  const getAllKeys = (layers: Layer[]) => {
+  const getAllKeys = (layers: LayerType[]) => {
     const keys: string[] = []
-    const loop = (array: Layer[]) => {
+    const loop = (array: LayerType[]) => {
       array.forEach((value) => {
         keys.push(value.key)
         value.children && loop(value.children)
@@ -36,9 +36,9 @@ export const useLayerActions = () => {
     return keys
   }
 
-  function getLayerKeys(layers: Layer[]) {
+  function getLayerKeys(layers: LayerType[]) {
     const keys: string[] = []
-    const loop = (array: Layer[]) => {
+    const loop = (array: LayerType[]) => {
       array.forEach((value) => {
         if (!value.group) {
           keys.push(value.key)
@@ -50,9 +50,9 @@ export const useLayerActions = () => {
     return keys
   }
 
-  function getGroupKeys(layers: Layer[]) {
+  function getGroupKeys(layers: LayerType[]) {
     const keys: string[] = []
-    const loop = (array: Layer[]) => {
+    const loop = (array: LayerType[]) => {
       array.forEach((value) => {
         if (value.group) {
           keys.push(value.key)

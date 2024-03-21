@@ -1,7 +1,7 @@
+import { generateProjectTreeData } from '@/feature/layer/layer.api'
 import { MapView } from '@/feature/map'
 import { Nav } from '@/feature/nav'
 import { NavItem } from '@/feature/nav/nav.type'
-import { getTemplateListData } from '@/feature/project/project.api'
 import { useForceUpdate } from '@/hook/useForceUpdate'
 import { ExtendRouter, route } from '@/router'
 import { useMapStore } from '@/store/mapStore'
@@ -63,7 +63,9 @@ export const Home = () => {
   const forceUpdate = useForceUpdate()
 
   const testClick = async () => {
-    console.log(await getTemplateListData())
+    console.log(
+      await generateProjectTreeData('5b9900f1-28e1-4090-a3d6-4fd2d7ff7bcc'),
+    )
   }
 
   return (

@@ -7,28 +7,28 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import { Layer } from '@/type'
+import { LayerType } from '@/type'
 import { produce } from 'immer'
 import { create } from 'zustand'
 
 interface LayersStore {
-  layers: { data: Layer[]; map: Layer[] }
+  layers: { data: LayerType[]; map: LayerType[] }
   layersChecked: { data: string[]; map: string[] }
   layersExpanded: { data: string[]; map: string[] }
-  layersSelected: { data: Layer | null; map: Layer | null }
-  setLayers: (value: Layer[], type: 'data' | 'map') => void
-  addLayer: (layer: Layer, type: 'data' | 'map') => void
-  getLayer: (key: string, type: 'data' | 'map') => Layer | null
+  layersSelected: { data: LayerType | null; map: LayerType | null }
+  setLayers: (value: LayerType[], type: 'data' | 'map') => void
+  addLayer: (layer: LayerType, type: 'data' | 'map') => void
+  getLayer: (key: string, type: 'data' | 'map') => LayerType | null
   deleteLayer: (key: string, type: 'data' | 'map') => void
   updateLayer: (
     key: string,
     type: 'data' | 'map',
     prop: string,
-    value: string | boolean | Layer,
+    value: string | boolean | LayerType,
   ) => void
   setLayersChecked: (value: string[], type: 'data' | 'map') => void
   setLayersExpanded: (value: string[], type: 'data' | 'map') => void
-  setLayersSelected: (value: Layer | null, type: 'data' | 'map') => void
+  setLayersSelected: (value: LayerType | null, type: 'data' | 'map') => void
   addLayersChecked: (key: string, type: 'data' | 'map') => void
   addLayersExpanded: (key: string, type: 'data' | 'map') => void
   deleteLayersChecked: (key: string, type: 'data' | 'map') => void
@@ -54,9 +54,9 @@ export const useLayersStore = create<LayersStore>((set, get) => ({
     ),
   getLayer: (key, type) => {
     const loop = (
-      data: Layer[],
+      data: LayerType[],
       key: string,
-      callback: (value: Layer, index: number, data: Layer[]) => void,
+      callback: (value: LayerType, index: number, data: LayerType[]) => void,
     ) => {
       data.forEach((value, index) => {
         if (value.key === key) {
@@ -68,7 +68,7 @@ export const useLayersStore = create<LayersStore>((set, get) => ({
       })
     }
     const layers = get().layers[type]
-    let layer: Layer | null = null
+    let layer: LayerType | null = null
     loop(layers, key, (value) => {
       layer = value
     })
@@ -78,9 +78,13 @@ export const useLayersStore = create<LayersStore>((set, get) => ({
     set(
       produce((draft: LayersStore) => {
         const loop = (
-          data: Layer[],
+          data: LayerType[],
           key: string,
-          callback: (value: Layer, index: number, data: Layer[]) => void,
+          callback: (
+            value: LayerType,
+            index: number,
+            data: LayerType[],
+          ) => void,
         ) => {
           data.forEach((value, index) => {
             if (value.key === key) {
@@ -100,9 +104,13 @@ export const useLayersStore = create<LayersStore>((set, get) => ({
     set(
       produce((draft: LayersStore) => {
         const loop = (
-          data: Layer[],
+          data: LayerType[],
           key: string,
-          callback: (value: Layer, index: number, data: Layer[]) => void,
+          callback: (
+            value: LayerType,
+            index: number,
+            data: LayerType[],
+          ) => void,
         ) => {
           data.forEach((value, index) => {
             if (value.key === key) {
