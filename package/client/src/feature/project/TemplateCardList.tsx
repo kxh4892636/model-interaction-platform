@@ -1,14 +1,13 @@
-import { useLayersStore } from '@/store/layerStore'
-import { useMapStore } from '@/store/mapStore'
 import { useModalStore } from '@/store/modalStore'
+import { useStateStore } from '@/store/stateStore'
 import { Button, Card } from 'antd'
 import Meta from 'antd/es/card/Meta'
+import { createProjectFromTemplate } from './project.api'
 import { TemplateListType } from './project.type'
 
 const generateCardList = (
   templateListData: TemplateListType,
   handleClose: () => void,
-  //   handleConfirm: () => void,
 ) => {
   const result = templateListData.map((data) => (
     <Card
@@ -18,7 +17,17 @@ const generateCardList = (
       }
       key={data.templateID}
       size={'small'}
-      actions={[<Button type="primary">新建项目</Button>]}
+      actions={[
+        <Button
+          type="primary"
+          onClick={async () => {
+            await createProjectFromTemplate(data.templateID, data.templateName)
+            handleClose()
+          }}
+        >
+          新建项目
+        </Button>,
+      ]}
     >
       <Meta title={data.templateName} description={'根据模板创建项目'} />
     </Card>
@@ -33,21 +42,16 @@ interface AppProps {
 export const TemplateCardList = ({ templateListData }: AppProps) => {
   const setIsModalDisplay = useModalStore((state) => state.setIsModalDisplay)
   const setModal = useModalStore((state) => state.setModal)
-  const map = useMapStore((state) => state.map)
-  const setLayers = useLayersStore((state) => state.setLayers)
+  const forceUpdate = useStateStore((state) => state.forceUpdate)
 
   const cardList = generateCardList(templateListData, () => {
     setIsModalDisplay(false)
     setModal(<></>)
+    forceUpdate()
   })
 
   return (
     <div className="mx-6 mb-4 flex flex-auto flex-wrap overflow-auto ">
-      {cardList}
-      {cardList}
-      {cardList}
-      {cardList}
-      {cardList}
       {cardList}
     </div>
   )

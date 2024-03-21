@@ -1,4 +1,3 @@
-import { generateProjectTreeData } from '@/feature/layer/layer.api'
 import { MapView } from '@/feature/map'
 import { Nav } from '@/feature/nav'
 import { NavItem } from '@/feature/nav/nav.type'
@@ -6,6 +5,7 @@ import { useForceUpdate } from '@/hook/useForceUpdate'
 import { ExtendRouter, route } from '@/router'
 import { useMapStore } from '@/store/mapStore'
 import { useModalStore } from '@/store/modalStore'
+import { useProjectStatusStore } from '@/store/projectStore'
 import {
   AppstoreOutlined,
   DatabaseOutlined,
@@ -61,11 +61,10 @@ export const Home = () => {
     },
   ]
   const forceUpdate = useForceUpdate()
+  const projectID = useProjectStatusStore((state) => state.projectID)
 
   const testClick = async () => {
-    console.log(
-      await generateProjectTreeData('5b9900f1-28e1-4090-a3d6-4fd2d7ff7bcc'),
-    )
+    console.log(projectID)
   }
 
   return (

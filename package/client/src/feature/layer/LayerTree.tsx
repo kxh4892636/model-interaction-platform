@@ -36,10 +36,10 @@ export const LayerTree = ({ children, type }: AppProps) => {
       onSelect={(_, e) => {
         // get selected layer node data
         if (e.selected) {
-          setLayersSelected(e.node, type)
+          setLayersSelected(e.node as any, type)
         }
       }}
-      treeData={layers[type]}
+      treeData={layers[type] as any}
     />
   )
 }

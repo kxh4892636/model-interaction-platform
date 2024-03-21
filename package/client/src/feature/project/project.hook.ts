@@ -1,3 +1,4 @@
+import { useStateStore } from '@/store/stateStore'
 import { DataQueryHookInterface } from '@/type'
 import { useEffect, useState } from 'react'
 import { getProjectListData, getTemplateListData } from './project.api'
@@ -9,6 +10,7 @@ export const useProjectListData = () => {
     data: null,
     error: null,
   })
+  const forceUpdateTag = useStateStore((state) => state.forceUpdateTag)
 
   useEffect(() => {
     getProjectListData()
@@ -26,7 +28,7 @@ export const useProjectListData = () => {
           error: '',
         })
       })
-  }, [])
+  }, [forceUpdateTag])
 
   return data
 }

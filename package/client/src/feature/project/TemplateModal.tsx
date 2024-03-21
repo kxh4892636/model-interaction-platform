@@ -13,7 +13,7 @@ export const TemplateModal = () => {
       onClick={() => {}}
     >
       <div
-        className="relative left-[19vw] top-[10vh] flex h-[80vh] w-[80rem]
+        className="relative left-[15vw] top-[10vh] flex h-[80vh] w-[66vw]
           flex-col rounded-xl border border-slate-300 bg-white shadow-lg
           shadow-slate-300"
       >
