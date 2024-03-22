@@ -14,7 +14,8 @@
     "lint": "eslint src/**/* test/**/* --max-warnings 0",
     "prettier": "prettier src/**/* test/**/* --write",
     "format": "pnpm prettier && pnpm lint",
-    "prisma": "pnpm dlx prisma db pull && pnpm dlx prisma generate"
+    "prisma": "pnpm dlx prisma db pull && pnpm dlx prisma generate",
+    "studio": "pnpm dlx prisma studio"
   },
   "devDependencies": {
     "@fastify/swagger": "^8.14.0",

@@ -34,7 +34,7 @@ export const templateService = {
         templateInfo.templatePositionAndZoom,
         templateInfo.templateTag,
       )
-    const datasetIDMap = await datasetService.createDataset(
+    const datasetIDMap = await datasetService.createDatasetFromTemplate(
       projectPath,
       templateInfo.templateFolderPath,
       templateInfo.templateTree,

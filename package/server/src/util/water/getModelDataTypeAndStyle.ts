@@ -49,7 +49,10 @@ export const getModelDataExtentAndVisualization = (
     string,
     [[number, number, number, number], string[]]
   > = new Map([
-    ['mesh31.gr3', [[119.54, 120.21, 26.34, 26.94], ['mesh31.png']]],
+    [
+      'mesh31.gr3',
+      [[119.549898, 120.21745, 26.34525, 26.972279], ['mesh31.png']],
+    ],
   ])
 
   const result = extentAndVisualization.get(fileName)

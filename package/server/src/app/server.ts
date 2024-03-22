@@ -73,6 +73,7 @@ export const startApp = async (port: number) => {
 
   try {
     await app.listen({ port })
+    console.log(process.cwd())
   } catch (err) {
     app.log.error(err)
     process.exit(1)

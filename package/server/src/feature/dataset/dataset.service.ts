@@ -8,7 +8,32 @@ import { dataDao } from '../modal-data/data.dao'
 import { datasetDao } from './dataset.dao'
 
 export const datasetService = {
-  createDataset: async (
+  createDataset: async (datasetName: string, datasetPath: string) => {
+    const timeStamp = Date.now().toString()
+    const datasetID = randomUUID()
+    await datasetDao.createDataset(
+      datasetPath,
+      datasetID,
+      datasetName,
+      timeStamp,
+    )
+    await mkdir(path.join(DATA_FOLDER_PATH, datasetPath, 'input'), {
+      recursive: true,
+    })
+    await mkdir(path.join(DATA_FOLDER_PATH, datasetPath, 'model'), {
+      recursive: true,
+    })
+    await mkdir(path.join(DATA_FOLDER_PATH, datasetPath, 'output'), {
+      recursive: true,
+    })
+    await copyFolder(
+      path.join(DATA_FOLDER_PATH, datasetPath, '../water/model'),
+      path.join(DATA_FOLDER_PATH, datasetPath, 'model'),
+    )
+    return datasetID
+  },
+
+  createDatasetFromTemplate: async (
     projectPath: string,
     templateFolderPath: string,
     projectTree: Record<string, string[]>,
@@ -22,11 +47,6 @@ export const datasetService = {
       await mkdir(path.join(DATA_FOLDER_PATH, datasetPath), {
         recursive: true,
       })
-      // copy dataset and its all data
-      await copyFolder(
-        path.join(DATA_FOLDER_PATH, templateFolderPath),
-        path.join(DATA_FOLDER_PATH, projectPath),
-      )
       const datasetID = randomUUID()
       result[datasetName] = datasetID
       await datasetDao.createDataset(
@@ -36,6 +56,11 @@ export const datasetService = {
         timeStamp,
       )
     }
+    // copy dataset and its all data
+    await copyFolder(
+      path.join(DATA_FOLDER_PATH, templateFolderPath),
+      path.join(DATA_FOLDER_PATH, projectPath),
+    )
     return result
   },
 
