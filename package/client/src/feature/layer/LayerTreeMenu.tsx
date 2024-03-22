@@ -1,11 +1,11 @@
-import { EllipsisOutlined } from '@ant-design/icons'
 import { Dropdown, MenuProps } from 'antd'
 import { LayerMenuItemType } from './layer.type'
 
 interface AppProps {
   layerMenuItems: LayerMenuItemType[]
+  title: string
 }
-export const LayerTreeMenu = ({ layerMenuItems }: AppProps) => {
+export const LayerTreeMenu = ({ layerMenuItems, title }: AppProps) => {
   const createItems = (layerMenuItems: LayerMenuItemType[]) => {
     const array: MenuProps['items'] = []
     layerMenuItems.forEach((value) => {
@@ -25,9 +25,9 @@ export const LayerTreeMenu = ({ layerMenuItems }: AppProps) => {
           })
         },
       }}
-      trigger={['click']}
+      trigger={['contextMenu']}
     >
-      <EllipsisOutlined />
+      <div className="w-48">{title}</div>
     </Dropdown>
   )
 }

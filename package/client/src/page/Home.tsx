@@ -82,7 +82,7 @@ export const Home = () => {
         </div>
         <div className="relative flex flex-auto bg-green-50">
           <ExtendRouter>{element}</ExtendRouter>
-          <MapView display={isDisplay}></MapView>
+          {projectID && <MapView display={isDisplay}></MapView>}
         </div>
       </div>
       {isModalDisplay && modal}

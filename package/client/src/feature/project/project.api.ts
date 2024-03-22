@@ -1,33 +1,30 @@
 import { extendFetch } from '@/util/api'
 import {
   ProjectActionResponseType,
-  ProjectInfoType,
+  ProjectInfoResponseType,
   ProjectListResponseType,
-  ProjectListType,
   TemplateActionResponseType,
-  TemplateInfoType,
   TemplateListResponseType,
-  TemplateListType,
 } from './project.type'
 
-// const getProjectInfoFromServer = async (projectID: string) => {
-//   const result = await extendFetch(`/api/v1/project/info/${projectID}`, {
-//     method: 'GET',
-//   })
-//     .then((res) => res.json())
-//     .then((result: ProjectInfoResponseType) => {
-//       if (result.code) {
-//         return result.data
-//       } else {
-//         return null
-//       }
-//     })
-//     .catch(() => null)
+export const getProjectInfo = async (projectID: string) => {
+  const result = await extendFetch(`/api/v1/project/info/${projectID}`, {
+    method: 'GET',
+  })
+    .then((res) => res.json())
+    .then((result: ProjectInfoResponseType) => {
+      if (result.code) {
+        return result.data
+      } else {
+        return null
+      }
+    })
+    .catch(() => null)
 
-//   return result
-// }
+  return result
+}
 
-const getProjectCoverImageFromServer = async (projectID: string) => {
+export const getProjectCoverImage = async (projectID: string) => {
   const result = await extendFetch(`/api/v1/project/cover/${projectID}`, {
     method: 'GET',
   })
@@ -43,7 +40,7 @@ const getProjectCoverImageFromServer = async (projectID: string) => {
   return result
 }
 
-const getProjectListFromServer = async () => {
+export const getProjectList = async () => {
   const result = await extendFetch(`/api/v1/project/list`, {
     method: 'GET',
   })
@@ -62,7 +59,7 @@ const getProjectListFromServer = async () => {
   return result
 }
 
-const getTemplateCoverImageFromServer = async (templateID: string) => {
+export const getTemplateCoverImage = async (templateID: string) => {
   const result = await extendFetch(`/api/v1/template/cover/${templateID}`, {
     method: 'GET',
   })
@@ -78,7 +75,7 @@ const getTemplateCoverImageFromServer = async (templateID: string) => {
   return result
 }
 
-const getTemplateListFromServer = async () => {
+export const getTemplateList = async () => {
   const result = await extendFetch(`/api/v1/template/list`, {
     method: 'GET',
   })
@@ -128,30 +125,6 @@ export const createProjectFromTemplate = async (
   return result
 }
 
-export const getProjectListData = async () => {
-  const result: ProjectListType = []
-  const projectList = await getProjectListFromServer()
-  if (!projectList) return null
-  for (const project of projectList) {
-    const id = project.projectId
-    const image = await getProjectCoverImageFromServer(id)
-    if (!image) continue
-    const imageUrl =
-      typeof image === 'string' ? image : URL.createObjectURL(image)
-    const temp: ProjectInfoType = {
-      datasetIDArray: project.datasetIDArray,
-      projectCoverImage: imageUrl,
-      projectId: id,
-      projectName: project.projectName,
-      projectPositionZoom: project.projectPositionZoom,
-      projectTag: project.projectTag,
-    }
-    result.push(temp)
-  }
-
-  return result
-}
-
 export const deleteProject = async (projectID: string) => {
   let jsonHeaders = new Headers({
     'Content-Type': 'application/json',
@@ -176,28 +149,6 @@ export const deleteProject = async (projectID: string) => {
       }
     })
     .catch(() => false)
-
-  return result
-}
-
-export const getTemplateListData = async () => {
-  const result: TemplateListType = []
-  const templateList = await getTemplateListFromServer()
-  if (!templateList) return null
-  for (const template of templateList) {
-    const id = template.templateId
-    const image = await getTemplateCoverImageFromServer(id)
-    if (!image) continue
-    const imageUrl =
-      typeof image === 'string' ? image : URL.createObjectURL(image)
-    const temp: TemplateInfoType = {
-      templateCoverImage: imageUrl,
-      templateID: id,
-      templateName: template.templateName,
-      templateTag: template.templateTag,
-    }
-    result.push(temp)
-  }
 
   return result
 }

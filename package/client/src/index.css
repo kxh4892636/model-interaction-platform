@@ -16,3 +16,17 @@
 :where(.css-dev-only-do-not-override-djtmh8).ant-card .ant-card-actions {
   background: transparent;
 }
+
+.ant-tree-node-content-wrapper {
+  display: flex;
+  flex-direction: row-reverse;
+}
+.ant-tree-node-content-wrapper .ant-tree-title {
+  margin-right: auto;
+}
+.ant-tree-node-content-wrapper .ant-tree-iconEle {
+  font-size: 18px;
+}
+.ant-tree-node-content-wrapper .ant-tree-iconEle:hover {
+  color: #4096ff;
+}

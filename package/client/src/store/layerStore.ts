@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import { LayerType } from '@/type'
+import { AntdTreeInterface, LayerType } from '@/type'
 import { produce } from 'immer'
 import { create } from 'zustand'
 
@@ -15,7 +15,10 @@ interface LayersStore {
   layers: { data: LayerType[]; map: LayerType[] }
   layersChecked: { data: string[]; map: string[] }
   layersExpanded: { data: string[]; map: string[] }
-  layersSelected: { data: LayerType | null; map: LayerType | null }
+  layersSelected: {
+    data: AntdTreeInterface | null
+    map: AntdTreeInterface | null
+  }
   setLayers: (value: LayerType[], type: 'data' | 'map') => void
   addLayer: (layer: LayerType, type: 'data' | 'map') => void
   getLayer: (key: string, type: 'data' | 'map') => LayerType | null
@@ -28,7 +31,10 @@ interface LayersStore {
   ) => void
   setLayersChecked: (value: string[], type: 'data' | 'map') => void
   setLayersExpanded: (value: string[], type: 'data' | 'map') => void
-  setLayersSelected: (value: LayerType | null, type: 'data' | 'map') => void
+  setLayersSelected: (
+    value: AntdTreeInterface | null,
+    type: 'data' | 'map',
+  ) => void
   addLayersChecked: (key: string, type: 'data' | 'map') => void
   addLayersExpanded: (key: string, type: 'data' | 'map') => void
   deleteLayersChecked: (key: string, type: 'data' | 'map') => void

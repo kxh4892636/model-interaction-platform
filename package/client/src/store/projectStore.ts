@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 
 interface ProjectStatus {
-  projectID: string
-  setProjectID: (key: string) => void
+  projectID: string | null
+  setProjectID: (key: string | null) => void
 }
 
 export const useProjectStatusStore = create<ProjectStatus>((set) => ({
-  projectID: '',
+  projectID: null,
   setProjectID: (value) => set({ projectID: value }),
 }))

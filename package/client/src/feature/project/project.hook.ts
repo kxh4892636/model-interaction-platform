@@ -1,8 +1,8 @@
 import { useStateStore } from '@/store/stateStore'
 import { DataQueryHookInterface } from '@/type'
 import { useEffect, useState } from 'react'
-import { getProjectListData, getTemplateListData } from './project.api'
 import { ProjectListType, TemplateListType } from './project.type'
+import { getProjectListData, getTemplateListData } from './project.util'
 
 export const useProjectListData = () => {
   const [data, setData] = useState<DataQueryHookInterface<ProjectListType>>({

@@ -1,7 +1,7 @@
 import { useMapStore } from '@/store/mapStore'
-import { useEffect } from 'react'
-import { matchRoutes, useLocation } from 'react-router-dom'
-import { route } from './route'
+import { useProjectStatusStore } from '@/store/projectStore'
+import { useEffect, useLayoutEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 // NOTE useLocation matchRoutes
 interface AppProps {
@@ -9,10 +9,18 @@ interface AppProps {
 }
 export const ExtendRouter = ({ children }: AppProps) => {
   const location = useLocation()
-  const matches = matchRoutes(route, location)
   const setDisplay = useMapStore((state) => state.setDisplay)
+  const link = useNavigate()
+  const projectID = useProjectStatusStore((state) => state.projectID)
 
   useEffect(() => {
+    link('/project')
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!projectID) {
+      link('/project')
+    }
     if (
       location.pathname.includes('/layer') ||
       location.pathname.includes('/info')

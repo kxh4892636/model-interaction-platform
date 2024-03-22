@@ -29,6 +29,7 @@ interface AppProps {
 export const MapView = ({ display }: AppProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(document.createElement('div'))
   const mapRef = useRef<mapboxgl.Map | null>(null)
+  const map = useMapStore((state) => state.map)
   const setMap = useMapStore((state) => state.setMap)
   const position = useMapStore((state) => state.mapPosition)
   const setPosition = useMapStore((state) => state.setMapPosition)
@@ -55,7 +56,11 @@ export const MapView = ({ display }: AppProps) => {
         ])
       }
     })
-  })
+  }, [])
+
+  useEffect(() => {
+    if (map) map.resize()
+  }, [display])
 
   return (
     <div

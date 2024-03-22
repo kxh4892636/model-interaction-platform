@@ -1,13 +1,13 @@
 import { useLayersStore } from '@/store/layerStore'
 import { Tree } from 'antd'
-import { useLayerActions } from './layer.hook'
+import { useLayerActions, useLayerTreeData } from './layer.hook'
+import { generateAntdTreeData } from './layer.util'
 
 interface AppProps {
-  children: JSX.Element
   type: 'data' | 'map'
 }
-export const LayerTree = ({ children, type }: AppProps) => {
-  const layers = useLayersStore((state) => state.layers)
+export const LayerTree = ({ type }: AppProps) => {
+  const layers = useLayerTreeData()
   const layersChecked = useLayersStore((state) => state.layersChecked)
   const layersExpanded = useLayersStore((state) => state.layersExpanded)
   const setLayersChecked = useLayersStore((state) => state.setLayersChecked)
@@ -15,31 +15,82 @@ export const LayerTree = ({ children, type }: AppProps) => {
   const setLayersSelected = useLayersStore((state) => state.setLayersSelected)
   const layerActions = useLayerActions()
 
+  const layerMenuItemsMap = {
+    map: {
+      key: 'map',
+      label: '添加至地图',
+      action: () => {
+        layerActions.addDataToMap()
+      },
+    },
+    visualization: {
+      key: 'visualization',
+      label: '可视化',
+      action: () => {},
+    },
+    download: {
+      key: 'download',
+      label: '下载文本文件',
+      action: () => {
+        layerActions.downloadText()
+      },
+    },
+    rename: {
+      key: 'rename',
+      label: '重命名',
+      action: () => undefined,
+    },
+    delete: {
+      key: 'delete',
+      label: '删除',
+      action: () => undefined,
+    },
+    remove: {
+      key: 'remove',
+      label: '移除',
+      action: () => {
+        layerActions.deleteMapLayer()
+      },
+    },
+  }
+
   return (
     <Tree
-      className="flex-auto overflow-auto"
-      showIcon
-      icon={children}
-      checkable
+      className="flex-auto overflow-auto p-2"
+      checkable={type === 'map'}
       onCheck={(checkedKeys, info) => {
-        // show or hide layer
         setLayersChecked(checkedKeys as string[], type)
-        layerActions.showLayer(info)
-      }}
-      checkedKeys={layersChecked.map}
-      onExpand={(expandedKeys) => {
-        // expand or collapse layer
-        setLayersExpanded(expandedKeys as string[], type)
-      }}
-      expandedKeys={layersExpanded.map}
-      blockNode
-      onSelect={(_, e) => {
-        // get selected layer node data
-        if (e.selected) {
-          setLayersSelected(e.node as any, type)
+        if (type === 'map') {
+          layerActions.showMapLayer(info)
         }
       }}
-      treeData={layers[type] as any}
+      checkedKeys={layersChecked[type]}
+      onExpand={(expandedKeys) => {
+        setLayersExpanded(expandedKeys as string[], type)
+      }}
+      expandedKeys={layersExpanded[type]}
+      blockNode
+      onSelect={(_, info) => {
+        setLayersSelected(
+          {
+            key: info.node.key as string,
+            title: info.node.title as string,
+            children: info.node.children as any,
+          },
+          type,
+        )
+      }}
+      onRightClick={(info) => {
+        setLayersSelected(
+          {
+            key: info.node.key as string,
+            title: info.node.title as string,
+            children: info.node.children as any,
+          },
+          type,
+        )
+      }}
+      treeData={generateAntdTreeData(layers[type], layerMenuItemsMap, type)}
     />
   )
 }

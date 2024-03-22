@@ -10,10 +10,43 @@
 
 import { useLayersStore } from '@/store/layerStore'
 import { useMapStore } from '@/store/mapStore'
+import { useModalStore } from '@/store/modalStore'
+import { useProjectStatusStore } from '@/store/projectStore'
 import { LayerType } from '@/type'
+import { useEffect } from 'react'
+import { getDataInfo, getTextData } from './layer.api'
+import { DataInfoType } from './layer.type'
+import {
+  addMeshToMap,
+  generateProjectTreeData,
+  getGroupKeys,
+  getLayerKeys,
+} from './layer.util'
+
+export const useLayerTreeData = () => {
+  const layers = useLayersStore((state) => state.layers)
+  const setLayer = useLayersStore((state) => state.setLayers)
+  const projectID = useProjectStatusStore((state) => state.projectID)
+
+  useEffect(() => {
+    generateProjectTreeData(projectID)
+      .then((value) => {
+        setLayer(value || [], 'data')
+      })
+      .catch(() => {
+        setLayer([], 'data')
+      })
+  }, [projectID])
+
+  return layers
+}
 
 export const useLayerActions = () => {
   const map = useMapStore((state) => state.map)
+  const layers = useLayersStore((state) => state.layers)
+  const addLayer = useLayersStore((state) => state.addLayer)
+  const addLayersChecked = useLayersStore((state) => state.addLayersChecked)
+  const addLayersExpanded = useLayersStore((state) => state.addLayersExpanded)
   const deleteLayerByKey = useLayersStore((state) => state.deleteLayer)
   const deleteLayersChecked = useLayersStore(
     (state) => state.deleteLayersChecked,
@@ -23,49 +56,74 @@ export const useLayerActions = () => {
   )
   const layersSelected = useLayersStore((state) => state.layersSelected)
   const setLayersSelected = useLayersStore((state) => state.setLayersSelected)
+  const setIsModalDisplay = useModalStore((state) => state.setIsModalDisplay)
+  const setModal = useModalStore((state) => state.setModal)
 
-  const getAllKeys = (layers: LayerType[]) => {
-    const keys: string[] = []
-    const loop = (array: LayerType[]) => {
-      array.forEach((value) => {
-        keys.push(value.key)
-        value.children && loop(value.children)
-      })
-    }
-    loop(layers)
-    return keys
+  const downloadText = async () => {
+    if (!layersSelected.data) return null
+    const dataID = layersSelected.data.key
+    const info = await getDataInfo(dataID)
+    if (!info) return null
+    const text = await getTextData(info.dataID, info.visualizationNumber - 1)
+    if (!text) return false
+
+    const blob = new Blob([text])
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.setAttribute('download', info.dataName)
+    a.click()
   }
 
-  function getLayerKeys(layers: LayerType[]) {
-    const keys: string[] = []
-    const loop = (array: LayerType[]) => {
-      array.forEach((value) => {
-        if (!value.group) {
-          keys.push(value.key)
-        }
-        value.children && loop(value.children)
-      })
-    }
-    loop(layers)
-    return keys
+  const visualizeData = async () => {
+    if (!layersSelected.data) return null
+    const dataID = layersSelected.data.key
+    const info = await getDataInfo(dataID)
+    if (!info) return null
+
+    const fnMap: Record<string, (info: DataInfoType) => Promise<JSX.Element>> =
+      {
+        //
+      }
+
+    return true
   }
 
-  function getGroupKeys(layers: LayerType[]) {
-    const keys: string[] = []
-    const loop = (array: LayerType[]) => {
-      array.forEach((value) => {
-        if (value.group) {
-          keys.push(value.key)
-        }
-        value.children && loop(value.children)
-      })
+  const addDataToMap = async () => {
+    if (!layersSelected.data || !map) return null
+    const dataID = layersSelected.data.key
+    if (getLayerKeys(layers.map).includes(dataID)) return null
+    const info = await getDataInfo(dataID)
+    if (!info) return null
+
+    const fnMap: Record<
+      string,
+      (map: mapboxgl.Map, info: DataInfoType) => Promise<boolean>
+    > = {
+      mesh: addMeshToMap,
     }
-    loop(layers)
-    return keys
+
+    const tag = await fnMap[info.dataType](map, info)
+    if (!tag) return false
+
+    const treeData: LayerType = {
+      title: info.dataName,
+      key: info.dataID,
+      type: info.dataType,
+      style: info.dataStyle,
+      input: info.isInput,
+      group: false,
+      children: [],
+    }
+    addLayer(treeData, 'map')
+    addLayersChecked(dataID, 'map')
+    addLayersExpanded(dataID, 'map')
+
+    return true
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const showLayer = (info: any) => {
+  const showMapLayer = (info: any) => {
     if (!map) return
     if (!info.node.group) {
       // show and hide single layer
@@ -102,10 +160,10 @@ export const useLayerActions = () => {
   /**
    * delete layer that is selected now
    */
-  const deleteLayer = () => {
+  const deleteMapLayer = () => {
     if (!map || !layersSelected.map) return
 
-    if (!layersSelected.map.group) {
+    if (layersSelected.map.children.length === 0) {
       deleteLayersChecked(layersSelected.map.key, 'map')
       deleteLayersExpanded(layersSelected.map.key, 'map')
       deleteLayerByKey(layersSelected.map.key, 'map')
@@ -115,7 +173,6 @@ export const useLayerActions = () => {
         map.removeLayer(layersSelected.map.key)
       if (map.getSource(layersSelected.map.key))
         map.removeSource(layersSelected.map.key)
-      console.log(layersSelected.map.key)
 
       // TODO
       //   animate.removeAnimate(layersSelected.map.key)
@@ -144,10 +201,9 @@ export const useLayerActions = () => {
   }
 
   return {
-    showLayer,
-    deleteLayer,
-    getAllKeys,
-    getGroupKeys,
-    getLayerKeys,
+    downloadText,
+    addDataToMap,
+    showMapLayer,
+    deleteMapLayer,
   }
 }

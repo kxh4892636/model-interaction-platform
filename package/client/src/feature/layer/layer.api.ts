@@ -1,8 +1,11 @@
-import { LayerType } from '@/type'
 import { extendFetch } from '@/util/api'
-import { ProjectTreeResponseType, ProjectTreeType } from './layer.type'
+import {
+  DataInfoResponseType,
+  DatasetActionResponseType,
+  ProjectTreeResponseType,
+} from './layer.type'
 
-const getProjectTreeFromServer = async (projectID: string) => {
+export const getProjectTree = async (projectID: string) => {
   const result = await extendFetch(`/api/v1/project/tree/${projectID}`, {
     method: 'GET',
   })
@@ -25,33 +28,101 @@ const getProjectTreeFromServer = async (projectID: string) => {
   return result
 }
 
-export const generateProjectTreeData = async (projectID: string) => {
-  const response = await getProjectTreeFromServer(projectID)
-  if (!response) return null
-
-  const loop = (origin: ProjectTreeType) => {
-    const result: LayerType[] = origin.map((value) => {
-      let children: LayerType[] = []
-      if (value.children) {
-        children = loop(value.children)
+export const getDataInfo = async (dataID: string) => {
+  const result = await extendFetch(`/api/v1/data/info/${dataID}`, {
+    method: 'GET',
+  })
+    .then((res) => {
+      if (res.status === 200) {
+        return res.json()
+      } else {
+        return null
       }
-      const result: LayerType = {
-        children: children,
-        group: value.group,
-        input: value.isInput,
-        key: value.key,
-        style: value.layerStyle,
-        title: value.title,
-        type: value.layerType,
-      }
-
-      return result
     })
+    .then((result: DataInfoResponseType) => {
+      if (result.code) {
+        return result.data
+      } else {
+        return null
+      }
+    })
+    .catch(() => null)
 
-    return result
-  }
+  return result
+}
 
-  const result = loop(response)
+export const getMeshData = async (dataID: string, index: number) => {
+  const url =
+    '/api/v1/data/mesh?' +
+    new URLSearchParams({
+      dataID: dataID,
+      index: index.toString(),
+    })
+  const result = await extendFetch(url, {
+    method: 'GET',
+  })
+    .then((res) => {
+      if (res.status === 200) {
+        return res.blob()
+      } else {
+        return null
+      }
+    })
+    .catch(() => null)
+
+  return result
+}
+
+export const getTextData = async (dataID: string, index: number) => {
+  const url =
+    '/api/v1/data/text?' +
+    new URLSearchParams({
+      dataID: dataID,
+      index: index.toString(),
+    })
+  const result = await extendFetch(url, {
+    method: 'GET',
+  })
+    .then((res) => {
+      if (res.status === 200) {
+        return res.text()
+      } else {
+        return null
+      }
+    })
+    .catch(() => null)
+
+  return result
+}
+
+export const operateDataset = async (
+  datasetID: string,
+  action: 'delete' | 'rename',
+  datasetName: string,
+) => {
+  let jsonHeaders = new Headers({
+    'Content-Type': 'application/json',
+  })
+  const result = await extendFetch(`/api/v1/dataset/action`, {
+    method: 'POST',
+    body: JSON.stringify({
+      datasetID,
+      datasetAction: action,
+      datasetName,
+    }),
+    headers: jsonHeaders,
+  })
+    .then((res) => {
+      return res.json()
+    })
+    .then((result: DatasetActionResponseType) => {
+      if (result.code) {
+        return true
+      } else {
+        return false
+      }
+    })
+    .catch(() => false)
 
   return result
 }
