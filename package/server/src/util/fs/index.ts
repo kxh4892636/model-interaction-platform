@@ -37,3 +37,40 @@ export const copyFolder = async (source: string, target: string) => {
     console.error('文件夹复制失败', error)
   }
 }
+
+export const copySelectFilesInFolder = async (
+  source: string,
+  target: string,
+  timeStamps: string[] = [],
+) => {
+  try {
+    if (!(await existsPromise(target))) {
+      await fs.promises.mkdir(target)
+    } else;
+    const files = await fs.promises.readdir(source)
+    const promises = files.map((file) => {
+      const sourcePath = path.join(source, file)
+      const targetPath = path.join(target, file)
+      const promise = new Promise(async (resolve) => {
+        const stats = await fs.promises.stat(sourcePath)
+        if (stats.isDirectory()) {
+          await copySelectFilesInFolder(sourcePath, targetPath)
+          resolve(1)
+        } else {
+          for (let index = 0; index < timeStamps.length; index++) {
+            const timeStamp = timeStamps[index]
+            if (sourcePath.includes(timeStamp))
+              await fs.promises.copyFile(sourcePath, targetPath)
+            else;
+          }
+          resolve(1)
+        }
+      })
+      return promise
+    })
+    await Promise.all(promises)
+    console.log('文件夹复制成功')
+  } catch (error) {
+    console.error('文件夹复制失败', error)
+  }
+}

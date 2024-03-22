@@ -26,10 +26,6 @@ export const datasetService = {
     await mkdir(path.join(DATA_FOLDER_PATH, datasetPath, 'output'), {
       recursive: true,
     })
-    await copyFolder(
-      path.join(DATA_FOLDER_PATH, datasetPath, '../water/model'),
-      path.join(DATA_FOLDER_PATH, datasetPath, 'model'),
-    )
     return datasetID
   },
 

@@ -52,6 +52,7 @@ export const templateService = {
     )
 
     await Promise.all([...promiseList0, ...promiseList1])
+    return projectID
   },
 
   getTemplateCoverImage: async (templateID: string) => {

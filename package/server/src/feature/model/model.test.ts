@@ -1,6 +1,5 @@
 import { prisma } from '@/util/db/prisma'
 import { randomUUID } from 'crypto'
-import { templateService } from '../template/template.service'
 import { modelService } from './model.service'
 
 const clear = async () => {
@@ -14,19 +13,15 @@ const clear = async () => {
 
 const water = async () => {
   try {
-    clear()
-    await templateService.createTemplate(
-      'c5a08bb6-5185-4dab-8da4-a041324a6287',
-      'test',
-    )
-    const projectID = await prisma.project.findMany({})
-    const dataID = await prisma.data.findMany({})
-    await modelService.water(
-      'test',
-      projectID[0].project_id,
+    //
+    modelService.runModel(
+      'water',
+      'water-test',
+      'e3cfa12b-bfe4-4527-9feb-c42ca24bd402',
       randomUUID(),
-      dataID.map((value) => value.data_id),
+      '1e7f1742-3dde-4ca3-b70b-070cda600107',
       1,
+      null,
     )
   } catch (error) {
     console.trace(error)
@@ -35,4 +30,40 @@ const water = async () => {
   console.log('water finished')
 }
 
-water()
+const quality = async () => {
+  try {
+    modelService.runModel(
+      'quality',
+      'quality-test',
+      'e3cfa12b-bfe4-4527-9feb-c42ca24bd402',
+      randomUUID(),
+      '2c0bd33c-930c-4313-91dc-e3bfbc898f6a',
+      1,
+      'e26b79b9-0683-42ad-b9dd-01a67c139b83',
+    )
+  } catch (error) {
+    console.trace(error)
+  }
+
+  console.log('finished')
+}
+
+const sand = async () => {
+  try {
+    modelService.runModel(
+      'sand',
+      'sand-test',
+      'e3cfa12b-bfe4-4527-9feb-c42ca24bd402',
+      randomUUID(),
+      '2c0bd33c-930c-4313-91dc-e3bfbc898f6a',
+      1,
+      'e26b79b9-0683-42ad-b9dd-01a67c139b83',
+    )
+  } catch (error) {
+    console.trace(error)
+  }
+
+  console.log('finished')
+}
+
+quality()

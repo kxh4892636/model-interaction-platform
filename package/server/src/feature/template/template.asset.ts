@@ -25,6 +25,17 @@ export const San_Sha_Wan_Template: TemplateInterface = {
       'vgridhk.in',
       'wudaodi.dat',
     ],
+    quality: [
+      'wuran-gongkuang.dat',
+      'wqm_para.dat',
+      '初始浓度.dat',
+      'cedian.dat',
+      'tang_info.dat',
+      'toufang.dat',
+      'in_node.dat',
+      'vgridzsh.in',
+    ],
+    sand: ['wuran-gongkuang.dat', 'wqm_para.dat', 'vgridzsh.in'],
   },
 }
 

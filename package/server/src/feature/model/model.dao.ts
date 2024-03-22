@@ -10,6 +10,9 @@ export const modelDao = {
       data: {
         create_time: timeStamp,
         model_id: modelID,
+        // 0 running
+        // 1 finished
+        // -1 failed
         model_progress: 0,
         status: 'active',
         update_time: timeStamp,
