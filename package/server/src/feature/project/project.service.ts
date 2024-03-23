@@ -109,7 +109,7 @@ export const projectService = {
     const datasetList = await projectDao.getDatasetListOfProject(projectID)
     const promiseList = datasetList.map(async (datasetID) => {
       const datasetInfo = await datasetDao.getDatasetInfo(datasetID)
-      if (!datasetInfo) {
+      if (!datasetInfo || datasetInfo.status === 'pending') {
         return
       }
       const temp = {

@@ -6,7 +6,8 @@
   "author": "XiaoHan Kong <kxh4892636@gmail.com> (https://github.com/kxh4892636)",
   "license": "MIT",
   "scripts": {
-    "dev": "pnpm --filter=./package/client --filter=./package/server dev",
+    "dev:client": "cd package/client && pnpm dev",
+    "dev:server": "cd package/server && pnpm dev",
     "lint": "eslint package --max-warnings 0",
     "prettier": "prettier package --write",
     "format": "pnpm prettier && pnpm lint",

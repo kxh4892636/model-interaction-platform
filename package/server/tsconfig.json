@@ -12,6 +12,7 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "sourceMap": true,
+    "allowJs": true,
 
     "outDir": "./dist",
     "baseUrl": ".",

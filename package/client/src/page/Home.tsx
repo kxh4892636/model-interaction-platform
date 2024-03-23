@@ -1,4 +1,5 @@
 import { MapView } from '@/feature/map'
+import { getModelInfo } from '@/feature/model/api/model.api'
 import { Nav } from '@/feature/nav'
 import { NavItem } from '@/feature/nav/nav.type'
 import { useForceUpdate } from '@/hook/useForceUpdate'
@@ -48,7 +49,7 @@ export const Home = () => {
       id: 'model',
       icon: <MediumOutlined style={{ color: '#fafafa' }} />,
       action: () => {
-        //
+        navigate('/model')
       },
     },
     {
@@ -64,7 +65,7 @@ export const Home = () => {
   const projectID = useProjectStatusStore((state) => state.projectID)
 
   const testClick = async () => {
-    console.log(projectID)
+    console.log(await getModelInfo('fa20fa47-74b1-46f0-819f-5aa2d9012fdc'))
   }
 
   return (

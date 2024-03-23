@@ -8,6 +8,7 @@
     "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "allowJs": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",

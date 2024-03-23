@@ -1,6 +1,6 @@
 import { prisma } from '@/util/db/prisma'
 import { randomUUID } from 'crypto'
-import { modelService } from './model.service'
+import { modelService } from './model.water.service'
 
 const clear = async () => {
   await prisma.project.deleteMany({})

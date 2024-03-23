@@ -8,7 +8,12 @@ import { dataDao } from '../modal-data/data.dao'
 import { datasetDao } from './dataset.dao'
 
 export const datasetService = {
-  createDataset: async (datasetName: string, datasetPath: string) => {
+  createDataset: async (
+    datasetName: string,
+    datasetPath: string,
+    datasetInput: boolean,
+    status: 'active' | 'pending',
+  ) => {
     const timeStamp = Date.now().toString()
     const datasetID = randomUUID()
     await datasetDao.createDataset(
@@ -16,6 +21,8 @@ export const datasetService = {
       datasetID,
       datasetName,
       timeStamp,
+      datasetInput,
+      status,
     )
     await mkdir(path.join(DATA_FOLDER_PATH, datasetPath, 'input'), {
       recursive: true,
@@ -50,6 +57,8 @@ export const datasetService = {
         datasetID,
         datasetName,
         timeStamp,
+        true,
+        'active',
       )
     }
     // copy dataset and its all data

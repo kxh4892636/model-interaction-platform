@@ -4,6 +4,7 @@ export const dataDao = {
   createData: async (
     dataFilePath: string,
     dataName: string,
+    input: boolean,
     dataID: string,
     style: string,
     type: string,
@@ -15,7 +16,7 @@ export const dataDao = {
       data: {
         data_file_path: dataFilePath,
         data_id: dataID,
-        data_input: true,
+        data_input: input,
         data_name: dataName,
         data_style: style,
         data_timestamp: timeStamp,
