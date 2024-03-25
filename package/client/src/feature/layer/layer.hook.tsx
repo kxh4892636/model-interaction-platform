@@ -18,6 +18,7 @@ import { getDataInfo, getTextData } from './layer.api'
 import { DataInfoType } from './layer.type'
 import {
   addMeshToMap,
+  addUVETToMap,
   generateProjectTreeData,
   getGroupKeys,
   getLayerKeys,
@@ -101,6 +102,7 @@ export const useLayerActions = () => {
       (map: mapboxgl.Map, info: DataInfoType) => Promise<boolean>
     > = {
       mesh: addMeshToMap,
+      uvet: addUVETToMap,
     }
 
     const tag = await fnMap[info.dataType](map, info)

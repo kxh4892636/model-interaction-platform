@@ -1,4 +1,5 @@
 import { useMapStore } from '@/store/mapStore'
+import { GetMap } from '@/util/customLayer/cusLayer'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import mapboxgl from 'mapbox-gl'
 import { useEffect, useRef } from 'react'
@@ -8,16 +9,16 @@ export const initMap = (
   mapContainerRef: React.MutableRefObject<HTMLDivElement>,
   position: [number, number, number],
 ) => {
-  mapboxgl.accessToken =
-    'pk.eyJ1Ijoia3hoNDg5MjYzNiIsImEiOiJjbGFhcWYyNmcwNHF3M25vNXJqaW95bDZsIn0.ID03BpkSU7-I0OcehcrvlQ'
-
-  const map = new mapboxgl.Map({
-    container: mapContainerRef.current,
-    style: 'mapbox://styles/mapbox/streets-v12',
-    center: [position[0], position[1]],
-    zoom: position[2],
-    preserveDrawingBuffer: true,
-  })
+  const map = GetMap(
+    'pk.eyJ1Ijoia3hoNDg5MjYzNiIsImEiOiJjbGFhcWYyNmcwNHF3M25vNXJqaW95bDZsIn0.ID03BpkSU7-I0OcehcrvlQ',
+    {
+      container: mapContainerRef.current,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [position[0], position[1]],
+      zoom: position[2],
+      preserveDrawingBuffer: true,
+    },
+  )
 
   return map
 }

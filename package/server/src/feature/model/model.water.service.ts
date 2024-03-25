@@ -11,6 +11,7 @@ import { dataDao } from '../modal-data/data.dao'
 import { projectDao } from '../project/project.dao'
 import { modelDao } from './model.dao'
 import { ModelInfoType } from './model.type'
+import { getModelDataVisualization } from './model.util'
 
 /**
  * Water model
@@ -33,6 +34,7 @@ const preWater = async (
   // create data record and dataset_data record
   const uvetPath = path.join(datasetPath, '/model/uvet.dat')
   const uvetID = randomUUID()
+  const visualization = getModelDataVisualization('water', datasetPath, hours)
   await dataDao.createData(
     uvetPath,
     'uvet流场数据',
@@ -41,7 +43,7 @@ const preWater = async (
     'uvet',
     'uvet',
     meshExtent,
-    [],
+    visualization,
     timeStamp,
   )
   await projectDao.createProjectDataset(projectID, datasetID, timeStamp)
@@ -258,6 +260,12 @@ const preQuality = async (
   for (let index = 0; index < titles.length; index++) {
     const id = randomUUID()
     const tndPath = path.join(datasetPath, `model/tnd${index + 1}.dat`)
+    const visualization = getModelDataVisualization(
+      'quality',
+      datasetPath,
+      hours,
+      index,
+    )
     await dataDao.createData(
       tndPath,
       `${index}_${titles[index]}`,
@@ -266,7 +274,7 @@ const preQuality = async (
       'raster',
       'tnd',
       meshExtent,
-      [],
+      visualization,
       timeStamp,
     )
     await projectDao.createProjectDataset(projectID, datasetID, timeStamp)
@@ -437,6 +445,7 @@ const preSand = async (
   const meshExtent = await copyModelData(paramsID, datasetPath, uvetInfo)
 
   // create data record and dataset_data record
+  const visualization = getModelDataVisualization('sand', datasetPath, hours)
   const sndID = randomUUID()
   const sndPath = path.join(datasetPath, `model/snd.dat`)
   await dataDao.createData(
@@ -447,7 +456,7 @@ const preSand = async (
     'raster',
     'snd',
     meshExtent,
-    [],
+    visualization.slice(0, hours),
     timeStamp,
   )
   await projectDao.createProjectDataset(projectID, datasetID, timeStamp)
@@ -462,7 +471,7 @@ const preSand = async (
     'raster',
     'yuji',
     meshExtent,
-    [],
+    visualization.slice(hours),
     timeStamp,
   )
   await projectDao.createProjectDataset(projectID, datasetID, timeStamp)
@@ -728,6 +737,6 @@ export const modelService = {
     const fn = fnMap[model]
     await fn(modelName, projectID, modelID, paramsID, hours, uvetID || '')
   },
-  stopModal: stopModel,
+  stopModel,
   getModelInfo,
 }

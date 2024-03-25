@@ -1,11 +1,11 @@
 import { useStateStore } from '@/store/stateStore'
-import { DataQueryHookInterface } from '@/type'
+import { DataFetchInterface } from '@/type'
 import { useEffect, useState } from 'react'
 import { ProjectListType, TemplateListType } from './project.type'
 import { getProjectListData, getTemplateListData } from './project.util'
 
 export const useProjectListData = () => {
-  const [data, setData] = useState<DataQueryHookInterface<ProjectListType>>({
+  const [data, setData] = useState<DataFetchInterface<ProjectListType>>({
     status: 'pending',
     data: null,
     error: null,
@@ -34,7 +34,7 @@ export const useProjectListData = () => {
 }
 
 export const useTemplateListData = () => {
-  const [data, setData] = useState<DataQueryHookInterface<TemplateListType>>({
+  const [data, setData] = useState<DataFetchInterface<TemplateListType>>({
     status: 'pending',
     data: null,
     error: null,

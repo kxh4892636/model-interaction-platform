@@ -1,5 +1,4 @@
 import { MapView } from '@/feature/map'
-import { getModelInfo } from '@/feature/model/api/model.api'
 import { Nav } from '@/feature/nav'
 import { NavItem } from '@/feature/nav/nav.type'
 import { useForceUpdate } from '@/hook/useForceUpdate'
@@ -63,9 +62,11 @@ export const Home = () => {
   ]
   const forceUpdate = useForceUpdate()
   const projectID = useProjectStatusStore((state) => state.projectID)
+  const map = useMapStore((state) => state.map)
 
   const testClick = async () => {
-    console.log(await getModelInfo('fa20fa47-74b1-46f0-819f-5aa2d9012fdc'))
+    map!.moveLayer('034172ae-9ac3-4cc9-a7a3-fb1b1fa48603', 'continent-label')
+    console.log(map!.getLayer('034172ae-9ac3-4cc9-a7a3-fb1b1fa48603'))
   }
 
   return (

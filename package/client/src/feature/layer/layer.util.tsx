@@ -1,4 +1,6 @@
 import { AntdTreeInterface, LayerType } from '@/type'
+import { FlowLayer } from '@/util/customLayer/flowLayer'
+import { FlowFieldManager } from '@/util/customLayer/flowfield'
 import { DataNode } from 'antd/es/tree'
 import { addImageToMap } from '../map/map.util'
 import { LayerTreeMenu } from './LayerTreeMenu'
@@ -146,4 +148,15 @@ export const addMeshToMap = async (map: mapboxgl.Map, info: DataInfoType) => {
   if (!blob) return false
   addImageToMap(map, info.dataID, blob, info.dataExtent)
   return true
+}
+
+export const addUVETToMap = async (map: mapboxgl.Map, info: DataInfoType) => {
+  try {
+    let flowFieldManager = new FlowFieldManager(info.dataID, info)
+    const flowLayer = new FlowLayer(info.dataID, '2d', flowFieldManager)
+    map.addLayer(flowLayer)
+    return true
+  } catch (error) {
+    return false
+  }
 }

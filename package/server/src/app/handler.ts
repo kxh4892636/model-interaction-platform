@@ -7,5 +7,6 @@ export const globalErrorHandler = fp(async (app: FastifyTypebox) => {
     if (error) {
       res.code(200).send(generateResponse(0, 'error', null))
     }
+    console.trace(error)
   })
 })

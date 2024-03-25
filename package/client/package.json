@@ -34,7 +34,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@types/mapbox-gl": "^2.7.21",
+    "@types/mapbox-gl": "2.7.10",
     "@types/react": "^18.2.67",
     "@types/react-dom": "^18.2.22",
     "@types/styled-components": "^5.1.34",

@@ -1,6 +1,8 @@
 import { generateResponseSchema } from '@/type/util'
 import { Static, Type } from '@sinclair/typebox'
 
+export type ModelType = 'water' | 'sand' | 'quality'
+
 export type ModelDataTypeType =
   | 'mesh'
   | 'text'

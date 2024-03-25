@@ -121,8 +121,8 @@ importers:
         version: 4.5.2(@types/react@18.2.67)(immer@10.0.4)(react@18.2.0)
     devDependencies:
       '@types/mapbox-gl':
-        specifier: ^2.7.21
-        version: 2.7.21
+        specifier: 2.7.10
+        version: 2.7.10
       '@types/react':
         specifier: ^18.2.67
         version: 18.2.67
@@ -2177,8 +2177,8 @@ packages:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
     dev: true
 
-  /@types/mapbox-gl@2.7.21:
-    resolution: {integrity: sha512-Dx9MuF2kKgT/N22LsMUB4b3acFZh9clVqz9zv1fomoiPoBrJolwYxpWA/9LPO/2N0xWbKi4V+pkjTaFkkx/4wA==}
+  /@types/mapbox-gl@2.7.10:
+    resolution: {integrity: sha512-nMVEcu9bAcenvx6oPWubQSPevsekByjOfKjlkr+8P91vawtkxTnopDoXXq1Qn/f4cg3zt0Z2W9DVsVsKRNXJTw==}
     dependencies:
       '@types/geojson': 7946.0.14
     dev: true

@@ -25,16 +25,17 @@ import Timeseries from './components/EcoSim/Timeseries'
 import { Navigate } from 'react-router-dom'
 import EcoSpaceResult from './components/EcoSpace/EcoSpaceResult'
 import RunEcosSpace from './components/EcoSpace/RunEcosSpace'
+import { Quality } from './components/Quality'
 
 const routes = [
   {
     path: 'water',
     element: <Water model="water" />,
   },
-  //   {
-  //     path: '/quality',
-  //     element: <QualityModelPanel model="quality" />,
-  //   },
+  {
+    path: 'quality',
+    element: <Quality model="quality" />,
+  },
   //   {
   //     path: '/sand',
   //     element: <SandModelPanel model="sand" />,

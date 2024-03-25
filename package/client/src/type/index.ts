@@ -14,8 +14,8 @@ export interface AntdTreeInterface {
   children: AntdTreeInterface[]
 }
 
-export interface DataQueryHookInterface<T> {
+export interface DataFetchInterface<T> {
   status: 'pending' | 'error' | 'success'
   data: T | null
-  error: string | null
+  message: string
 }

@@ -43,6 +43,7 @@ export const templateService = {
       projectPath,
       templateInfo.templateTree,
       datasetIDMap,
+      true,
     )
     const promiseList0 = Object.values(datasetIDMap).map((value) =>
       projectService.createProjectDataset(projectID, value),

@@ -35,6 +35,7 @@ export const modelRoute = async (app: FastifyTypebox) => {
     method: 'post',
     url: '/water/action',
     schema: {
+      tags: ['model'],
       body: ModelActionBodySchema,
       response: {
         200: ModelActionResponseSchema,
@@ -59,13 +60,13 @@ export const modelRoute = async (app: FastifyTypebox) => {
             init.uvetID,
           )
           .catch(() => {
-            modelService.stopModal(modelID)
+            modelService.stopModel(modelID)
           })
         const response = generateResponse(1, '', modelID)
         return response
       } else {
         if (!modelID) throw Error()
-        modelService.stopModal(modelID)
+        modelService.stopModel(modelID)
         const response = generateResponse(1, '', null)
         return response
       }

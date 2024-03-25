@@ -13,6 +13,7 @@ export const dataService = {
     projectPath: string,
     projectTree: Record<string, string[]>,
     datasetIDMap: Record<string, string>,
+    input: boolean,
   ) => {
     const result: Record<string, string[]> = {}
     const timeStamp = Date.now().toString()
@@ -39,6 +40,7 @@ export const dataService = {
         await dataDao.createData(
           dataPath,
           dataName,
+          input,
           uuid,
           style,
           type,
@@ -81,7 +83,7 @@ export const dataService = {
     if (!dataInfo) return null
 
     const length = dataInfo.data_visualization.length
-    if (length !== 0 && (index > length || index < 0)) return null
+    if (length !== 0 && (index >= length || index < 0)) return null
 
     const relativePath =
       length === 0
