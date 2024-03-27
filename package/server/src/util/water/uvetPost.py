@@ -11,13 +11,15 @@ def createDescription(
     outputURL: str,
     extent: list,
     maskURL: str,
-    num: int,
+    hours: int,
+    identifier: str,
 ) -> None:
     files = []
-    for i in range(0, num):
-        files.append({"in": f"\\uvet_{i}.txt", "sn": f"{i}"})
+    for i in range(0, hours):
+        files.append({"in": f"uvet-{identifier}-{i}.txt", "sn": f"{i}"})
     with open(dstPath, "w", encoding="utf8") as f:
         jsonObject = {
+            "identifier": identifier,
             "input_url": inputURL + "\\",
             "output_url": outputURL + "\\",
             "column_num": 6,
@@ -87,28 +89,31 @@ def uvet2txt(uvetPath: str, dstPath: str, dataDict: dict, num: int):
 
 if __name__ == "__main__":
     try:
-        [datasetPath, extent, num] = sys.argv[1:4]
-        csvPath = os.path.join(datasetPath, "output\\mesh31.csv")
-        uvetPath = os.path.join(datasetPath, "model\\uvet.dat")
-        dstPath = os.path.join(datasetPath, "output")
+        [modelFolderPath, extent, hours, identifier] = sys.argv[1:5]
+        csvPath = os.path.join(modelFolderPath, "mesh31.csv")
+        uvetPath = os.path.join(modelFolderPath, "uvet.dat")
+        dstPath = os.path.join(modelFolderPath)
         dataDict = resolveCSV(csvPath)
-        for i in range(0, int(num)):
+        for i in range(0, int(hours)):
             uvet2txt(
                 uvetPath,
-                os.path.join(datasetPath, f"output\\uvet_{i}.txt"),
+                os.path.join(modelFolderPath, f"uvet-{identifier}-{i}.txt"),
                 dataDict,
                 i,
             )
             print(i)
-        descriptionPath = os.path.join(datasetPath, "output\\description.json")
-        maskPath = os.path.join(datasetPath, "output\\mesh31.shp")
+        descriptionPath = os.path.join(
+            modelFolderPath, f"description-{identifier}.json"
+        )
+        maskPath = os.path.join(modelFolderPath, "mesh31.shp")
         createDescription(
             descriptionPath,
             dstPath,
             dstPath,
             extent.split(","),
             maskPath,
-            int(num),
+            int(hours),
+            identifier,
         )
     except:
         traceback.print_exc()

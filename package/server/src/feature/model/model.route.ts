@@ -1,14 +1,17 @@
-import { FastifyTypebox } from '@/type/app.type'
-import { generateResponse } from '@/util/app'
+import { FastifyTypebox } from '@/type'
+import { generateResponse } from '@/util/typebox'
 import { randomUUID } from 'crypto'
 import { eweService } from './model.ewe.service'
 import {
   ModelActionBodySchema,
   ModelActionResponseSchema,
   ModelActionResponseType,
-  ModelInfoParamsSchema,
+  ModelInfoQueryStringSchema,
   ModelInfoResponseSchema,
   ModelInfoResponseType,
+  ModelParamResponseSchema,
+  ModelParamResponseType,
+  Water2DParamBodySchema,
 } from './model.type'
 import { modelService } from './model.water.service'
 
@@ -18,7 +21,7 @@ export const modelRoute = async (app: FastifyTypebox) => {
     url: '/info/:modelID',
     schema: {
       tags: ['model'],
-      params: ModelInfoParamsSchema,
+      params: ModelInfoQueryStringSchema,
       response: {
         200: ModelInfoResponseSchema,
       },
@@ -26,7 +29,25 @@ export const modelRoute = async (app: FastifyTypebox) => {
     handler: async (req): Promise<ModelInfoResponseType> => {
       const params = req.params
       const result = await modelService.getModelInfo(params.modelID)
-      const response = generateResponse(1, 'success', result)
+      const response = generateResponse('success', '', result)
+      return response
+    },
+  })
+
+  app.route({
+    method: 'post',
+    url: '/param/water-2d',
+    schema: {
+      tags: ['model'],
+      body: Water2DParamBodySchema,
+      response: {
+        200: ModelParamResponseSchema,
+      },
+    },
+    handler: async (req): Promise<ModelParamResponseType> => {
+      const body = req.body
+      await modelService.setWater2DParam(body.projectID, body.hours)
+      const response = generateResponse('success', '', null)
       return response
     },
   })
@@ -49,25 +70,19 @@ export const modelRoute = async (app: FastifyTypebox) => {
       if (action === 'run') {
         if (!init) throw Error()
         const modelID = randomUUID()
-        modelService
-          .runModel(
-            init.modelType,
-            init.modelName,
-            init.projectID,
-            modelID,
-            init.paramsID,
-            init.hours,
-            init.uvetID,
-          )
-          .catch(() => {
-            modelService.stopModel(modelID)
-          })
-        const response = generateResponse(1, '', modelID)
+        if (init.modelType === 'water-2d') {
+          modelService
+            .runWater2DModel(init.modelName, init.projectID, modelID)
+            .catch(() => {
+              modelService.stopModel(modelID)
+            })
+        }
+        const response = generateResponse('success', '', modelID)
         return response
       } else {
         if (!modelID) throw Error()
         modelService.stopModel(modelID)
-        const response = generateResponse(1, '', null)
+        const response = generateResponse('success', '', null)
         return response
       }
     },

@@ -1,56 +1,68 @@
+import {
+  WaterDataStyleSchema,
+  WaterDataTypeSchema,
+  WaterModelTypeSchema,
+} from '@/type'
 import { Static, Type } from '@sinclair/typebox'
-import { generateResponseSchema } from '../../type/util'
+import { generateResponseSchema } from '../../util/typebox'
 
-// /info/:projectID
+// /api/v1/project/info
 export const ProjectInfoSchema = Type.Object({
   projectId: Type.String(),
   projectName: Type.String(),
-  projectPositionZoom: Type.Array(Type.Number()),
-  projectTag: Type.Array(Type.String()),
-  datasetIDArray: Type.Array(Type.String()),
+  projectExtent: Type.Array(Type.Number()),
 })
 export type ProjectInfoType = Static<typeof ProjectInfoSchema>
-export const ProjectInfoParamsSchema = Type.Object({ projectID: Type.String() })
-export type ProjectInfoParamsType = Static<typeof ProjectInfoParamsSchema>
+export const ProjectInfoQueryStringSchema = Type.Object({
+  projectID: Type.String(),
+})
+export type ProjectInfoQueryStringType = Static<
+  typeof ProjectInfoQueryStringSchema
+>
 export const ProjectInfoResponseSchema =
   generateResponseSchema(ProjectInfoSchema)
 export type ProjectInfoResponseType = Static<typeof ProjectInfoResponseSchema>
 
-// /list
+// /api/v1/project/list
 export const ProjectListSchema = Type.Array(ProjectInfoSchema)
 export type ProjectListType = Static<typeof ProjectListSchema>
 export const ProjectListResponseSchema =
   generateResponseSchema(ProjectListSchema)
 export type ProjectListResponseType = Static<typeof ProjectListResponseSchema>
 
-// /tree
+// /api/v1/project/tree
 export const ProjectTreeSchema = Type.Recursive((This) =>
   Type.Array(
     Type.Object({
-      title: Type.String(),
-      key: Type.String(),
-      layerType: Type.String(),
-      layerStyle: Type.String(),
-      group: Type.Boolean(),
-      isInput: Type.Boolean(),
+      layerName: Type.String(),
+      layerKey: Type.String(),
+      layerType: WaterDataTypeSchema,
+      layerStyle: WaterDataStyleSchema,
+      modelType: WaterModelTypeSchema,
+      isGroup: Type.Boolean(),
       children: This,
     }),
   ),
 )
 export type ProjectTreeType = Static<typeof ProjectTreeSchema>
-export const ProjectTreeParamsSchema = Type.Object({ projectID: Type.String() })
-export type ProjectTreeParamsType = Static<typeof ProjectInfoParamsSchema>
+export const ProjectTreeQueryStringSchema = Type.Object({
+  projectID: Type.String(),
+})
+export type ProjectTreeQueryStringType = Static<
+  typeof ProjectInfoQueryStringSchema
+>
 export const ProjectTreeResponseSchema =
   generateResponseSchema(ProjectTreeSchema)
 export type ProjectTreeResponseType = Static<typeof ProjectTreeResponseSchema>
 
-// /action
-export const ProjectActionSchema = Type.Null()
+// /api/v1/project/action
+export const ProjectActionSchema = Type.Union([Type.String(), Type.Null()])
 export type ProjectActionType = Static<typeof ProjectActionSchema>
 export const ProjectActionBodySchema = Type.Object({
-  projectID: Type.String(),
-  action: Type.Union([Type.Literal('update'), Type.Literal('delete')]),
-  projectName: Type.String(),
+  action: Type.Union([Type.Literal('create'), Type.Literal('delete')]),
+  projectID: Type.Union([Type.String(), Type.Null()]),
+  projectName: Type.Union([Type.String(), Type.Null()]),
+  projectExtent: Type.Union([Type.Null(), Type.Array(Type.Number())]),
 })
 export type ProjectActionBodyType = Static<typeof ProjectActionBodySchema>
 export const ProjectActionResponseSchema =

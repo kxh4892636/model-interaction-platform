@@ -12,65 +12,49 @@ export const existsPromise = async (filePath: string) => {
 }
 
 export const copyFolder = async (source: string, target: string) => {
-  try {
-    if (!(await existsPromise(target))) {
-      await fs.promises.mkdir(target)
-    }
-    const files = await fs.promises.readdir(source)
-    const promises = files.map((file) => {
-      const sourcePath = path.join(source, file)
-      const targetPath = path.join(target, file)
-      const promise = new Promise(async (resolve) => {
-        const stats = await fs.promises.stat(sourcePath)
-        if (stats.isDirectory()) {
-          await copyFolder(sourcePath, targetPath)
-          resolve(1)
-        } else {
-          await fs.promises.copyFile(sourcePath, targetPath)
-          resolve(1)
-        }
-      })
-      return promise
-    })
-    await Promise.all(promises)
-  } catch (error) {
-    console.error('文件夹复制失败', error)
+  const stats = await fs.promises.stat(source)
+  if (stats.isFile()) throw Error('the path of source is the file')
+  if (!(await existsPromise(target))) {
+    await fs.promises.mkdir(target)
   }
+  const files = await fs.promises.readdir(source)
+  const promises = files.map(async (file) => {
+    const sourcePath = path.join(source, file)
+    const targetPath = path.join(target, file)
+    const stats = await fs.promises.stat(sourcePath)
+    if (stats.isDirectory()) {
+      await copyFolder(sourcePath, targetPath)
+    } else {
+      await fs.promises.copyFile(sourcePath, targetPath)
+    }
+  })
+  await Promise.all(promises)
 }
 
 export const copySelectFilesInFolder = async (
   source: string,
   target: string,
-  timeStamps: string[] = [],
+  fileNameList: string[] = [],
 ) => {
-  try {
-    if (!(await existsPromise(target))) {
-      await fs.promises.mkdir(target)
-    } else;
-    const files = await fs.promises.readdir(source)
-    const promises = files.map((file) => {
-      const sourcePath = path.join(source, file)
-      const targetPath = path.join(target, file)
-      const promise = new Promise(async (resolve) => {
-        const stats = await fs.promises.stat(sourcePath)
-        if (stats.isDirectory()) {
-          await copySelectFilesInFolder(sourcePath, targetPath)
-          resolve(1)
-        } else {
-          for (let index = 0; index < timeStamps.length; index++) {
-            const timeStamp = timeStamps[index]
-            if (sourcePath.includes(timeStamp))
-              await fs.promises.copyFile(sourcePath, targetPath)
-            else;
-          }
-          resolve(1)
-        }
-      })
-      return promise
-    })
-    await Promise.all(promises)
-    console.log('文件夹复制成功')
-  } catch (error) {
-    console.error('文件夹复制失败', error)
+  const stats = await fs.promises.stat(source)
+  if (stats.isFile()) throw Error('the path of source is the file')
+  if (!(await existsPromise(target))) {
+    await fs.promises.mkdir(target)
   }
+  const files = await fs.promises.readdir(source)
+  const promises = files.map(async (file) => {
+    const sourcePath = path.join(source, file)
+    const targetPath = path.join(target, file)
+    const stats = await fs.promises.stat(sourcePath)
+    if (stats.isDirectory()) {
+      await copySelectFilesInFolder(sourcePath, targetPath, fileNameList)
+    } else {
+      for (const fileName of fileNameList) {
+        if (path.basename(sourcePath).includes(fileName)) {
+          await fs.promises.copyFile(sourcePath, targetPath)
+        }
+      }
+    }
+  })
+  await Promise.all(promises)
 }

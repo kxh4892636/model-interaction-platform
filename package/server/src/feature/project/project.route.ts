@@ -1,60 +1,34 @@
+import { FastifyTypebox } from '@/type'
+import { generateResponse } from '@/util/typebox'
+import { randomUUID } from 'crypto'
+import { projectService } from './project.service'
 import {
   ProjectActionBodySchema,
   ProjectActionResponseSchema,
   ProjectActionResponseType,
-  ProjectInfoParamsSchema,
-  ProjectInfoResponseSchema,
-  ProjectInfoResponseType,
   ProjectListResponseSchema,
   ProjectListResponseType,
-  ProjectTreeParamsSchema,
+  ProjectTreeQueryStringSchema,
   ProjectTreeResponseSchema,
   ProjectTreeResponseType,
-} from '@/feature/project/project.type'
-import { FastifyTypebox } from '@/type/app.type'
-import { generateResponse } from '@/util/app'
-import { projectService } from './project.service'
+} from './project.type'
 
 export const projectRoute = async (app: FastifyTypebox) => {
-  app.route({
-    method: 'get',
-    url: '/info/:projectID',
-    schema: {
-      tags: ['project'],
-      params: ProjectInfoParamsSchema,
-      response: { 200: ProjectInfoResponseSchema },
-    },
-    handler: async (req): Promise<ProjectInfoResponseType> => {
-      const { projectID } = req.params
-      const result = await projectService.getProjectByProjectID(projectID)
-      const response = generateResponse(1, 'success', result)
-      return response
-    },
-  })
-
-  app.route({
-    method: 'get',
-    url: '/cover/:projectID',
-    schema: {
-      tags: ['project'],
-      params: ProjectInfoParamsSchema,
-      response: {
-        200: {
-          content: {
-            'image/png': {
-              schema: {},
-            },
-          },
-        },
-      },
-    },
-    handler: async (req, res) => {
-      const params = req.params
-      const cs = await projectService.getProjectCoverImage(params.projectID)
-      if (!cs) throw new Error()
-      return res.type('image/png').send(cs)
-    },
-  })
+  // app.route({
+  //   method: 'get',
+  //   url: '/info',
+  //   schema: {
+  //     tags: ['project'],
+  //     querystring: ProjectInfoQueryStringSchema,
+  //     response: { 200: ProjectInfoResponseSchema },
+  //   },
+  //   handler: async (req): Promise<ProjectInfoResponseType> => {
+  //     const { projectID } = req.query
+  //     const result = await projectService.getProjectByProjectID(projectID)
+  //     const response = generateResponse('success', '', result)
+  //     return response
+  //   },
+  // })
 
   app.route({
     method: 'get',
@@ -65,23 +39,23 @@ export const projectRoute = async (app: FastifyTypebox) => {
     },
     handler: async (): Promise<ProjectListResponseType> => {
       const result = await projectService.getAllProject()
-      const response = generateResponse(1, 'success', result)
+      const response = generateResponse('success', '', result)
       return response
     },
   })
 
   app.route({
     method: 'get',
-    url: '/tree/:projectID',
+    url: '/tree',
     schema: {
       tags: ['project'],
-      params: ProjectTreeParamsSchema,
+      querystring: ProjectTreeQueryStringSchema,
       response: { 200: ProjectTreeResponseSchema },
     },
     handler: async (req): Promise<ProjectTreeResponseType> => {
-      const params = req.params
+      const params = req.query
       const result = await projectService.generateProjectTree(params.projectID)
-      const response = generateResponse(1, 'success', result)
+      const response = generateResponse('success', '', result)
       return response
     },
   })
@@ -95,13 +69,29 @@ export const projectRoute = async (app: FastifyTypebox) => {
       response: { 200: ProjectActionResponseSchema },
     },
     handler: async (req): Promise<ProjectActionResponseType> => {
-      const body = req.body
-      if (body.action === 'update') {
-        await projectService.updateProjectName(body.projectID, body.projectName)
-      } else {
-        await projectService.deleteProject(body.projectID)
+      const { action, projectID, projectName, projectExtent } = req.body
+      const actionFnMap = {
+        create: async () => {
+          const projectID = randomUUID()
+          const identifier = Date.now().toString()
+          if (!projectExtent || !projectName) throw Error('')
+          await projectService.createProject(
+            projectID,
+            projectName,
+            projectExtent,
+            identifier,
+            'valid',
+          )
+          return projectID
+        },
+        delete: async () => {
+          if (!projectID) throw Error()
+          await projectService.deleteProject(projectID)
+          return null
+        },
       }
-      const response = generateResponse(1, 'success', null)
+      const result = await actionFnMap[action]()
+      const response = generateResponse('success', '', result)
       return response
     },
   })

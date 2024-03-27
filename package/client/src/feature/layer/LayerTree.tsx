@@ -1,58 +1,21 @@
 import { useLayersStore } from '@/store/layerStore'
 import { Tree } from 'antd'
-import { useLayerActions, useLayerTreeData } from './layer.hook'
-import { generateAntdTreeData } from './layer.util'
+import { DataNode } from 'antd/es/tree'
+import { useLayerActions } from './layer.hook'
+import { antdTreeToProjectTree } from './layer.util'
 
-interface AppProps {
+interface LayerTreePropsInterface {
   type: 'data' | 'map'
+  treeData: DataNode[]
 }
-export const LayerTree = ({ type }: AppProps) => {
-  const layers = useLayerTreeData()
+export const LayerTree = ({ type, treeData }: LayerTreePropsInterface) => {
+  const layers = useLayersStore((state) => state.layers)
+  const layerActions = useLayerActions()
   const layersChecked = useLayersStore((state) => state.layersChecked)
   const layersExpanded = useLayersStore((state) => state.layersExpanded)
   const setLayersChecked = useLayersStore((state) => state.setLayersChecked)
   const setLayersExpanded = useLayersStore((state) => state.setLayersExpanded)
   const setLayersSelected = useLayersStore((state) => state.setLayersSelected)
-  const layerActions = useLayerActions()
-
-  const layerMenuItemsMap = {
-    map: {
-      key: 'map',
-      label: '添加至地图',
-      action: () => {
-        layerActions.addDataToMap()
-      },
-    },
-    visualization: {
-      key: 'visualization',
-      label: '可视化',
-      action: () => {},
-    },
-    download: {
-      key: 'download',
-      label: '下载文本文件',
-      action: () => {
-        layerActions.downloadText()
-      },
-    },
-    rename: {
-      key: 'rename',
-      label: '重命名',
-      action: () => undefined,
-    },
-    delete: {
-      key: 'delete',
-      label: '删除',
-      action: () => undefined,
-    },
-    remove: {
-      key: 'remove',
-      label: '移除',
-      action: () => {
-        layerActions.deleteMapLayer()
-      },
-    },
-  }
 
   return (
     <Tree
@@ -72,25 +35,17 @@ export const LayerTree = ({ type }: AppProps) => {
       blockNode
       onSelect={(_, info) => {
         setLayersSelected(
-          {
-            key: info.node.key as string,
-            title: info.node.title as string,
-            children: info.node.children as any,
-          },
+          antdTreeToProjectTree(layers[type], info.node.key as string),
           type,
         )
       }}
       onRightClick={(info) => {
         setLayersSelected(
-          {
-            key: info.node.key as string,
-            title: info.node.title as string,
-            children: info.node.children as any,
-          },
+          antdTreeToProjectTree(layers[type], info.node.key as string),
           type,
         )
       }}
-      treeData={generateAntdTreeData(layers[type], layerMenuItemsMap, type)}
+      treeData={treeData}
     />
   )
 }

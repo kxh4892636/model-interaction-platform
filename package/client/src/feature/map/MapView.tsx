@@ -23,11 +23,7 @@ export const initMap = (
   return map
 }
 
-interface AppProps {
-  display: boolean
-}
-
-export const MapView = ({ display }: AppProps) => {
+export const MapView = () => {
   const mapContainerRef = useRef<HTMLDivElement>(document.createElement('div'))
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const map = useMapStore((state) => state.map)
@@ -61,15 +57,10 @@ export const MapView = ({ display }: AppProps) => {
 
   useEffect(() => {
     if (map) map.resize()
-  }, [display])
+  }, [])
 
   return (
-    <div
-      style={{
-        display: display ? 'flex' : 'none',
-      }}
-      className="h-full w-full"
-    >
+    <div className="h-full w-full">
       <MapStatus position={position}></MapStatus>
       <div ref={mapContainerRef} className="h-full w-full" />
     </div>

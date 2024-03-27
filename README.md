@@ -294,3 +294,20 @@ npx prisma generate
 npm run build
 npm run start:prod
 ```
+
+## memo
+
+- project;
+  - r;
+  - d;
+- dataset;
+  - c;
+  - r;
+  - d;
+- data;
+  - c;
+  - r;
+  - d;
+  - 可视化;
+- model;
+  - run;

@@ -1,5 +1,8 @@
-import { getUVETDescription, getUVETImage } from '@/feature/layer/layer.api'
-import { DataInfoType } from '@/feature/layer/layer.type'
+import {
+  getUVETDescriptionAPI,
+  getUVETImageAPI,
+} from '@/api/model-data/data.api'
+import { DataInfoType } from '@/api/model-data/data.type'
 import axios from 'axios'
 import mapboxgl from 'mapbox-gl'
 import { Shader } from '../renderUtils/shader'
@@ -145,15 +148,9 @@ interface TextureOffset {
   offsetY: number
 }
 
-type ParamsType = {
-  startValue?: number
-  endValue?: number
-}
-
 export class FlowFieldManager {
   private id: string
   private dataDetail: DataInfoType | undefined
-  private params: ParamsType | undefined
 
   private fieldSequence: Array<WebGLTexture>
   private maskSequence: Array<WebGLTexture>
@@ -200,14 +197,9 @@ export class FlowFieldManager {
   private ffTextureInfo: Array<WebGLTexture> = []
   private maskTextureInfo: Array<WebGLTexture> = []
 
-  constructor(
-    id: string,
-    dataDetail: DataInfoType | undefined = undefined,
-    params: ParamsType | undefined = undefined,
-  ) {
+  constructor(id: string, dataDetail: DataInfoType | undefined = undefined) {
     this.id = id
     this.dataDetail = dataDetail
-    this.params = params
     this.fieldSequence = [] // store all the flow textures
     this.maskSequence = [] // store all the mask textures
     this.validSequence = []
@@ -248,84 +240,89 @@ export class FlowFieldManager {
   async Prepare(gl: WebGL2RenderingContext) {
     console.log('prepare')
     if (!this.dataDetail) return false
-    const response = (await getUVETDescription(this.dataDetail.dataID)) as any
-    if (!response.data) return false
+    const response = await getUVETDescriptionAPI(this.dataDetail.dataID)
+    if (response.status === 'success') {
+      const description = response.data as any
+      // Get boundaries of flow speed
+      this.flowBoundary[0] = description.flow_boundary.u_min
+      this.flowBoundary[1] = description.flow_boundary.v_min
+      this.flowBoundary[2] = description.flow_boundary.u_max
+      this.flowBoundary[3] = description.flow_boundary.v_max
 
-    // Get boundaries of flow speed
-    this.flowBoundary[0] = response.data['flow_boundary']['u_min']
-    this.flowBoundary[1] = response.data['flow_boundary']['v_min']
-    this.flowBoundary[2] = response.data['flow_boundary']['u_max']
-    this.flowBoundary[3] = response.data['flow_boundary']['v_max']
+      // Set uniform buffer object data (something will not change)
+      this.uboMapBuffer[8] = this.flowBoundary[0]
+      this.uboMapBuffer[9] = this.flowBoundary[1]
+      this.uboMapBuffer[10] = this.flowBoundary[2]
+      this.uboMapBuffer[11] = this.flowBoundary[3]
 
-    // Set uniform buffer object data (something will not change)
-    this.uboMapBuffer[8] = this.flowBoundary[0]
-    this.uboMapBuffer[9] = this.flowBoundary[1]
-    this.uboMapBuffer[10] = this.flowBoundary[2]
-    this.uboMapBuffer[11] = this.flowBoundary[3]
-
-    // Get constraints
-    const constraints: FlowFieldConstraints = {
-      MAX_TEXTURE_SIZE: response.data['constraints']['max_texture_size'],
-      MAX_STREAMLINE_NUM: response.data['constraints']['max_streamline_num'],
-      MAX_SEGMENT_NUM: response.data['constraints']['max_segment_num'],
-      MAX_DORP_RATE: response.data['constraints']['max_drop_rate'],
-      MAX_DORP_RATE_BUMP: response.data['constraints']['max_drop_rate_bump'],
-    }
-
-    const extent: [number, number, number, number] = [
-      this.dataDetail.dataExtent[0],
-      this.dataDetail.dataExtent[3],
-      this.dataDetail.dataExtent[1],
-      this.dataDetail.dataExtent[2],
-    ]
-
-    const startValue = 0
-    const endValue = Number((this.dataDetail!.visualizationNumber - 1) / 3)
-
-    this.geoBbox = this.TransMercator(extent)
-    // Set constraints
-    this.controller = new FlowFieldController(constraints)!
-
-    // Load textures of flow fields
-    for (let i = startValue; i < endValue; i++) {
-      const blob = await getUVETImage(this.dataDetail.dataID, 'uv', endValue, i)
-      if (blob instanceof Blob) {
-        const url = URL.createObjectURL(blob)
-        this.fieldSequence.push(loadTexture(gl, url, gl.NEAREST)!)
+      // Get constraints
+      const constraints: FlowFieldConstraints = {
+        MAX_TEXTURE_SIZE: description.constraints.max_texture_size,
+        MAX_STREAMLINE_NUM: description.constraints.max_streamline_num,
+        MAX_SEGMENT_NUM: description.constraints.max_segment_num,
+        MAX_DORP_RATE: description.constraints.max_drop_rate,
+        MAX_DORP_RATE_BUMP: description.constraints.max_drop_rate_bump,
       }
-    }
-    // Load textures of area masks
-    for (let i = startValue; i < endValue; i++) {
-      const blob = await getUVETImage(
-        this.dataDetail.dataID,
-        'mask',
-        endValue,
-        i,
-      )
-      if (blob instanceof Blob) {
-        const url = URL.createObjectURL(blob)
-        this.fieldSequence.push(loadTexture(gl, url, gl.NEAREST)!)
+
+      const extent: [number, number, number, number] = [
+        this.dataDetail!.dataExtent[0],
+        this.dataDetail!.dataExtent[3],
+        this.dataDetail!.dataExtent[1],
+        this.dataDetail!.dataExtent[2],
+      ]
+
+      const startValue = 0
+      const endValue = Number((this.dataDetail!.visualizationNumber - 1) / 3)
+
+      this.geoBbox = this.TransMercator(extent)
+      // Set constraints
+      this.controller = new FlowFieldController(constraints)!
+
+      // Load textures of flow fields
+      for (let i = startValue; i < endValue; i++) {
+        const response = await getUVETImageAPI(
+          this.dataDetail.dataID,
+          'uv',
+          endValue,
+          i,
+        )
+        if (response instanceof Blob) {
+          const url = window.URL.createObjectURL(response)
+          this.fieldSequence.push(loadTexture(gl, url, gl.NEAREST)!)
+        }
       }
-    }
-    // Load textures of valid address
-    for (let i = startValue; i < endValue; i++) {
-      const blob = await getUVETImage(
-        this.dataDetail.dataID,
-        'valid',
-        endValue,
-        i,
-      )
-      if (blob instanceof Blob) {
-        const url = URL.createObjectURL(blob)
-        this.fieldSequence.push(loadTexture(gl, url, gl.NEAREST)!)
+      // Load textures of area masks
+      for (let i = startValue; i < endValue; i++) {
+        const response = await getUVETImageAPI(
+          this.dataDetail.dataID,
+          'mask',
+          endValue,
+          i,
+        )
+        if (response instanceof Blob) {
+          const url = window.URL.createObjectURL(response)
+          this.maskSequence.push(loadTexture(gl, url, gl.NEAREST)!)
+        }
+      }
+      // Load textures of valid address
+      for (let i = startValue; i < endValue; i++) {
+        const response = await getUVETImageAPI(
+          this.dataDetail.dataID,
+          'valid',
+          endValue,
+          i,
+        )
+        if (response instanceof Blob) {
+          const url = window.URL.createObjectURL(response)
+          this.validSequence.push(loadTexture(gl, url, gl.NEAREST)!)
+        }
       }
     }
 
     // Prepare descriptive variables
-    const MAX_TEXTURE_SIZE = this.controller!.constraints['MAX_TEXTURE_SIZE']
-    const MAX_STREAMLINE_NUM =
-      this.controller!.constraints['MAX_STREAMLINE_NUM']
-    const MAX_SEGMENT_NUM = this.controller!.constraints['MAX_SEGMENT_NUM']
+    const MAX_TEXTURE_SIZE = this.controller!.constraints.MAX_TEXTURE_SIZE
+    const MAX_STREAMLINE_NUM = this.controller!.constraints.MAX_STREAMLINE_NUM
+    const MAX_SEGMENT_NUM = this.controller!.constraints.MAX_SEGMENT_NUM
 
     this.maxBlockSize = Math.ceil(Math.sqrt(MAX_STREAMLINE_NUM)) // block num in a row/col
     this.maxBlockColumn = Math.floor(MAX_TEXTURE_SIZE / this.maxBlockSize) // column num of a block
@@ -553,7 +550,7 @@ export class FlowFieldManager {
     this.step(this.renderCount * 0.002)
     console.log(this.controller)
     this.beginBlock =
-      (this.beginBlock + 1) % this.controller!.constraints['MAX_SEGMENT_NUM']
+      (this.beginBlock + 1) % this.controller!.constraints.MAX_SEGMENT_NUM
 
     this.uboMapBuffer[0] = this.getProgressBetweenTexture(
       this.controller!.progressRate,
@@ -567,7 +564,7 @@ export class FlowFieldManager {
   tickLogicCount() {
     this.step(0.001)
     this.beginBlock =
-      (this.beginBlock + 1) % this.controller!.constraints['MAX_SEGMENT_NUM']
+      (this.beginBlock + 1) % this.controller!.constraints.MAX_SEGMENT_NUM
     // console.log(this.beginBlock);
 
     this.uboMapBuffer[0] = this.getProgressBetweenTexture(
@@ -698,7 +695,7 @@ export class FlowFieldManager {
     this.drawShader!.setInt(
       gl,
       'blockNum',
-      this.controller!.constraints['MAX_SEGMENT_NUM'],
+      this.controller!.constraints.MAX_SEGMENT_NUM,
     )
     this.drawShader!.setInt(gl, 'beginBlock', this.beginBlock)
     this.drawShader!.setInt(gl, 'blockSize', this.maxBlockSize)

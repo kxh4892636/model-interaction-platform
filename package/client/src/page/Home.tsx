@@ -1,20 +1,14 @@
+import { LayerPanel } from '@/feature/layer'
 import { MapView } from '@/feature/map'
-import { Nav } from '@/feature/nav'
-import { NavItem } from '@/feature/nav/nav.type'
+import { Model } from '@/feature/model'
+import { ModelSelect } from '@/feature/model-select'
 import { useForceUpdate } from '@/hook/useForceUpdate'
-import { ExtendRouter, route } from '@/router'
+import { useLayersStore } from '@/store/layerStore'
 import { useMapStore } from '@/store/mapStore'
+import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
-import { useProjectStatusStore } from '@/store/projectStore'
-import {
-  AppstoreOutlined,
-  DatabaseOutlined,
-  MediumOutlined,
-  SaveOutlined,
-} from '@ant-design/icons'
-import { useNavigate, useRoutes } from 'react-router-dom'
+import { WaterModelTypeType } from '@/type'
 
-// TODO ref 是引用 ref.current 不是
 const test = (number: React.MutableRefObject<number>) => {
   number.current++
 }
@@ -22,52 +16,31 @@ const test = (number: React.MutableRefObject<number>) => {
 export const Home = () => {
   const modal = useModalStore((state) => state.modal)
   const isModalDisplay = useModalStore((state) => state.isModalDisplay)
-  const isDisplay = useMapStore((state) => state.isDisplay)
-  const element = useRoutes(route)
-  const navigate = useNavigate()
-  const navItems: NavItem[] = [
-    {
-      title: '项目',
-      id: 'project',
-      icon: <AppstoreOutlined style={{ color: '#fafafa' }} />,
-      action: () => {
-        navigate('/project')
-      },
-    },
-    {
-      title: '图层',
-      id: 'layer',
-      icon: <DatabaseOutlined style={{ color: '#fafafa' }} />,
-      action: () => {
-        //
-        navigate('/layer')
-      },
-    },
-    {
-      title: '模型',
-      id: 'model',
-      icon: <MediumOutlined style={{ color: '#fafafa' }} />,
-      action: () => {
-        navigate('/model')
-      },
-    },
-    {
-      title: '详情',
-      id: 'info',
-      icon: <SaveOutlined style={{ color: '#fafafa' }} />,
-      action: () => {
-        //
-      },
-    },
-  ]
+  const openModal = useModalStore((state) => state.openModal)
+  const closeModal = useModalStore((state) => state.closeModal)
   const forceUpdate = useForceUpdate()
-  const projectID = useProjectStatusStore((state) => state.projectID)
+  const projectID = useMetaStore((state) => state.projectID)
   const map = useMapStore((state) => state.map)
+  const layersSelected = useLayersStore((state) => state.layersSelected)
 
   const testClick = async () => {
-    map!.moveLayer('034172ae-9ac3-4cc9-a7a3-fb1b1fa48603', 'continent-label')
-    console.log(map!.getLayer('034172ae-9ac3-4cc9-a7a3-fb1b1fa48603'))
+    console.log(layersSelected)
   }
+
+  const options: {
+    value: WaterModelTypeType
+    label: string
+  }[] = [
+    { value: 'water-2d', label: '水动力模型' },
+    {
+      value: 'quality-wasp',
+      label: '水质模型-wasp',
+    },
+    {
+      value: 'sand',
+      label: '泥沙模型',
+    },
+  ]
 
   return (
     <div className="relative flex h-screen w-screen flex-col">
@@ -79,12 +52,17 @@ export const Home = () => {
         <button className="h-4 w-4 bg-red-400" onClick={testClick}></button>
       </div>
       <div className="flex flex-auto bg-pink-50">
-        <div className="w-16 bg-red-50">
-          <Nav items={navItems}></Nav>
-        </div>
         <div className="relative flex flex-auto bg-green-50">
-          <ExtendRouter>{element}</ExtendRouter>
-          {projectID && <MapView display={isDisplay}></MapView>}
+          <div className="flex w-[24rem] flex-col bg-slate-200 px-1">
+            <div className="my-0.5">
+              <ModelSelect options={options}></ModelSelect>
+            </div>
+            <div className="mb-0.5">
+              <Model></Model>
+            </div>
+            <LayerPanel></LayerPanel>
+          </div>
+          <MapView></MapView>
         </div>
       </div>
       {isModalDisplay && modal}

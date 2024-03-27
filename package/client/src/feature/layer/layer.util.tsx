@@ -1,113 +1,33 @@
-import { AntdTreeInterface, LayerType } from '@/type'
+import { getMeshAPI } from '@/api/model-data/data.api'
+import { DataInfoType } from '@/api/model-data/data.type'
+import { LayerType } from '@/type'
 import { FlowLayer } from '@/util/customLayer/flowLayer'
 import { FlowFieldManager } from '@/util/customLayer/flowfield'
-import { DataNode } from 'antd/es/tree'
-import { addImageToMap } from '../map/map.util'
-import { LayerTreeMenu } from './LayerTreeMenu'
-import { getMeshData, getProjectTree } from './layer.api'
-import { DataInfoType, LayerMenuItemType, ProjectTreeType } from './layer.type'
+import { addImageToMap } from '../../util/mapbox.util'
 
-const filterLayerMenuItems = (
-  layer: LayerType,
-  layerMenuItems: Record<string, LayerMenuItemType>,
-  layerType: string,
-): LayerMenuItemType[] => {
-  const result: LayerMenuItemType[] = []
-  if (!layer.group && layerType === 'data') {
-    if (layer.type === 'text') {
-      const temp = layerMenuItems['download']
-      result.push(temp)
-    } else {
-      const temp = layerMenuItems['map']
-      temp.action
-      result.push(layerMenuItems['map'])
-    }
-  }
-  if (!layer.input) {
-    result.push(layerMenuItems['delete'])
-  }
-  if (layerType === 'map') {
-    result.push(layerMenuItems['remove'])
-  }
-
-  return result
-}
-
-export const generateProjectTreeData = async (projectID: string | null) => {
-  if (!projectID) return null
-  const response = await getProjectTree(projectID)
-  if (!response) return null
-
-  const loop = (origin: ProjectTreeType) => {
-    const result: LayerType[] = origin.map((value) => {
-      let children: LayerType[] = []
+export const antdTreeToProjectTree = (layer: LayerType[], key: string) => {
+  const loop = (origin: LayerType[], key: string) => {
+    origin.forEach((value) => {
+      if (value.layerKey === key) {
+        result = value
+      }
       if (value.children) {
-        children = loop(value.children)
+        loop(value.children, key)
       }
-      const result: LayerType = {
-        children: children,
-        group: value.group,
-        input: value.isInput,
-        key: value.key,
-        style: value.layerStyle,
-        title: value.title,
-        type: value.layerType,
-      }
-
-      return result
     })
-
-    return result
   }
 
-  const result = loop(response)
+  let result: LayerType | null = null
+  loop(layer, key)
 
-  return result
-}
-
-export const generateAntdTreeData = (
-  layers: LayerType[],
-  layerMenuItems: Record<string, LayerMenuItemType>,
-  layerType: string,
-) => {
-  const loop = (origin: LayerType[]) => {
-    const result: DataNode[] = origin.map((value) => {
-      let children: DataNode[] = []
-      if (value.children) {
-        children = loop(value.children)
-      }
-      const filterMenuItems = filterLayerMenuItems(
-        value,
-        layerMenuItems,
-        layerType,
-      )
-      const result = {
-        children: children,
-        key: value.key,
-        title: (
-          <LayerTreeMenu
-            title={value.title}
-            layerMenuItems={filterMenuItems}
-          ></LayerTreeMenu>
-        ),
-      }
-
-      return result
-    })
-
-    return result
-  }
-
-  const result = loop(layers)
-
-  return result
+  return result as unknown as LayerType
 }
 
 export const getAllKeys = (layers: LayerType[]) => {
   const keys: string[] = []
   const loop = (array: LayerType[]) => {
     array.forEach((value) => {
-      keys.push(value.key)
+      keys.push(value.layerKey)
       value.children && loop(value.children)
     })
   }
@@ -115,12 +35,12 @@ export const getAllKeys = (layers: LayerType[]) => {
   return keys
 }
 
-export const getLayerKeys = (layers: LayerType[] | AntdTreeInterface[]) => {
+export const getLayerKeys = (layers: LayerType[]) => {
   const keys: string[] = []
-  const loop = (array: LayerType[] | AntdTreeInterface[]) => {
+  const loop = (array: LayerType[]) => {
     array.forEach((value) => {
       if (value.children.length === 0) {
-        keys.push(value.key)
+        keys.push(value.layerKey)
       }
       value.children && loop(value.children)
     })
@@ -129,12 +49,12 @@ export const getLayerKeys = (layers: LayerType[] | AntdTreeInterface[]) => {
   return keys
 }
 
-export const getGroupKeys = (layers: LayerType[] | AntdTreeInterface[]) => {
+export const getGroupKeys = (layers: LayerType[]) => {
   const keys: string[] = []
-  const loop = (array: LayerType[] | AntdTreeInterface[]) => {
+  const loop = (array: LayerType[]) => {
     array.forEach((value) => {
-      if (value.children.length === 0) {
-        keys.push(value.key)
+      if (value.children.length !== 0) {
+        keys.push(value.layerKey)
       }
       value.children && loop(value.children)
     })
@@ -144,8 +64,8 @@ export const getGroupKeys = (layers: LayerType[] | AntdTreeInterface[]) => {
 }
 
 export const addMeshToMap = async (map: mapboxgl.Map, info: DataInfoType) => {
-  const blob = await getMeshData(info.dataID, info.visualizationNumber - 1)
-  if (!blob) return false
+  const blob = await getMeshAPI(info.dataID, info.visualizationNumber - 1)
+  if (!(blob instanceof Blob)) return false
   addImageToMap(map, info.dataID, blob, info.dataExtent)
   return true
 }

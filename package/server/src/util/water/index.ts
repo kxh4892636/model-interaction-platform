@@ -1,1 +1,4 @@
-export { getModelDataTypeAndStyle } from './getModelDataTypeAndStyle'
+export {
+  getModelDataExtentAndVisualization,
+  getModelDataTypeAndStyle,
+} from './getModelDataTypeAndStyle'

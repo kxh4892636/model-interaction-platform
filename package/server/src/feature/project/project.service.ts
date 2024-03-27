@@ -1,164 +1,135 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DATA_FOLDER_PATH } from '@/config/env'
-import {
-  ProjectInfoType,
-  ProjectListType,
-  ProjectTreeType,
-} from '@/feature/project/project.type'
+import { orm } from '@/dao'
+import { projectDatasetDao } from '@/dao/project-dataset'
+import { DBStatusType, WaterModelTypeType } from '@/type'
+import { copyFolder } from '@/util/fs'
 import { randomUUID } from 'crypto'
-import { createReadStream } from 'fs'
 import { mkdir, rm } from 'fs/promises'
 import path from 'path'
-import { datasetDao } from '../dataset/dataset.dao'
 import { datasetService } from '../dataset/dataset.service'
-import { dataDao } from '../modal-data/data.dao'
 import { projectDao } from './project.dao'
+import { ProjectListType, ProjectTreeType } from './project.type'
 
 export const projectService = {
   createProject: async (
+    projectID: string,
     projectName: string,
-    projectPositionAndZoom: number[],
-    projectTags: string[],
+    projectExtent: number[],
+    identifier: string,
+    projectStatus: DBStatusType,
   ) => {
-    const timeStamp = Date.now().toString()
-    const projectPath = path.join('/project', timeStamp)
-    const coverImage = path.join(projectPath, '/cover.png')
+    const projectPath = path.join('/project', identifier)
+    // create db records
+    await orm.project.createProject(
+      projectID,
+      projectName,
+      projectExtent,
+      identifier,
+      projectPath,
+      projectStatus,
+    )
+    const projectDatasetMap = [
+      ['water-2d', ['water-2d']],
+      ['water-3d', ['water-3d']],
+      ['quality-wasp', ['water-2d', 'quality-wasp']],
+      ['quality-phreec', ['water-2d', 'quality-phreec']],
+      ['sand', ['water-2d', 'sand']],
+      ['mud', ['water-2d', 'mud']],
+    ]
+    const promiseList = projectDatasetMap.map(async (value) => {
+      ;(value[1] as string[]).map(async (paramType) => {
+        const datasetID = randomUUID()
+        const datasetName = paramType + '参数'
+        await datasetService.createDataset(
+          projectID,
+          value[0] as WaterModelTypeType,
+          paramType + '-input',
+          datasetID,
+          datasetName,
+          'valid',
+        )
+      })
+    })
+    await Promise.all(promiseList)
 
-    // create folder
+    // create folder and copy model
     await mkdir(path.join(DATA_FOLDER_PATH, projectPath), {
       recursive: true,
     })
-
-    // create db records
-    const projectID = randomUUID()
-    await projectDao.createProject(
-      coverImage,
-      projectPath,
-      projectID,
-      projectName,
-      timeStamp,
-      projectPositionAndZoom,
-      projectTags,
+    await copyFolder(
+      path.join(DATA_FOLDER_PATH, '/template'),
+      path.join(DATA_FOLDER_PATH, projectPath),
     )
-
-    return {
-      id: projectID,
-      path: projectPath,
-    }
-  },
-
-  createProjectDataset: async (projectID: string, datasetID: string) => {
-    const timeStamp = Date.now().toString()
-    await projectDao.createProjectDataset(projectID, datasetID, timeStamp)
-  },
-
-  getProjectByProjectID: async (
-    projectID: string,
-  ): Promise<ProjectInfoType | null> => {
-    const projectInfo = await projectDao.getProject(projectID)
-    if (!projectInfo) {
-      return null
-    }
-    const datasetList = await projectDao.getDatasetListOfProject(projectID)
-
-    return {
-      datasetIDArray: datasetList,
-      projectId: projectInfo.project_id,
-      projectName: projectInfo.project_name,
-      projectPositionZoom: projectInfo.project_position_zoom,
-      projectTag: projectInfo.project_tag,
-    }
   },
 
   getAllProject: async (): Promise<ProjectListType> => {
-    const result: ProjectListType = []
-    const projectList = await projectDao.getAllProject()
-    const promiseList = projectList.map(async (projectInfo) => {
-      const datasetList = await projectDao.getDatasetListOfProject(
-        projectInfo.project_id,
-      )
-      const temp = {
-        projectId: projectInfo.project_id,
-        projectName: projectInfo.project_name,
-        projectPositionZoom: projectInfo.project_position_zoom,
-        projectTag: projectInfo.project_tag,
-        datasetIDArray: datasetList,
+    const projectList = await orm.project.getAllProject()
+    const result: ProjectListType = projectList.map((value) => {
+      return {
+        projectExtent: value.project_extent,
+        projectId: value.project_id,
+        projectName: value.project_name,
       }
-
-      result.push(temp)
     })
-
-    await Promise.all(promiseList)
-
     return result
-  },
-
-  getProjectCoverImage: async (projectID: string) => {
-    const projectInfo = await projectDao.getProject(projectID)
-    if (!projectInfo) return null
-    const imagePath = path.join(
-      DATA_FOLDER_PATH,
-      projectInfo.project_cover_image,
-    )
-    const cs = createReadStream(imagePath)
-    return cs
   },
 
   generateProjectTree: async (projectID: string): Promise<ProjectTreeType> => {
     const result: ProjectTreeType = []
+    const datasetList =
+      await projectDatasetDao.getDatasetIDListByProjectID(projectID)
 
-    const datasetList = await projectDao.getDatasetListOfProject(projectID)
-    const promiseList = datasetList.map(async (datasetID) => {
-      const datasetInfo = await datasetDao.getDatasetInfo(datasetID)
-      if (!datasetInfo || datasetInfo.status === 'pending') {
+    const promiseList = datasetList.map(async (dataset) => {
+      const datasetInfo = await orm.dataset.getDatasetByDatasetID(
+        dataset.dataset_id,
+      )
+      if (!datasetInfo) throw Error()
+      if (datasetInfo.status === 'pending') {
         return
       }
       const temp = {
-        title: datasetInfo.dataset_name,
-        key: datasetInfo.dataset_id,
+        layerName: datasetInfo.dataset_name,
+        layerKey: datasetInfo.dataset_id,
         layerType: 'none',
         layerStyle: 'none',
-        group: true,
-        isInput: datasetInfo.dataset_input,
+        isGroup: true,
+        modelType: datasetInfo.model_type,
         children: [] as ProjectTreeType,
       }
-      const dataIDList = await datasetDao.getDataIDListOfDataset(datasetID)
-      for (const dataID of dataIDList) {
-        const dataInfo = await dataDao.getDataInfo(dataID)
+      const dataList = await orm.datasetData.getDataIDListByDatasetID(
+        dataset.dataset_id,
+      )
+      for (const data of dataList) {
+        const dataInfo = await orm.data.getDataByDataID(data.data_id)
         if (!dataInfo) continue
         temp.children.push({
-          title: dataInfo.data_name,
-          key: dataInfo.data_id,
-          layerType: dataInfo.data_type,
-          layerStyle: dataInfo.data_style,
-          group: false,
-          isInput: dataInfo.data_input,
+          layerName: dataInfo.data_name,
+          layerKey: dataInfo.data_id,
+          layerType: dataInfo.data_type as any,
+          layerStyle: dataInfo.data_style as any,
+          isGroup: false,
+          modelType: dataInfo.model_type as any,
           children: [],
         })
       }
-      result.push(temp)
+      result.push(temp as any)
     })
-
     await Promise.all(promiseList)
-
     return result
   },
 
-  updateProjectName: async (projectID: string, projectName: string) => {
-    await projectDao.updateProjectName(projectID, projectName)
-  },
-
   deleteProject: async (projectID: string) => {
-    const projectInfo = await projectDao.getProject(projectID)
-    if (!projectInfo) return
-    const datasetIDList = await projectDao.getDatasetListOfProject(projectID)
-
-    // delete db record
+    const projectInfo = await orm.project.getProjectByProjectID(projectID)
+    if (!projectInfo) throw Error()
+    const datasetIDList =
+      await orm.projectDataset.getDatasetIDListByProjectID(projectID)
+    // delete project db record
     await projectDao.deleteProject(projectID)
-    await projectDao.deleteProjectDataset(projectID)
+    // delete dataset of project
     for (const datasetID of datasetIDList) {
-      await datasetService.deleteDataset(datasetID)
+      await datasetService.deleteDataset(datasetID.dataset_id, false)
     }
-
     // delete disk data
     const projectPath = path.join(
       DATA_FOLDER_PATH,

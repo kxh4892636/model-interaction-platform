@@ -29,7 +29,6 @@ class FlowLayer extends CustomLayer {
       this.map?.triggerRepaint()
       return
     }
-    console.log('finish')
     // console.log(u_matrix)
     this.ffManager.zoomRate = this.map!.getZoom() / this.map!.getMaxZoom()
     if (this.ffManager.zoomRate <= 0.3) {

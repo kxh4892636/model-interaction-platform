@@ -1,37 +1,33 @@
-import { generateResponseSchema } from '@/type/util'
+import { WaterModelTypeSchema } from '@/type'
+import { generateResponseSchema } from '@/util/typebox'
 import { Static, Type } from '@sinclair/typebox'
-
-export type ModelType = 'water' | 'sand' | 'quality'
-
-export type ModelDataTypeType =
-  | 'mesh'
-  | 'text'
-  | 'geojson'
-  | 'uvet'
-  | 'tcd'
-  | 'tnd'
-  | 'snd'
-  | 'yuji'
-// | 'image'
-// | 'shp'
-
-export type ModelDataStyleType = 'text' | 'raster' | 'circle' | 'uvet'
-// | 'none'
 
 // /model/info
 export const ModelInfoSchema = Type.Object({
   modelID: Type.String(),
   modelDatasetID: Type.String(),
-  progress: Type.Number(),
-  modelStatus: Type.Number(),
+  modelProgress: Type.Number(),
+  modelStatus: Type.String(),
 })
 export type ModelInfoType = Static<typeof ModelInfoSchema>
-export const ModelInfoParamsSchema = Type.Object({
+export const ModelInfoQueryStringSchema = Type.Object({
   modelID: Type.String(),
 })
-export type ModelInfoParamType = Static<typeof ModelInfoParamsSchema>
+export type ModelInfoParamType = Static<typeof ModelInfoQueryStringSchema>
 export const ModelInfoResponseSchema = generateResponseSchema(ModelInfoSchema)
 export type ModelInfoResponseType = Static<typeof ModelInfoResponseSchema>
+
+// /model/param/*
+export const ModelParamSchema = Type.Null()
+export type ModelParamType = Static<typeof ModelParamSchema>
+export const ModelParamResponseSchema = generateResponseSchema(ModelParamSchema)
+export type ModelParamResponseType = Static<typeof ModelParamResponseSchema>
+// /model/param/water-2d
+export const Water2DParamBodySchema = Type.Object({
+  projectID: Type.String(),
+  hours: Type.Integer(),
+})
+export type Water2DParamBodyType = Static<typeof Water2DParamBodySchema>
 
 // /model/action
 export const ModelActionSchema = Type.Union([Type.String(), Type.Null()])
@@ -42,16 +38,9 @@ export const ModelActionBodySchema = Type.Object({
   modelInit: Type.Union([
     Type.Null(),
     Type.Object({
-      modelType: Type.Union([
-        Type.Literal('water'),
-        Type.Literal('quality'),
-        Type.Literal('sand'),
-      ]),
-      modelName: Type.String(),
       projectID: Type.String(),
-      paramsID: Type.String(),
-      hours: Type.Number(),
-      uvetID: Type.Union([Type.Null(), Type.String()]),
+      modelType: WaterModelTypeSchema,
+      modelName: Type.String(),
     }),
   ]),
 })

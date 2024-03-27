@@ -1,36 +1,54 @@
 import { DATA_FOLDER_PATH } from '@/config/env'
+import { WaterModelTypeType } from '@/type'
 import path from 'path'
-import { ModelType } from './model.type'
 
 export const getModelDataVisualization = (
-  modelType: ModelType,
+  modelType: WaterModelTypeType,
   datasetPath: string,
   hours: number,
-  num?: number,
+  identifier: string,
 ): string[] => {
   const fnMap = {
-    water: () => {
+    'water-2d': () => {
       const result: string[] = []
-      result.push(path.join(datasetPath, 'output/flow_field_description.json'))
+      result.push(
+        path.join(datasetPath, `flow-field-description-${identifier}.json`),
+      )
       for (let index = 0; index < hours; index++) {
-        result.push(path.join(datasetPath, `output/mask_${index}.png`))
+        result.push(path.join(datasetPath, `mask-${identifier}-${index}.png`))
       }
       for (let index = 0; index < hours; index++) {
-        result.push(path.join(datasetPath, `output/uv_${index}.png`))
+        result.push(path.join(datasetPath, `uv-${identifier}-${index}.png`))
       }
       for (let index = 0; index < hours; index++) {
-        result.push(path.join(datasetPath, `output/valid_${index}.png`))
+        result.push(path.join(datasetPath, `valid-${identifier}-${index}.png`))
       }
       return result
     },
-    quality: () => {
+    'water-3d': () => {
+      return ['']
+    },
+    'quality-wasp': () => {
       const result: string[] = []
       for (let index = 0; index < hours; index++) {
         result.push(
           path.join(
             DATA_FOLDER_PATH,
             datasetPath,
-            `output/tnd_${num}_${index}.png`,
+            `output/tnd-${1}-${index}.png`,
+          ),
+        )
+      }
+      return result
+    },
+    'quality-phreec': () => {
+      const result: string[] = []
+      for (let index = 0; index < hours; index++) {
+        result.push(
+          path.join(
+            DATA_FOLDER_PATH,
+            datasetPath,
+            `output/tnd_${1}_${index}.png`,
           ),
         )
       }
@@ -46,23 +64,18 @@ export const getModelDataVisualization = (
       }
       return result
     },
+    mud: () => {
+      const result: string[] = []
+      for (let index = 0; index < hours; index++) {
+        result.push(path.join(datasetPath, `output/snd_${index}.png`))
+      }
+      for (let index = 0; index < hours; index++) {
+        result.push(path.join(datasetPath, `output/yuji_${index}.png`))
+      }
+      return result
+    },
   }
 
   const result = fnMap[modelType]()
   return result
 }
-
-// await prisma.data.update({
-//   where: {
-//     data_id: '40dc0b6e-78b1-48f7-a558-c655b4459582',
-//   },
-//   data: {
-//     data_visualization: getModelDataVisualization(
-//       'water',
-//       '\\project\\1711200452607\\1711200503722',
-//       72,
-//     ),
-//   },
-// })
-
-// console.log('fi')

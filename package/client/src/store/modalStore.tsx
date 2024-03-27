@@ -1,19 +1,38 @@
 import { create } from 'zustand'
 
 interface ModalStore {
-  modal: JSX.Element
+  modal: JSX.Element | null
   isModalDisplay: boolean
-  setModal: (element: JSX.Element) => void
-  setIsModalDisplay: (tag: boolean) => void
+  openModal: (element: JSX.Element) => void
+  closeModal: () => void
+}
+
+const ModalContainer = ({ children }: { children: JSX.Element }) => {
+  return (
+    <div
+      className="fixed z-50 h-full w-screen bg-slate-500/20"
+      onClick={() => {
+        //
+      }}
+    >
+      {children}
+    </div>
+  )
 }
 
 export const useModalStore = create<ModalStore>((set) => ({
-  modal: <></>,
+  modal: null,
   isModalDisplay: false,
-  setModal: (element) => {
-    set({ modal: element })
+  openModal: (element) => {
+    set({
+      modal: <ModalContainer>{element}</ModalContainer>,
+      isModalDisplay: true,
+    })
   },
-  setIsModalDisplay(tag) {
-    set({ isModalDisplay: tag })
+  closeModal: () => {
+    set({
+      modal: null,
+      isModalDisplay: false,
+    })
   },
 }))

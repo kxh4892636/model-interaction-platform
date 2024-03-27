@@ -1,6 +1,9 @@
 # Project data
+data
 config
 docs
+customLayer
+renderUtils
 
 # Local File
 pnpm-lock.yaml

@@ -1,7 +1,7 @@
+import { ProjectView } from '@/feature/__project'
 import { LayerPanel } from '@/feature/layer'
 import App from '@/feature/model/App'
 import routes from '@/feature/model/route'
-import { ProjectView } from '@/feature/project'
 import { ExtendRouterObject } from './router.type'
 
 export const route: ExtendRouterObject[] = [

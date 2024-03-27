@@ -1,31 +1,12 @@
 import { Static, Type } from '@sinclair/typebox'
-import { generateResponseSchema } from '../../type/util'
-
-// /list
-export const DatasetListSchema = Type.Array(
-  Type.Object({
-    datasetID: Type.String(),
-    datasetName: Type.String(),
-    isInput: Type.Boolean(),
-    dataIDList: Type.Array(Type.String()),
-  }),
-)
-export type DatasetListType = Static<typeof DatasetListSchema>
-export const DatasetListResponseSchema =
-  generateResponseSchema(DatasetListSchema)
-export type DatasetListResponseType = Static<typeof DatasetListResponseSchema>
+import { generateResponseSchema } from '../../util/typebox'
 
 // /action
 export const DatasetActionSchema = Type.Null()
 export type DatasetActionType = Static<typeof DatasetActionSchema>
 export const DatasetActionBodySchema = Type.Object({
   datasetID: Type.String(),
-  datasetName: Type.String(),
-  datasetAction: Type.Union([
-    Type.Literal('create'),
-    Type.Literal('rename'),
-    Type.Literal('delete'),
-  ]),
+  datasetAction: Type.Union([Type.Literal('delete')]),
 })
 export type DatasetActionBodyType = Static<typeof DatasetActionBodySchema>
 export const DatasetActionResponseSchema =

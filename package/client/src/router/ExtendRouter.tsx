@@ -1,5 +1,5 @@
 import { useMapStore } from '@/store/mapStore'
-import { useProjectStatusStore } from '@/store/projectStore'
+import { useMetaStore } from '@/store/metaStore'
 import { useEffect, useLayoutEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -11,7 +11,7 @@ export const ExtendRouter = ({ children }: AppProps) => {
   const location = useLocation()
   const setDisplay = useMapStore((state) => state.setDisplay)
   const link = useNavigate()
-  const projectID = useProjectStatusStore((state) => state.projectID)
+  const projectID = useMetaStore((state) => state.projectID)
 
   useEffect(() => {
     link('/project')

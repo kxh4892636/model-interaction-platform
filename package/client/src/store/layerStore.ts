@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2023 by xiaohan kong, All Rights Reserved.
  */
-import { AntdTreeInterface, LayerType } from '@/type'
+import { LayerType } from '@/type'
 import { produce } from 'immer'
 import { create } from 'zustand'
 
@@ -16,8 +16,8 @@ interface LayersStore {
   layersChecked: { data: string[]; map: string[] }
   layersExpanded: { data: string[]; map: string[] }
   layersSelected: {
-    data: AntdTreeInterface | null
-    map: AntdTreeInterface | null
+    data: LayerType | null
+    map: LayerType | null
   }
   setLayers: (value: LayerType[], type: 'data' | 'map') => void
   addLayer: (layer: LayerType, type: 'data' | 'map') => void
@@ -31,10 +31,7 @@ interface LayersStore {
   ) => void
   setLayersChecked: (value: string[], type: 'data' | 'map') => void
   setLayersExpanded: (value: string[], type: 'data' | 'map') => void
-  setLayersSelected: (
-    value: AntdTreeInterface | null,
-    type: 'data' | 'map',
-  ) => void
+  setLayersSelected: (value: LayerType | null, type: 'data' | 'map') => void
   addLayersChecked: (key: string, type: 'data' | 'map') => void
   addLayersExpanded: (key: string, type: 'data' | 'map') => void
   deleteLayersChecked: (key: string, type: 'data' | 'map') => void
@@ -65,7 +62,7 @@ export const useLayersStore = create<LayersStore>((set, get) => ({
       callback: (value: LayerType, index: number, data: LayerType[]) => void,
     ) => {
       data.forEach((value, index) => {
-        if (value.key === key) {
+        if (value.layerKey === key) {
           return callback(value, index, data)
         }
         if (value.children) {
@@ -93,7 +90,7 @@ export const useLayersStore = create<LayersStore>((set, get) => ({
           ) => void,
         ) => {
           data.forEach((value, index) => {
-            if (value.key === key) {
+            if (value.layerKey === key) {
               return callback(value, index, data)
             }
             if (value.children) {
@@ -119,7 +116,7 @@ export const useLayersStore = create<LayersStore>((set, get) => ({
           ) => void,
         ) => {
           data.forEach((value, index) => {
-            if (value.key === key) {
+            if (value.layerKey === key) {
               return callback(value, index, data)
             }
             if (value.children) {

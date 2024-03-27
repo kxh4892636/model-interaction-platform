@@ -1,3 +1,6 @@
+import sys
+from os import path
+
 from osgeo import gdal, ogr, osr
 
 
@@ -218,12 +221,17 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
 
 
 if __name__ == "__main__":
-    meshPath = r"D:\project\fine-grained-simulation\data\template\san-sha-wan\water\input\mesh31.gr3"
-    csvPath = r"D:\project\fine-grained-simulation\data\template\san-sha-wan\water\transform\mesh31.csv"
-    maskPath = r"D:\project\fine-grained-simulation\data\template\san-sha-wan\water\transform\mesh31.shp"
-    pngPath = r"D:\project\fine-grained-simulation\data\template\san-sha-wan\water\transform\mesh31.png"
-    dataList = Mesh2CSV(meshPath, csvPath)
-    mesh2mask(csvPath, maskPath)
-    extent: tuple = mesh2png(csvPath, pngPath, maskPath)
-    # (119.5498985092223, 120.21745091964257, 26.34525050928077, 26.972279065373204)
-    print(extent)
+    # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
+    try:
+        projectPath = sys.argv[1]
+        meshPath = path.join(projectPath, "mesh31.gr3")
+        csvPath = path.join(projectPath, "mesh31.csv")
+        maskPath = path.join(projectPath, "mesh31.shp")
+        pngPath = path.join(projectPath, "mesh31.png")
+        dataList = Mesh2CSV(meshPath, csvPath)
+        mesh2mask(csvPath, maskPath)
+        extent: tuple = mesh2png(csvPath, pngPath, maskPath)
+        # (119.5498985092223, 120.21745091964257, 26.34525050928077, 26.972279065373204)
+        print(extent)
+    except:
+        print((0, 0, 0, 0))
