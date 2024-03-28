@@ -11,6 +11,8 @@ import {
   ModelInfoResponseType,
   ModelParamResponseSchema,
   ModelParamResponseType,
+  QualityWaspParamBodySchema,
+  SandParamBodySchema,
   Water2DParamBodySchema,
 } from './model.type'
 import { modelService } from './model.water.service'
@@ -57,7 +59,7 @@ export const modelRoute = async (app: FastifyTypebox) => {
     url: '/param/quality-wasp',
     schema: {
       tags: ['model'],
-      body: Water2DParamBodySchema,
+      body: QualityWaspParamBodySchema,
       response: {
         200: ModelParamResponseSchema,
       },
@@ -65,6 +67,24 @@ export const modelRoute = async (app: FastifyTypebox) => {
     handler: async (req): Promise<ModelParamResponseType> => {
       const body = req.body
       await modelService.setQualityWaspParam(body.projectID, body.hours)
+      const response = generateResponse('success', '', null)
+      return response
+    },
+  })
+
+  app.route({
+    method: 'post',
+    url: '/param/sand',
+    schema: {
+      tags: ['model'],
+      body: SandParamBodySchema,
+      response: {
+        200: ModelParamResponseSchema,
+      },
+    },
+    handler: async (req): Promise<ModelParamResponseType> => {
+      const body = req.body
+      await modelService.setSandParam(body.projectID, body.hours)
       const response = generateResponse('success', '', null)
       return response
     },
@@ -98,6 +118,13 @@ export const modelRoute = async (app: FastifyTypebox) => {
         } else if (init.modelType === 'quality-wasp') {
           modelService
             .runQualityWaspModel(init.modelName, init.projectID, modelID)
+            .catch(() => {
+              console.log('stop model')
+              modelService.stopModel(modelID)
+            })
+        } else if (init.modelType === 'sand') {
+          modelService
+            .runSandModel(init.modelName, init.projectID, modelID)
             .catch(() => {
               console.log('stop model')
               modelService.stopModel(modelID)

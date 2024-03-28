@@ -1,5 +1,6 @@
 import {
   postQualityWaspParamAPI,
+  postSandParamAPI,
   postWater2DParamAPI,
 } from '@/api/model/model.api'
 import { useMetaStore } from '@/store/metaStore'
@@ -106,6 +107,55 @@ const QualityWaspParamEditor = () => {
   )
 }
 
+const SandParamEditor = () => {
+  const [hours, setHours] = useState<null | number>(null)
+  const projectID = useMetaStore((state) => state.projectID)
+  const closeModal = useModalStore((state) => state.closeModal)
+
+  const handleClick = async () => {
+    const result = await postSandParamAPI({
+      projectID: projectID!,
+      hours: hours!,
+    })
+    if (result.status === 'success') {
+      message.info('设置参数成功', 5)
+      closeModal()
+    } else {
+      message.error('设置参数失败', 5)
+      closeModal()
+    }
+  }
+
+  return (
+    <div>
+      <div className="mx-4 w-[40%] min-w-72">
+        <div className="">模拟时间 (小时)</div>
+        <InputNumber
+          defaultValue={undefined}
+          step={24}
+          min={0}
+          value={hours}
+          onChange={(value: any) => {
+            setHours(Number(value))
+          }}
+          className="my-3 w-full"
+        />
+      </div>
+      <div className="mx-4 w-[40%] min-w-72">
+        <div className="my-2 flex justify-end">
+          <Button
+            type="primary"
+            disabled={hours === null}
+            onClick={handleClick}
+          >
+            确定
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export const ModelParamEditor = () => {
   const modelType = useMetaStore((state) => state.modelType)
   const closeModal = useModalStore((state) => state.closeModal)
@@ -114,7 +164,7 @@ export const ModelParamEditor = () => {
     'water-3d': <></>,
     'quality-wasp': <QualityWaspParamEditor></QualityWaspParamEditor>,
     'quality-phreec': <></>,
-    sand: <></>,
+    sand: <SandParamEditor></SandParamEditor>,
     mud: <></>,
   }
   const uploadPanel = componentMap[modelType]

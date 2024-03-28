@@ -199,7 +199,7 @@ if __name__ == "__main__":
     dataDict = resolveCSV(csvPath)
     sndPath = os.path.join(modelFolderPath, "snd.dat")
     for i in range(0, int(hours)):
-        txtPath = os.path.join(dstPath, f"snd-{i}.txt")
+        txtPath = os.path.join(dstPath, f"snd-{identifier}-{i}.txt")
         tnd2txt(
             sndPath,
             txtPath,
@@ -213,7 +213,7 @@ if __name__ == "__main__":
         )
     yujiPath = os.path.join(modelFolderPath, "yuji.dat")
     for i in range(0, int(hours)):
-        txtPath = os.path.join(dstPath, f"yuji-{i}.txt")
+        txtPath = os.path.join(dstPath, f"yuji-{identifier}-{i}.txt")
         tnd2txt(
             yujiPath,
             txtPath,

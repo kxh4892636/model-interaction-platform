@@ -34,6 +34,12 @@ export const QualityWaspParamBodySchema = Type.Object({
   hours: Type.Integer(),
 })
 export type QualityWaspParamBodyType = Static<typeof QualityWaspParamBodySchema>
+// /model/param/sand
+export const SandParamBodySchema = Type.Object({
+  projectID: Type.String(),
+  hours: Type.Integer(),
+})
+export type SandParamBodyType = Static<typeof SandParamBodySchema>
 
 // /model/action
 export const ModelActionSchema = Type.Union([Type.String(), Type.Null()])

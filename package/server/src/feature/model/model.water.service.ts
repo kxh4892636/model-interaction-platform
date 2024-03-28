@@ -400,9 +400,7 @@ const preQualityWasp = async (
     )
   }
 
-  return {
-    hours,
-  }
+  return { hours }
 }
 
 const runQualityWaspEXE = async (
@@ -535,198 +533,234 @@ const runQualityWaspModel = async (
   })
 }
 
-// /**
-//  * sand model
-//  */
-// const preSand = async (
-//   modelID: string,
-//   timeStamp: string,
-//   datasetID: string,
-//   uvetID: string,
-//   paramsID: string[],
-//   datasetPath: string,
-//   projectID: string,
-//   hours: number,
-// ) => {
-//   // create model record
-//   await modelDao.createModel(modelID, timeStamp, datasetID)
+/**
+ * sand model
+ */
+const setSandParam = async (projectID: string, hours: number) => {
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  // modify model param by hours
+  const qualityWaspPath = path.join(
+    DATA_FOLDER_PATH,
+    projectInfo.project_folder_path,
+    'sand',
+  )
+  // modify water-2d
+  const paramhkPath = path.join(qualityWaspPath, 'paramhk.in')
+  const isPramhkExist = await existsPromise(paramhkPath)
+  if (!isPramhkExist) throw Error()
+  const paramhkContent = (await readFile(paramhkPath))
+    .toString()
+    .replace(/.*3.5.*2.5/, `${(hours + 72) / 24} 3.5 2.5`)
+  await writeFile(paramhkPath, paramhkContent)
 
-//   // copy model data
-//   const uvetInfo = await dataDao.getDataInfo(uvetID)
-//   if (!uvetInfo) throw Error()
-//   const meshExtent = await copyModelData(paramsID, datasetPath, uvetInfo)
+  // modify sand
+  const wuRanGongKuangPath = path.join(qualityWaspPath, 'wuran-gongkuang.dat')
+  const isExist = await existsPromise(wuRanGongKuangPath)
+  if (!isExist) throw Error()
+  const paramContent = (await readFile(wuRanGongKuangPath))
+    .toString()
+    .replace(/.*60.*31/, `${hours / 24} 60 31`)
+  await writeFile(wuRanGongKuangPath, paramContent)
+}
 
-//   // create data record and dataset_data record
-//   const visualization = getModelDataVisualization('sand', datasetPath, hours)
-//   const sndID = randomUUID()
-//   const sndPath = path.join(datasetPath, `model/snd.dat`)
-//   await dataDao.createData(
-//     sndPath,
-//     '泥沙',
-//     false,
-//     sndID,
-//     'raster',
-//     'snd',
-//     meshExtent,
-//     visualization.slice(0, hours),
-//     timeStamp,
-//   )
-//   await projectDao.createProjectDataset(projectID, datasetID, timeStamp)
-//   await datasetDao.createDatasetData(datasetID, sndID, timeStamp)
-//   const yujiID = randomUUID()
-//   const yujiPath = path.join(datasetPath, `model/yuji.dat`)
-//   await dataDao.createData(
-//     yujiPath,
-//     '淤积',
-//     false,
-//     yujiID,
-//     'raster',
-//     'yuji',
-//     meshExtent,
-//     visualization.slice(hours),
-//     timeStamp,
-//   )
-//   await projectDao.createProjectDataset(projectID, datasetID, timeStamp)
-//   await datasetDao.createDatasetData(datasetID, yujiID, timeStamp)
+const preSand = async (
+  modelID: string,
+  datasetID: string,
+  modelFolderPath: string,
+  identifier: string,
+) => {
+  // create model record
+  await orm.model.createModel(modelID, datasetID, -9999, 0, 'pending')
 
-//   // modify model param by hours
-//   const paramContent = (
-//     await readFile(
-//       path.join(DATA_FOLDER_PATH, datasetPath, '/model/wuran-gongkuang.dat'),
-//     )
-//   )
-//     .toString()
-//     .replace('56	60', `${hours / 24}	60`)
-//   await writeFile(
-//     path.join(DATA_FOLDER_PATH, datasetPath, '/model/wuran-gongkuang.dat'),
-//     paramContent,
-//   )
-// }
+  // get mesh extent
+  const isMeshExist = await existsPromise(
+    path.join(DATA_FOLDER_PATH, modelFolderPath, 'mesh31.gr3'),
+  )
+  if (!isMeshExist) throw Error()
+  const meshInfo = await modelDao.getMeshInfo(
+    path.join(modelFolderPath, 'mesh31.gr3'),
+  )
+  if (!meshInfo) throw Error()
+  const extent = meshInfo.data_extent
 
-// const runSandEXE = async (
-//   datasetPath: string,
-//   pids: number[],
-//   modelID: string,
-//   progress: {
-//     current: number
-//     per: number
-//     total: number
-//   },
-// ) => {
-//   const modelPath = path.join(DATA_FOLDER_PATH, datasetPath, '/model/sand.exe')
-//   const cp = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
-//     shell: true,
-//     windowsHide: true,
-//   })
-//   pids.push(cp.pid!)
-//   modelDao.updateModel(modelID, {
-//     pids,
-//   })
-//   cp.stdout!.on('data', (chunk) => {
-//     if ((chunk.toString() as string).includes('SED')) {
-//       progress.current += progress.per * 20
-//       modelDao.updateModel(modelID, {
-//         modelProgress: progress.current / progress.total,
-//       })
-//     }
-//   })
-//   await cp
-//   pids.shift()
-// }
+  // get hours
+  const wuRanGongKuangPath = path.join(
+    DATA_FOLDER_PATH,
+    modelFolderPath,
+    'wuran-gongkuang.dat',
+  )
+  const isExist = await existsPromise(wuRanGongKuangPath)
+  if (!isExist) throw Error()
+  const paramContent = (await readFile(wuRanGongKuangPath))
+    .toString()
+    .match(/[\d.]*(?=.*60.*31)/)
+  if (!paramContent) throw Error()
+  const hours = Math.round(Number(paramContent[0]) * 24)
 
-// const postSand = async (
-//   modelID: string,
-//   datasetPath: string,
-//   hours: number,
-//   pids: number[],
-//   progress: {
-//     current: number
-//     per: number
-//     total: number
-//   },
-// ) => {
-//   // tnd2png
-//   const cp = execa(
-//     `conda activate gis && python ${[
-//       path.join(process.cwd(), '/src/util/water/sand.py'),
-//       path.join(DATA_FOLDER_PATH, datasetPath),
-//       hours,
-//     ].join(' ')}`,
-//     {
-//       shell: true,
-//       windowsHide: true,
-//     },
-//   )
-//   pids.push(cp.pid!)
-//   modelDao.updateModel(modelID, {
-//     pids,
-//   })
-//   cp.stderr!.on('data', (chunk) => {
-//     if ((chunk.toString() as string).includes('clamped')) {
-//       progress.current += progress.per * 7
-//       modelDao.updateModel(modelID, {
-//         modelProgress: progress.current / progress.total,
-//       })
-//     }
-//   })
-//   await cp
-//   pids.shift()
-// }
+  // create data record and dataset_data record
+  const visualization = getModelDataVisualization(
+    'sand',
+    modelFolderPath,
+    hours,
+    identifier,
+  )
+  const sndID = randomUUID()
+  const sndPath = path.join(modelFolderPath, `snd.dat`)
+  await dataDao.createData(
+    datasetID,
+    sndID,
+    `泥沙`,
+    'snd',
+    'raster',
+    extent,
+    identifier,
+    sndPath,
+    'sand',
+    visualization.slice(0, hours),
+    'valid',
+  )
+  const yujiID = randomUUID()
+  const yujiPath = path.join(modelFolderPath, `yuji.dat`)
+  await dataDao.createData(
+    datasetID,
+    yujiID,
+    `淤积`,
+    'yuji',
+    'raster',
+    extent,
+    identifier,
+    yujiPath,
+    'sand',
+    visualization.slice(hours),
+    'valid',
+  )
 
-// const runSand = async (
-//   modelName: string,
-//   projectID: string,
-//   modelID: string,
-//   paramsID: string,
-//   hours: number,
-//   uvetID: string,
-// ) => {
-//   const timeStamp = Date.now().toString()
-//   const projectInfo = await projectDao.getProject(projectID)
-//   if (!projectInfo) return null
-//   const datasetPath = path.join(projectInfo.project_folder_path, timeStamp)
-//   const datasetID = await datasetService.createDataset(
-//     modelName,
-//     datasetPath,
-//     false,
-//     'pending',
-//   )
-//   const dataIDS = await datasetDao.getDataIDListOfDataset(paramsID)
+  return { hours }
+}
 
-//   console.time('sand')
-//   // preprocess quality.exe
-//   console.timeLog('sand', 'model copy')
-//   await preSand(
-//     modelID,
-//     timeStamp,
-//     datasetID,
-//     uvetID,
-//     dataIDS,
-//     datasetPath,
-//     projectID,
-//     hours,
-//   )
+const runSandEXE = async (
+  modelFolderPath: string,
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  const modelPath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'sand.exe')
+  const cp = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+    shell: true,
+    windowsHide: true,
+  })
+  orm.model.updateModelByModelID(modelID, {
+    modelPid: cp.pid,
+  })
+  cp.stdout!.on('data', (chunk) => {
+    if ((chunk.toString() as string).includes('SED')) {
+      progress.current += progress.per * 20
+      orm.model.updateModelByModelID(modelID, {
+        modelProgress: progress.current / progress.total,
+      })
+    }
+  })
+  await cp
+}
 
-//   const progress = {
-//     current: 0,
-//     per: 1,
-//     total: 34 * hours,
-//   }
-//   // run quality model
-//   console.timeLog('sand', 'model start')
-//   const pids: number[] = []
-//   await runSandEXE(datasetPath, pids, modelID, progress)
-//   console.timeLog('sand', 'sand.exe finish')
+const postSand = async (
+  modelFolderPath: string,
+  hours: number,
+  identifier: string,
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  // tnd2png
+  const cp = execa(
+    `conda activate gis && python ${[
+      path.join(process.cwd(), '/src/util/water/sand.py'),
+      path.join(DATA_FOLDER_PATH, modelFolderPath),
+      hours,
+      identifier,
+    ].join(' ')}`,
+    {
+      shell: true,
+      windowsHide: true,
+    },
+  )
+  orm.model.updateModelByModelID(modelID, {
+    modelPid: cp.pid,
+  })
+  cp.stderr!.on('data', (chunk) => {
+    if ((chunk.toString() as string).toLowerCase().includes('clamped')) {
+      progress.current += progress.per * 7
+      orm.model.updateModelByModelID(modelID, {
+        modelProgress: progress.current / progress.total,
+      })
+    }
+  })
+  await cp
+}
 
-//   // postProcess quality
-//   await postSand(modelID, datasetPath, hours, pids, progress)
-//   console.timeLog('sand', 'model end')
-//   console.log(progress)
-//   await modelDao.updateModel(modelID, {
-//     modelStatus: 0,
-//   })
-//   await datasetDao.updateDatasetStatus(datasetID, 'active')
-// }
+const runSandModel = async (
+  modelName: string,
+  projectID: string,
+  modelID: string,
+) => {
+  const identifier = Date.now().toString()
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  const modelFolderPath = path.join(projectInfo.project_folder_path, 'sand')
+  const datasetID = randomUUID()
+  await datasetService.createDataset(
+    projectID,
+    'sand',
+    'sand-output',
+    datasetID,
+    modelName,
+    'pending',
+  )
+
+  console.time(identifier)
+  // preprocess sand.exe
+  console.timeLog(identifier, 'preprocess sand.exe')
+  const { hours } = await preSand(
+    modelID,
+    datasetID,
+    modelFolderPath,
+    identifier,
+  )
+
+  // pre water-2d.exe
+  const progress = {
+    current: 0,
+    per: 1,
+    total: 51 * hours + 1224,
+  }
+  console.timeLog(identifier, 'preprocess water-2d.exe')
+  // await preRunWater2DModel(modelID, modelFolderPath, progress)
+
+  // run sand model
+  console.timeLog(identifier, 'run sand.exe')
+  await runSandEXE(modelFolderPath, modelID, progress)
+  console.timeLog(identifier, 'sand.exe finish')
+
+  // postProcess quality
+  console.timeLog(identifier, 'run sand.py')
+  await postSand(modelFolderPath, hours, identifier, modelID, progress)
+  console.timeLog(identifier, 'model finish')
+
+  console.log(progress)
+  await orm.model.updateModelByModelID(modelID, {
+    status: 'valid',
+  })
+  await orm.dataset.updateDatasetByDatasetID(datasetID, {
+    status: 'valid',
+  })
+}
 
 const stopModel = async (modelID: string) => {
   try {
@@ -764,8 +798,10 @@ const getModelInfo = async (modelID: string): Promise<ModelInfoType | null> => {
 export const modelService = {
   setWater2DParam,
   setQualityWaspParam,
+  setSandParam,
   runWater2DModel,
   runQualityWaspModel,
+  runSandModel,
   stopModel,
   getModelInfo,
 }

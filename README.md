@@ -74,7 +74,7 @@
 
 ![uvet.dat](images/2024-03-23-19-42-30.png)
 
-### 水质模型
+### 水质模型-wasp
 
 ##### 执行文件
 
@@ -105,6 +105,46 @@
 
 ##### tnd.dat 详解
 
+- time + value \* ne;
+- time: id, int32;
+- value: value, double64
+-
+
+### 水质模型-wqsp
+
+##### 执行文件
+
+- quality-wasp.exe: 执行文件;
+
+##### 模型输入
+
+- 必要参数;
+  - uvet;
+    - mesh31.gr3;
+    - vt.dat: 水动力模型结果;
+    - vn.dat: 水动力模型结果;
+    - et.dat: 水动力模型结果:
+  - quality;
+    - wuran-gongkuang: 模型参数, 第 10 行第一个数字(day)表明模拟时间, 12 行表明是否开启 wasp, 若开启需要 wqm_para.dat 文件
+    - wqm_para.dat: wuran-gongkuang 中 12 行为 1 时需要;
+    - 初始浓度: 初始浓度;
+    - cedian: 测点文件, 第一行为测点数量, 其余为各测点所在 ne id;
+    - tang_info: 测点文件, 养殖塘信息, 不知道具体东西;
+    - toufang: 测点文件, 第一行为测点数量, 其余行为 ne id + 八种污染物浓度强度(kg/s);
+    - in_node: 测点文件, 鱼塘信息;
+    - vgridzsh.in
+
+##### 模型输出
+
+- tcd1-8: 各污染物浓度在各测点的浓度值;
+- tnd1-8: 各污染物整个区域浓度, 时序数据, 时间间隔 1h;
+
+##### tnd.dat 详解
+
+- time + value \* ne;
+- time: id, int32;
+- value: value, double64
+
 ### 泥沙模型
 
 ##### 执行文件
@@ -116,31 +156,27 @@
 ##### 模型输入
 
 - 必要参数;
-  - mesh31.gr3;
-  - vt.dat: 水动力模型结果;
-  - vn.dat: 水动力模型结果;
-  - et.dat: 水动力模型结果:
-  - vgridhk.in;
-  - wuran-gongkuang: 模型参数, 第 10 行第一个数字(day)表明模拟时间, 12 行表明是否开启 wasp, 若开启需要 wqm_para.dat 文件
-  - wqm_para.dat: wasp
-  - vgridzsh.in
-- 可选文件
-  - wqm_para.dat: wuran-gongkuang 中 12 行为 1 时需要;
+  - water-2d;
+    - mesh31.gr3;
+    - vt.dat: 水动力模型结果;
+    - vn.dat: 水动力模型结果;
+    - et.dat: 水动力模型结果:
+    - vgridhk.in;
+  - sand;
+    - wuran-gongkuang: 模型参数, 第 10 行第一个数字(day)表明模拟时间, 12 行表明是否开启 wasp, 若开启需要 wqm_para.dat 文件
+    - wqm_para.dat: wasp
+    - vgridzsh.in
 
 ##### 模型输出
 
 - snd.dat: 泥沙;
 - yuji.dat: 淤积;
 
-##### tnd.dat 详解
+##### snd/yuji.dat 详解
 
 - time + value \* ne;
 - time: id, int32;
 - value: value, double64
-
-##
-
-cusuan: 2dphreec
 
 ## UI
 

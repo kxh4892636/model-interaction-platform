@@ -27,7 +27,7 @@ export const LayerTreeMenu = ({ layerMenuItems, title }: AppProps) => {
       }}
       trigger={['contextMenu']}
     >
-      <div className="w-48">{title}</div>
+      <div className="w-56">{title}</div>
     </Dropdown>
   )
 }
