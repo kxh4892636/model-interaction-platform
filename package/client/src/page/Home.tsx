@@ -22,9 +22,10 @@ export const Home = () => {
   const projectID = useMetaStore((state) => state.projectID)
   const map = useMapStore((state) => state.map)
   const layersSelected = useLayersStore((state) => state.layersSelected)
+  const intervalIDMap = useMetaStore((state) => state.intervalIDMap)
 
   const testClick = async () => {
-    console.log(layersSelected)
+    console.log(intervalIDMap)
   }
 
   const options: {

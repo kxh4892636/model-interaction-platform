@@ -16,6 +16,7 @@ export interface AntdTreeInterface {
   children: AntdTreeInterface[]
 }
 
+// NOTE 俩个 interface
 export interface DataFetchAPIInterface<T> {
   status: 'error' | 'success'
   data: T | null
@@ -43,7 +44,6 @@ export const WaterDataTypeSchema = Type.Union([
   Type.Literal('text'),
   Type.Literal('geojson'),
   Type.Literal('uvet'),
-  Type.Literal('tcd'),
   Type.Literal('tnd'),
   Type.Literal('snd'),
   Type.Literal('yuji'),
@@ -59,5 +59,3 @@ export const WaterDataStyleSchema = Type.Union([
   Type.Literal('none'),
 ])
 export type WaterDataStyleType = Static<typeof WaterDataStyleSchema>
-
-console.log(new Date(Date.now()).toLocaleDateString().toString())

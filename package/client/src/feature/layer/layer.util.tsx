@@ -1,9 +1,9 @@
-import { getMeshAPI } from '@/api/model-data/data.api'
+import { getJsonAPI, getMeshAPI } from '@/api/model-data/data.api'
 import { DataInfoType } from '@/api/model-data/data.type'
 import { LayerType } from '@/type'
 import { FlowLayer } from '@/util/customLayer/flowLayer'
 import { FlowFieldManager } from '@/util/customLayer/flowfield'
-import { addImageToMap } from '../../util/mapbox.util'
+import { addImageToMap, addJsonToMap } from '../../util/mapbox.util'
 
 export const antdTreeToProjectTree = (layer: LayerType[], key: string) => {
   const loop = (origin: LayerType[], key: string) => {
@@ -63,20 +63,36 @@ export const getGroupKeys = (layers: LayerType[]) => {
   return keys
 }
 
-export const addMeshToMap = async (map: mapboxgl.Map, info: DataInfoType) => {
+export const addMeshLayerToMap = async (
+  map: mapboxgl.Map,
+  info: DataInfoType,
+) => {
   const blob = await getMeshAPI(info.dataID, info.visualizationNumber - 1)
   if (!(blob instanceof Blob)) return false
   addImageToMap(map, info.dataID, blob, info.dataExtent)
   return true
 }
 
-export const addUVETToMap = async (map: mapboxgl.Map, info: DataInfoType) => {
+export const addUVETLayerToMap = async (
+  map: mapboxgl.Map,
+  info: DataInfoType,
+) => {
   try {
-    let flowFieldManager = new FlowFieldManager(info.dataID, info)
+    const flowFieldManager = new FlowFieldManager(info.dataID, info)
     const flowLayer = new FlowLayer(info.dataID, '2d', flowFieldManager)
     map.addLayer(flowLayer)
     return true
   } catch (error) {
     return false
   }
+}
+
+export const addGeoJsonLayerToMap = async (
+  map: mapboxgl.Map,
+  info: DataInfoType,
+) => {
+  const response = await getJsonAPI(info.dataID, info.visualizationNumber - 1)
+  if (response.status === 'error') return false
+  addJsonToMap(map, info.dataID, response.data!, info.dataStyle)
+  return true
 }

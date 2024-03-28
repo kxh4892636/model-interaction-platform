@@ -71,6 +71,5 @@ export const startApp = async (port: number) => {
     console.log(process.cwd())
   } catch (err) {
     app.log.error(err)
-    process.exit(1)
   }
 }

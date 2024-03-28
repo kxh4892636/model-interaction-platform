@@ -1,4 +1,4 @@
 export {
-  getModelDataExtentAndVisualization,
-  getModelDataTypeAndStyle,
-} from './getModelDataTypeAndStyle'
+  getUploadDataExtentAndVisualization as getModelDataExtentAndVisualization,
+  getUploadDataTypeAndStyle as getModelDataTypeAndStyle,
+} from './getUploadDataTypeAndStyle'

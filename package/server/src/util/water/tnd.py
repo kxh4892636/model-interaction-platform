@@ -21,13 +21,12 @@ def resolveCSV(csvPath: str) -> dict:
     return dataDict
 
 
-def tnd2txt(tndPath: str, dstPath: str, dataDict: dict, num: int):
+def tnd2txt(tndPath: str, dstPath: str, dataDict: dict, hours: int):
     tinNum = dataDict["num"]
     data = dataDict["data"]
     tndData: list[str] = []
-    # NOTE 二进制读取
     with open(tndPath, "rb") as f:
-        f.seek((4 + 8 * tinNum) * num)
+        f.seek((4 + 8 * tinNum) * hours)
         id: tuple = struct.unpack("i", f.read(4))
         for i in range(0, tinNum):
             value: tuple = struct.unpack("d", f.read(8))
@@ -43,7 +42,6 @@ def tnd2txt(tndPath: str, dstPath: str, dataDict: dict, num: int):
                 + "\n"
             )
 
-    # # NOTE suffix:04d
     with open(dstPath, "w", encoding="utf8") as ff:
         ff.write(f"{tinNum}\n")
         ff.write("id x y z\n")
@@ -199,34 +197,31 @@ def tnd2png(srcPath, dstPath: str, maskPath: str) -> tuple:
 
 if __name__ == "__main__":
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
-    try:
-        # sys.argv
-        [datasetPath, num] = sys.argv[1:3]
-        # datasetPath = r"D:\project\fine-grained-simulation\data\test\tnd"
-        # num = 3
-        csvPath = os.path.join(datasetPath, "output/mesh31.csv")
-        dstPath = os.path.join(datasetPath, "output")
-        dataDict = resolveCSV(csvPath)
-        for i in range(1, 9):
-            tndPath = os.path.join(datasetPath, f"model/tnd{i}.dat")
-            for j in range(0, int(num)):
-                txtPath = os.path.join(
-                    dstPath,
-                    f"tnd_{i}_{j}.txt",
-                )
-                tnd2txt(
-                    tndPath,
-                    txtPath,
-                    dataDict,
-                    j,
-                )
-
-                dirname = os.path.dirname(txtPath)
-                fileName = os.path.basename(txtPath).split(".")[0]
-                extent = tnd2png(
-                    txtPath,
-                    txtPath.replace("txt", "png"),
-                    csvPath.replace("csv", "shp"),
-                )
-    except:
-        print("输入参数错误, 请输入文件 url")
+    # sys.argv
+    [modelFolderPath, hours, identifier] = sys.argv[1:4]
+    # modelFolderPath = r"D:\project\fine-grained-simulation\data\test\tnd"
+    # hours = "1"
+    # identifier = "123456"
+    csvPath = os.path.join(modelFolderPath, "mesh31.csv")
+    dstPath = os.path.join(modelFolderPath)
+    dataDict = resolveCSV(csvPath)
+    for i in range(1, 9):
+        tndPath = os.path.join(modelFolderPath, f"tnd{i}.dat")
+        for j in range(0, int(hours)):
+            txtPath = os.path.join(
+                dstPath,
+                f"tnd-{identifier}-{i}-{j}.txt",
+            )
+            tnd2txt(
+                tndPath,
+                txtPath,
+                dataDict,
+                j,
+            )
+            dirname = os.path.dirname(txtPath)
+            fileName = os.path.basename(txtPath).split(".")[0]
+            extent = tnd2png(
+                txtPath,
+                txtPath.replace("txt", "png"),
+                csvPath.replace("csv", "shp"),
+            )

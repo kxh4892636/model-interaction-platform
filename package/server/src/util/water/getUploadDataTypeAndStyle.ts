@@ -3,7 +3,7 @@ import { WaterDataStyleType, WaterDataTypeType } from '@/type'
 import { execa } from 'execa'
 import path from 'path'
 
-export const getModelDataTypeAndStyle = (
+export const getUploadDataTypeAndStyle = (
   relativeFilePath: string,
 ): [WaterDataTypeType, WaterDataStyleType] => {
   const typeAndStyleMap: Map<string, [WaterDataTypeType, WaterDataStyleType]> =
@@ -23,7 +23,6 @@ export const getModelDataTypeAndStyle = (
       ['cedian.dat', ['geojson', 'circle']],
       ['toufang.dat', ['geojson', 'circle']],
       ['uvet.dat', ['uvet', 'uvet']],
-      ['tcd.dat', ['tcd', 'raster']],
       ['tnd.dat', ['tnd', 'raster']],
       ['snd.dat', ['snd', 'raster']],
       ['yuji.dat', ['yuji', 'raster']],
@@ -39,7 +38,7 @@ export const getModelDataTypeAndStyle = (
   }
 }
 
-export const getModelDataExtentAndVisualization = async (
+export const getUploadDataExtentAndVisualization = async (
   relativeFilePath: string,
 ): Promise<[number[], string[]] | [[], []]> => {
   const filePath = path.join(DATA_FOLDER_PATH, relativeFilePath)

@@ -1,5 +1,6 @@
 import { getProjectTreeAPI } from '@/api/project/project.api'
 import { ProjectTreeType } from '@/api/project/project.type'
+import { useForceUpdate } from '@/hook/useForceUpdate'
 import { useLayersStore } from '@/store/layerStore'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
@@ -137,6 +138,7 @@ const useLayerTreeData = () => {
 }
 
 export const LayerPanel = () => {
+  const [_, forceUpdate] = useForceUpdate()
   const layers = useLayerTreeData()
   const layerActions = useLayerActions()
   const layerMenuItemsMap = {
@@ -167,6 +169,7 @@ export const LayerPanel = () => {
       action: async () => {
         const tag = await layerActions.deleteDataLayer()
         if (tag) {
+          forceUpdate()
           message.info('删除文件成功', 5)
         } else {
           message.error('删除文件失败', 5)
@@ -186,8 +189,8 @@ export const LayerPanel = () => {
     <div className=" flex h-full flex-col">
       <div className=" flex flex-auto flex-col ">
         <div
-          className="mb-0.5 flex flex-1 flex-col border border-slate-300
-            bg-white"
+          className="mb-0.5 flex max-h-[40vh] flex-1 flex-col border
+            border-slate-300 bg-white"
         >
           <div
             className="flex h-10 items-center border-0 border-b

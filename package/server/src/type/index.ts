@@ -47,7 +47,7 @@ export const WaterDataTypeSchema = Type.Union([
   Type.Literal('text'),
   Type.Literal('geojson'),
   Type.Literal('uvet'),
-  Type.Literal('tcd'),
+
   Type.Literal('tnd'),
   Type.Literal('snd'),
   Type.Literal('yuji'),

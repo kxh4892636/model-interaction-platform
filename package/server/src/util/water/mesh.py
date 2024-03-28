@@ -9,7 +9,6 @@ def Mesh2CSV(srcPath: str, dstPath) -> None:
     srs: osr.SpatialReference = osr.SpatialReference()
     srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
     srs.ImportFromEPSG(2437)
-    # TODO srs file should be supplied
     srs.SetTM(clat=0, clong=120, scale=1, fe=500000, fn=0)
     dst: osr.SpatialReference = osr.SpatialReference()
     dst.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
@@ -17,7 +16,6 @@ def Mesh2CSV(srcPath: str, dstPath) -> None:
     ct: osr.CoordinateTransformation = osr.CoordinateTransformation(srs, dst)
     with open(srcPath, "r", encoding="utf8") as f:
         for line in f:
-            # NOTE split() 用法
             content = line.split()
             splitNum = len(content)
             if splitNum == 2:
@@ -174,7 +172,6 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
     # false color composite image
     ds: gdal.Dataset = gdal.Open("/vsimem/temp_normalize.tif")
     band: gdal.Band = ds.GetRasterBand(1)
-    # NOTE std
     [min, max, mean, std] = band.ComputeStatistics(0)
     # create color table
     colors = gdal.ColorTable()
@@ -222,16 +219,13 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
 
 if __name__ == "__main__":
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
-    try:
-        projectPath = sys.argv[1]
-        meshPath = path.join(projectPath, "mesh31.gr3")
-        csvPath = path.join(projectPath, "mesh31.csv")
-        maskPath = path.join(projectPath, "mesh31.shp")
-        pngPath = path.join(projectPath, "mesh31.png")
-        dataList = Mesh2CSV(meshPath, csvPath)
-        mesh2mask(csvPath, maskPath)
-        extent: tuple = mesh2png(csvPath, pngPath, maskPath)
-        # (119.5498985092223, 120.21745091964257, 26.34525050928077, 26.972279065373204)
-        print(extent)
-    except:
-        print((0, 0, 0, 0))
+    projectPath = sys.argv[1]
+    meshPath = path.join(projectPath, "mesh31.gr3")
+    csvPath = path.join(projectPath, "mesh31.csv")
+    maskPath = path.join(projectPath, "mesh31.shp")
+    pngPath = path.join(projectPath, "mesh31.png")
+    dataList = Mesh2CSV(meshPath, csvPath)
+    mesh2mask(csvPath, maskPath)
+    extent: tuple = mesh2png(csvPath, pngPath, maskPath)
+    # (119.5498985092223, 120.21745091964257, 26.34525050928077, 26.972279065373204)
+    print(extent)

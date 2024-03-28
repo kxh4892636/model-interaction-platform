@@ -115,6 +115,60 @@ export const dataRoute = async (app: FastifyTypebox) => {
 
   app.route({
     method: 'get',
+    url: '/json',
+    schema: {
+      tags: ['data'],
+      querystring: DataVisualizationQueryStringSchema,
+      response: {
+        200: {
+          content: {
+            'application/json': {
+              schema: {},
+            },
+          },
+        },
+      },
+    },
+    handler: async (req, res) => {
+      const query = req.query
+      const cs = await dataService.getDataVisualizationData(
+        query.dataID,
+        query.index,
+      )
+      if (!cs) throw Error()
+      return res.type('application/json').send(cs)
+    },
+  })
+
+  app.route({
+    method: 'get',
+    url: '/image',
+    schema: {
+      tags: ['data'],
+      querystring: DataVisualizationQueryStringSchema,
+      response: {
+        200: {
+          content: {
+            'image/png': {
+              schema: {},
+            },
+          },
+        },
+      },
+    },
+    handler: async (req, res) => {
+      const query = req.query
+      const cs = await dataService.getDataVisualizationData(
+        query.dataID,
+        query.index,
+      )
+      if (!cs) throw Error()
+      return res.send(cs)
+    },
+  })
+
+  app.route({
+    method: 'get',
     url: '/text',
     schema: {
       tags: ['data'],
@@ -150,6 +204,7 @@ export const dataRoute = async (app: FastifyTypebox) => {
       },
     },
     handler: async (req): Promise<DataUploadResponseType> => {
+      // NOTE
       const options = { limits: { fileSize: 1073741824 } }
       const file = await req.file(options)
       if (!file) throw Error()

@@ -28,6 +28,7 @@ const NewArea = () => {
   const map = useMapStore((state) => state.map)
   const setModelArea = useModeStore((state) => state.setModelArea)
   const setProjectID = useMetaStore((state) => state.setProjectID)
+  const setModelType = useMetaStore((state) => state.setModelType)
   const [modelStatus, setModelStatus] = useState<(number | string)[]>([])
   const inputList = ['最小经度', '最小纬度', '最大经度', '最大纬度'].map(
     (value, index) => {
@@ -64,6 +65,7 @@ const NewArea = () => {
       setModelArea('defined')
       map!.fitBounds(modelStatus.slice(1) as any)
       setProjectID(result.data)
+      setModelType('water-2d')
       closeModal()
     } else {
       message.error('创建区域失败, 经纬度输入错误', 5)
@@ -108,6 +110,7 @@ const NewArea = () => {
 const HistoryArea = () => {
   const projectID = useMetaStore((state) => state.projectID)
   const setProjectID = useMetaStore((state) => state.setProjectID)
+  const setModelType = useMetaStore((state) => state.setModelType)
   const closeModal = useModalStore((state) => state.closeModal)
   const map = useMapStore((state) => state.map)
   const setModelArea = useModeStore((state) => state.setModelArea)
@@ -125,6 +128,7 @@ const HistoryArea = () => {
     setModelArea('defined')
     map!.fitBounds(projectInfo.projectExtent as any)
     setProjectID(projectInfo.projectId)
+    setModelType('water-2d')
     closeModal()
   }
 
@@ -138,6 +142,7 @@ const HistoryArea = () => {
     forceUpdate()
     if (projectInfo.projectId === projectID) {
       setProjectID(null)
+      setModelType('water-2d')
       setModelArea('undefined')
     }
     if (result.status === 'success') {

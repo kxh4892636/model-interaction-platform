@@ -11,7 +11,7 @@ export const getDataInfoAPI = async (dataID: string) => {
   const url =
     '/api/v1/data/info?' +
     new URLSearchParams({
-      dataID: dataID,
+      dataID,
     })
   const response: DataFetchAPIInterface<DataInfoType> = await extendFetch(url, {
     method: 'GET',
@@ -46,7 +46,7 @@ export const getMeshAPI = async (dataID: string, index: number) => {
   const url =
     '/api/v1/data/mesh?' +
     new URLSearchParams({
-      dataID: dataID,
+      dataID,
       index: index.toString(),
     })
   const response: Blob | DataFetchAPIInterface<null> = await extendFetch(url, {
@@ -74,7 +74,7 @@ export const getUVETDescriptionAPI = async (dataID: string) => {
   const url =
     '/api/v1/data/uvet/description?' +
     new URLSearchParams({
-      dataID: dataID,
+      dataID,
       index: '0',
     })
 
@@ -111,6 +111,7 @@ export const getUVETDescriptionAPI = async (dataID: string) => {
   return response
 }
 
+// TODO 把逻辑放到后端
 export const getUVETImageAPI = async (
   dataID: string,
   type: 'mask' | 'uv' | 'valid',
@@ -128,8 +129,37 @@ export const getUVETImageAPI = async (
   const url =
     '/api/v1/data/uvet/image?' +
     new URLSearchParams({
-      dataID: dataID,
+      dataID,
       index: transformIndex.toString(),
+    })
+
+  const result: Blob | DataFetchAPIInterface<null> = await extendFetch(url, {
+    method: 'get',
+  })
+    .then((res) => {
+      if (res.status === 200) {
+        return res.blob()
+      } else {
+        throw Error()
+      }
+    })
+    .catch(() => {
+      return {
+        status: 'error',
+        data: null,
+        message: '',
+      }
+    })
+
+  return result
+}
+
+export const getImageAPI = async (dataID: string, index: number) => {
+  const url =
+    '/api/v1/data/image?' +
+    new URLSearchParams({
+      dataID,
+      index: index.toString(),
     })
 
   const result: Blob | DataFetchAPIInterface<null> = await extendFetch(url, {
@@ -157,7 +187,7 @@ export const getTextAPI = async (dataID: string, index: number) => {
   const url =
     '/api/v1/data/text?' +
     new URLSearchParams({
-      dataID: dataID,
+      dataID,
       index: index.toString(),
     })
   const response: DataFetchAPIInterface<string> = await extendFetch(url, {
@@ -174,6 +204,42 @@ export const getTextAPI = async (dataID: string, index: number) => {
       const result: DataFetchAPIInterface<string> = {
         status: 'success',
         data: text,
+        message: '',
+      }
+      return result
+    })
+    .catch(() => {
+      return {
+        status: 'error',
+        data: null,
+        message: '',
+      }
+    })
+
+  return response
+}
+
+export const getJsonAPI = async (dataID: string, index: number) => {
+  const url =
+    '/api/v1/data/json?' +
+    new URLSearchParams({
+      dataID,
+      index: index.toString(),
+    })
+  const response: DataFetchAPIInterface<object> = await extendFetch(url, {
+    method: 'GET',
+  })
+    .then((res) => {
+      if (res.status === 200) {
+        return res.json()
+      } else {
+        throw Error()
+      }
+    })
+    .then((json) => {
+      const result: DataFetchAPIInterface<object> = {
+        status: 'success',
+        data: json,
         message: '',
       }
       return result

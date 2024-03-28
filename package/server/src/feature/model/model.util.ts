@@ -30,14 +30,10 @@ export const getModelDataVisualization = (
     },
     'quality-wasp': () => {
       const result: string[] = []
-      for (let index = 0; index < hours; index++) {
-        result.push(
-          path.join(
-            DATA_FOLDER_PATH,
-            datasetPath,
-            `output/tnd-${1}-${index}.png`,
-          ),
-        )
+      for (let i = 1; i <= 8; i++) {
+        for (let j = 0; j < hours; j++) {
+          result.push(path.join(datasetPath, `tnd-${identifier}-${i}-${j}.png`))
+        }
       }
       return result
     },
@@ -48,7 +44,7 @@ export const getModelDataVisualization = (
           path.join(
             DATA_FOLDER_PATH,
             datasetPath,
-            `output/tnd_${1}_${index}.png`,
+            `tnd-${identifier}-${index}.png`,
           ),
         )
       }
@@ -57,20 +53,20 @@ export const getModelDataVisualization = (
     sand: () => {
       const result: string[] = []
       for (let index = 0; index < hours; index++) {
-        result.push(path.join(datasetPath, `output/snd_${index}.png`))
+        result.push(path.join(datasetPath, `snd-${identifier}-${index}.png`))
       }
       for (let index = 0; index < hours; index++) {
-        result.push(path.join(datasetPath, `output/yuji_${index}.png`))
+        result.push(path.join(datasetPath, `yuji-${identifier}-${index}.png`))
       }
       return result
     },
     mud: () => {
       const result: string[] = []
       for (let index = 0; index < hours; index++) {
-        result.push(path.join(datasetPath, `output/snd_${index}.png`))
+        result.push(path.join(datasetPath, `snd-${identifier}-${index}.png`))
       }
       for (let index = 0; index < hours; index++) {
-        result.push(path.join(datasetPath, `output/yuji_${index}.png`))
+        result.push(path.join(datasetPath, `yuji-${identifier}-${index}.png`))
       }
       return result
     },

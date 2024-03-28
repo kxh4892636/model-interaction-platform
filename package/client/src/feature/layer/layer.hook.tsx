@@ -1,14 +1,22 @@
 import { postDatasetActonAPI } from '@/api/dataset/dataset.api'
 import {
   getDataInfoAPI,
+  getImageAPI,
   getTextAPI,
   postDataActonAPI,
 } from '@/api/model-data/data.api'
 import { DataInfoType } from '@/api/model-data/data.type'
 import { useLayersStore } from '@/store/layerStore'
 import { useMapStore } from '@/store/mapStore'
+import { useMetaStore } from '@/store/metaStore'
 import { LayerType } from '@/type'
-import { addMeshToMap, addUVETToMap, getLayerKeys } from './layer.util'
+import { addImageSequenceToMap } from '@/util/mapbox.util'
+import {
+  addGeoJsonLayerToMap,
+  addMeshLayerToMap,
+  addUVETLayerToMap,
+  getLayerKeys,
+} from './layer.util'
 
 export const useLayerActions = () => {
   const map = useMapStore((state) => state.map)
@@ -25,6 +33,13 @@ export const useLayerActions = () => {
   )
   const layersSelected = useLayersStore((state) => state.layersSelected)
   const setLayersSelected = useLayersStore((state) => state.setLayersSelected)
+  const addInterValID = useMetaStore((state) => state.addInterValID)
+  const getInterValIDByLayerID = useMetaStore(
+    (state) => state.getInterValIDByLayerID,
+  )
+  const removeInterValIDByLayerID = useMetaStore(
+    (state) => state.removeInterValIDByLayerID,
+  )
 
   const downloadText = async () => {
     if (!layersSelected.data) return false
@@ -59,6 +74,27 @@ export const useLayerActions = () => {
   //   return true
   // }
 
+  const addImageSequenceLayerToMap = async (
+    map: mapboxgl.Map,
+    info: DataInfoType,
+  ) => {
+    const blobList: Blob[] = []
+    for (let index = 0; index < info.visualizationNumber; index++) {
+      const blob = await getImageAPI(info.dataID, index)
+      if (!(blob instanceof Blob)) continue
+      blobList.push(blob)
+    }
+    const intervalID = addImageSequenceToMap(
+      map,
+      info.dataID,
+      blobList,
+      info.dataExtent,
+    )
+
+    addInterValID(layersSelected.data!.layerKey, intervalID)
+    return true
+  }
+
   const addDataToMap = async () => {
     if (!layersSelected.data || !map) return false
     const dataID = layersSelected.data.layerKey
@@ -70,8 +106,12 @@ export const useLayerActions = () => {
       string,
       (map: mapboxgl.Map, info: DataInfoType) => Promise<boolean>
     > = {
-      mesh: addMeshToMap,
-      uvet: addUVETToMap,
+      mesh: addMeshLayerToMap,
+      uvet: addUVETLayerToMap,
+      geojson: addGeoJsonLayerToMap,
+      tnd: addImageSequenceLayerToMap,
+      snd: addImageSequenceLayerToMap,
+      yuji: addImageSequenceLayerToMap,
     }
 
     const tag = await fnMap[info.data.dataType](map, info.data)
@@ -136,6 +176,11 @@ export const useLayerActions = () => {
     if (map.getSource(layersSelected.map.layerKey))
       map.removeSource(layersSelected.map.layerKey)
     setLayersSelected(null, 'map')
+
+    const intervalID = getInterValIDByLayerID(layersSelected.map.layerKey)
+    if (!intervalID) return
+    clearInterval(intervalID)
+    removeInterValIDByLayerID(layersSelected.map.layerKey)
   }
 
   /**

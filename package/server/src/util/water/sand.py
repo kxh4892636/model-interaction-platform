@@ -2,6 +2,8 @@ import os
 import struct
 import sys
 
+from osgeo import gdal, ogr, osr
+
 
 def resolveCSV(csvPath: str) -> dict:
     dataDict: dict = {"num": 0, "data": []}
@@ -19,13 +21,12 @@ def resolveCSV(csvPath: str) -> dict:
     return dataDict
 
 
-def tnd2txt(tndPath: str, dstPath: str, dataDict: dict, num: int):
+def tnd2txt(tndPath: str, dstPath: str, dataDict: dict, hours: int):
     tinNum = dataDict["num"]
     data = dataDict["data"]
     tndData: list[str] = []
-    # NOTE 二进制读取
     with open(tndPath, "rb") as f:
-        f.seek((4 + 8 * tinNum) * num)
+        f.seek((4 + 8 * tinNum) * hours)
         id: tuple = struct.unpack("i", f.read(4))
         for i in range(0, tinNum):
             value: tuple = struct.unpack("d", f.read(8))
@@ -41,14 +42,10 @@ def tnd2txt(tndPath: str, dstPath: str, dataDict: dict, num: int):
                 + "\n"
             )
 
-    # # NOTE suffix:04d
     with open(dstPath, "w", encoding="utf8") as ff:
         ff.write(f"{tinNum}\n")
         ff.write("id x y z\n")
         ff.writelines(tndData)
-
-
-from osgeo import gdal, ogr, osr
 
 
 def resolveTXT(src: str) -> list[tuple[str, float, float, float]]:
@@ -192,39 +189,39 @@ def sand2png(srcPath, dstPath: str, maskPath: str) -> tuple:
 
 if __name__ == "__main__":
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
-    try:
-        # sys.argv
-        [datasetPath, num] = sys.argv[1:3]
-        csvPath = os.path.join(datasetPath, "output/mesh31.csv")
-        dstPath = os.path.join(datasetPath, "output")
-        dataDict = resolveCSV(csvPath)
-        sndPath = os.path.join(datasetPath, "model/snd.dat")
-        for i in range(0, int(num)):
-            txtPath = os.path.join(dstPath, f"snd_{i}.txt")
-            tnd2txt(
-                sndPath,
-                txtPath,
-                dataDict,
-                i,
-            )
-            sand2png(
-                txtPath,
-                txtPath.replace("txt", "png"),
-                csvPath.replace("csv", "shp"),
-            )
-        yujiPath = os.path.join(datasetPath, "model/yuji.dat")
-        for i in range(0, int(num)):
-            txtPath = os.path.join(dstPath, f"yuji_{i}.txt")
-            tnd2txt(
-                yujiPath,
-                txtPath,
-                dataDict,
-                i,
-            )
-            sand2png(
-                txtPath,
-                txtPath.replace("txt", "png"),
-                csvPath.replace("csv", "shp"),
-            )
-    except:
-        print("输入参数错误, 请输入文件 url")
+    # sys.argv
+    [modelFolderPath, hours, identifier] = sys.argv[1:4]
+    # modelFolderPath = r"D:\project\fine-grained-simulation\data\test\sand"
+    # hours = 1
+    # identifier = 123456
+    csvPath = os.path.join(modelFolderPath, "mesh31.csv")
+    dstPath = os.path.join(modelFolderPath)
+    dataDict = resolveCSV(csvPath)
+    sndPath = os.path.join(modelFolderPath, "snd.dat")
+    for i in range(0, int(hours)):
+        txtPath = os.path.join(dstPath, f"snd-{i}.txt")
+        tnd2txt(
+            sndPath,
+            txtPath,
+            dataDict,
+            i,
+        )
+        sand2png(
+            txtPath,
+            txtPath.replace("txt", "png"),
+            csvPath.replace("csv", "shp"),
+        )
+    yujiPath = os.path.join(modelFolderPath, "yuji.dat")
+    for i in range(0, int(hours)):
+        txtPath = os.path.join(dstPath, f"yuji-{i}.txt")
+        tnd2txt(
+            yujiPath,
+            txtPath,
+            dataDict,
+            i,
+        )
+        sand2png(
+            txtPath,
+            txtPath.replace("txt", "png"),
+            csvPath.replace("csv", "shp"),
+        )

@@ -54,6 +54,24 @@ export const modelRoute = async (app: FastifyTypebox) => {
 
   app.route({
     method: 'post',
+    url: '/param/quality-wasp',
+    schema: {
+      tags: ['model'],
+      body: Water2DParamBodySchema,
+      response: {
+        200: ModelParamResponseSchema,
+      },
+    },
+    handler: async (req): Promise<ModelParamResponseType> => {
+      const body = req.body
+      await modelService.setQualityWaspParam(body.projectID, body.hours)
+      const response = generateResponse('success', '', null)
+      return response
+    },
+  })
+
+  app.route({
+    method: 'post',
     url: '/water/action',
     schema: {
       tags: ['model'],
@@ -74,6 +92,14 @@ export const modelRoute = async (app: FastifyTypebox) => {
           modelService
             .runWater2DModel(init.modelName, init.projectID, modelID)
             .catch(() => {
+              console.log('stop model')
+              modelService.stopModel(modelID)
+            })
+        } else if (init.modelType === 'quality-wasp') {
+          modelService
+            .runQualityWaspModel(init.modelName, init.projectID, modelID)
+            .catch(() => {
+              console.log('stop model')
               modelService.stopModel(modelID)
             })
         }

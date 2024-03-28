@@ -61,14 +61,11 @@ def dat2json(dataDict: dict, ids: list[str], dstPath) -> None:
 
 
 if __name__ == "__main__":
-    try:
-        # sys.argv
-        filePath = sys.argv[1]
-        meshPath = path.join(path.dirname(filePath), "mesh31.csv")
-        dataDict = resolveCSV(meshPath)
-        ids = resolveDat(filePath)
-        dstPath = filePath.replace(".dat", ".json")
-        dat2json(dataDict, ids, dstPath)
-        print("success")
-    except:
-        print("fail")
+    # sys.argv
+    filePath = sys.argv[1]
+    meshPath = path.join(path.dirname(filePath), "mesh31.csv")
+    dataDict = resolveCSV(meshPath)
+    ids = resolveDat(filePath)
+    dstPath = filePath.replace(".dat", ".json")
+    dat2json(dataDict, ids, dstPath)
+    print("success")

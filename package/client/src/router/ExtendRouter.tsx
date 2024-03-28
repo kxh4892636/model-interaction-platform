@@ -3,7 +3,6 @@ import { useMetaStore } from '@/store/metaStore'
 import { useEffect, useLayoutEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-// NOTE useLocation matchRoutes
 interface AppProps {
   children: JSX.Element | null
 }

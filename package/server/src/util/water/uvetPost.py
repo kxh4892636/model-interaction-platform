@@ -2,7 +2,6 @@ import json
 import os
 import struct
 import sys
-import traceback
 
 
 def createDescription(
@@ -58,7 +57,6 @@ def uvet2txt(uvetPath: str, dstPath: str, dataDict: dict, num: int):
     gridNum = dataDict["num"]
     data = dataDict["data"]
     uvet: list[str] = []
-    # NOTE 二进制读取
     with open(uvetPath, "rb") as f:
         f.seek((4 + 24 * gridNum) * num)
         id: tuple = struct.unpack("i", f.read(4))
@@ -80,7 +78,6 @@ def uvet2txt(uvetPath: str, dstPath: str, dataDict: dict, num: int):
                 + "\n"
             )
 
-    # # NOTE suffix:04d
     with open(dstPath, "w", encoding="utf8") as ff:
         ff.write(f"{gridNum}\n")
         ff.write("id x y p u v\n")
@@ -88,33 +85,29 @@ def uvet2txt(uvetPath: str, dstPath: str, dataDict: dict, num: int):
 
 
 if __name__ == "__main__":
-    try:
-        [modelFolderPath, extent, hours, identifier] = sys.argv[1:5]
-        csvPath = os.path.join(modelFolderPath, "mesh31.csv")
-        uvetPath = os.path.join(modelFolderPath, "uvet.dat")
-        dstPath = os.path.join(modelFolderPath)
-        dataDict = resolveCSV(csvPath)
-        for i in range(0, int(hours)):
-            uvet2txt(
-                uvetPath,
-                os.path.join(modelFolderPath, f"uvet-{identifier}-{i}.txt"),
-                dataDict,
-                i,
-            )
-            print(i)
-        descriptionPath = os.path.join(
-            modelFolderPath, f"description-{identifier}.json"
+    [modelFolderPath, extent, hours, identifier] = sys.argv[1:5]
+    csvPath = os.path.join(modelFolderPath, "mesh31.csv")
+    uvetPath = os.path.join(modelFolderPath, "uvet.dat")
+    dstPath = os.path.join(modelFolderPath)
+    dataDict = resolveCSV(csvPath)
+    for i in range(0, int(hours)):
+        uvet2txt(
+            uvetPath,
+            os.path.join(modelFolderPath, f"uvet-{identifier}-{i}.txt"),
+            dataDict,
+            i,
         )
-        maskPath = os.path.join(modelFolderPath, "mesh31.shp")
-        createDescription(
-            descriptionPath,
-            dstPath,
-            dstPath,
-            extent.split(","),
-            maskPath,
-            int(hours),
-            identifier,
-        )
-    except:
-        traceback.print_exc()
-        print("输入参数错误, 请输入文件 url")
+        print(i)
+    descriptionPath = os.path.join(
+        modelFolderPath, f"description-{identifier}.json"
+    )
+    maskPath = os.path.join(modelFolderPath, "mesh31.shp")
+    createDescription(
+        descriptionPath,
+        dstPath,
+        dstPath,
+        extent.split(","),
+        maskPath,
+        int(hours),
+        identifier,
+    )
