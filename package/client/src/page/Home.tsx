@@ -32,7 +32,8 @@ export const Home = () => {
     value: WaterModelTypeType
     label: string
   }[] = [
-    { value: 'water-2d', label: '水动力模型' },
+    { value: 'water-2d', label: '水动力2D模型' },
+    { value: 'water-3d', label: '水动力3D模型' },
     {
       value: 'quality-wasp',
       label: '水质模型-wasp',
@@ -40,6 +41,10 @@ export const Home = () => {
     {
       value: 'sand',
       label: '泥沙模型',
+    },
+    {
+      value: 'mud',
+      label: '抛泥模型',
     },
   ]
 

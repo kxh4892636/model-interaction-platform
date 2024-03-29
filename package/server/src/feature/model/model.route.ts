@@ -11,6 +11,7 @@ import {
   ModelInfoResponseType,
   ModelParamResponseSchema,
   ModelParamResponseType,
+  MudParamBodySchema,
   QualityWaspParamBodySchema,
   SandParamBodySchema,
   Water2DParamBodySchema,
@@ -92,6 +93,24 @@ export const modelRoute = async (app: FastifyTypebox) => {
 
   app.route({
     method: 'post',
+    url: '/param/mud',
+    schema: {
+      tags: ['model'],
+      body: MudParamBodySchema,
+      response: {
+        200: ModelParamResponseSchema,
+      },
+    },
+    handler: async (req): Promise<ModelParamResponseType> => {
+      const body = req.body
+      await modelService.setMudParam(body.projectID, body.hours)
+      const response = generateResponse('success', '', null)
+      return response
+    },
+  })
+
+  app.route({
+    method: 'post',
     url: '/water/action',
     schema: {
       tags: ['model'],
@@ -125,6 +144,13 @@ export const modelRoute = async (app: FastifyTypebox) => {
         } else if (init.modelType === 'sand') {
           modelService
             .runSandModel(init.modelName, init.projectID, modelID)
+            .catch(() => {
+              console.log('stop model')
+              modelService.stopModel(modelID)
+            })
+        } else if (init.modelType === 'mud') {
+          modelService
+            .runMudModel(init.modelName, init.projectID, modelID)
             .catch(() => {
               console.log('stop model')
               modelService.stopModel(modelID)

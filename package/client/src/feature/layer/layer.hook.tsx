@@ -112,6 +112,7 @@ export const useLayerActions = () => {
       tnd: addImageSequenceLayerToMap,
       snd: addImageSequenceLayerToMap,
       yuji: addImageSequenceLayerToMap,
+      mud: addImageSequenceLayerToMap,
     }
 
     const tag = await fnMap[info.data.dataType](map, info.data)

@@ -247,6 +247,8 @@ const runWater2DModel = async (
   console.timeLog(identifier, 'process.exe finish')
 
   console.timeLog(identifier, 'model finish')
+
+  console.log(progress)
   await orm.model.updateModelByModelID(modelID, {
     status: 'valid',
   })
@@ -318,7 +320,7 @@ const setQualityWaspParam = async (projectID: string, hours: number) => {
   if (!isPramhkExist) throw Error()
   const paramhkContent = (await readFile(paramhkPath))
     .toString()
-    .replace(/.*3.5.*2.5/, `${(hours + 72) / 24} 3.5 2.5`)
+    .replace(/.*3.5.*2.5/, `${(hours + 24) / 24} 3.5 2.5`)
   await writeFile(paramhkPath, paramhkContent)
 
   // modify quality-wasp
@@ -449,7 +451,7 @@ const postQualityWasp = async (
   // tnd2png
   const cp = execa(
     `conda activate gis && python ${[
-      path.join(process.cwd(), '/src/util/water/tnd.py'),
+      path.join(process.cwd(), '/src/util/water/qualityWasp.py'),
       path.join(DATA_FOLDER_PATH, modelFolderPath),
       hours,
       identifier,
@@ -509,7 +511,7 @@ const runQualityWaspModel = async (
   const progress = {
     current: 0,
     per: 1,
-    total: 93 * hours + 1224,
+    total: 93 * hours + 408,
   }
   console.timeLog(identifier, 'preprocess water-2d.exe')
   await preRunWater2DModel(modelID, modelFolderPath, progress)
@@ -520,7 +522,7 @@ const runQualityWaspModel = async (
   console.timeLog(identifier, 'quality-wasp.exe finish')
 
   // postProcess quality
-  console.timeLog(identifier, 'run tnd.py')
+  console.timeLog(identifier, 'run qualityWasp.py')
   await postQualityWasp(modelFolderPath, hours, identifier, modelID, progress)
   console.timeLog(identifier, 'model finish')
 
@@ -551,7 +553,7 @@ const setSandParam = async (projectID: string, hours: number) => {
   if (!isPramhkExist) throw Error()
   const paramhkContent = (await readFile(paramhkPath))
     .toString()
-    .replace(/.*3.5.*2.5/, `${(hours + 72) / 24} 3.5 2.5`)
+    .replace(/.*3.5.*2.5/, `${(hours + 24) / 24} 3.5 2.5`)
   await writeFile(paramhkPath, paramhkContent)
 
   // modify sand
@@ -738,10 +740,10 @@ const runSandModel = async (
   const progress = {
     current: 0,
     per: 1,
-    total: 51 * hours + 1224,
+    total: 51 * hours + 408,
   }
   console.timeLog(identifier, 'preprocess water-2d.exe')
-  // await preRunWater2DModel(modelID, modelFolderPath, progress)
+  await preRunWater2DModel(modelID, modelFolderPath, progress)
 
   // run sand model
   console.timeLog(identifier, 'run sand.exe')
@@ -751,6 +753,223 @@ const runSandModel = async (
   // postProcess quality
   console.timeLog(identifier, 'run sand.py')
   await postSand(modelFolderPath, hours, identifier, modelID, progress)
+  console.timeLog(identifier, 'model finish')
+
+  console.log(progress)
+  await orm.model.updateModelByModelID(modelID, {
+    status: 'valid',
+  })
+  await orm.dataset.updateDatasetByDatasetID(datasetID, {
+    status: 'valid',
+  })
+}
+
+/**
+ * mud model
+ */
+const setMudParam = async (projectID: string, hours: number) => {
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  // modify model param by hours
+  const qualityWaspPath = path.join(
+    DATA_FOLDER_PATH,
+    projectInfo.project_folder_path,
+    'mud',
+  )
+  // modify water-2d
+  const paramhkPath = path.join(qualityWaspPath, 'paramhk.in')
+  const isPramhkExist = await existsPromise(paramhkPath)
+  if (!isPramhkExist) throw Error()
+  const paramhkContent = (await readFile(paramhkPath))
+    .toString()
+    .replace(/.*3.5.*2.5/, `${(hours + 12) / 24} 3.5 2.5`)
+  await writeFile(paramhkPath, paramhkContent)
+
+  // modify mud
+  const wuRanGongKuangPath = path.join(qualityWaspPath, 'wuran-gongkuang.dat')
+  const isExist = await existsPromise(wuRanGongKuangPath)
+  if (!isExist) throw Error()
+  const paramContent = (await readFile(wuRanGongKuangPath))
+    .toString()
+    .replace(/.*31.*day.*/, `${hours / 24},31,"day"`)
+  await writeFile(wuRanGongKuangPath, paramContent)
+}
+
+const preMud = async (
+  modelID: string,
+  datasetID: string,
+  modelFolderPath: string,
+  identifier: string,
+) => {
+  // create model record
+  await orm.model.createModel(modelID, datasetID, -9999, 0, 'pending')
+
+  // get mesh extent
+  const isMeshExist = await existsPromise(
+    path.join(DATA_FOLDER_PATH, modelFolderPath, 'mesh31.gr3'),
+  )
+  if (!isMeshExist) throw Error()
+  const meshInfo = await modelDao.getMeshInfo(
+    path.join(modelFolderPath, 'mesh31.gr3'),
+  )
+  if (!meshInfo) throw Error()
+  const extent = meshInfo.data_extent
+
+  // get hours
+  const wuRanGongKuangPath = path.join(
+    DATA_FOLDER_PATH,
+    modelFolderPath,
+    'wuran-gongkuang.dat',
+  )
+  const isExist = await existsPromise(wuRanGongKuangPath)
+  if (!isExist) throw Error()
+  const paramContent = (await readFile(wuRanGongKuangPath))
+    .toString()
+    .match(/[\d.]*(?=,31,"day")/)
+  if (!paramContent) throw Error()
+  const hours = Math.round(Number(paramContent[0]) * 24)
+
+  // create data record and dataset_data record
+  const visualization = getModelDataVisualization(
+    'mud',
+    modelFolderPath,
+    hours,
+    identifier,
+  )
+  const titles: string[] = ['输出 - 1', '输出 - 2']
+  for (let index = 1; index <= 2; index++) {
+    const tndID = randomUUID()
+    const tndPath = path.join(modelFolderPath, `tnd${index}.dat`)
+    await dataDao.createData(
+      datasetID,
+      tndID,
+      `${index}_${titles[index - 1]}`,
+      'mud',
+      'raster',
+      extent,
+      identifier,
+      tndPath,
+      'mud',
+      visualization.slice(0 + hours * (index - 1), hours + hours * (index - 1)),
+      'valid',
+    )
+  }
+
+  return { hours }
+}
+
+const runMudEXE = async (
+  modelFolderPath: string,
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  const modelPath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'mud.exe')
+  const cp = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+    shell: true,
+    windowsHide: true,
+  })
+  orm.model.updateModelByModelID(modelID, {
+    modelPid: cp.pid,
+  })
+  cp.stdout!.on('data', (chunk) => {
+    if ((chunk.toString() as string).includes('time')) {
+      progress.current += progress.per * 40
+      orm.model.updateModelByModelID(modelID, {
+        modelProgress: progress.current / progress.total,
+      })
+    }
+  })
+  await cp
+}
+
+const postMud = async (
+  modelFolderPath: string,
+  hours: number,
+  identifier: string,
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  // mud2png, same as quality-wasp.py
+  const cp = execa(
+    `conda activate gis && python ${[
+      path.join(process.cwd(), '/src/util/water/mud.py'),
+      path.join(DATA_FOLDER_PATH, modelFolderPath),
+      hours,
+      identifier,
+    ].join(' ')}`,
+    {
+      shell: true,
+      windowsHide: true,
+    },
+  )
+  orm.model.updateModelByModelID(modelID, {
+    modelPid: cp.pid,
+  })
+  cp.stderr!.on('data', (chunk) => {
+    if ((chunk.toString() as string).toLowerCase().includes('clamped')) {
+      progress.current += progress.per * 7
+      orm.model.updateModelByModelID(modelID, {
+        modelProgress: progress.current / progress.total,
+      })
+    }
+  })
+  await cp
+}
+
+const runMudModel = async (
+  modelName: string,
+  projectID: string,
+  modelID: string,
+) => {
+  const identifier = Date.now().toString()
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  const modelFolderPath = path.join(projectInfo.project_folder_path, 'mud')
+  const datasetID = randomUUID()
+  await datasetService.createDataset(
+    projectID,
+    'mud',
+    'mud-output',
+    datasetID,
+    modelName,
+    'pending',
+  )
+
+  console.time(identifier)
+  // preprocess mud.exe
+  console.timeLog(identifier, 'preprocess mud.exe')
+  const { hours } = await preMud(
+    modelID,
+    datasetID,
+    modelFolderPath,
+    identifier,
+  )
+
+  // pre water-2d.exe
+  const progress = {
+    current: 0,
+    per: 1,
+    total: 71 * hours + 204,
+  }
+  console.timeLog(identifier, 'preprocess water-2d.exe')
+  await preRunWater2DModel(modelID, modelFolderPath, progress)
+
+  // run mud model
+  console.timeLog(identifier, 'run mud.exe')
+  await runMudEXE(modelFolderPath, modelID, progress)
+  console.timeLog(identifier, 'mud.exe finish')
+
+  // postProcess quality
+  console.timeLog(identifier, 'run mud.py')
+  await postMud(modelFolderPath, hours, identifier, modelID, progress)
   console.timeLog(identifier, 'model finish')
 
   console.log(progress)
@@ -799,9 +1018,11 @@ export const modelService = {
   setWater2DParam,
   setQualityWaspParam,
   setSandParam,
+  setMudParam,
   runWater2DModel,
   runQualityWaspModel,
   runSandModel,
+  runMudModel,
   stopModel,
   getModelInfo,
 }

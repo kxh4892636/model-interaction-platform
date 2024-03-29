@@ -40,6 +40,12 @@ export const SandParamBodySchema = Type.Object({
   hours: Type.Integer(),
 })
 export type SandParamBodyType = Static<typeof SandParamBodySchema>
+// /model/param/mud
+export const MudParamBodySchema = Type.Object({
+  projectID: Type.String(),
+  hours: Type.Integer(),
+})
+export type MudParamBodyType = Static<typeof MudParamBodySchema>
 
 // /model/action
 export const ModelActionSchema = Type.Union([Type.String(), Type.Null()])

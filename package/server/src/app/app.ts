@@ -68,7 +68,7 @@ export const startApp = async (port: number) => {
 
   try {
     await app.listen({ port })
-    console.log(process.cwd())
+    console.log('current working directory:', process.cwd())
   } catch (err) {
     app.log.error(err)
   }

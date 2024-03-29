@@ -6,6 +6,7 @@ import {
   ModelActionType,
   ModelParamResponseType,
   ModelParamType,
+  MudParamBodyType,
   QualityWaspParamBodyType,
   SandParamBodyType,
   Water2DParamBodyType,
@@ -91,6 +92,44 @@ export const postQualityWaspParamAPI = async (
 
 export const postSandParamAPI = async (params: SandParamBodyType) => {
   const url = `/api/v1/model/param/sand`
+  const response: DataFetchAPIInterface<ModelParamType> = await extendFetch(
+    url,
+    {
+      method: 'post',
+      headers: new Headers({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(params),
+    },
+  )
+    .then((res) => {
+      if (res.status === 200) {
+        return res.json()
+      } else {
+        throw Error()
+      }
+    })
+    .then((result: ModelParamResponseType) => {
+      if (result.status === 'success') {
+        return result
+      } else {
+        throw Error()
+      }
+    })
+    .catch(() => {
+      const result: DataFetchAPIInterface<ModelParamType> = {
+        status: 'error',
+        data: null,
+        message: '',
+      }
+      return result
+    })
+
+  return response
+}
+
+export const postMudParamAPI = async (params: MudParamBodyType) => {
+  const url = `/api/v1/model/param/mud`
   const response: DataFetchAPIInterface<ModelParamType> = await extendFetch(
     url,
     {

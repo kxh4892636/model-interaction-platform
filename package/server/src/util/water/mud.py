@@ -21,55 +21,33 @@ def resolveCSV(csvPath: str) -> dict:
     return dataDict
 
 
-def tnd2txt(tndPath: str, dstPath: str, dataDict: dict, hours: int):
+def resolveDat(
+    tndPath: str, dataDict: dict, hours: int
+) -> list[tuple[str, float, float, float]]:
+    dataList: list[tuple[str, float, float, float]] = []
     tinNum = dataDict["num"]
     data = dataDict["data"]
-    tndData: list[str] = []
+    # NOTE 二进制读取
     with open(tndPath, "rb") as f:
         f.seek((4 + 8 * tinNum) * hours)
         id: tuple = struct.unpack("i", f.read(4))
         for i in range(0, tinNum):
             value: tuple = struct.unpack("d", f.read(8))
-            tndData.append(
-                " ".join(
-                    [
-                        data[i][0],
-                        data[i][1],
-                        data[i][2],
-                        str(round(value[0], 6)),
-                    ]
-                )
-                + "\n"
+            temp = (
+                str(data[i][0]),
+                float(data[i][1]),
+                float(data[i][2]),
+                float(value[0]),
             )
-
-    with open(dstPath, "w", encoding="utf8") as ff:
-        ff.write(f"{tinNum}\n")
-        ff.write("id x y z\n")
-        ff.writelines(tndData)
-
-
-def resolveTXT(src: str) -> list[tuple[str, float, float, float]]:
-    dataList: list[tuple[str, float, float, float]] = []
-    with open(src, "r", encoding="utf8") as f:
-        f.readline()
-        f.readline()
-        for line in f:
-            content = line.split()
-            dataList.append(
-                (
-                    str(content[0]),
-                    float(content[1]),
-                    float(content[2]),
-                    float(content[3].removesuffix("\n")),
-                )
-            )
+            dataList.append(temp)
 
     return dataList
 
 
-def tnd2png(srcPath, dstPath: str, maskPath: str) -> tuple:
-    dataList = resolveTXT(srcPath)
-
+def tnd2png(
+    tndPath: str, dataDict: dict, hours: int, dstPath: str, maskPath: str
+) -> tuple:
+    dataList = resolveDat(tndPath, dataDict, hours)
     # create shp file from the csv file
     driver: ogr.Driver = ogr.GetDriverByName("ESRI Shapefile")
     ds: ogr.DataSource = driver.CreateDataSource("/vsimem/temp.shp")
@@ -205,23 +183,12 @@ if __name__ == "__main__":
     csvPath = os.path.join(modelFolderPath, "mesh31.csv")
     dstPath = os.path.join(modelFolderPath)
     dataDict = resolveCSV(csvPath)
-    for i in range(1, 9):
+    maskPath = os.path.join(modelFolderPath, "mesh31.shp")
+    for i in range(1, 3):
         tndPath = os.path.join(modelFolderPath, f"tnd{i}.dat")
         for j in range(0, int(hours)):
-            txtPath = os.path.join(
+            pngPath = os.path.join(
                 dstPath,
-                f"tnd-{identifier}-{i}-{j}.txt",
+                f"tnd-{identifier}-{i}-{j}.png",
             )
-            tnd2txt(
-                tndPath,
-                txtPath,
-                dataDict,
-                j,
-            )
-            dirname = os.path.dirname(txtPath)
-            fileName = os.path.basename(txtPath).split(".")[0]
-            extent = tnd2png(
-                txtPath,
-                txtPath.replace("txt", "png"),
-                csvPath.replace("csv", "shp"),
-            )
+            extent = tnd2png(tndPath, dataDict, j, pngPath, maskPath)

@@ -74,6 +74,32 @@
 
 ![uvet.dat](images/2024-03-23-19-42-30.png)
 
+### 水动力模型-3d
+
+##### 执行文件
+
+- water-3d.exe: 执行文件;
+
+##### 模型输入
+
+- 必要参数;
+  - inputfile 文件夹;
+    - fo.gr3;
+    - param.in: rnday 一行第一个数字为模拟时间 (day);
+    - vgrid3d.in;
+    - pollutant.dat;
+    - west20080410.th;
+    - south20080410.th;
+  - outfile 文件夹;
+  - mesh31.gr3;
+
+##### 输出
+
+- uvet\_\*\*\*.dat: 水动力模型;
+  - 同 uvet.dat;
+- snd123.dat: 水质模型,
+  - 同 snd.dat;
+
 ### 水质模型-wasp
 
 ##### 执行文件
@@ -108,42 +134,33 @@
 - time + value \* ne;
 - time: id, int32;
 - value: value, double64
--
 
-### 水质模型-wqsp
+### 水质模型-phreec
 
 ##### 执行文件
 
-- quality-wasp.exe: 执行文件;
+- quality-phreec.exe: 执行文件;
 
 ##### 模型输入
 
 - 必要参数;
   - uvet;
     - mesh31.gr3;
-    - vt.dat: 水动力模型结果;
-    - vn.dat: 水动力模型结果;
-    - et.dat: 水动力模型结果:
+    - vt.dat: 水动力模型结果, 需要额外 24 小时;
+    - vn.dat: 水动力模型结果, 需要额外 24 小时;
+    - et.dat: 水动力模型结果, 需要额外 24 小时:
   - quality;
-    - wuran-gongkuang: 模型参数, 第 10 行第一个数字(day)表明模拟时间, 12 行表明是否开启 wasp, 若开启需要 wqm_para.dat 文件
-    - wqm_para.dat: wuran-gongkuang 中 12 行为 1 时需要;
-    - 初始浓度: 初始浓度;
-    - cedian: 测点文件, 第一行为测点数量, 其余为各测点所在 ne id;
-    - tang_info: 测点文件, 养殖塘信息, 不知道具体东西;
-    - toufang: 测点文件, 第一行为测点数量, 其余行为 ne id + 八种污染物浓度强度(kg/s);
-    - in_node: 测点文件, 鱼塘信息;
-    - vgridzsh.in
+    - libmmd.dll;
+    - libifcoremd.dll;
+    - wuran-gongkaung1.dat: 注意这个 1, 和 quality-wasp 的不同;
+    - vgridzsh.in;
+    - phreeqc.dat;
+    - llnl.dat;
+    - Sea Water2.pqi;
 
 ##### 模型输出
 
-- tcd1-8: 各污染物浓度在各测点的浓度值;
-- tnd1-8: 各污染物整个区域浓度, 时序数据, 时间间隔 1h;
-
-##### tnd.dat 详解
-
-- time + value \* ne;
-- time: id, int32;
-- value: value, double64
+- ph.dat;
 
 ### 泥沙模型
 
@@ -158,9 +175,9 @@
 - 必要参数;
   - water-2d;
     - mesh31.gr3;
-    - vt.dat: 水动力模型结果;
-    - vn.dat: 水动力模型结果;
-    - et.dat: 水动力模型结果:
+    - vt.dat: 水动力模型结果, 需要额外 12 小时;
+    - vn.dat: 水动力模型结果, 需要额外 12 小时;
+    - et.dat: 水动力模型结果, 需要额外 12 小时;
     - vgridhk.in;
   - sand;
     - wuran-gongkuang: 模型参数, 第 10 行第一个数字(day)表明模拟时间, 12 行表明是否开启 wasp, 若开启需要 wqm_para.dat 文件
@@ -173,6 +190,36 @@
 - yuji.dat: 淤积;
 
 ##### snd/yuji.dat 详解
+
+- time + value \* ne;
+- time: id, int32;
+- value: value, double64
+
+### 抛泥模型
+
+##### 执行文件
+
+- paoni.exe;
+
+##### 模型输入
+
+- 必要参数;
+  - water-2d;
+    - mesh31.gr3;
+    - vt.dat: 水动力模型结果, 需要额外 12 小时;
+    - vn.dat: 水动力模型结果, 需要额外 12 小时;
+    - et.dat: 水动力模型结果, 需要额外 12 小时;
+  - sand;
+    - wuran-gongkuang: 模型参数, 第 9 行第一个数字(day)表明模拟时间
+    - vgridzsh.in
+    - ie_pao.dat: 抛泥点数量和位置, 第一行为数量;
+
+##### 模型输出
+
+- tnd1.dat: 泥沙;
+- tnd2.dat: 淤积;
+
+##### tnd.dat 详解
 
 - time + value \* ne;
 - time: id, int32;

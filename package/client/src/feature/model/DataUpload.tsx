@@ -45,10 +45,24 @@ const Water2DUpload = () => {
   return (
     <div>
       <div className="m-3">
-        <div className="mb-3">上传水动力模型文件</div>
+        <div className="mb-3">上传水动力2D模型文件</div>
         <UploadButton
           modelType="water-2d"
           datasetType="water-2d-input"
+        ></UploadButton>
+      </div>
+    </div>
+  )
+}
+
+const Water3DUpload = () => {
+  return (
+    <div>
+      <div className="m-3">
+        <div className="mb-3">上传水动力3D模型文件</div>
+        <UploadButton
+          modelType="water-3d"
+          datasetType="water-3d-input"
         ></UploadButton>
       </div>
     </div>
@@ -117,16 +131,47 @@ const SandUpload = () => {
   )
 }
 
+const MudUpload = () => {
+  const [isMeshUpload, setIsWaterUpload] = useState(true)
+  return (
+    <div>
+      <div className="m-3">
+        <div className="mb-3">上传水动力模型文件</div>
+        <UploadButton
+          modelType="mud"
+          datasetType="water-2d-input"
+          handleChange={(info) => {
+            if (
+              info.file.status === 'done' &&
+              info.file.name?.includes('mesh')
+            ) {
+              setIsWaterUpload(false)
+            }
+          }}
+        ></UploadButton>
+      </div>
+      <div className="m-3">
+        <div className="mb-3">上传抛泥模型文件</div>
+        <UploadButton
+          modelType="mud"
+          datasetType="mud-input"
+          disable={isMeshUpload}
+        ></UploadButton>
+      </div>
+    </div>
+  )
+}
+
 export const DataUpload = () => {
   const modelType = useMetaStore((state) => state.modelType)
   const closeModal = useModalStore((state) => state.closeModal)
   const componentMap: Record<WaterModelTypeType, JSX.Element> = {
     'water-2d': <Water2DUpload></Water2DUpload>,
-    'water-3d': <></>,
+    'water-3d': <Water3DUpload></Water3DUpload>,
     'quality-wasp': <QualityWasmUpload></QualityWasmUpload>,
     'quality-phreec': <></>,
     sand: <SandUpload></SandUpload>,
-    mud: <></>,
+    mud: <MudUpload></MudUpload>,
   }
   const uploadPanel = componentMap[modelType]
 

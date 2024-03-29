@@ -62,11 +62,10 @@ export const getModelDataVisualization = (
     },
     mud: () => {
       const result: string[] = []
-      for (let index = 0; index < hours; index++) {
-        result.push(path.join(datasetPath, `snd-${identifier}-${index}.png`))
-      }
-      for (let index = 0; index < hours; index++) {
-        result.push(path.join(datasetPath, `yuji-${identifier}-${index}.png`))
+      for (let i = 1; i <= 2; i++) {
+        for (let j = 0; j < hours; j++) {
+          result.push(path.join(datasetPath, `tnd-${identifier}-${i}-${j}.png`))
+        }
       }
       return result
     },

@@ -44,7 +44,7 @@ def resolveDat(
     return dataList
 
 
-def sand2png(
+def tnd2png(
     tndPath: str, dataDict: dict, hours: int, dstPath: str, maskPath: str
 ) -> tuple:
     dataList = resolveDat(tndPath, dataDict, hours)
@@ -58,15 +58,22 @@ def sand2png(
         "mesh", srs, ogr.wkbPoint, options=["ENCODING=UTF-8"]
     )
     # create fields of shp
+    layer.CreateField(ogr.FieldDefn("ID", ogr.OFTString))
+    layer.CreateField(ogr.FieldDefn("X", ogr.OFTReal))
+    layer.CreateField(ogr.FieldDefn("Y", ogr.OFTReal))
     layer.CreateField(ogr.FieldDefn("Z", ogr.OFTReal))
     # create features
     featureDefn: ogr.FeatureDefn = layer.GetLayerDefn()
     for data in dataList:
+        id = str(data[0])
         x = float(data[1])
         y = float(data[2])
         z = float(data[3])
         # create feature
         feature: ogr.Feature = ogr.Feature(featureDefn)
+        feature.SetField("ID", id)
+        feature.SetField("X", x)
+        feature.SetField("Y", y)
         feature.SetField("Z", z)
         # create geometry
         point = ogr.Geometry(ogr.wkbPoint)
@@ -170,18 +177,18 @@ if __name__ == "__main__":
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
     # sys.argv
     [modelFolderPath, hours, identifier] = sys.argv[1:4]
-    # modelFolderPath = r"D:\project\fine-grained-simulation\data\test\sand"
-    # hours = 1
-    # identifier = 123456
+    # modelFolderPath = r"D:\project\fine-grained-simulation\data\test\tnd"
+    # hours = "1"
+    # identifier = "123456"
     csvPath = os.path.join(modelFolderPath, "mesh31.csv")
-    maskPath = os.path.join(modelFolderPath, "mesh31.shp")
     dstPath = os.path.join(modelFolderPath)
     dataDict = resolveCSV(csvPath)
-    sndPath = os.path.join(modelFolderPath, "snd.dat")
-    for i in range(0, int(hours)):
-        pngPath = os.path.join(dstPath, f"snd-{identifier}-{i}.png")
-        sand2png(sndPath, dataDict, i, pngPath, maskPath)
-    yujiPath = os.path.join(modelFolderPath, "yuji.dat")
-    for i in range(0, int(hours)):
-        pngPath = os.path.join(dstPath, f"yuji-{identifier}-{i}.png")
-        sand2png(yujiPath, dataDict, i, pngPath, maskPath)
+    maskPath = os.path.join(modelFolderPath, "mesh31.shp")
+    for i in range(1, 9):
+        tndPath = os.path.join(modelFolderPath, f"tnd{i}.dat")
+        for j in range(0, int(hours)):
+            pngPath = os.path.join(
+                dstPath,
+                f"tnd-{identifier}-{i}-{j}.png",
+            )
+            extent = tnd2png(tndPath, dataDict, j, pngPath, maskPath)
