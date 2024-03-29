@@ -1,9 +1,7 @@
 import { getProjectTreeAPI } from '@/api/project/project.api'
 import { ProjectTreeType } from '@/api/project/project.type'
-import { useForceUpdate } from '@/hook/useForceUpdate'
 import { useLayersStore } from '@/store/layerStore'
 import { useMetaStore } from '@/store/metaStore'
-import { useModalStore } from '@/store/modalStore'
 import { LayerType, WaterModelTypeType } from '@/type'
 import { message } from 'antd'
 import { DataNode } from 'antd/es/tree'
@@ -119,10 +117,10 @@ const generateProjectTreeData = async (
 
 const useLayerTreeData = () => {
   const layers = useLayersStore((state) => state.layers)
+  const layerTreeTag = useLayersStore((state) => state.layerTreeTag)
   const setLayer = useLayersStore((state) => state.setLayers)
   const projectID = useMetaStore((state) => state.projectID)
   const modelType = useMetaStore((state) => state.modelType)
-  const modelTag = useModalStore((state) => state.isModalDisplay)
 
   useEffect(() => {
     generateProjectTreeData(projectID, modelType)
@@ -132,15 +130,17 @@ const useLayerTreeData = () => {
       .catch(() => {
         setLayer([], 'data')
       })
-  }, [projectID, modelType, modelTag])
+  }, [projectID, modelType, layerTreeTag])
 
   return layers
 }
 
 export const LayerPanel = () => {
-  const [_, forceUpdate] = useForceUpdate()
   const layers = useLayerTreeData()
   const layerActions = useLayerActions()
+  const forceUpdateLayerTree = useLayersStore(
+    (state) => state.forceUpdateLayerTree,
+  )
   const layerMenuItemsMap = {
     map: {
       key: 'map',
@@ -169,7 +169,7 @@ export const LayerPanel = () => {
       action: async () => {
         const tag = await layerActions.deleteDataLayer()
         if (tag) {
-          forceUpdate()
+          forceUpdateLayerTree()
           message.info('删除文件成功', 5)
         } else {
           message.error('删除文件失败', 5)

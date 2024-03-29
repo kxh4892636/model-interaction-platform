@@ -19,6 +19,7 @@ interface LayersStore {
     data: LayerType | null
     map: LayerType | null
   }
+  layerTreeTag: number
   setLayers: (value: LayerType[], type: 'data' | 'map') => void
   addLayer: (layer: LayerType, type: 'data' | 'map') => void
   getLayer: (key: string, type: 'data' | 'map') => LayerType | null
@@ -36,6 +37,7 @@ interface LayersStore {
   addLayersExpanded: (key: string, type: 'data' | 'map') => void
   deleteLayersChecked: (key: string, type: 'data' | 'map') => void
   deleteLayersExpanded: (key: string, type: 'data' | 'map') => void
+  forceUpdateLayerTree: () => void
 }
 
 export const useLayersStore = create<LayersStore>((set, get) => ({
@@ -43,6 +45,7 @@ export const useLayersStore = create<LayersStore>((set, get) => ({
   layersChecked: { data: [], map: [] },
   layersExpanded: { data: [], map: [] },
   layersSelected: { data: null, map: null },
+  layerTreeTag: 0,
   setLayers: (value, type) =>
     set(
       produce((draft: LayersStore) => {
@@ -181,4 +184,8 @@ export const useLayersStore = create<LayersStore>((set, get) => ({
         )
       }),
     ),
+  forceUpdateLayerTree: () =>
+    set({
+      layerTreeTag: get().layerTreeTag + 1,
+    }),
 }))

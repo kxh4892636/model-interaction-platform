@@ -1,3 +1,4 @@
+import { useLayersStore } from '@/store/layerStore'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
 import { WaterModelTypeType } from '@/type'
@@ -165,6 +166,9 @@ const MudUpload = () => {
 export const DataUpload = () => {
   const modelType = useMetaStore((state) => state.modelType)
   const closeModal = useModalStore((state) => state.closeModal)
+  const forceUpdateLayerTree = useLayersStore(
+    (state) => state.forceUpdateLayerTree,
+  )
   const componentMap: Record<WaterModelTypeType, JSX.Element> = {
     'water-2d': <Water2DUpload></Water2DUpload>,
     'water-3d': <Water3DUpload></Water3DUpload>,
@@ -180,7 +184,13 @@ export const DataUpload = () => {
       className="relative left-[15vw] top-[10vh] flex h-[80vh] w-[66vw] flex-col
         rounded-xl border border-slate-300 bg-white shadow-lg shadow-slate-300"
     >
-      <div className="absolute right-4 top-3 bg-slate-400" onClick={closeModal}>
+      <div
+        className="absolute right-4 top-3 bg-slate-400"
+        onClick={() => {
+          closeModal()
+          forceUpdateLayerTree()
+        }}
+      >
         关闭
       </div>
 
