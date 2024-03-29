@@ -21,17 +21,17 @@ import { modelService } from './model.water.service'
 export const modelRoute = async (app: FastifyTypebox) => {
   app.route({
     method: 'get',
-    url: '/info/:modelID',
+    url: '/info',
     schema: {
       tags: ['model'],
-      params: ModelInfoQueryStringSchema,
+      querystring: ModelInfoQueryStringSchema,
       response: {
         200: ModelInfoResponseSchema,
       },
     },
     handler: async (req): Promise<ModelInfoResponseType> => {
-      const params = req.params
-      const result = await modelService.getModelInfo(params.modelID)
+      const queryString = req.query
+      const result = await modelService.getModelInfo(queryString.modelID)
       const response = generateResponse('success', '', result)
       return response
     },

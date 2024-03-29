@@ -4,6 +4,8 @@ import {
   ModelActionBodyType,
   ModelActionResponseType,
   ModelActionType,
+  ModelInfoResponseType,
+  ModelInfoType,
   ModelParamResponseType,
   ModelParamType,
   MudParamBodyType,
@@ -11,6 +13,42 @@ import {
   SandParamBodyType,
   Water2DParamBodyType,
 } from './model.type'
+
+export const getModelInfoAPI = async (modelID: string) => {
+  const url =
+    `/api/v1/model/info?` +
+    new URLSearchParams({
+      modelID,
+    })
+  const response: DataFetchAPIInterface<ModelInfoType> = await extendFetch(
+    url,
+    { method: 'get' },
+  )
+    .then((res) => {
+      if (res.status === 200) {
+        return res.json()
+      } else {
+        throw Error()
+      }
+    })
+    .then((result: ModelInfoResponseType) => {
+      if (result.status === 'success') {
+        return result
+      } else {
+        throw Error()
+      }
+    })
+    .catch(() => {
+      const result: DataFetchAPIInterface<ModelInfoType> = {
+        status: 'error',
+        data: null,
+        message: '',
+      }
+      return result
+    })
+
+  return response
+}
 
 export const postWater2DParamAPI = async (params: Water2DParamBodyType) => {
   const url = `/api/v1/model/param/water-2d`

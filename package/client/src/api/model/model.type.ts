@@ -7,7 +7,11 @@ export const ModelInfoSchema = Type.Object({
   modelID: Type.String(),
   modelDatasetID: Type.String(),
   modelProgress: Type.Number(),
-  modelStatus: Type.String(),
+  modelStatus: Type.Union([
+    Type.Literal('valid'),
+    Type.Literal('pending'),
+    Type.Literal('expire'),
+  ]),
 })
 export type ModelInfoType = Static<typeof ModelInfoSchema>
 export const ModelInfoQueryStringSchema = Type.Object({

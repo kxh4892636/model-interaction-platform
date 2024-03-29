@@ -1008,7 +1008,7 @@ const getModelInfo = async (modelID: string): Promise<ModelInfoType | null> => {
   const result: ModelInfoType = {
     modelDatasetID: info.model_dataset_id,
     modelID: info.model_id,
-    modelStatus: info.status,
+    modelStatus: info.status as 'valid' | 'pending' | 'expire',
     modelProgress: info.model_progress,
   }
   return result

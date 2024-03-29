@@ -1,4 +1,4 @@
-import { WaterModelTypeSchema } from '@/type'
+import { DBStatusSchema, WaterModelTypeSchema } from '@/type'
 import { generateResponseSchema } from '@/util/typebox'
 import { Static, Type } from '@sinclair/typebox'
 
@@ -7,7 +7,7 @@ export const ModelInfoSchema = Type.Object({
   modelID: Type.String(),
   modelDatasetID: Type.String(),
   modelProgress: Type.Number(),
-  modelStatus: Type.String(),
+  modelStatus: DBStatusSchema,
 })
 export type ModelInfoType = Static<typeof ModelInfoSchema>
 export const ModelInfoQueryStringSchema = Type.Object({
