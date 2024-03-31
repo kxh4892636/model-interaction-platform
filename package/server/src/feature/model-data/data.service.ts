@@ -57,13 +57,23 @@ export const dataService = {
       })
     }
 
-    // whether the data is already uploaded
-    const filePath = path.join(
-      projectInfo.project_folder_path,
-      modelType,
-      file.filename,
-    )
     // copy file
+    const filePath = (() => {
+      if (modelType !== 'water-3d') {
+        return path.join(
+          projectInfo.project_folder_path,
+          modelType,
+          file.filename,
+        )
+      } else {
+        return path.join(
+          projectInfo.project_folder_path,
+          modelType,
+          'inputfile',
+          file.filename,
+        )
+      }
+    })()
     await pipeline(
       file.file,
       createWriteStream(path.join(DATA_FOLDER_PATH, filePath)),

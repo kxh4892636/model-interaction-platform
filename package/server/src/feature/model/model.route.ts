@@ -57,6 +57,24 @@ export const modelRoute = async (app: FastifyTypebox) => {
 
   app.route({
     method: 'post',
+    url: '/param/water-3d',
+    schema: {
+      tags: ['model'],
+      body: Water2DParamBodySchema,
+      response: {
+        200: ModelParamResponseSchema,
+      },
+    },
+    handler: async (req): Promise<ModelParamResponseType> => {
+      const body = req.body
+      await modelService.setWater3DParam(body.projectID, body.hours)
+      const response = generateResponse('success', '', null)
+      return response
+    },
+  })
+
+  app.route({
+    method: 'post',
     url: '/param/quality-wasp',
     schema: {
       tags: ['model'],
@@ -130,6 +148,13 @@ export const modelRoute = async (app: FastifyTypebox) => {
         if (init.modelType === 'water-2d') {
           modelService
             .runWater2DModel(init.modelName, init.projectID, modelID)
+            .catch(() => {
+              console.log('stop model')
+              modelService.stopModel(modelID)
+            })
+        } else if (init.modelType === 'water-3d') {
+          modelService
+            .runWater3DModel(init.modelName, init.projectID, modelID)
             .catch(() => {
               console.log('stop model')
               modelService.stopModel(modelID)

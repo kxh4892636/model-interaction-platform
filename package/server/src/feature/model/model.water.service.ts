@@ -4,7 +4,7 @@ import { orm } from '@/dao'
 import { existsPromise } from '@/util/fs'
 import { randomUUID } from 'crypto'
 import { execa } from 'execa'
-import { readFile, writeFile } from 'fs/promises'
+import { readFile, readdir, rename, stat, writeFile } from 'fs/promises'
 import path from 'path'
 import { datasetService } from '../dataset/dataset.service'
 import { dataDao } from '../model-data/data.dao'
@@ -260,7 +260,6 @@ const runWater2DModel = async (
 /**
  * Water-2d pre exe
  */
-
 const preRunWater2DModel = async (
   modelID: string,
   modelFolderPath: string,
@@ -300,6 +299,355 @@ const preRunWater2DModel = async (
     }
   })
   await cp
+}
+
+/**
+ * water-3d model
+ */
+const setWater3DParam = async (projectID: string, hours: number) => {
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  // modify model param by hours
+  const watereDPath = path.join(
+    DATA_FOLDER_PATH,
+    projectInfo.project_folder_path,
+    'water-3d',
+  )
+  const paramhkPath = path.join(watereDPath, 'inputfile', 'param.in')
+  const isExist = await existsPromise(paramhkPath)
+  if (!isExist) throw Error()
+  const paramContent = (await readFile(paramhkPath))
+    .toString()
+    .replace(/.*rnday/, `${hours / 24}  rnday`)
+  await writeFile(paramhkPath, paramContent)
+}
+
+const preWater3D = async (
+  modelID: string,
+  datasetID: string,
+  modelFolderPath: string,
+  identifier: string,
+) => {
+  // create model record
+  await orm.model.createModel(modelID, datasetID, -9999, 0, 'pending')
+
+  // get mesh extent
+  const isMeshExist = await existsPromise(
+    path.join(DATA_FOLDER_PATH, modelFolderPath, 'inputfile', 'f0.gr3'),
+  )
+  if (!isMeshExist) throw Error()
+  const meshInfo = await modelDao.getMeshInfo(
+    path.join(modelFolderPath, 'inputfile', 'f0.gr3'),
+  )
+  if (!meshInfo) throw Error()
+  const extent = meshInfo.data_extent
+
+  // get hours
+  const paramhkPath = path.join(
+    DATA_FOLDER_PATH,
+    modelFolderPath,
+    'inputfile',
+    'param.in',
+  )
+  const isExist = await existsPromise(paramhkPath)
+  if (!isExist) throw Error()
+  const paramContent = (await readFile(paramhkPath))
+    .toString()
+    .match(/[\d.]*(?=.*rnday)/)
+  if (!paramContent) throw Error()
+  const hours = Math.round(Number(paramContent[0]) * 24)
+
+  // create data record and dataset_data record
+  const visualization = getModelDataVisualization(
+    'water-3d',
+    modelFolderPath,
+    hours,
+    identifier,
+  )
+  const titleList = ['uvet_down', 'uvet_middle', 'uvet_up']
+  for (let index = 0; index < 3; index++) {
+    // uvet
+    const uvetID = randomUUID()
+    const uvetPath = path.join(modelFolderPath, `${titleList[index]}.dat`)
+    await dataDao.createData(
+      datasetID,
+      uvetID,
+      `${titleList[index]} 流场数据`,
+      'uvet',
+      'uvet',
+      extent,
+      identifier,
+      uvetPath,
+      'water-3d',
+      visualization.slice(
+        (1 + 3 * hours) * index,
+        (1 + 3 * hours) * index + 1 + 3 * hours,
+      ),
+      'valid',
+    )
+
+    // snd
+    const sndID = randomUUID()
+    const sndPath = path.join(modelFolderPath, `snd${index + 1}.dat`)
+    await dataDao.createData(
+      datasetID,
+      sndID,
+      `${titleList[index]} 水质数据`,
+      'snd',
+      'raster',
+      extent,
+      identifier,
+      sndPath,
+      'water-3d',
+      visualization.slice(
+        (1 + 3 * hours) * 3 + hours * index,
+        (1 + 3 * hours) * 3 + hours * index + hours,
+      ),
+      'valid',
+    )
+  }
+
+  return {
+    meshExtent: extent,
+    hours,
+  }
+}
+
+const runWater3DEXE = async (
+  modelFolderPath: string,
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  const exePath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'water-3d.exe')
+  const cp = execa(`cd ${path.dirname(exePath)} && ${exePath}`, {
+    shell: true,
+    windowsHide: true,
+  })
+  orm.model.updateModelByModelID(modelID, {
+    modelPid: cp.pid,
+  })
+  cp.stdout!.on('data', (chunk) => {
+    if ((chunk.toString() as string).includes('nt,it')) {
+      progress.current += progress.per * 51
+      orm.model.updateModelByModelID(modelID, {
+        modelProgress: progress.current / progress.total,
+      })
+    }
+  })
+  await cp
+}
+
+const preUvetProcess3D = async (
+  modelFolderPath: string,
+  meshExtent: number[],
+  hours: number,
+  identifier: string,
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  const uvetPost = execa(
+    `conda activate gis && python ${[
+      path.join(process.cwd(), '/src/util/water/uvetPost3D.py'),
+      path.join(DATA_FOLDER_PATH, modelFolderPath),
+      meshExtent.join(','),
+      hours,
+      identifier,
+    ].join(' ')}`,
+    { shell: true, windowsHide: true },
+  )
+  orm.model.updateModelByModelID(modelID, {
+    modelPid: uvetPost.pid,
+  })
+  uvetPost.stdout?.on('data', () => {
+    progress.current += progress.per * hours
+    orm.model.updateModelByModelID(modelID, {
+      modelProgress: progress.current / progress.total,
+    })
+  })
+  await uvetPost
+}
+
+const uvetProcess3D = async (
+  modelFolderPath: string,
+  modelID: string,
+  identifier: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  const suffixList = ['down', 'middle', 'up']
+  for (let index = 0; index < 3; index++) {
+    // run exe
+    const flow = execa(
+      [
+        path.join(process.cwd(), '/src/util/flowField/process.exe'),
+        path.join(
+          DATA_FOLDER_PATH,
+          modelFolderPath,
+          `description-${suffixList[index]}-${identifier}.json`,
+        ),
+      ].join(' '),
+      {
+        shell: true,
+        windowsHide: true,
+      },
+    )
+    orm.model.updateModelByModelID(modelID, {
+      modelPid: flow.pid,
+    })
+    flow.stdout?.on('data', (chunk) => {
+      if ((chunk.toString() as string).includes('SUCCESSED')) {
+        progress.current += progress.per * 5
+        orm.model.updateModelByModelID(modelID, {
+          modelProgress: progress.current / progress.total,
+        })
+      }
+    })
+    await flow
+    // rename
+    const fileNameList = await readdir(
+      path.join(DATA_FOLDER_PATH, modelFolderPath),
+    )
+    const promiseList = fileNameList.map(async (fileName) => {
+      const filePath = path.join(DATA_FOLDER_PATH, modelFolderPath, fileName)
+      const fileStat = await stat(filePath)
+      if (fileStat.isDirectory()) return
+      if (!(fileName.includes('.png') || fileName.includes('.json'))) return
+      if (
+        !(
+          fileName.includes(`flow-field-description-${identifier}`) ||
+          fileName.includes(`uv-${identifier}`) ||
+          fileName.includes(`valid-${identifier}`) ||
+          fileName.includes(`mask-${identifier}`)
+        )
+      ) {
+        return
+      }
+      const renamePath = path.join(
+        DATA_FOLDER_PATH,
+        modelFolderPath,
+        fileName.replace(/-(?=\d)/, `-${suffixList[index]}-`),
+      )
+      await rename(filePath, renamePath)
+    })
+    await Promise.all(promiseList)
+  }
+}
+
+const postWater3DModel = async (
+  modelFolderPath: string,
+  hours: number,
+  identifier: string,
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  // tnd2png
+  const cp = execa(
+    `conda activate gis && python ${[
+      path.join(process.cwd(), '/src/util/water/quality3D.py'),
+      path.join(DATA_FOLDER_PATH, modelFolderPath),
+      hours,
+      identifier,
+    ].join(' ')}`,
+    {
+      shell: true,
+      windowsHide: true,
+    },
+  )
+  orm.model.updateModelByModelID(modelID, {
+    modelPid: cp.pid,
+  })
+  cp.stderr!.on('data', (chunk) => {
+    if ((chunk.toString() as string).toLowerCase().includes('clamped')) {
+      progress.current += progress.per * 7
+      orm.model.updateModelByModelID(modelID, {
+        modelProgress: progress.current / progress.total,
+      })
+    }
+  })
+  await cp
+}
+
+const runWater3DModel = async (
+  modelName: string,
+  projectID: string,
+  modelID: string,
+) => {
+  const identifier = Date.now().toString()
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  const modelFolderPath = path.join(projectInfo.project_folder_path, 'water-3d')
+  const datasetID = randomUUID()
+  await datasetService.createDataset(
+    projectID,
+    'water-3d',
+    'water-3d-output',
+    datasetID,
+    modelName,
+    'pending',
+  )
+
+  console.time(identifier)
+  // preprocess water.exe
+  console.timeLog(identifier, 'preprocess water-3d.exe')
+  const { meshExtent, hours } = await preWater3D(
+    modelID,
+    datasetID,
+    modelFolderPath,
+    identifier,
+  )
+
+  // run water model
+  const progress = {
+    current: 0,
+    per: 1,
+    total: 88 * hours,
+  }
+  console.timeLog(identifier, 'run water-3d.exe')
+  await runWater3DEXE(modelFolderPath, modelID, progress)
+  console.timeLog(identifier, 'water-3d.exe finish')
+
+  // uvet-precess
+  await preUvetProcess3D(
+    modelFolderPath,
+    meshExtent,
+    hours,
+    identifier,
+    modelID,
+    progress,
+  )
+  console.timeLog(identifier, 'uvetPost3D.py finish')
+
+  // uvet process
+  console.timeLog(identifier, 'run process.exe')
+  await uvetProcess3D(modelFolderPath, modelID, identifier, progress)
+  console.timeLog(identifier, 'process.exe finish')
+
+  // snd process
+  await postWater3DModel(modelFolderPath, hours, identifier, modelID, progress)
+  console.timeLog(identifier, 'model finish')
+
+  console.log(progress)
+  await orm.model.updateModelByModelID(modelID, {
+    status: 'valid',
+  })
+  await orm.dataset.updateDatasetByDatasetID(datasetID, {
+    status: 'valid',
+  })
 }
 
 /**
@@ -1016,10 +1364,12 @@ const getModelInfo = async (modelID: string): Promise<ModelInfoType | null> => {
 
 export const modelService = {
   setWater2DParam,
+  setWater3DParam,
   setQualityWaspParam,
   setSandParam,
   setMudParam,
   runWater2DModel,
+  runWater3DModel,
   runQualityWaspModel,
   runSandModel,
   runMudModel,

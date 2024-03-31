@@ -98,7 +98,9 @@
 - uvet\_\*\*\*.dat: 水动力模型;
   - 同 uvet.dat;
 - snd123.dat: 水质模型,
-  - 同 snd.dat;
+  - time + value \* np;
+  - time: id, int32;
+  - value: value, double64
 
 ### 水质模型-wasp
 

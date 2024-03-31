@@ -26,7 +26,37 @@ export const getModelDataVisualization = (
       return result
     },
     'water-3d': () => {
-      return ['']
+      const result: string[] = []
+      ;['down', 'middle', 'up'].forEach((title) => {
+        result.push(
+          path.join(
+            datasetPath,
+            `flow-field-description-${title}-${identifier}.json`,
+          ),
+        )
+        for (let index = 0; index < hours; index++) {
+          result.push(
+            path.join(datasetPath, `mask-${title}-${identifier}-${index}.png`),
+          )
+        }
+        for (let index = 0; index < hours; index++) {
+          result.push(
+            path.join(datasetPath, `uv-${title}-${identifier}-${index}.png`),
+          )
+        }
+        for (let index = 0; index < hours; index++) {
+          result.push(
+            path.join(datasetPath, `valid-${title}-${identifier}-${index}.png`),
+          )
+        }
+      })
+      for (let i = 1; i <= 3; i++) {
+        for (let j = 0; j < hours; j++) {
+          result.push(path.join(datasetPath, `snd-${identifier}-${i}-${j}.png`))
+        }
+      }
+
+      return result
     },
     'quality-wasp': () => {
       const result: string[] = []

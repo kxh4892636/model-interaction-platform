@@ -28,6 +28,12 @@ export const Water2DParamBodySchema = Type.Object({
   hours: Type.Integer(),
 })
 export type Water2DParamBodyType = Static<typeof Water2DParamBodySchema>
+// /model/param/water-3d
+export const Water3DParamBodySchema = Type.Object({
+  projectID: Type.String(),
+  hours: Type.Integer(),
+})
+export type Water3DParamBodyType = Static<typeof Water3DParamBodySchema>
 // /model/param/quality-wasp
 export const QualityWaspParamBodySchema = Type.Object({
   projectID: Type.String(),

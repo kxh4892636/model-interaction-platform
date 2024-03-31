@@ -3,6 +3,7 @@ import {
   postQualityWaspParamAPI,
   postSandParamAPI,
   postWater2DParamAPI,
+  postWater3DParamAPI,
 } from '@/api/model/model.api'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
@@ -65,17 +66,17 @@ const Water3DParamEditor = () => {
   const closeModal = useModalStore((state) => state.closeModal)
 
   const handleClick = async () => {
-    // const result = await postMudParamAPI({
-    //   projectID: projectID!,
-    //   hours: hours!,
-    // })
-    // if (result.status === 'success') {
-    //   message.info('设置参数成功', 5)
-    //   closeModal()
-    // } else {
-    //   message.error('设置参数失败', 5)
-    //   closeModal()
-    // }
+    const result = await postWater3DParamAPI({
+      projectID: projectID!,
+      hours: hours!,
+    })
+    if (result.status === 'success') {
+      message.info('设置参数成功', 5)
+      closeModal()
+    } else {
+      message.error('设置参数失败', 5)
+      closeModal()
+    }
   }
 
   return (

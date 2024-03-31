@@ -9,6 +9,7 @@ export const getUploadDataTypeAndStyle = (
   const typeAndStyleMap: Map<string, [WaterDataTypeType, WaterDataStyleType]> =
     new Map([
       ['mesh31.gr3', ['mesh', 'raster']],
+      ['f0.gr3', ['mesh', 'raster']],
       ['paramhk.in', ['text', 'text']],
       ['gongkuang.dat', ['text', 'text']],
       ['sanshawan.th', ['text', 'text']],
@@ -18,14 +19,26 @@ export const getUploadDataTypeAndStyle = (
       ['初始浓度.dat', ['text', 'text']],
       ['wqm_para.dat', ['text', 'text']],
       ['vgridzsh.in', ['text', 'text']],
+      ['param.in', ['text', 'text']],
+      ['pollutant.dat', ['text', 'text']],
+      ['vgridzsh.in', ['text', 'text']],
+      ['south20080410.th', ['text', 'text']],
+      ['vgrid3d.in', ['text', 'text']],
+      ['west20080410.th', ['text', 'text']],
       ['tang_info.dat', ['geojson', 'circle']],
       ['in_node.dat', ['geojson', 'circle']],
       ['cedian.dat', ['geojson', 'circle']],
       ['toufang.dat', ['geojson', 'circle']],
-      ['uvet.dat', ['uvet', 'uvet']],
-      ['tnd.dat', ['tnd', 'raster']],
-      ['snd.dat', ['snd', 'raster']],
-      ['yuji.dat', ['yuji', 'raster']],
+      // ['uvet.dat', ['uvet', 'uvet']],
+      // ['tnd.dat', ['tnd', 'raster']],
+      // ['snd.dat', ['snd', 'raster']],
+      // ['yuji.dat', ['yuji', 'raster']],
+      // ['uvet_up.dat', ['uvet', 'uvet']],
+      // ['uvet_down.dat', ['uvet', 'uvet']],
+      // ['uvet_middle.dat', ['uvet', 'uvet']],
+      // ['snd1.dat', ['snd', 'raster']],
+      // ['snd2.dat', ['snd', 'raster']],
+      // ['snd3.dat', ['snd', 'raster']],
     ])
 
   const filePath = path.join(DATA_FOLDER_PATH, relativeFilePath)
@@ -73,6 +86,28 @@ export const getUploadDataExtentAndVisualization = async (
         .split(',')
         .map((value) => Number(value))
       return [extent, [relativeFilePath.replace('.gr3', '.png')]]
+    },
+    'f0.gr3': async () => {
+      const { stdout } = await execa(
+        `conda activate gis && python ${[
+          path.join(process.cwd(), '/src/util/water/fo.py'),
+          path.join(path.dirname(path.dirname(filePath))),
+        ].join(' ')}`,
+        { shell: true, windowsHide: true },
+      )
+      const extent = stdout
+        .replace('(', '')
+        .replace(')', '')
+        .split(',')
+        .map((value) => Number(value))
+      return [
+        extent,
+        [
+          path.normalize(
+            relativeFilePath.replace('.gr3', '.png').replace('inputfile', ''),
+          ),
+        ],
+      ]
     },
     'tang_info.dat': datToGeoJSON,
     'in_node.dat': datToGeoJSON,
