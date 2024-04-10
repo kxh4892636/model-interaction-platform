@@ -1,0 +1,4 @@
+{"level":30,"time":1709712903443,"pid":13784,"hostname":"DESKTOP-J44S6KC","msg":"Server listening at http://[::1]:3456"}
+{"level":30,"time":1709712903447,"pid":13784,"hostname":"DESKTOP-J44S6KC","msg":"Server listening at http://127.0.0.1:3456"}
+{"level":30,"time":1709712915753,"pid":18696,"hostname":"DESKTOP-J44S6KC","msg":"Server listening at http://[::1]:3456"}
+{"level":30,"time":1709712915756,"pid":18696,"hostname":"DESKTOP-J44S6KC","msg":"Server listening at http://127.0.0.1:3456"}

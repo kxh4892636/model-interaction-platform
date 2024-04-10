@@ -1,0 +1,20 @@
+{
+  "name": "@kxh/node",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "execute": "node ./dist/main.js",
+    "build": "node ./esbuild.config.js",
+    "lint": "eslint src/**/* test/**/* --max-warnings 0",
+    "prettier": "prettier src/**/* test/**/* --write",
+    "format": "pnpm prettier && pnpm lint",
+    "test": "vitest --config ./vitest.config.ts",
+    "test:coverage": "vitest run --config ./vitest.config.ts --coverage",
+    "bench": "vitest bench --config ./vitest.config.ts"
+  }
+}

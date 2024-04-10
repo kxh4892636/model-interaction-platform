@@ -1,0 +1,39 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "node ./esbuild.config.js",
+    "start": "cross-env NODE_ENV=production node ./dist/main.js",
+    "lint": "eslint src/**/* test/**/* --max-warnings 0",
+    "prettier": "prettier src/**/* test/**/* --write",
+    "format": "pnpm prettier && pnpm lint",
+    "prisma": "pnpm dlx prisma db pull && pnpm dlx prisma generate",
+    "studio": "pnpm dlx prisma studio"
+  },
+  "devDependencies": {
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^3.0.0",
+    "cross-env": "^7.0.3",
+    "prisma": "^5.11.0"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@fastify/formbody": "^7.4.0",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/multipart": "^8.2.0",
+    "@fastify/type-provider-typebox": "^4.0.0",
+    "@prisma/client": "^5.11.0",
+    "@sinclair/typebox": "^0.32.17",
+    "execa": "^8.0.1",
+    "fast-csv": "^5.0.1",
+    "fastify": "^4.26.2",
+    "fastify-plugin": "^4.5.1"
+  }
+}
