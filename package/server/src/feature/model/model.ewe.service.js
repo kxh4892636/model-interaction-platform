@@ -86,7 +86,6 @@ const FleetPlotName = [
   'Discard survival',
 ]
 
-
 // 处理一下Stanze用到的图表
 const StanzePlotOption = (data) => {
   Object.keys(data).forEach((item) => {
