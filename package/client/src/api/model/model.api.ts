@@ -284,21 +284,18 @@ export const postModelActionAPI = async (params: ModelActionBodyType) => {
 
 export const postEWEModelImportAPI = async (params: EWEParamBodyType) => {
   const url = `/api/v1/model/ewe/Import`
-  const response = await extendFetch(
-    url,
-    {
-      method: 'post',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(params),
-    },
-  )
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
     .then((res) => {
       if (res.status === 200) {
         return res.json()
       } else {
-        console.log("ERROE")
+        console.log('ERROE')
         throw Error()
       }
     })
@@ -323,16 +320,13 @@ export const postEWEModelImportAPI = async (params: EWEParamBodyType) => {
 
 export const postEWEModelRunAPI = async (params: EWEParamBodyType) => {
   const url = `/api/v1/model/ewe/Run`
-  const response = await extendFetch(
-    url,
-    {
-      method: 'post',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(params),
-    },
-  )
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
     .then((res) => {
       if (res.status === 200) {
         return res.json()
@@ -361,16 +355,13 @@ export const postEWEModelRunAPI = async (params: EWEParamBodyType) => {
 
 export const postRunEcoSimSwitchAPI = async (params: EWEParamBodyType) => {
   const url = `/api/v1/model/ewe/RunEcoSim_Switch`
-  const response = await extendFetch(
-    url,
-    {
-      method: 'post',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(params),
-    },
-  )
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
     .then((res) => {
       if (res.status === 200) {
         return res.json()
@@ -399,16 +390,13 @@ export const postRunEcoSimSwitchAPI = async (params: EWEParamBodyType) => {
 
 export const postGroupPlotSwitchAPI = async (params: EWEParamBodyType) => {
   const url = `/api/v1/model/ewe/GroupPlot_Switch`
-  const response = await extendFetch(
-    url,
-    {
-      method: 'post',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(params),
-    },
-  )
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
     .then((res) => {
       if (res.status === 200) {
         return res.json()
@@ -437,16 +425,13 @@ export const postGroupPlotSwitchAPI = async (params: EWEParamBodyType) => {
 
 export const postFleetPlotSwitchAPI = async (params: EWEParamBodyType) => {
   const url = `/api/v1/model/ewe/FleetPlot_Switch`
-  const response = await extendFetch(
-    url,
-    {
-      method: 'post',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(params),
-    },
-  )
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
     .then((res) => {
       if (res.status === 200) {
         return res.json()
@@ -475,16 +460,13 @@ export const postFleetPlotSwitchAPI = async (params: EWEParamBodyType) => {
 
 export const postUplaodTimeserieAPI = async (params: EWEParamBodyType) => {
   const url = `/api/v1/model/ewe/UploadTimeseries`
-  const response = await extendFetch(
-    url,
-    {
-      method: 'post',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(params),
-    },
-  )
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
     .then((res) => {
       if (res.status === 200) {
         return res.json()
@@ -513,16 +495,13 @@ export const postUplaodTimeserieAPI = async (params: EWEParamBodyType) => {
 
 export const postUplaodForcingAPI = async (params: EWEParamBodyType) => {
   const url = `/api/v1/model/ewe/UploadForcing`
-  const response = await extendFetch(
-    url,
-    {
-      method: 'post',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(params),
-    },
-  )
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
     .then((res) => {
       if (res.status === 200) {
         return res.json()
@@ -551,16 +530,13 @@ export const postUplaodForcingAPI = async (params: EWEParamBodyType) => {
 
 export const postUplaodMeasuredAPI = async (params: EWEParamBodyType) => {
   const url = `/api/v1/model/ewe/UploadMeasured`
-  const response = await extendFetch(
-    url,
-    {
-      method: 'post',
-      headers: new Headers({
-        'Content-Type': 'application/json',
-      }),
-      body: JSON.stringify(params),
-    },
-  )
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
     .then((res) => {
       if (res.status === 200) {
         return res.json()

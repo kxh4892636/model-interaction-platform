@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-undef */
 /* eslint-disable camelcase */
 import { DATA_FOLDER_PATH } from '@/config/env'
-import { execSync } from 'child_process'
-import fs from 'fs'
 import { orm } from '@/dao'
-import csv from 'fast-csv';
+import { execSync } from 'child_process'
+import csv from 'fast-csv'
+import fs from 'fs'
 
 const exeFilePath = DATA_FOLDER_PATH + '/template/ewe'
 
@@ -1360,64 +1361,98 @@ const test_get = (request, response) => {
 }
 
 // Uplaod
-const UploadTimeseries = async (req,res)=>{
-  const projectInfo = await orm.project.getProjectByProjectID(req.body.projectID)
-  const ewefilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name
-  const outfilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name.split(".")[0]
-  const csvpath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.csvname
+const UploadTimeseries = async (req, res) => {
+  const projectInfo = await orm.project.getProjectByProjectID(
+    req.body.projectID,
+  )
+  const ewefilepath =
+    DATA_FOLDER_PATH + projectInfo.project_folder_path + '/ewe/' + req.body.name
+  const outfilepath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.name.split('.')[0]
+  const csvpath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.csvname
   const output = execSync(
     `cd "${exeFilePath}" && ConsoleApp2.exe "${ewefilepath}" "ImportCSV" "${outfilepath}" "${csvpath}" "Annual"`,
   )
   // //EcoSim输入相关 TimeSeries
-  let TimeSelect = []
-  try
-  {
-      fs.accessSync(outfilepath+"\\"+'EcoSimInput.json');
-      let ESdata = JSON.parse(fs.readFileSync(outfilepath+"\\"+'EcoSimInput.json', 'utf-8'))
-      Object.keys(ESdata.TimeSeries).forEach((item)=>{
-          TimeSelect.push({value: item, label: item})
-      })
-      ESdata.TimeSelect=TimeSelect
-      return {status:"success","EcoSim":ESdata}
-  }catch (err) {
-      console.log("EcoSimInput文件不存在");
-      return {"EcoSim":{}}
+  const TimeSelect = []
+  try {
+    fs.accessSync(outfilepath + '\\' + 'EcoSimInput.json')
+    const ESdata = JSON.parse(
+      fs.readFileSync(outfilepath + '\\' + 'EcoSimInput.json', 'utf-8'),
+    )
+    Object.keys(ESdata.TimeSeries).forEach((item) => {
+      TimeSelect.push({ value: item, label: item })
+    })
+    ESdata.TimeSelect = TimeSelect
+    return { status: 'success', EcoSim: ESdata }
+  } catch (err) {
+    console.log('EcoSimInput文件不存在')
+    return { EcoSim: {} }
   }
 }
-const UploadForcing = async (req,res)=>{
-  const projectInfo = await orm.project.getProjectByProjectID(req.body.projectID)
-  const ewefilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name
-  const outfilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name.split(".")[0]
-  const csvpath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.csvname
+const UploadForcing = async (req, res) => {
+  const projectInfo = await orm.project.getProjectByProjectID(
+    req.body.projectID,
+  )
+  const ewefilepath =
+    DATA_FOLDER_PATH + projectInfo.project_folder_path + '/ewe/' + req.body.name
+  const outfilepath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.name.split('.')[0]
+  const csvpath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.csvname
   const output = execSync(
     `cd "${exeFilePath}" && ConsoleApp2.exe "${ewefilepath}" "ImportCSV" "${outfilepath}" "${csvpath}" "TimeStep"`,
   )
-  //EcoSim输入相关 TimeSeries
-  let TimeSelect = []
-  try
-  {
-      fs.accessSync(outfilepath+"\\"+'EcoSimInput.json');
-      let ESdata = JSON.parse(fs.readFileSync(outfilepath+"\\"+'EcoSimInput.json', 'utf-8'))
-      Object.keys(ESdata.TimeSeries).forEach((item)=>{
-          TimeSelect.push({value: item, label: item})
-      })
-      ESdata.TimeSelect=TimeSelect
-      return {status:"success","EcoSim":ESdata}
-  }catch (err) {
-      console.log("EcoSimInput文件不存在");
-      return {"EcoSim":{}}
+  // EcoSim输入相关 TimeSeries
+  const TimeSelect = []
+  try {
+    fs.accessSync(outfilepath + '\\' + 'EcoSimInput.json')
+    const ESdata = JSON.parse(
+      fs.readFileSync(outfilepath + '\\' + 'EcoSimInput.json', 'utf-8'),
+    )
+    Object.keys(ESdata.TimeSeries).forEach((item) => {
+      TimeSelect.push({ value: item, label: item })
+    })
+    ESdata.TimeSelect = TimeSelect
+    return { status: 'success', EcoSim: ESdata }
+  } catch (err) {
+    console.log('EcoSimInput文件不存在')
+    return { EcoSim: {} }
   }
 }
-const UploadMeasured = async (req,res)=>{
-  const projectInfo = await orm.project.getProjectByProjectID(req.body.projectID)
-  const ewefilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name
-  const outfilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name.split(".")[0]
-  const csvpath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.csvname
-  
+const UploadMeasured = async (req, res) => {
+  const projectInfo = await orm.project.getProjectByProjectID(
+    req.body.projectID,
+  )
+  const ewefilepath =
+    DATA_FOLDER_PATH + projectInfo.project_folder_path + '/ewe/' + req.body.name
+  const outfilepath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.name.split('.')[0]
+  const csvpath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.csvname
 
   let index = 0
-  let series = []
-  let data = []
+  const series = []
+  const data = []
   // 读取CSV文件
   return new Promise((resolve, reject) => {
     fs.createReadStream(csvpath)
@@ -1425,7 +1460,11 @@ const UploadMeasured = async (req,res)=>{
       .on('data', (row) => {
         if (index === 0) {
           for (let i = 1; i < row.length; i++) {
-            series.push({ "name": row[i] + i, "type": "scatter", itemStyle: { color: colorpanel[i] } })
+            series.push({
+              name: row[i] + i,
+              type: 'scatter',
+              itemStyle: { color: colorpanel[i] },
+            })
             data.push([])
           }
         }
@@ -1433,30 +1472,37 @@ const UploadMeasured = async (req,res)=>{
         if (index >= 4) {
           data.forEach((innerArray, i) => {
             innerArray.push([6 + 12 * (index - 4), row[i + 1]])
-          });
+          })
         }
         index += 1
       })
       .on('end', () => {
-        const jsonData = JSON.stringify(data, null, 2);
-        fs.writeFileSync(outfilepath + '\\Measured.json', jsonData);
-        console.log('数据已保存到 Measured.json 文件');
+        const jsonData = JSON.stringify(data, null, 2)
+        fs.writeFileSync(outfilepath + '\\Measured.json', jsonData)
+        console.log('数据已保存到 Measured.json 文件')
         for (let i = 0; i < series.length; i++) {
-          series[i]["data"] = data[i]
+          series[i].data = data[i]
         }
-        console.log('CSV文件读取完毕');
-        resolve({ status: "success", "series": series });
+        console.log('CSV文件读取完毕')
+        resolve({ status: 'success', series })
       })
       .on('error', (error) => {
-        reject(error);
-      });
-  });
+        reject(error)
+      })
+  })
 }
 
 const Import_Model = async (req, res) => {
-  const projectInfo = await orm.project.getProjectByProjectID(req.body.projectID)
-  const ewefilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name
-  const outfilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name.split(".")[0]
+  const projectInfo = await orm.project.getProjectByProjectID(
+    req.body.projectID,
+  )
+  const ewefilepath =
+    DATA_FOLDER_PATH + projectInfo.project_folder_path + '/ewe/' + req.body.name
+  const outfilepath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.name.split('.')[0]
   try {
     const output = execSync(
       `cd "${exeFilePath}"&& ConsoleApp2.exe "${ewefilepath}" "Import" "${outfilepath}"`,
@@ -1499,24 +1545,42 @@ const Import_Model = async (req, res) => {
         TimeSelect.push({ value: item, label: item })
       })
       ESdata.TimeSelect = TimeSelect
-      return { status :'success',EcoPath: data, EcoSpaceDepthData: DepthData, EcoSim: ESdata }
+      return {
+        status: 'success',
+        EcoPath: data,
+        EcoSpaceDepthData: DepthData,
+        EcoSim: ESdata,
+      }
     } catch (err) {
       console.log('EcoSimInput文件不存在')
-      return { status :'error',message:"Mloading",EcoPath: data, EcoSpaceDepthData: DepthData, EcoSim: {} }
+      return {
+        status: 'error',
+        message: 'Mloading',
+        EcoPath: data,
+        EcoSpaceDepthData: DepthData,
+        EcoSim: {},
+      }
     }
   } catch (error) {
     // 处理异常情况
-    return { status :'error',message:"Mloading"}
+    return { status: 'error', message: 'Mloading' }
   }
 }
 
-const Run_Model = async (req, res) => { 
-  const projectInfo = await orm.project.getProjectByProjectID(req.body.projectID)
-  const ewefilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name
-  const outfilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name.split(".")[0]
+const Run_Model = async (req, res) => {
+  const projectInfo = await orm.project.getProjectByProjectID(
+    req.body.projectID,
+  )
+  const ewefilepath =
+    DATA_FOLDER_PATH + projectInfo.project_folder_path + '/ewe/' + req.body.name
+  const outfilepath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.name.split('.')[0]
   const result = {}
   try {
-    ////////////////////////EcoPath////////////////////////////////////////
+    /// /////////////////////EcoPath////////////////////////////////////////
     const output = execSync(
       `cd "${exeFilePath}"&& ConsoleApp2.exe "${ewefilepath}" "Run" "${outfilepath}"`,
     )
@@ -1526,14 +1590,14 @@ const Run_Model = async (req, res) => {
     )
     const FlowDiagramD = FlowDiagram(data.PreNode, data.Link)
     const LindmanSpine = NetWorkAnlysis(data)
-    result["EcoPath"] = {
+    result.EcoPath = {
       Basic_Estimate: data.Basic_Estimate,
       FlowDiagram: FlowDiagramD,
       LindmanSpine,
       Mortality: data.Mortality,
       MixedTrophic: data.MixedTrophicImpacts,
     }
-    ////////////////////////EcoSim////////////////////////////////////////
+    /// /////////////////////EcoSim////////////////////////////////////////
     // 处理执行命令后的结果
     const EcoSim_data = JSON.parse(
       fs.readFileSync(outfilepath + '\\' + 'EcoSim_Result.json', 'utf-8'),
@@ -1627,17 +1691,17 @@ const Run_Model = async (req, res) => {
       Color: FleetPlotColor,
       FleetColor,
     }
-    result["EcoSim"]=EcoSim_data
-    ////////////////////////EcoSpace////////////////////////////////////////
+    result.EcoSim = EcoSim_data
+    /// /////////////////////EcoSpace////////////////////////////////////////
     const outputString = output.toString().trim()
     console.log(outputString)
     // console.log(result)
-    result["status"] = "success"
-    result["message"] = "Mloading"
+    result.status = 'success'
+    result.message = 'Mloading'
     return result
   } catch (error) {
     // 处理异常情况
-    return { status :'error',message:"Mloading"}
+    return { status: 'error', message: 'Mloading' }
   }
 }
 
@@ -1763,10 +1827,17 @@ const RunEcoSim = async (req, res) => {
 
 // Run EcoSim Plot Biomass_relative Biomass_absolute Catch_relative Catch_absolute切换
 const RunEcoSim_Switch = async (req, res) => {
-  const projectInfo = await orm.project.getProjectByProjectID(req.body.projectID)
+  const projectInfo = await orm.project.getProjectByProjectID(
+    req.body.projectID,
+  )
   // console.log(projectInfo)
-  const ewefilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name
-  const outfilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name.split(".")[0]
+  const ewefilepath =
+    DATA_FOLDER_PATH + projectInfo.project_folder_path + '/ewe/' + req.body.name
+  const outfilepath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.name.split('.')[0]
   console.log(outfilepath)
   console.log('运行RunEcoSim_Switch')
   const RunEcoSimPlot = JSON.parse(
@@ -1798,11 +1869,10 @@ const RunEcoSim_Switch = async (req, res) => {
       ModelParameters.StartTime,
       MeasuredData,
     )
-    return {status:"success",option:option}
+    return { status: 'success', option }
   } else if (req.body.id === 'Biomass_relativ_validate') {
-    if(MeasuredFlag===false)
-    {
-      return {status:"success",option:{}}
+    if (MeasuredFlag === false) {
+      return { status: 'success', option: {} }
     }
     const option = SwitchEcoSim(
       RunEcoSimPlot.Biomass_relative,
@@ -1812,7 +1882,7 @@ const RunEcoSim_Switch = async (req, res) => {
       MeasuredFlag,
       MeasuredData,
     )
-    return {status:"success",option:option}
+    return { status: 'success', option }
   } else if (req.body.id === 'Biomass_absolute') {
     const option = SwitchEcoSim(
       RunEcoSimPlot.Biomass_absolute,
@@ -1820,7 +1890,7 @@ const RunEcoSim_Switch = async (req, res) => {
       'Biomass_absolute',
       ModelParameters.StartTime,
     )
-    return {status:"success",option:option}
+    return { status: 'success', option }
   } else if (req.body.id === 'Catch_relative') {
     const option = SwitchEcoSim(
       RunEcoSimPlot.Catch_relative,
@@ -1828,7 +1898,7 @@ const RunEcoSim_Switch = async (req, res) => {
       'Catch_relative',
       ModelParameters.StartTime,
     )
-    return {status:"success",option:option}
+    return { status: 'success', option }
   } else if (req.body.id === 'Catch_absolute') {
     const option = SwitchEcoSim(
       RunEcoSimPlot.Catch_absolute,
@@ -1836,16 +1906,23 @@ const RunEcoSim_Switch = async (req, res) => {
       'Catch_absolute',
       ModelParameters.StartTime,
     )
-    return {status:"success",option:option}
+    return { status: 'success', option }
   }
 }
 
 const GroupPlot_Switch = async (req, res) => {
   console.log('GroupPlot_Switch')
-  const projectInfo = await orm.project.getProjectByProjectID(req.body.projectID)
+  const projectInfo = await orm.project.getProjectByProjectID(
+    req.body.projectID,
+  )
   // console.log(projectInfo)
-  const ewefilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name
-  const outfilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name.split(".")[0]
+  const ewefilepath =
+    DATA_FOLDER_PATH + projectInfo.project_folder_path + '/ewe/' + req.body.name
+  const outfilepath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.name.split('.')[0]
   console.log(outfilepath)
   const data = JSON.parse(
     fs.readFileSync(outfilepath + '\\' + 'EcoSim_Result.json', 'utf-8'),
@@ -1890,7 +1967,7 @@ const GroupPlot_Switch = async (req, res) => {
     GroupFleetColor,
   )
   const result = {
-    status:"success",
+    status: 'success',
     Option: GroupPlotOption,
     Color: GroupPlotColor,
     GroupColor,
@@ -1900,10 +1977,17 @@ const GroupPlot_Switch = async (req, res) => {
 
 const FleetPlot_Switch = async (req, res) => {
   console.log('FleetPlot_Switch')
-  const projectInfo = await orm.project.getProjectByProjectID(req.body.projectID)
+  const projectInfo = await orm.project.getProjectByProjectID(
+    req.body.projectID,
+  )
   // console.log(projectInfo)
-  const ewefilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name
-  const outfilepath = DATA_FOLDER_PATH + projectInfo.project_folder_path + "/ewe/" +req.body.name.split(".")[0]
+  const ewefilepath =
+    DATA_FOLDER_PATH + projectInfo.project_folder_path + '/ewe/' + req.body.name
+  const outfilepath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.name.split('.')[0]
   console.log(outfilepath)
   const data = JSON.parse(
     fs.readFileSync(outfilepath + '\\' + 'EcoSim_Result.json', 'utf-8'),
@@ -1951,7 +2035,7 @@ const FleetPlot_Switch = async (req, res) => {
     GroupFleetColor,
   )
   const result = {
-    status:"success",
+    status: 'success',
     Option: FleetPlotOption,
     Color: FleetPlotColor,
     GroupColor,

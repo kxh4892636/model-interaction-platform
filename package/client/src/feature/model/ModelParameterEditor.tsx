@@ -266,7 +266,7 @@ export const ModelParamEditor = () => {
     'quality-phreec': <></>,
     sand: <SandParamEditor></SandParamEditor>,
     mud: <MudParamEditor></MudParamEditor>,
-    "ewe":<></>,
+    ewe: <></>,
   }
   const uploadPanel = componentMap[modelType]
 

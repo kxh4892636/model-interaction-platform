@@ -1,4 +1,8 @@
-import { getModelInfoAPI, postModelActionAPI, postEWEModelRunAPI } from '@/api/model/model.api'
+import {
+  getModelInfoAPI,
+  postModelActionAPI,
+  postEWEModelRunAPI,
+} from '@/api/model/model.api'
 import { useLayersStore } from '@/store/layerStore'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
@@ -64,7 +68,7 @@ export const Model = () => {
   const projectID = useMetaStore((state) => state.projectID)
   const modelType = useMetaStore((state) => state.modelType)
   const modelArea = useModeStore((state) => state.modelArea)
-  const ewefile   = eweFile((state) => state.Data)
+  const ewefile = eweFile((state) => state.Data)
   const [EWEresponse, setEWEresponse] = useState({})
   const openModal = useModalStore((state) => state.openModal)
   const forceUpdateLayerTree = useLayersStore(
@@ -104,29 +108,28 @@ export const Model = () => {
       arr.push({
         label: '计算模型',
         action: async () => {
-          if(modelType==="ewe")
-          {
-            message.loading({ content: "模型计算中", key: "Mloading",duration:0 });
-            const result = await postEWEModelRunAPI({projectID: projectID as string,name:ewefile})
-            if(result.status==="success")
-            {
+          if (modelType === 'ewe') {
+            message.loading({
+              content: '模型计算中',
+              key: 'Mloading',
+              duration: 0,
+            })
+            const result = await postEWEModelRunAPI({
+              projectID: projectID as string,
+              name: ewefile,
+            })
+            if (result.status === 'success') {
               setEWEresponse(result)
-              message.destroy("Mloading");
-              message.success({ content: "模型计算成功！！！", duration: 1.25 });
+              message.destroy('Mloading')
+              message.success({ content: '模型计算成功！！！', duration: 1.25 })
+            } else {
+              message.destroy('Mloading')
+              message.error({ content: '模型计算失败！！！', duration: 1.25 })
             }
-            else
-            {
-              message.destroy("Mloading");
-              message.error({ content: "模型计算失败！！！", duration: 1.25 });
-            }
-
-          }
-          else
-          {
+          } else {
             if (!projectID) return
             runModelAction(projectID, modelType, forceUpdateLayerTree)
           }
-
         },
       })
     }
@@ -153,7 +156,7 @@ export const Model = () => {
       className="grid grid-cols-2 gap-y-1 border border-slate-300 bg-white py-1"
     >
       {toolList}
-    <EWE data={EWEresponse} flag="Run"></EWE>
+      <EWE data={EWEresponse} flag="Run"></EWE>
     </div>
   )
 }

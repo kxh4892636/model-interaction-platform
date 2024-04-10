@@ -23,7 +23,7 @@ export const ModelSelect = ({ options }: ModelSelectProps) => {
         size="small"
         disabled={projectID === null}
         value={projectID === null ? null : modelType}
-        style={{ width: 160}}
+        style={{ width: 160 }}
         listHeight={600}
         onChange={(value) => {
           setModelType(value)

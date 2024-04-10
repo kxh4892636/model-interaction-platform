@@ -1,41 +1,45 @@
 import React from 'react'
-import { Tabs,Table } from 'antd';
-import { EcoSpaceResult_Group,EcoSpaceResult_Fleet,EcoSpaceResult_Region } from '../../../store/eweStore';
+import { Tabs, Table } from 'antd'
+import {
+  EcoSpaceResult_Group,
+  EcoSpaceResult_Fleet,
+  EcoSpaceResult_Region,
+} from '../../../store/eweStore'
 const GroupCloumns = [
   {
-      title: 'Group_name',
-      dataIndex: 'Group_name',
-      key: 'Group_name',
+    title: 'Group_name',
+    dataIndex: 'Group_name',
+    key: 'Group_name',
   },
   {
-      title: 'Biomass_start',
-      dataIndex: 'Biomass_start',
-      key: 'Biomass_start',
+    title: 'Biomass_start',
+    dataIndex: 'Biomass_start',
+    key: 'Biomass_start',
   },
   {
-      title: 'Biomass_end',
-      dataIndex: 'Biomass_end',
-      key: 'Biomass_end',
+    title: 'Biomass_end',
+    dataIndex: 'Biomass_end',
+    key: 'Biomass_end',
   },
   {
-      title: 'Biomass_E/S',
-      dataIndex: 'Biomass_ES',
-      key: 'Biomass_ES',
+    title: 'Biomass_E/S',
+    dataIndex: 'Biomass_ES',
+    key: 'Biomass_ES',
   },
   {
-      title: 'Catch_start',
-      dataIndex: 'Catch_start',
-      key: 'Catch_start',
+    title: 'Catch_start',
+    dataIndex: 'Catch_start',
+    key: 'Catch_start',
   },
   {
-      title: 'Catch_end',
-      dataIndex: 'Catch_end',
-      key: 'Catch_end',
+    title: 'Catch_end',
+    dataIndex: 'Catch_end',
+    key: 'Catch_end',
   },
   {
-      title: 'Catch_E/S',
-      dataIndex: 'Catch_ES',
-      key: 'Catch_ES',
+    title: 'Catch_E/S',
+    dataIndex: 'Catch_ES',
+    key: 'Catch_ES',
   },
   {
     title: 'Value_start',
@@ -43,36 +47,36 @@ const GroupCloumns = [
     key: 'Value_start',
   },
   {
-      title: 'Value_end',
-      dataIndex: 'Value_end',
-      key: 'Value_end',
+    title: 'Value_end',
+    dataIndex: 'Value_end',
+    key: 'Value_end',
   },
   {
-      title: 'Value_E/S',
-      dataIndex: 'Value_ES',
-      key: 'Value_ES',
+    title: 'Value_E/S',
+    dataIndex: 'Value_ES',
+    key: 'Value_ES',
   },
 ]
 const FleeetCloumns = [
   {
-      title: 'Fleet_name',
-      dataIndex: 'Fleet_name',
-      key: 'Fleet_name',
+    title: 'Fleet_name',
+    dataIndex: 'Fleet_name',
+    key: 'Fleet_name',
   },
   {
-      title: 'Catch_start',
-      dataIndex: 'Catch_start',
-      key: 'Catch_start',
+    title: 'Catch_start',
+    dataIndex: 'Catch_start',
+    key: 'Catch_start',
   },
   {
-      title: 'Catch_end',
-      dataIndex: 'Catch_end',
-      key: 'Catch_end',
+    title: 'Catch_end',
+    dataIndex: 'Catch_end',
+    key: 'Catch_end',
   },
   {
-      title: 'Catch_E/S',
-      dataIndex: 'Catch_ES',
-      key: 'Catch_ES',
+    title: 'Catch_E/S',
+    dataIndex: 'Catch_ES',
+    key: 'Catch_ES',
   },
   {
     title: 'Value_start',
@@ -80,14 +84,14 @@ const FleeetCloumns = [
     key: 'Value_start',
   },
   {
-      title: 'Value_end',
-      dataIndex: 'Value_end',
-      key: 'Value_end',
+    title: 'Value_end',
+    dataIndex: 'Value_end',
+    key: 'Value_end',
   },
   {
-      title: 'Value_E/S',
-      dataIndex: 'Value_ES',
-      key: 'Value_ES',
+    title: 'Value_E/S',
+    dataIndex: 'Value_ES',
+    key: 'Value_ES',
   },
   {
     title: 'Cost_start',
@@ -105,16 +109,16 @@ const FleeetCloumns = [
     key: 'Cost_ES',
   },
   {
-      title: 'Effort',
-      dataIndex: 'Effort',
-      key: 'Effort',
-  }
+    title: 'Effort',
+    dataIndex: 'Effort',
+    key: 'Effort',
+  },
 ]
 const RegionCloumns = [
   {
-      title: 'Group Name',
-      dataIndex: 'Name',
-      key: 'GroupName',
+    title: 'Group Name',
+    dataIndex: 'Name',
+    key: 'GroupName',
   },
   {
     title: 'Biomass_start',
@@ -122,36 +126,36 @@ const RegionCloumns = [
     key: 'Biomass_start',
   },
   {
-      title: 'Biomass_end',
-      dataIndex: 'Biomass_end',
-      key: 'Biomass_end',
+    title: 'Biomass_end',
+    dataIndex: 'Biomass_end',
+    key: 'Biomass_end',
   },
   {
-      title: 'Biomass_E/S',
-      dataIndex: 'Biomass_ES',
-      key: 'Biomass_ES',
+    title: 'Biomass_E/S',
+    dataIndex: 'Biomass_ES',
+    key: 'Biomass_ES',
   },
   {
-      title: 'Catch_start',
-      dataIndex: 'Catch_start',
-      key: 'Catch_start',
+    title: 'Catch_start',
+    dataIndex: 'Catch_start',
+    key: 'Catch_start',
   },
   {
-      title: 'Catch_end',
-      dataIndex: 'Catch_end',
-      key: 'Catch_end',
+    title: 'Catch_end',
+    dataIndex: 'Catch_end',
+    key: 'Catch_end',
   },
   {
-      title: 'Catch_E/S',
-      dataIndex: 'Catch_ES',
-      key: 'Catch_ES',
+    title: 'Catch_E/S',
+    dataIndex: 'Catch_ES',
+    key: 'Catch_ES',
   },
 ]
 
 export default function EcoSpaceResult() {
-  const GroupData = EcoSpaceResult_Group((state) => state.Data);
-  const FleetData = EcoSpaceResult_Fleet((state) => state.Data);
-  const RegionData = EcoSpaceResult_Region((state) => state.Data);
+  const GroupData = EcoSpaceResult_Group((state) => state.Data)
+  const FleetData = EcoSpaceResult_Fleet((state) => state.Data)
+  const RegionData = EcoSpaceResult_Region((state) => state.Data)
   const items = [
     {
       key: '1',
@@ -166,10 +170,8 @@ export default function EcoSpaceResult() {
     {
       key: '3',
       label: 'Region',
-      children: <Table dataSource={RegionData} columns={RegionCloumns}></Table>
+      children: <Table dataSource={RegionData} columns={RegionCloumns}></Table>,
     },
-  ];
-  return (
-    <Tabs defaultActiveKey="1" items={items} />
-  )
+  ]
+  return <Tabs defaultActiveKey="1" items={items} />
 }

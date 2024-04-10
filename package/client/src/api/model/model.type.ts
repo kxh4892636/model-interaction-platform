@@ -80,9 +80,8 @@ export type ModelActionResponseType = Static<typeof ModelActionResponseSchema>
 // /ewe/Import Run
 export const EWEParamBodySchema = Type.Object({
   projectID: Type.String(),
-  name:Type.String(),
+  name: Type.String(),
   id: Type.Optional(Type.String()),
-  csvname : Type.Optional(Type.String())
+  csvname: Type.Optional(Type.String()),
 })
 export type EWEParamBodyType = Static<typeof EWEParamBodySchema>
-

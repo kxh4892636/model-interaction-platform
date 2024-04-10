@@ -1,9 +1,9 @@
-import React,{useEffect,useState} from 'react'
-function Map(props){
-  return(<h1>{props.data}</h1>)
+import React, { useEffect, useState } from 'react'
+function Map(props) {
+  return <h1>{props.data}</h1>
 }
 export default function InputMap() {
-  useEffect(()=>{
+  useEffect(() => {
     // // 获取Canvas元素
     // var canvas = document.getElementById('gridCanvas');
     // var ctx = canvas.getContext('2d');
@@ -28,52 +28,54 @@ export default function InputMap() {
     //         ctx.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
     //     }
     // }
-    const canvas = document.getElementById('gridCanvas');
-    const ctx = canvas.getContext('2d');
-    let x = 50;
-    let y = 50;
-    let vx = 5;
-    let vy = 1;
-    
+    const canvas = document.getElementById('gridCanvas')
+    const ctx = canvas.getContext('2d')
+    let x = 50
+    let y = 50
+    let vx = 5
+    let vy = 1
+
     function draw() {
       // 清除画布
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
       // 更新小球位置
-      x += vx;
-      y += vy;
-    
+      x += vx
+      y += vy
+
       // 边界检测
       if (x + 10 > canvas.width || x - 10 < 0) {
-        vx = -vx;
+        vx = -vx
       }
       if (y + 10 > canvas.height || y - 10 < 0) {
-        vy = -vy;
+        vy = -vy
       }
-    
+
       // 绘制小球
-      ctx.beginPath();
-      ctx.arc(x, y, 10, 0, Math.PI * 2);
-      ctx.fillStyle = 'blue';
-      ctx.fill();
-      ctx.closePath();
-    
+      ctx.beginPath()
+      ctx.arc(x, y, 10, 0, Math.PI * 2)
+      ctx.fillStyle = 'blue'
+      ctx.fill()
+      ctx.closePath()
+
       // 循环动画
-      requestAnimationFrame(draw);
+      requestAnimationFrame(draw)
     }
-    
-    draw();
-    
+
+    draw()
   })
   const [content, setContent] = useState('初始状态')
   return (
     <div>
       <canvas id="gridCanvas" width="400" height="400"></canvas>
-      <div onClick={()=>{
-            content==='初始状态' ? setContent('新的状态') : setContent('初始状态')
+      <div
+        onClick={() => {
+          content === '初始状态'
+            ? setContent('新的状态')
+            : setContent('初始状态')
         }}
-        style={{background:"red",height:"50px",width:"50px"}}>
-        </div>
+        style={{ background: 'red', height: '50px', width: '50px' }}
+      ></div>
       <Map data={content}></Map>
     </div>
   )

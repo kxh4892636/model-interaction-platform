@@ -1,458 +1,515 @@
-import {create} from "zustand";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable camelcase */
+import {
+  postFleetPlotSwitchAPI,
+  postGroupPlotSwitchAPI,
+} from '@/api/model/model.api'
 import { useMetaStore } from '@/store/metaStore'
-import { postGroupPlotSwitchAPI,postFleetPlotSwitchAPI } from "@/api/model/model.api";
-import axios from "axios";// 控制表格的显隐
+import { create } from 'zustand'
 const eweFile = create((set, get) => ({
-    Data:"",
-    setData: (newData) =>
-        set((state) => ({
-            Data: newData
+  Data: '',
+  setData: (newData) =>
+    set((state) => ({
+      Data: newData,
     })),
-}));
+}))
 // 控制表格的显隐
 const TableFlag = create((set, get) => ({
-    Flag:false,
-    setFlag: (newData) =>
-        set((state) => ({
-            Flag: newData
+  Flag: false,
+  setFlag: (newData) =>
+    set((state) => ({
+      Flag: newData,
     })),
-}));
+}))
 
 // Basic Input中的状态
 const Basic = create((set, get) => ({
-    BasicData:[],
-    setBasicData: (newData) =>
-        set((state) => ({
-            BasicData: [...newData]
+  BasicData: [],
+  setBasicData: (newData) =>
+    set((state) => ({
+      BasicData: [...newData],
     })),
-}));
+}))
 
-//StanzeSelect
+// StanzeSelect
 const StanzeSelect = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//StanzeSelectedValue
+}))
+// StanzeSelectedValue
 const StanzeSelectedValue = create((set, get) => ({
-    Data:"",
-    setData: (newData) =>
-        set((state) => ({
-            Data: newData
+  Data: '',
+  setData: (newData) =>
+    set((state) => ({
+      Data: newData,
     })),
-}));
-//StanzeGroup
+}))
+// StanzeGroup
 const StanzeGroup = create((set, get) => ({
-    Data:{},
-    setData: (newData) =>
-        set((state) => ({
-            Data: {...newData}
+  Data: {},
+  setData: (newData) =>
+    set((state) => ({
+      Data: { ...newData },
     })),
-}));
+}))
 
-//StanzeTable
+// StanzeTable
 const StanzeTable = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//StanzePlotOption
+}))
+// StanzePlotOption
 const StanzePlotOption = create((set, get) => ({
-    Data:{},
-    setData: (newData) =>
-        set((state) => ({
-            Data: {...newData}
+  Data: {},
+  setData: (newData) =>
+    set((state) => ({
+      Data: { ...newData },
     })),
-}));
-//Diet Cloumns
+}))
+// Diet Cloumns
 const Diet_Cloumns = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
+}))
 
-//Diet Data
+// Diet Data
 const Diet_Data = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//DetritusFate
+}))
+// DetritusFate
 const DetritusFate = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
+}))
 
-//FleetsCloums
+// FleetsCloums
 const FleetsCloums = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
+}))
 
-//Landings
+// Landings
 const Landings = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
+}))
 
-//FishDiscard
+// FishDiscard
 const Discard = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
+}))
 
-//DiscardFate
+// DiscardFate
 const DiscardFate = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
+}))
 
-//控制Ecopath result的显隐
+// 控制Ecopath result的显隐
 const EcopathResultFlag = create((set, get) => ({
-    Flag:false,
-    setFlag: (newData) =>
-        set((state) => ({
-            Flag: newData
+  Flag: false,
+  setFlag: (newData) =>
+    set((state) => ({
+      Flag: newData,
     })),
-}));
-//Basic_Estimate
+}))
+// Basic_Estimate
 const Basic_Estimate = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//FlowDiagram
+}))
+// FlowDiagram
 const FlowDiagram = create((set, get) => ({
-    Data:{},
-    setData: (newData) =>
-        set((state) => ({
-            Data: {...newData}
+  Data: {},
+  setData: (newData) =>
+    set((state) => ({
+      Data: { ...newData },
     })),
-}));
-//Antv6画的营养等级图
+}))
+// Antv6画的营养等级图
 const Lindman_spine = create((set, get) => ({
-    Data:{},
-    setData: (newData) =>{
-        // console.log("my",newData)
-        set((state) => ({
-            Data: {...newData}
-    }))},
-}));
-//Mortalities
+  Data: {},
+  setData: (newData) => {
+    // console.log("my",newData)
+    set((state) => ({
+      Data: { ...newData },
+    }))
+  },
+}))
+// Mortalities
 const Mortalities = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>{
-        // console.log("my",newData)
-        set((state) => ({
-            Data: [...newData]
-    }))},
-}));
-//PredationMortalities
+  Data: [],
+  setData: (newData) => {
+    // console.log("my",newData)
+    set((state) => ({
+      Data: [...newData],
+    }))
+  },
+}))
+// PredationMortalities
 const PredationMortalities = create((set, get) => ({
-    Data:{},
-    setData: (newData) =>{
-        // console.log("my",newData)
-        set((state) => ({
-            Data: {...newData}
-    }))},
-}));
-//FishingMortalities
+  Data: {},
+  setData: (newData) => {
+    // console.log("my",newData)
+    set((state) => ({
+      Data: { ...newData },
+    }))
+  },
+}))
+// FishingMortalities
 const FishingMortalities = create((set, get) => ({
-    Data:{},
-    setData: (newData) =>{
-        // console.log("my",newData)
-        set((state) => ({
-            Data: {...newData}
-    }))},
-}));
+  Data: {},
+  setData: (newData) => {
+    // console.log("my",newData)
+    set((state) => ({
+      Data: { ...newData },
+    }))
+  },
+}))
 
-//MixedTrophicData
+// MixedTrophicData
 const MixedTrophicData = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>{
-        // console.log("my",newData)
-        set((state) => ({
-            Data: [...newData]
-    }))},
-}));
+  Data: [],
+  setData: (newData) => {
+    // console.log("my",newData)
+    set((state) => ({
+      Data: [...newData],
+    }))
+  },
+}))
 
-//From predators detritus All
+// From predators detritus All
 const FromEvery = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>{
-        // console.log("my",newData)
-        set((state) => ({
-            Data: [...newData]
-    }))},
-}));
+  Data: [],
+  setData: (newData) => {
+    // console.log("my",newData)
+    set((state) => ({
+      Data: [...newData],
+    }))
+  },
+}))
 
 // TimeSeries ForcingFunction Measured 是否可以上传
 const UploadFlag = create((set, get) => ({
-    Data:true,
-    setData: (newData) =>
-        set((state) => ({
-            Data: newData
+  Data: true,
+  setData: (newData) =>
+    set((state) => ({
+      Data: newData,
     })),
-}));
-//TimeSelect
+}))
+// TimeSelect
 const TimeSelect = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//TimeSeries
+}))
+// TimeSeries
 const TimeSeriesData = create((set, get) => ({
-    Data:{},
-    setData: (newData) =>
-        set((state) => ({
-            Data: {...newData}
+  Data: {},
+  setData: (newData) =>
+    set((state) => ({
+      Data: { ...newData },
     })),
-}));
-//TimeYearData
+}))
+// TimeYearData
 const TimeYearData = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//TimeSeriesPlot
+}))
+// TimeSeriesPlot
 const TimeSeriesPlot = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//TimeSelected
+}))
+// TimeSelected
 const TimeSelected = create((set, get) => ({
-    Data:"",
-    setData: (newData) =>
-        set((state) => ({
-            Data: newData
+  Data: '',
+  setData: (newData) =>
+    set((state) => ({
+      Data: newData,
     })),
-}));
-//ForcingFunction
+}))
+// ForcingFunction
 const ForcingFunctionData = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//EggProduction
+}))
+// EggProduction
 const EggProductionData = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//Measured
+}))
+// Measured
 const MeasuredData = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//EcoSimResult Group
+}))
+// EcoSimResult Group
 const EcoSimResult_Group = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
+}))
 
-//EcoSimResult Fleet
+// EcoSimResult Fleet
 const EcoSimResult_Fleet = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
+}))
 
-
-//EcoSimResult Indices
+// EcoSimResult Indices
 const EcoSimResult_Indices = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//RunEcoSim Option
+}))
+// RunEcoSim Option
 const RunEcoSim_Option = create((set, get) => ({
-    Data:{},
-    setData: (newData) =>
-        set((state) => ({
-            Data: {...newData}
+  Data: {},
+  setData: (newData) =>
+    set((state) => ({
+      Data: { ...newData },
     })),
-}));
-//RunEcoSim Option
+}))
+// RunEcoSim Option
 const RunEcoSim_validate = create((set, get) => ({
-    Data:{},
-    setData: (newData) =>
-        set((state) => ({
-            Data: {...newData}
+  Data: {},
+  setData: (newData) =>
+    set((state) => ({
+      Data: { ...newData },
     })),
-}));
+}))
 
-
-//EcoSim Group Plot
-const EcoSimGroup_Plot= create((set, get) => ({
-    Data:{},
-    setData: (newData) =>
-        set((state) => ({
-            Data: {...newData}
+// EcoSim Group Plot
+const EcoSimGroup_Plot = create((set, get) => ({
+  Data: {},
+  setData: (newData) =>
+    set((state) => ({
+      Data: { ...newData },
     })),
-}));
+}))
 function ListItem(props) {
-    const newData = props.data
-    const setERGroupOption = EcoSimGroup_Plot((state) => state.setData );
-    const setERGroupPred = EcoSimGroup_PlotColorPred((state) => state.setData );
-    const setERGroupPrey = EcoSimGroup_PlotColorPrey((state) => state.setData );
-    const setERGroupFleet = EcoSimGroup_PlotColorFleet((state) => state.setData );
-    const projectID = useMetaStore((state) => state.projectID);
-    const ewefile   = eweFile((state) => state.Data);
-    const test= async (item)=>{ 
-        const result = await postGroupPlotSwitchAPI({projectID: projectID,name:ewefile,id:item.target.childNodes[1].data})
-        setERGroupOption(result.Option)
-        setERGroupPred(result.Color.Predatorsranked)
-        setERGroupPrey(result.Color.Preyranked)
-        setERGroupFleet(result.Color.Fleets)
-    }
-    const result = Object.keys(newData).map(item => 
-        <li key={item+"0"} onClick={(item)=>test(item)} style={{listStyleType:"none",cursor:"pointer"}}>
-            <span style={{width:"20px",height:"10px",background:newData[item],display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
-            {item}
-        </li>)
-    // console.log(result)
-  return (
-    result
-  )
+  const newData = props.data
+  const setERGroupOption = EcoSimGroup_Plot((state) => state.setData)
+  const setERGroupPred = EcoSimGroup_PlotColorPred((state) => state.setData)
+  const setERGroupPrey = EcoSimGroup_PlotColorPrey((state) => state.setData)
+  const setERGroupFleet = EcoSimGroup_PlotColorFleet((state) => state.setData)
+  const projectID = useMetaStore((state) => state.projectID)
+  const ewefile = eweFile((state) => state.Data)
+  const test = async (item) => {
+    const result = await postGroupPlotSwitchAPI({
+      projectID,
+      name: ewefile,
+      id: item.target.childNodes[1].data,
+    })
+    setERGroupOption(result.Option)
+    setERGroupPred(result.Color.Predatorsranked)
+    setERGroupPrey(result.Color.Preyranked)
+    setERGroupFleet(result.Color.Fleets)
+  }
+  const result = Object.keys(newData).map((item) => (
+    <li
+      key={item + '0'}
+      onClick={(item) => test(item)}
+      style={{ listStyleType: 'none', cursor: 'pointer' }}
+    >
+      <span
+        style={{
+          width: '20px',
+          height: '10px',
+          background: newData[item],
+          display: 'inline-block',
+          verticalAlign: 'baseline',
+          border: 'solid',
+          borderWidth: '1px',
+        }}
+      ></span>
+      {item}
+    </li>
+  ))
+  // console.log(result)
+  return result
 }
-//Ecosim Group Plot Color
-const EcoSimGroup_PlotColor= create((set, get) => ({
-    Data:<></>,
-    setData: (newData) =>{
-        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
-        if(newData.key===null)
-        {
-            return set((state) => ({Data: <></>}))
-        }
-        set((state) => ({
-            Data: <ListItem data={newData}></ListItem>
-        }))
+// Ecosim Group Plot Color
+const EcoSimGroup_PlotColor = create((set, get) => ({
+  Data: <></>,
+  setData: (newData) => {
+    // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+    if (newData.key === null) {
+      return set((state) => ({ Data: <></> }))
     }
-}));
-//Ecosim Group Plot Color Prey
-const EcoSimGroup_PlotColorPrey= create((set, get) => ({
-    Data:<></>,
-    setData: (newData) =>{
-        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
-        if(newData.key===null)
-        {
-            return set((state) => ({Data: <></>}))
-        }
-        const result = newData.map(item => 
-            <li key={item.Name+"1"} style={{listStyleType:"none"}}>
-                <span style={{width:"20px",height:"10px",background:item.color,display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
-                {item.Name}
-            </li>)
-        set((state) => ({
-            Data: result
-        }))
+    set((state) => ({
+      Data: <ListItem data={newData}></ListItem>,
+    }))
+  },
+}))
+// Ecosim Group Plot Color Prey
+const EcoSimGroup_PlotColorPrey = create((set, get) => ({
+  Data: <></>,
+  setData: (newData) => {
+    // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+    if (newData.key === null) {
+      return set((state) => ({ Data: <></> }))
     }
-}));
-//Ecosim Group Plot Color Pred
-const EcoSimGroup_PlotColorPred= create((set, get) => ({
-    Data:<></>,
-    setData: (newData) =>{
-        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
-        if(newData.key===null)
-        {
-            return set((state) => ({Data: <></>}))
-        }
-        const result = newData.map(item => 
-            <li key={item.Name+"2"} style={{listStyleType:"none"}}>
-                <span style={{width:"20px",height:"10px",background:item.color,display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
-                {item.Name}
-            </li>)
-        set((state) => ({
-            Data: result
-        }))
+    const result = newData.map((item) => (
+      <li key={item.Name + '1'} style={{ listStyleType: 'none' }}>
+        <span
+          style={{
+            width: '20px',
+            height: '10px',
+            background: item.color,
+            display: 'inline-block',
+            verticalAlign: 'baseline',
+            border: 'solid',
+            borderWidth: '1px',
+          }}
+        ></span>
+        {item.Name}
+      </li>
+    ))
+    set((state) => ({
+      Data: result,
+    }))
+  },
+}))
+// Ecosim Group Plot Color Pred
+const EcoSimGroup_PlotColorPred = create((set, get) => ({
+  Data: <></>,
+  setData: (newData) => {
+    // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+    if (newData.key === null) {
+      return set((state) => ({ Data: <></> }))
+    }
+    const result = newData.map((item) => (
+      <li key={item.Name + '2'} style={{ listStyleType: 'none' }}>
+        <span
+          style={{
+            width: '20px',
+            height: '10px',
+            background: item.color,
+            display: 'inline-block',
+            verticalAlign: 'baseline',
+            border: 'solid',
+            borderWidth: '1px',
+          }}
+        ></span>
+        {item.Name}
+      </li>
+    ))
+    set((state) => ({
+      Data: result,
+    }))
+  },
+}))
+// Ecosim Group Plot Color Fleet
+const EcoSimGroup_PlotColorFleet = create((set, get) => ({
+  Data: <></>,
+  setData: (newData) => {
+    // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+    if (newData.key === null) {
+      return set((state) => ({ Data: <></> }))
+    }
+    const result = newData.map((item) => (
+      <li key={item.Name + '3'} style={{ listStyleType: 'none' }}>
+        <span
+          style={{
+            width: '20px',
+            height: '10px',
+            background: item.color,
+            display: 'inline-block',
+            verticalAlign: 'baseline',
+            border: 'solid',
+            borderWidth: '1px',
+          }}
+        ></span>
+        {item.Name}
+      </li>
+    ))
+    set((state) => ({
+      Data: result,
+    }))
+  },
+}))
 
-    }
-}));
-//Ecosim Group Plot Color Fleet
-const EcoSimGroup_PlotColorFleet= create((set, get) => ({
-    Data:<></>,
-    setData: (newData) =>{
-        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
-        if(newData.key===null)
-        {
-            return set((state) => ({Data: <></>}))
-        }
-        const result = newData.map(item => 
-            <li key={item.Name+"3"} style={{listStyleType:"none"}}>
-                <span style={{width:"20px",height:"10px",background:item.color,display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
-                {item.Name}
-            </li>)
-        set((state) => ({
-            Data: result
-        }))
-    }
-}));
-
-//EcoSim Fleet Plot
-const EcoSimFleet_Plot= create((set, get) => ({
-    Data:{},
-    setData: (newData) =>
-        set((state) => ({
-            Data: {...newData}
+// EcoSim Fleet Plot
+const EcoSimFleet_Plot = create((set, get) => ({
+  Data: {},
+  setData: (newData) =>
+    set((state) => ({
+      Data: { ...newData },
     })),
-}));
-function ListItemF(props){
-    const newData = props.data
-    const setERFleetOption = EcoSimFleet_Plot((state) => state.setData );
-    const setERFleetGroup = EcoSimFleet_PlotColorGroup((state) => state.setData );
-    const projectID = useMetaStore((state) => state.projectID);
-    const ewefile   = eweFile((state) => state.Data);
-    const test= async(item)=>{ 
-        const result = await postFleetPlotSwitchAPI({projectID: projectID,name:ewefile,id:item.target.childNodes[1].data})
-        setERFleetOption(result.Option)
-        setERFleetGroup(result.Color)
-        // axios({
+}))
+function ListItemF(props) {
+  const newData = props.data
+  const setERFleetOption = EcoSimFleet_Plot((state) => state.setData)
+  const setERFleetGroup = EcoSimFleet_PlotColorGroup((state) => state.setData)
+  const projectID = useMetaStore((state) => state.projectID)
+  const ewefile = eweFile((state) => state.Data)
+  const test = async (item) => {
+    const result = await postFleetPlotSwitchAPI({
+      projectID,
+      name: ewefile,
+      id: item.target.childNodes[1].data,
+    })
+    setERFleetOption(result.Option)
+    setERFleetGroup(result.Color)
+    // axios({
     //     method: "post",
     //     baseURL: "http://localhost:4000/formal/FleetPlot_Switch",
     //     data: { name: item.target.childNodes[1].data },
@@ -460,189 +517,212 @@ function ListItemF(props){
     //     if (response.status === 200) {
     //         setERFleetOption(response.data.Option)
     //         setERFleetGroup(response.data.Color)
-    //     } 
+    //     }
     //     else {
     //         console.log("FleetPlot Error")
     //     }
     // });
-    }
-    const result = Object.keys(newData).map(item => 
-        <li key={item+"0"} onClick={(item)=>test(item)} style={{listStyleType:"none",cursor:"pointer"}}>
-            <span style={{width:"20px",height:"10px",background:newData[item],display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
-            {item}
-        </li>)
-    return result
+  }
+  const result = Object.keys(newData).map((item) => (
+    <li
+      key={item + '0'}
+      onClick={(item) => test(item)}
+      style={{ listStyleType: 'none', cursor: 'pointer' }}
+    >
+      <span
+        style={{
+          width: '20px',
+          height: '10px',
+          background: newData[item],
+          display: 'inline-block',
+          verticalAlign: 'baseline',
+          border: 'solid',
+          borderWidth: '1px',
+        }}
+      ></span>
+      {item}
+    </li>
+  ))
+  return result
 }
-//Ecosim Fleet Plot Color
-const EcoSimFleet_PlotColor= create((set, get) => ({
-    Data:<></>,
-    setData: (newData) =>{
-        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
-        if(newData.key===null)
-        {
-            return set((state) => ({Data: <></>}))
-        }
-        set((state) => ({
-            Data: <ListItemF data={newData}></ListItemF>
-        }))
+// Ecosim Fleet Plot Color
+const EcoSimFleet_PlotColor = create((set, get) => ({
+  Data: <></>,
+  setData: (newData) => {
+    // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+    if (newData.key === null) {
+      return set((state) => ({ Data: <></> }))
     }
-}));
-//Ecosim Fleet Plot Color Group
-const EcoSimFleet_PlotColorGroup= create((set, get) => ({
-    Data:<></>,
-    setData: (newData) =>{
-        // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
-        if(newData.key===null)
-        {
-            return set((state) => ({Data: <></>}))
-        }
-        const result = newData.map(item => 
-            <li key={item.Name+"1"} style={{listStyleType:"none"}}>
-                <span style={{width:"20px",height:"10px",background:item.color,display:"inline-block",verticalAlign:"baseline",border:"solid",borderWidth:"1px"}}></span>  
-                {item.Name}
-            </li>)
-        set((state) => ({
-            Data: result
-        }))
+    set((state) => ({
+      Data: <ListItemF data={newData}></ListItemF>,
+    }))
+  },
+}))
+// Ecosim Fleet Plot Color Group
+const EcoSimFleet_PlotColorGroup = create((set, get) => ({
+  Data: <></>,
+  setData: (newData) => {
+    // newData===<></>这样判断不行，<><>是一个react元素，利用其key属性判断
+    if (newData.key === null) {
+      return set((state) => ({ Data: <></> }))
     }
-}));
+    const result = newData.map((item) => (
+      <li key={item.Name + '1'} style={{ listStyleType: 'none' }}>
+        <span
+          style={{
+            width: '20px',
+            height: '10px',
+            background: item.color,
+            display: 'inline-block',
+            verticalAlign: 'baseline',
+            border: 'solid',
+            borderWidth: '1px',
+          }}
+        ></span>
+        {item.Name}
+      </li>
+    ))
+    set((state) => ({
+      Data: result,
+    }))
+  },
+}))
 
-//EcoSpaceResult Group
+// EcoSpaceResult Group
 const EcoSpaceResult_Group = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
-    }))
-}));
-//EcoSpaceResult Fleet
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
+    })),
+}))
+// EcoSpaceResult Fleet
 const EcoSpaceResult_Fleet = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//EcoSpaceResult Region
+}))
+// EcoSpaceResult Region
 const EcoSpaceResult_Region = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
     })),
-}));
-//RunEcoSpace Option
+}))
+// RunEcoSpace Option
 const RunEcoSpace_Option = create((set, get) => ({
-    Data:{},
-    setData: (newData) =>{
-        // console.log(newData)
-                set((state) => ({
-            Data: {...newData}
+  Data: {},
+  setData: (newData) => {
+    // console.log(newData)
+    set((state) => ({
+      Data: { ...newData },
     }))
-    }
+  },
+}))
 
-}));
-
-//RcoSpace Map
-//Depth
+// RcoSpace Map
+// Depth
 const EcoSpaceMap_Depth = create((set, get) => ({
-    Data:[[0]],
-    setData: (newData) =>
-    {
-        // console.log("EcoSpaceMap_Depth")
-        set((state) => ({
-            Data: [...newData]
-        }))
-    }
-}));
-//用于选择群组的SelectOption
-const RunEcoSpacae_SelectOption = create((set, get) => ({
-    Data:[],
-    setData: (newData) =>
-        set((state) => ({
-            Data: [...newData]
-    })),
-}));
-//用于选择群组的SelectOption default_value
-const RunEcoSpacae_DefaultSelect = create((set, get) => ({
-    Data:"",
-    setData: (newData) =>{
-        // console.log(newData)
-                set((state) => ({
-            Data: newData
+  Data: [[0]],
+  setData: (newData) => {
+    // console.log("EcoSpaceMap_Depth")
+    set((state) => ({
+      Data: [...newData],
     }))
-    }
-}));
-//Plot Map
+  },
+}))
+// 用于选择群组的SelectOption
+const RunEcoSpacae_SelectOption = create((set, get) => ({
+  Data: [],
+  setData: (newData) =>
+    set((state) => ({
+      Data: [...newData],
+    })),
+}))
+// 用于选择群组的SelectOption default_value
+const RunEcoSpacae_DefaultSelect = create((set, get) => ({
+  Data: '',
+  setData: (newData) => {
+    // console.log(newData)
+    set((state) => ({
+      Data: newData,
+    }))
+  },
+}))
+// Plot Map
 const RunEcoSpacae_PlotMap = create((set, get) => ({
-    Data:{id:"none",data:[[0]]},
-    setData: (newData) =>
-        set((state) => ({
-            Data: {...newData}
+  Data: { id: 'none', data: [[0]] },
+  setData: (newData) =>
+    set((state) => ({
+      Data: { ...newData },
     })),
-}));
+}))
 
-//EcoSpaceTime
+// EcoSpaceTime
 const EcoSpaceTime = create((set, get) => ({
-    Data:0,
-    setData: (newData) =>
-        set((state) => ({
-            Data: newData
+  Data: 0,
+  setData: (newData) =>
+    set((state) => ({
+      Data: newData,
     })),
-}));
-export { 
-    eweFile,
-    Basic,
-    StanzeSelect,
-    StanzeSelectedValue,
-    StanzeGroup,
-    StanzeTable,
-    StanzePlotOption,
-    TableFlag,
-    Diet_Cloumns,
-    Diet_Data,
-    DetritusFate,
-    FleetsCloums,
-    Landings,
-    Discard,
-    DiscardFate,
-    Basic_Estimate,
-    EcopathResultFlag,
-    Mortalities,
-    MixedTrophicData,
-    PredationMortalities,
-    FishingMortalities,
-    FlowDiagram,
-    Lindman_spine,
-    FromEvery,
-    UploadFlag,
-    TimeSelect,
-    TimeYearData,
-    TimeSeriesData,
-    TimeSeriesPlot,
-    TimeSelected,
-    ForcingFunctionData,
-    EggProductionData,
-    MeasuredData,
-    EcoSimResult_Group,
-    EcoSimResult_Fleet,
-    EcoSimResult_Indices,
-    RunEcoSim_Option,
-    RunEcoSim_validate,
-    EcoSimGroup_Plot,
-    EcoSimGroup_PlotColor,
-    EcoSimGroup_PlotColorFleet,
-    EcoSimGroup_PlotColorPrey,
-    EcoSimGroup_PlotColorPred,
-    EcoSimFleet_Plot,
-    EcoSimFleet_PlotColor,
-    EcoSimFleet_PlotColorGroup,
-    EcoSpaceResult_Group,
-    EcoSpaceResult_Fleet,
-    EcoSpaceResult_Region,
-    RunEcoSpace_Option,
-    EcoSpaceMap_Depth,
-    RunEcoSpacae_SelectOption,
-    RunEcoSpacae_PlotMap,
-    RunEcoSpacae_DefaultSelect,
-    EcoSpaceTime}
+}))
+export {
+  Basic,
+  Basic_Estimate,
+  DetritusFate,
+  Diet_Cloumns,
+  Diet_Data,
+  Discard,
+  DiscardFate,
+  EcoSimFleet_Plot,
+  EcoSimFleet_PlotColor,
+  EcoSimFleet_PlotColorGroup,
+  EcoSimGroup_Plot,
+  EcoSimGroup_PlotColor,
+  EcoSimGroup_PlotColorFleet,
+  EcoSimGroup_PlotColorPred,
+  EcoSimGroup_PlotColorPrey,
+  EcoSimResult_Fleet,
+  EcoSimResult_Group,
+  EcoSimResult_Indices,
+  EcoSpaceMap_Depth,
+  EcoSpaceResult_Fleet,
+  EcoSpaceResult_Group,
+  EcoSpaceResult_Region,
+  EcoSpaceTime,
+  EcopathResultFlag,
+  EggProductionData,
+  FishingMortalities,
+  FleetsCloums,
+  FlowDiagram,
+  ForcingFunctionData,
+  FromEvery,
+  Landings,
+  Lindman_spine,
+  MeasuredData,
+  MixedTrophicData,
+  Mortalities,
+  PredationMortalities,
+  RunEcoSim_Option,
+  RunEcoSim_validate,
+  RunEcoSpacae_DefaultSelect,
+  RunEcoSpacae_PlotMap,
+  RunEcoSpacae_SelectOption,
+  RunEcoSpace_Option,
+  StanzeGroup,
+  StanzePlotOption,
+  StanzeSelect,
+  StanzeSelectedValue,
+  StanzeTable,
+  TableFlag,
+  TimeSelect,
+  TimeSelected,
+  TimeSeriesData,
+  TimeSeriesPlot,
+  TimeYearData,
+  UploadFlag,
+  eweFile,
+}

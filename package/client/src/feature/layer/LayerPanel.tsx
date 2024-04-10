@@ -4,7 +4,7 @@ import { useLayersStore } from '@/store/layerStore'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
 import { LayerType, WaterModelTypeType } from '@/type'
-import { message } from 'antd'
+import { Tree, message } from 'antd'
 import { DataNode } from 'antd/es/tree'
 import { useEffect } from 'react'
 import { LayerTree } from './LayerTree'
@@ -12,145 +12,143 @@ import { LayerTreeMenu } from './LayerTreeMenu'
 import { useLayerActions } from './layer.hook'
 import { LayerMenuItemType } from './layer.type'
 
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined } from '@ant-design/icons'
 import eweroutes from '../model-ewe/route'
-import { Tree } from "antd";
 
 // ewe的树，写死了
 const EWEPanel = () => {
-  const treeData:DataNode[] = [
+  const treeData: DataNode[] = [
+    {
+      title: '稳态模型',
+      key: '0-2-1',
+      children: [
         {
-          title: "稳态模型",
-          key: "0-2-1",
+          title: '输入',
+          key: '0-2-1-1',
           children: [
             {
-              title: "输入",
-              key: "0-2-1-1",
-              children: [
-                {
-                  title: "基本参数输入",
-                  key: "BasicInput",
-                },
-                {
-                  title: "多节功能组",
-                  key: "StanzeGroup",
-                },
-                {
-                  title: "食物矩阵",
-                  key: "Diet",
-                },
-                {
-                  title: "渔业捕捞",
-                  key: "Landing",
-                },
-              ],
+              title: '基本参数输入',
+              key: 'BasicInput',
             },
             {
-              title: "输出",
-              key: "0-2-1-2",
-              children: [
-                {
-                  title: "基本参数计算",
-                  key: "EcopathOutput",
-                },
-                {
-                  title: "食物网结构",
-                  key: "FlowDiagram",
-                },
-                {
-                  title: "营养级流动",
-                  key: "AntvG6T",
-                },
-                {
-                  title: "死亡率",
-                  key: "Mortality",
-                },
-                {
-                  title: "混合营养效率",
-                  key: "MixedTrophicImapct",
-                },
-              ],
+              title: '多节功能组',
+              key: 'StanzeGroup',
+            },
+            {
+              title: '食物矩阵',
+              key: 'Diet',
+            },
+            {
+              title: '渔业捕捞',
+              key: 'Landing',
             },
           ],
         },
         {
-          title: "时间动态模型",
-          key: "0-2-2",
-          children:[
-            {
-              title: "输入",
-              key: "0-2-2-1",
-              children:[
-                {
-                  title: "功能函数",
-                  key: "Timeseries",
-                },
-                {
-                  title: "水质浓度",
-                  key: "ForcingFunction",
-                },
-                {
-                  title: "产卵函数",
-                  key: "EggProduction",
-                },
-                {
-                  title: "实测生物量",
-                  key: "Measured",
-                },
-              ]
-            },
-            {
-              title: "输出",
-              key: "0-2-2-2",
-              // icon: <Loading3QuartersOutlined />,
-              children: [
-                {
-                  title: "生物量表格",
-                  key: "EcoSimResults",
-                },
-                {
-                  title: "各功能组验证生物量",
-                  key: "RunEcoSim_validate",
-                },
-                {
-                  title: "各功能组生物量",
-                  key: "RunEcoSim",
-                },
-                {
-                  title: "各功能组参数",
-                  key: "GroupPlot",
-                },
-                {
-                  title: "各功能组捕捞量",
-                  key: "FleetPlot",
-                },
-              ],
-            }
-          ]
-          // icon: <AliwangwangOutlined />,
-
-        },
-        {
-          title: "空间异质模型",
-          key: "0-2-3",
+          title: '输出',
+          key: '0-2-1-2',
           children: [
-            // {
-            //   title: "Input",
-            //   key: "0-5-0",
-            //   routekey:"/model/Input",
-            //   icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
-            // },
             {
-              title: "Run EcoSpace",
-              key: "Run_EcoSpace",
+              title: '基本参数计算',
+              key: 'EcopathOutput',
             },
             {
-              title: "EcoSpace Result",
-              key: "EcoSpace_Result",
+              title: '食物网结构',
+              key: 'FlowDiagram',
+            },
+            {
+              title: '营养级流动',
+              key: 'AntvG6T',
+            },
+            {
+              title: '死亡率',
+              key: 'Mortality',
+            },
+            {
+              title: '混合营养效率',
+              key: 'MixedTrophicImapct',
             },
           ],
         },
-  ];
+      ],
+    },
+    {
+      title: '时间动态模型',
+      key: '0-2-2',
+      children: [
+        {
+          title: '输入',
+          key: '0-2-2-1',
+          children: [
+            {
+              title: '功能函数',
+              key: 'Timeseries',
+            },
+            {
+              title: '水质浓度',
+              key: 'ForcingFunction',
+            },
+            {
+              title: '产卵函数',
+              key: 'EggProduction',
+            },
+            {
+              title: '实测生物量',
+              key: 'Measured',
+            },
+          ],
+        },
+        {
+          title: '输出',
+          key: '0-2-2-2',
+          // icon: <Loading3QuartersOutlined />,
+          children: [
+            {
+              title: '生物量表格',
+              key: 'EcoSimResults',
+            },
+            {
+              title: '各功能组验证生物量',
+              key: 'RunEcoSim_validate',
+            },
+            {
+              title: '各功能组生物量',
+              key: 'RunEcoSim',
+            },
+            {
+              title: '各功能组参数',
+              key: 'GroupPlot',
+            },
+            {
+              title: '各功能组捕捞量',
+              key: 'FleetPlot',
+            },
+          ],
+        },
+      ],
+      // icon: <AliwangwangOutlined />,
+    },
+    {
+      title: '空间异质模型',
+      key: '0-2-3',
+      children: [
+        // {
+        //   title: "Input",
+        //   key: "0-5-0",
+        //   routekey:"/model/Input",
+        //   icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
+        // },
+        {
+          title: 'Run EcoSpace',
+          key: 'Run_EcoSpace',
+        },
+        {
+          title: 'EcoSpace Result',
+          key: 'EcoSpace_Result',
+        },
+      ],
+    },
+  ]
   const openModal = useModalStore((state) => state.openModal)
   return (
     <>
@@ -166,17 +164,15 @@ const EWEPanel = () => {
         onSelect={(_, e) => {
           // 路由切换
           // console.log(eweroutes[e.node.key as string])
-          if(eweroutes[e.node.key as string] !== undefined)
-          {
+          if (eweroutes[e.node.key as string] !== undefined) {
             openModal(eweroutes[e.node.key as string])
           }
-          
         }}
-        style={{ backgroundColor: "#fff", padding: "12px 6px"}}
+        style={{ backgroundColor: '#fff', padding: '12px 6px' }}
       />
     </>
-  );
-};
+  )
+}
 
 const filterLayerMenuItems = (
   layer: LayerType,
@@ -367,7 +363,9 @@ export const LayerPanel = () => {
             数据面板
           </div>
           {/*  modelType==="ewe"的话，直接换成我的组件EWEPanel */}
-          {modelType==="ewe"?<EWEPanel/>:
+          {modelType === 'ewe' ? (
+            <EWEPanel />
+          ) : (
             <LayerTree
               type="data"
               treeData={generateAntdTreeData(
@@ -376,8 +374,7 @@ export const LayerPanel = () => {
                 'data',
               )}
             ></LayerTree>
-          }
-
+          )}
         </div>
         <div
           className=" flex flex-1 flex-col border border-b-0 border-slate-300

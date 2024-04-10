@@ -178,12 +178,17 @@ const EWEUpload = () => {
           modelType="ewe"
           datasetType="ewe-input"
           handleChange={async (info) => {
-            if (
-              info.file.status === 'done'
-            ) {
-              message.loading({ content: "模型加载中", key: "Mloading",duration:0 });
+            if (info.file.status === 'done') {
+              message.loading({
+                content: '模型加载中',
+                key: 'Mloading',
+                duration: 0,
+              })
               setewefile(info.file.name)
-              const result = await postEWEModelImportAPI({projectID: projectID as string,name:info.file.name})
+              const result = await postEWEModelImportAPI({
+                projectID: projectID as string,
+                name: info.file.name,
+              })
               setEWEresponse(result)
             }
           }}
@@ -193,7 +198,6 @@ const EWEUpload = () => {
     </div>
   )
 }
-
 
 export const DataUpload = () => {
   const modelType = useMetaStore((state) => state.modelType)
@@ -208,7 +212,7 @@ export const DataUpload = () => {
     'quality-phreec': <></>,
     sand: <SandUpload></SandUpload>,
     mud: <MudUpload></MudUpload>,
-    "ewe":<EWEUpload></EWEUpload>,
+    ewe: <EWEUpload></EWEUpload>,
   }
   const uploadPanel = componentMap[modelType]
 

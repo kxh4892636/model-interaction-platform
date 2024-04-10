@@ -4,6 +4,7 @@ config
 docs
 customLayer
 renderUtils
+shaders
 
 # Local File
 pnpm-lock.yaml

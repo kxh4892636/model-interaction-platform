@@ -2,26 +2,13 @@ import { LayerPanel } from '@/feature/layer'
 import { MapView } from '@/feature/map'
 import { Model } from '@/feature/model'
 import { ModelSelect } from '@/feature/model-select'
-import { useForceUpdate } from '@/hook/useForceUpdate'
-import { useLayersStore } from '@/store/layerStore'
-import { useMapStore } from '@/store/mapStore'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
 import { WaterModelTypeType } from '@/type'
 
-const test = (number: React.MutableRefObject<number>) => {
-  number.current++
-}
-
 export const Home = () => {
   const modal = useModalStore((state) => state.modal)
   const isModalDisplay = useModalStore((state) => state.isModalDisplay)
-  const openModal = useModalStore((state) => state.openModal)
-  const closeModal = useModalStore((state) => state.closeModal)
-  const forceUpdate = useForceUpdate()
-  const projectID = useMetaStore((state) => state.projectID)
-  const map = useMapStore((state) => state.map)
-  const layersSelected = useLayersStore((state) => state.layersSelected)
   const intervalIDMap = useMetaStore((state) => state.intervalIDMap)
 
   const testClick = async () => {
@@ -50,7 +37,6 @@ export const Home = () => {
       value: 'ewe',
       label: '生态模型',
     },
-
   ]
 
   return (

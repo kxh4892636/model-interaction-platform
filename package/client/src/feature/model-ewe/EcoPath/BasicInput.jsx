@@ -1,6 +1,6 @@
 import React from 'react'
-import { Table,Empty } from 'antd'
-import {Basic,TableFlag} from "../../../store/eweStore"
+import { Table, Empty } from 'antd'
+import { Basic, TableFlag } from '../../../store/eweStore'
 
 const columns = [
   {
@@ -50,12 +50,22 @@ const columns = [
   },
 ]
 export default function Group() {
-  const BasicData = Basic((state) => state.BasicData);
-  const TableF = TableFlag((state) => state.Flag);
+  const BasicData = Basic((state) => state.BasicData)
+  const TableF = TableFlag((state) => state.Flag)
   return (
-    <div style={{textAlign: 'center'}}>
-      <div style={{marginBottom:"10px",fontWeight: 'bold'}}>基本输入参数</div>
-      {TableF===false?<Empty />:<Table dataSource={BasicData} columns={columns} scroll={{x: 1500,y: 450,}}></Table>}
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ marginBottom: '10px', fontWeight: 'bold' }}>
+        基本输入参数
+      </div>
+      {TableF === false ? (
+        <Empty />
+      ) : (
+        <Table
+          dataSource={BasicData}
+          columns={columns}
+          scroll={{ x: 1500, y: 450 }}
+        ></Table>
+      )}
     </div>
   )
 }
