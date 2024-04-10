@@ -4,8 +4,9 @@ from os import path
 from osgeo import gdal, ogr, osr
 
 
-def Mesh2CSV(srcPath: str, dstPath) -> None:
-    data: list[str] = []
+def Mesh2CSV(srcPath: str, dstPath, trianglePath: str) -> None:
+    gridData: list[str] = []
+    triangleData: list[str] = []
     srs: osr.SpatialReference = osr.SpatialReference()
     srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
     srs.ImportFromEPSG(2437)
@@ -19,32 +20,32 @@ def Mesh2CSV(srcPath: str, dstPath) -> None:
             content = line.split()
             splitNum = len(content)
             if splitNum == 2:
-                data.append(",".join(content) + "\n")
+                gridData.append(",".join(content) + "\n")
             elif splitNum == 4:
                 id = content[0]
                 x = float(content[1])
                 y = float(content[2])
                 z = float(content[3])
                 coords = ct.TransformPoint(x, y)
-                data.append(f"{id},{coords[0]},{coords[1]},{z}\n")
+                gridData.append(f"{id},{coords[0]},{coords[1]},{z}\n")
             elif splitNum == 5:
                 tinID = int(content[0])
                 point1 = int(content[2])
                 point2 = int(content[3])
                 point3 = int(content[4])
-                [x1, y1] = data[point1].split(",")[1:3]
-                [x2, y2] = data[point2].split(",")[1:3]
-                [x3, y3] = data[point3].split(",")[1:3]
-                tinX = (float(x1) + float(x2) + float(x3)) / 3
-                tinY = (float(y1) + float(y2) + float(y3)) / 3
-                data.append(f"{tinID},{tinX},{tinY}\n")
+                [x1, y1] = gridData[point1].split(",")[1:3]
+                [x2, y2] = gridData[point2].split(",")[1:3]
+                [x3, y3] = gridData[point3].split(",")[1:3]
+                triangleData.append(f"{point1},{x1},{y1},{x2},{y2},{x3},{y3}\n")
             elif splitNum == 1:
                 break
             elif splitNum == 1:
                 break
 
     with open(dstPath, "w", encoding="utf8") as f:
-        f.writelines(data)
+        f.writelines(gridData)
+    with open(trianglePath, "w", encoding="utf8") as f:
+        f.writelines(triangleData)
 
 
 def resolveCSV(src: str) -> list[tuple[str, float, float, float]]:
@@ -222,9 +223,10 @@ if __name__ == "__main__":
     projectPath = sys.argv[1]
     meshPath = path.join(projectPath, "mesh31.gr3")
     csvPath = path.join(projectPath, "mesh31.csv")
+    trianglePath = path.join(projectPath, "mesh31-triangle.csv")
     maskPath = path.join(projectPath, "mesh31.shp")
     pngPath = path.join(projectPath, "mesh31.png")
-    dataList = Mesh2CSV(meshPath, csvPath)
+    dataList = Mesh2CSV(meshPath, csvPath, trianglePath)
     mesh2mask(csvPath, maskPath)
     extent: tuple = mesh2png(csvPath, pngPath, maskPath)
     # (119.5498985092223, 120.21745091964257, 26.34525050928077, 26.972279065373204)
