@@ -8,8 +8,7 @@ def Mesh2CSV(srcPath: str, dstPath) -> None:
     data: list[str] = []
     srs: osr.SpatialReference = osr.SpatialReference()
     srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-    srs.ImportFromEPSG(2437)
-    srs.SetTM(clat=0, clong=120, scale=1, fe=500000, fn=0)
+    srs.ImportFromEPSG(2434)
     dst: osr.SpatialReference = osr.SpatialReference()
     dst.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
     dst.ImportFromEPSG(4326)
@@ -94,7 +93,7 @@ def mesh2mask(srcPath, dstPath: str) -> None:
         del point
     feature.SetField("id", 0)
     # create concaveHull
-    feature.SetGeometry(multiPoint.ConcaveHull(0.01, True))
+    feature.SetGeometry(multiPoint.ConcaveHull(0.025, True))
     layer.CreateFeature(feature)
     del driver, ds
 

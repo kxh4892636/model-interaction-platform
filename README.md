@@ -113,9 +113,9 @@
 - 必要参数;
   - uvet;
     - mesh31.gr3;
-    - vt.dat: 水动力模型结果;
-    - vn.dat: 水动力模型结果;
-    - et.dat: 水动力模型结果:
+    - vt.dat: 水动力模型结果, 需要额外 24 小时;
+    - vn.dat: 水动力模型结果, 需要额外 24 小时;
+    - et.dat: 水动力模型结果, 需要额外 24 小时:
   - quality;
     - wuran-gongkuang: 模型参数, 第 10 行第一个数字(day)表明模拟时间, 12 行表明是否开启 wasp, 若开启需要 wqm_para.dat 文件
     - wqm_para.dat: wuran-gongkuang 中 12 行为 1 时需要;
