@@ -36,6 +36,9 @@ def Mesh2CSV(srcPath: str, dstPath, trianglePath: str) -> None:
                 [x1, y1] = gridData[point1].split(",")[1:3]
                 [x2, y2] = gridData[point2].split(",")[1:3]
                 [x3, y3] = gridData[point3].split(",")[1:3]
+                tinX = (float(x1) + float(x2) + float(x3)) / 3
+                tinY = (float(y1) + float(y2) + float(y3)) / 3
+                gridData.append(f"{tinID},{tinX},{tinY}\n")
                 triangleData.append(f"{point1},{x1},{y1},{x2},{y2},{x3},{y3}\n")
             elif splitNum == 1:
                 break
