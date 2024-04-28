@@ -49,6 +49,12 @@ import {
   EcoSpaceResult_Region,
   RunEcoSpace_Option,
   EcoSpaceMap_Depth,
+  EcoSpaceMap_DepthColor,
+  EcoSpaceMap_Habitat,
+  EcoSpaceMap_HabitatLegend,
+  EcoSpaceMap_Flow,
+  EcoSpaceMap_FlowColor,
+  EcoSpaceMap_Dispersal,
   RunEcoSpacae_SelectOption,
   RunEcoSpacae_PlotMap,
   RunEcoSpacae_DefaultSelect,
@@ -128,6 +134,12 @@ export default function EWE(props) {
   )
   const setEcoSpcae_Option = RunEcoSpace_Option((state) => state.setData)
   const setEcoSpace_Depth = EcoSpaceMap_Depth((state) => state.setData)
+  const setEcoSpace_DepthColor = EcoSpaceMap_DepthColor((state) => state.setData );
+  const setEcoSpace_Habitat = EcoSpaceMap_Habitat((state) => state.setData );
+  const setEcoSpace_HabitatLegend = EcoSpaceMap_HabitatLegend((state) => state.setData );
+  const setEcoSpace_Flow = EcoSpaceMap_Flow((state) => state.setData );
+  const setEcoSpace_FlowColor = EcoSpaceMap_FlowColor((state) => state.setData );
+  const setEcoSpace_Dispersal = EcoSpaceMap_Dispersal((state) => state.setData );
   const setEcoSpace_SelectOption = RunEcoSpacae_SelectOption(
     (state) => state.setData,
   )
@@ -137,7 +149,8 @@ export default function EWE(props) {
   )
   const setEcoSpaceTime = EcoSpaceTime((state) => state.setData)
 
-  const RefreshInit = () => {
+  const RefreshInit = async () => {
+    // console.log("触发了RefreshInit")
     // EcoPath部分
     setEcoPathFlag(false)
     setStanzeOption([])
@@ -153,8 +166,6 @@ export default function EWE(props) {
     setOutTableF(false)
     setMortalitiesData([])
     setMixedTrophicData([])
-    setMixedTrophicData([])
-    setEcoSpace_Depth([[0]])
 
     // EcoSim部分
     setEcoSimFlag(false)
@@ -181,6 +192,13 @@ export default function EWE(props) {
 
     //EcoSpace部分
     setEcoSpaceFlag(false)
+    setEcoSpace_Depth([[0]])
+    setEcoSpace_DepthColor([[0]])
+    setEcoSpace_Habitat ([[0]]);
+    setEcoSpace_HabitatLegend({});
+    setEcoSpace_Flow([[0]]);
+    setEcoSpace_FlowColor([[0]]);
+    setEcoSpace_Dispersal([])
     setEcoSpaceResult_Group([])
     setEcoSpaceResult_Fleet([])
     setEcoSpaceResult_Region([])
@@ -190,10 +208,11 @@ export default function EWE(props) {
     setRunEcoSpace_DefaultSelect('')
   }
   const ImportModel = async (response) => {
+    //将上一个模型运行结果清楚
+    RefreshInit()
     if (Object.keys(response).length !== 0) {
       if (response.status === 'success') {
-        //将上一个模型运行结果清楚
-        RefreshInit()
+
         //设置一下文件路径
         // setFilePath(filepath);
         //设置TimeSeries ForcingFunction Measured可以上传
@@ -238,7 +257,17 @@ export default function EWE(props) {
         setFleetC(response.EcoPath.FleetCloumn)
         setLanding(response.EcoPath.Landings)
         setTableF(true)
-        setEcoSpace_Depth(response.EcoSpaceDepthData)
+        if(Object.keys(response.EcoSpace).length>0)
+        {
+          setEcoSpace_Depth(response.EcoSpace.MapDepth)
+          setEcoSpace_DepthColor(response.EcoSpace.MapDepthColor)
+          setEcoSpace_Habitat (response.EcoSpace.MapHabitat);
+          setEcoSpace_HabitatLegend(response.EcoSpace.HabitType);
+          setEcoSpace_Flow(response.EcoSpace.MapFlow);
+          setEcoSpace_FlowColor(response.EcoSpace.MapFlowColor);
+          setEcoSpace_Dispersal(response.EcoSpace.Input.Dispersal)
+        }
+
 
         message.destroy(response.message)
         message.success({ content: '数据加载成功！！！', duration: 1.25 })
@@ -274,6 +303,21 @@ export default function EWE(props) {
         setERFleetOption(response.EcoSim.FleetPlot.Option)
         setERFleetColor(response.EcoSim.FleetPlot.FleetColor)
         setERFleetGroup(response.EcoSim.FleetPlot.Color)
+
+        // EcoSpace
+        if(Object.keys(response.EcoSpace).length>0)
+        {
+          setEcoSpaceFlag(true)
+          setEcoSpaceResult_Group(response.EcoSpace.ResultData.EcoSpace_Result_Group);
+          setEcoSpaceResult_Fleet(response.EcoSpace.ResultData.EcoSpace_Result_Fleet);
+          setEcoSpaceResult_Region(response.EcoSpace.ResultData.EcoSpace_Result_Region);
+          setEcoSpcae_Option(response.EcoSpace.option);
+          setEcoSpace_SelectOption(response.EcoSpace.SelectOption)
+          setRunEcoSpace_PlotMap(response.EcoSpace.FirstResultMap)
+          setRunEcoSpace_DefaultSelect(response.EcoSpace.FirstResultMap.id)
+          setEcoSpaceTime(response.EcoSpace.Time)
+        }
+
       }
     }
   }

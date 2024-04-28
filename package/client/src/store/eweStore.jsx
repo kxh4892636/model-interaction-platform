@@ -634,6 +634,77 @@ const EcoSpaceMap_Depth = create((set, get) => ({
     }))
   },
 }))
+const EcoSpaceMap_DepthColor = create((set, get) => ({
+  Data:[[0]],
+  setData: (newData) =>
+  {
+      // console.log("EcoSpaceMap_Depth")
+      set((state) => ({
+          Data: [...newData]
+      }))
+  }
+}));
+//Habitat
+const EcoSpaceMap_Habitat = create((set, get) => ({
+  Data:[[0]],
+  setData: (newData) =>
+  {
+      // console.log("EcoSpaceMap_Depth")
+      set((state) => ({
+          Data: [...newData]
+      }))
+  }
+}));
+const EcoSpaceMap_HabitatLegend = create((set, get) => ({
+  Data:{},
+  setData: (newData) =>
+  {
+      // console.log("EcoSpaceMap_Depth")
+      set((state) => ({
+          Data: {...newData}
+      }))
+  }
+}));
+//Flow
+const EcoSpaceMap_Flow = create((set, get) => ({
+  Data:[[0]],
+  setData: (newData) =>
+  {
+      // console.log("EcoSpaceMap_Depth")
+      set((state) => ({
+          Data: [...newData]
+      }))
+  }
+}));
+const EcoSpaceMap_FlowColor = create((set, get) => ({
+  Data:[[0]],
+  setData: (newData) =>
+  {
+      // console.log(newData)
+      set((state) => ({
+          Data: [...newData]
+      }))
+  }
+}));
+// 迁移速率
+const EcoSpaceMap_Dispersal = create((set, get) => ({
+  Data:[],
+  setData: (newData) =>
+  {
+      // console.log(newData)
+      set((state) => ({
+          Data: [...newData]
+      }))
+  }
+}));
+// ModelType
+const RunEcoSpacae_ModelType = create((set, get) => ({
+  Data:0,
+  setData: (newData) =>
+      set((state) => ({
+          Data: newData
+  })),
+}));
 // 用于选择群组的SelectOption
 const RunEcoSpacae_SelectOption = create((set, get) => ({
   Data: [],
@@ -688,11 +759,6 @@ export {
   EcoSimResult_Fleet,
   EcoSimResult_Group,
   EcoSimResult_Indices,
-  EcoSpaceMap_Depth,
-  EcoSpaceResult_Fleet,
-  EcoSpaceResult_Group,
-  EcoSpaceResult_Region,
-  EcoSpaceTime,
   EcopathResultFlag,
   EggProductionData,
   FishingMortalities,
@@ -708,10 +774,6 @@ export {
   PredationMortalities,
   RunEcoSim_Option,
   RunEcoSim_validate,
-  RunEcoSpacae_DefaultSelect,
-  RunEcoSpacae_PlotMap,
-  RunEcoSpacae_SelectOption,
-  RunEcoSpace_Option,
   StanzeGroup,
   StanzePlotOption,
   StanzeSelect,
@@ -725,4 +787,20 @@ export {
   TimeYearData,
   UploadFlag,
   eweFile,
+  EcoSpaceResult_Fleet,
+  EcoSpaceResult_Group,
+  EcoSpaceResult_Region,
+  EcoSpaceMap_Depth,
+  EcoSpaceMap_DepthColor,
+  EcoSpaceMap_Habitat,
+  EcoSpaceMap_HabitatLegend,
+  EcoSpaceMap_Flow,
+  EcoSpaceMap_FlowColor,
+  EcoSpaceMap_Dispersal,
+  RunEcoSpacae_ModelType,
+  EcoSpaceTime,
+  RunEcoSpacae_DefaultSelect,
+  RunEcoSpacae_PlotMap,
+  RunEcoSpacae_SelectOption,
+  RunEcoSpace_Option,
 }

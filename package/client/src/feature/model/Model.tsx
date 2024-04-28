@@ -117,6 +117,7 @@ export const Model = () => {
             const result = await postEWEModelRunAPI({
               projectID: projectID as string,
               name: ewefile,
+              modeltype: 0
             })
             if (result.status === 'success') {
               setEWEresponse(result)

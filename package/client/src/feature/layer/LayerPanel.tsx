@@ -132,20 +132,51 @@ const EWEPanel = () => {
       title: '空间异质模型',
       key: '0-2-3',
       children: [
-        // {
-        //   title: "Input",
-        //   key: "0-5-0",
-        //   routekey:"/model/Input",
-        //   icon: ({ selected }) => (selected ? <CalendarOutlined /> : <CalendarOutlined />),
-        // },
         {
-          title: 'Run EcoSpace',
-          key: 'Run_EcoSpace',
+          title: "输入",
+          key: "0-2-3-0",
+          children: [
+            {
+              title: "栖息地类型",
+              key:"EcoSpace_Habitat",
+  
+            },  
+            {
+              title: "单元水深",
+              key:"EcoSpace_Depth",
+  
+            },
+            {
+              title: "单元流速",
+              key:"EcoSpace_Flow",
+  
+            },
+            {
+              title: "迁移速率",
+              key:"EcoSpace_Dispersal",
+  
+            },
+          ]
         },
         {
-          title: 'EcoSpace Result',
-          key: 'EcoSpace_Result',
+          title: "输出",
+          key: "0-2-3-1",
+          children:[
+              {
+                title: "生物量表格",
+                key:"EcoSpace_Result",
+              },
+              {
+                title: "生物量时间分布",
+                key:"EcoSpace_Graph",
+              },
+              {
+                title: "生物量空间分布",
+                key:"EcoSpace_Map",
+              },
+          ]
         },
+
       ],
     },
   ]

@@ -458,6 +458,76 @@ export const postFleetPlotSwitchAPI = async (params: EWEParamBodyType) => {
   return response
 }
 
+export const postEcoSpaceGraphSwitchAPI = async (params: EWEParamBodyType) => {
+  const url = `/api/v1/model/ewe/RunEcoSpace_Switch`
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
+    .then((res) => {
+      if (res.status === 200) {
+        return res.json()
+      } else {
+        throw Error()
+      }
+    })
+    .then((result) => {
+      if (result.status === 'success') {
+        return result
+      } else {
+        throw Error()
+      }
+    })
+    .catch(() => {
+      const result = {
+        status: 'error',
+        data: null,
+        message: 'Mloading',
+      }
+      return result
+    })
+
+  return response
+}
+
+export const postEcoSpaceMapSwitchAPI = async (params: EWEParamBodyType) => {
+  const url = `/api/v1/model/ewe/RunEcoSpace_SwitchMap`
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
+    .then((res) => {
+      if (res.status === 200) {
+        return res.json()
+      } else {
+        throw Error()
+      }
+    })
+    .then((result) => {
+      if (result.status === 'success') {
+        return result
+      } else {
+        throw Error()
+      }
+    })
+    .catch(() => {
+      const result = {
+        status: 'error',
+        data: null,
+        message: 'Mloading',
+      }
+      return result
+    })
+
+  return response
+}
+
 export const postUplaodTimeserieAPI = async (params: EWEParamBodyType) => {
   const url = `/api/v1/model/ewe/UploadTimeseries`
   const response = await extendFetch(url, {

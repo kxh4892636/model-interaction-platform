@@ -83,5 +83,7 @@ export const EWEParamBodySchema = Type.Object({
   name: Type.String(),
   id: Type.Optional(Type.String()),
   csvname: Type.Optional(Type.String()),
+  modeltype: Type.Optional(Type.Integer()),
+  time: Type.Optional(Type.Integer()),
 })
 export type EWEParamBodyType = Static<typeof EWEParamBodySchema>

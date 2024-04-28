@@ -20,8 +20,14 @@ import RunEcoSimPlot from './EcoSim/RunEcoSimPlot'
 import RunEcoSimPlotValidate from './EcoSim/RunEcoSimPlotValidate'
 import Timeseries from './EcoSim/Timeseries'
 
+import MapDepth from './EcoSpace/Depth'
+import MapFlow from './EcoSpace/Flow'
+import MapHabitat from './EcoSpace/Habitat'
+import Dispersal from './EcoSpace/Dispersal'
 import EcoSpaceResult from './EcoSpace/EcoSpaceResult'
-import RunEcosSpace from './EcoSpace/RunEcosSpace'
+import EcoSpaceGraph from './EcoSpace/EcoSpaceGraph'
+import EcoSpaceMaps from './EcoSpace/EcoSpaceMap'
+
 
 interface Routes {
   [key: string]: JSX.Element
@@ -151,14 +157,39 @@ const eweroutes: Routes = {
       <FleetPlot />
     </Container>
   ),
-  Run_EcoSpace: (
-    <Container>
-      <RunEcosSpace />
+  EcoSpace_Depth: (
+    <Container name="单元水深">
+      <MapDepth />
+    </Container>
+  ),
+  EcoSpace_Flow: (
+    <Container name="单元流速">
+      <MapFlow />
+    </Container>
+  ),
+  EcoSpace_Habitat: (
+    <Container name="栖息地类型">
+      <MapHabitat />
+    </Container>
+  ),
+  EcoSpace_Dispersal: (
+    <Container name="迁移速率">
+      <Dispersal />
     </Container>
   ),
   EcoSpace_Result: (
-    <Container>
+    <Container name="生物量表格">
       <EcoSpaceResult />
+    </Container>
+  ),
+  EcoSpace_Graph: (
+    <Container name="生物量时间分布">
+      <EcoSpaceGraph />
+    </Container>
+  ),
+  EcoSpace_Map: (
+    <Container name="生物量空间分布">
+      <EcoSpaceMaps />
     </Container>
   ),
 }
