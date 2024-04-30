@@ -70,6 +70,7 @@ export const Model = () => {
   const modelArea = useModeStore((state) => state.modelArea)
   const ewefile = eweFile((state) => state.Data)
   const [EWEresponse, setEWEresponse] = useState({})
+  const [EWEflag, setEWEflag] = useState("")
   const openModal = useModalStore((state) => state.openModal)
   const forceUpdateLayerTree = useLayersStore(
     (state) => state.forceUpdateLayerTree,
@@ -121,6 +122,7 @@ export const Model = () => {
             })
             if (result.status === 'success') {
               setEWEresponse(result)
+              setEWEflag("Run")
               message.destroy('Mloading')
               message.success({ content: '模型计算成功！！！', duration: 1.25 })
             } else {
@@ -157,7 +159,7 @@ export const Model = () => {
       className="grid grid-cols-2 gap-y-1 border border-slate-300 bg-white py-1"
     >
       {toolList}
-      <EWE data={EWEresponse} flag="Run"></EWE>
+      <EWE data={EWEresponse} flag={EWEflag} ></EWE>
     </div>
   )
 }

@@ -208,14 +208,12 @@ export default function EWE(props) {
     setRunEcoSpace_DefaultSelect('')
   }
   const ImportModel = async (response) => {
-    //将上一个模型运行结果清楚
-    RefreshInit()
     if (Object.keys(response).length !== 0) {
       if (response.status === 'success') {
-
         //设置一下文件路径
         // setFilePath(filepath);
         //设置TimeSeries ForcingFunction Measured可以上传
+        RefreshInit() 
         setUPflag(false)
         //先设置Ecopath运行状态
         setImportFlag(true)
@@ -428,12 +426,12 @@ export default function EWE(props) {
   // 使用 useEffect hook 在 response 发生变化时设置数据
   useEffect(() => {
     // 检查 response 是否有效
-    if (props.flag == 'Import') {
+    if (props.flag.split("_")[0] == 'Import') {
       ImportModel(props.data)
     } else if (props.flag == 'Run') {
       RunModel(props.data)
     }
-  }, [props]) // 传入 response 作为依赖项，当其变化时执行 effect
+  }, [props.flag]) // 传入 response 作为依赖项，当其变化时执行 effect
 
   return <></>
 }

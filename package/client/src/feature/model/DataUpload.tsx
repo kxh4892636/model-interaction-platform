@@ -170,6 +170,7 @@ const EWEUpload = () => {
   const projectID = useMetaStore((state) => state.projectID)
   const setewefile = eweFile((state) => state.setData)
   const [EWEresponse, setEWEresponse] = useState({})
+  const [EWEflag, setEWEflag] = useState("")
   return (
     <div>
       <div className="m-3">
@@ -190,11 +191,12 @@ const EWEUpload = () => {
                 name: info.file.name,
               })
               setEWEresponse(result)
+              setEWEflag("Import_"+info.file.name)
             }
           }}
         ></UploadButton>
       </div>
-      <EWE data={EWEresponse} flag="Import"></EWE>
+      <EWE data={EWEresponse} flag={EWEflag} ></EWE>
     </div>
   )
 }
