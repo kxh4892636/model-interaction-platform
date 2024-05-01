@@ -23,7 +23,7 @@ export const ModelSelect = ({ options }: ModelSelectProps) => {
   const [EWEflag, setEWEflag] = useState("")
   const setewefile = eweFile((state) => state.setData)
   const LoadEwEModel = async ()=>{
-    let modelname = "skikda2.EwEmdb"
+    let modelname = ""
     if(projectID)
       {
           const response = await getProjectTreeAPI(projectID)
