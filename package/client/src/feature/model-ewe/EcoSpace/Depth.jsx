@@ -33,14 +33,14 @@ function Map(props){
     }
     drawGrid();
   })
-  return <canvas id="depthCanvas" width="600px" height="600px"></canvas>
+  return <canvas id="depthCanvas" width="500px" height="500px"></canvas>
 }
 export default function MapDepth() {
   const DepthData = EcoSpaceMap_Depth((state)=>state.Data)
   const DepthColor = EcoSpaceMap_DepthColor((state)=>state.Data)
   return (
     <div style={{marginLeft:"100px"}}>
-      <h1 style={{fontSize:20,fontWeight:"bold",paddingBottom:"5px",textAlign:"center",width:"600px"}}>初始深度</h1>
+      <h1 style={{fontSize:20,fontWeight:"bold",paddingBottom:"5px",textAlign:"center",width:"500px"}}>初始深度</h1>
       <div style={{display:"flex"}}>
         <Map data={{"data":DepthData,"color":DepthColor}}></Map>
         {/* <div style={{width:"20px",height:"600px",marginLeft:"10px",background:"linear-gradient(to bottom, #0000FF,#00FFFF)"}}></div> */}

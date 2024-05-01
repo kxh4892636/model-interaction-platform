@@ -1496,6 +1496,260 @@ const UploadMeasured = async (req, res) => {
   })
 }
 
+const Load_Model = async (req, res) => {
+  const projectInfo = await orm.project.getProjectByProjectID(
+    req.body.projectID,
+  )
+  const ewefilepath =
+    DATA_FOLDER_PATH + projectInfo.project_folder_path + '/ewe/' + req.body.name
+  const outfilepath =
+    DATA_FOLDER_PATH +
+    projectInfo.project_folder_path +
+    '/ewe/' +
+    req.body.name.split('.')[0]
+  try {
+    // const output = execSync(
+    //   `cd "${exeFilePath}"&& ConsoleApp2.exe "${ewefilepath}" "Import" "${outfilepath}"`,
+    // )
+    // const outputString = output.toString();
+    // console.log(outputString)
+    // 处理执行命令后的结果
+    const data = JSON.parse(
+      fs.readFileSync(outfilepath + '\\' + 'Import_Data.json', 'utf-8'),
+    )
+    const StanzeSelect = []
+    Object.keys(data.StanzeGroup).forEach((item) => {
+      StanzeSelect.push({ value: item, label: item })
+    })
+    data.StanzeSelect = StanzeSelect
+
+    // Stanze画图option
+    StanzePlotOption(data.StanzeGroup)
+
+    let EspaceData = {};
+    //fs.access是一个异步方法。当调用这个方法时，Node.js将继续执行代码，而不会等到文件检查完成
+    try {
+        fs.accessSync(outfilepath+"\\"+'EcoSpaceInput.json');
+        console.log("EcoSpaceInput.json文件存在");
+        const EcospaceInput = JSON.parse(fs.readFileSync(outfilepath+"\\"+'EcoSpaceInput.json', 'utf-8'))
+        EspaceData["Input"] = EcospaceInput
+    } catch (err) {
+        console.log("EcoSpaceInput.json文件不存在");
+    }
+    try {
+        fs.accessSync(outfilepath+"\\"+'MapDepth.json');
+        console.log("MapDepth.json文件存在");
+        const DepthData = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapDepth.json', 'utf-8'))
+        EspaceData["MapDepth"] = DepthData["MapDepth"]
+        EspaceData["MapHabitat"] = DepthData["MapHabitat"]
+    } catch (err) {
+        console.log("MapDepth.json文件不存在");
+    }
+    try {
+        fs.accessSync(outfilepath+"\\"+'MapDepthColor.json');
+        console.log("MapDepthColor文件存在");
+        const MapDepthColor = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapDepthColor.json', 'utf-8'))
+        EspaceData["MapDepthColor"] = MapDepthColor
+    } catch (err) {
+        console.log("MapDepthColor文件不存在");
+    }
+    try {
+        fs.accessSync(outfilepath+"\\"+'ModelParameters.json');
+        console.log("ModelParameters文件存在");
+        const ModelParameters = JSON.parse(fs.readFileSync(outfilepath+"\\"+'ModelParameters.json', 'utf-8'))
+        EspaceData["HabitType"] = ModelParameters.MapHabitatIndex
+    } catch (err) {
+        console.log("ModelParameters文件不存在");
+    }
+    // Flow
+    try {
+        fs.accessSync(outfilepath+"\\"+'MapFlow.json');
+        console.log("MapFlow文件存在");
+        const MapFlow = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapFlow.json', 'utf-8'))
+        EspaceData["MapFlow"] = MapFlow["1"]
+    } catch (err) {
+        console.log("MapFlow文件不存在");
+    }
+    try {
+        fs.accessSync(outfilepath+"\\"+'MapFlowColor.json');
+        console.log("MapFlowColor文件存在");
+        const MapFlowColor = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapFlowColor.json', 'utf-8'))
+        EspaceData["MapFlowColor"] = MapFlowColor["1"]
+    } catch (err) {
+        console.log("MapFlowColor文件不存在");
+    }
+
+    // EcoSim输入相关 TimeSeries
+    let ESdata = {}
+    const TimeSelect = []
+    try {
+        fs.accessSync(outfilepath + '\\' + 'EcoSimInput.json')
+        ESdata = JSON.parse(
+          fs.readFileSync(outfilepath + '\\' + 'EcoSimInput.json', 'utf-8'),
+        )
+        Object.keys(ESdata.TimeSeries).forEach((item) => {
+          TimeSelect.push({ value: item, label: item })
+        })
+        ESdata.TimeSelect = TimeSelect
+    } 
+    catch (err) {
+      console.log('EcoSimInput文件不存在')
+    }
+    // RUn之后产生的文件
+    const result = {}
+    try {
+      /// /////////////////////EcoPath////////////////////////////////////////
+      // 处理执行命令后的结果
+      const data = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'EcopathOutput.json', 'utf-8'),
+      )
+      const FlowDiagramD = FlowDiagram(data.PreNode, data.Link)
+      const LindmanSpine = NetWorkAnlysis(data)
+      result.EcoPath = {
+        Basic_Estimate: data.Basic_Estimate,
+        FlowDiagram: FlowDiagramD,
+        LindmanSpine,
+        Mortality: data.Mortality,
+        MixedTrophic: data.MixedTrophicImpacts,
+      }
+      /// /////////////////////EcoSim////////////////////////////////////////
+      // 处理执行命令后的结果
+      const EcoSim_data = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'EcoSim_Result.json', 'utf-8'),
+      )
+      const RunEcoSimPlot = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'RunEcosim_Plot.json', 'utf-8'),
+      )
+      const EcoSimGroupPlot = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'EcoSim_Group_Plots.json', 'utf-8'),
+      )
+      const EcoSimFleetPlot = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'EcoSim_Fleet_Plots.json', 'utf-8'),
+      )
+      const ModelParameters = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'ModelParameters.json', 'utf-8'),
+      )
+      // 通过EcoSim——Result获得种类对应的颜色
+      const GroupFleetColor = {}
+      const GroupColor = {}
+      const FleetColor = {}
+      EcoSim_data.EcoSim_Result_Group.forEach((el, index) => {
+        if (index < EcoSimGroupPlot.EcoSim_Group_Plots.length) {
+          GroupFleetColor[el.Group_name] = colorpanel[index]
+          GroupColor[el.Group_name] = colorpanel[index]
+        }
+      })
+      EcoSim_data.EcoSim_Result_Fleet.forEach((el, index) => {
+        GroupFleetColor[el.Fleet_name] =
+          colorpanel[index + EcoSim_data.EcoSim_Result_Group.length]
+        FleetColor[el.Fleet_name] =
+          colorpanel[index + EcoSim_data.EcoSim_Result_Group.length]
+      })
+      // RunEcoSim里面的图画
+      let MeasuredFlag = false
+      let MeasuredData = []
+      // fs.access是一个异步方法。当调用这个方法时，Node.js将继续执行代码，而不会等到文件检查完成
+      try {
+        fs.accessSync(outfilepath + '\\' + 'Measured.json')
+        console.log('Measured.json文件存在')
+        MeasuredData = JSON.parse(
+          fs.readFileSync(outfilepath + '\\' + 'Measured.json', 'utf-8'),
+        )
+        MeasuredFlag = true
+      } catch (err) {
+        console.log('Measured.json文件不存在')
+        MeasuredFlag = false
+      }
+      const option = SwitchEcoSim(
+        RunEcoSimPlot.Biomass_relative,
+        false,
+        'Biomass_relative',
+        ModelParameters.StartTime,
+        false,
+        MeasuredData,
+      )
+      EcoSim_data.option = option
+      const option_validate = SwitchEcoSim(
+        RunEcoSimPlot.Biomass_relative,
+        false,
+        'Biomass_relative_validate',
+        ModelParameters.StartTime,
+        MeasuredFlag,
+        MeasuredData,
+      )
+      EcoSim_data.option_validate = option_validate
+      const GroupPlotOption = SwitchGroupPlot(
+        EcoSimGroupPlot.EcoSim_Group_Plots[0],
+        GroupFleetColor,
+        ModelParameters.StartTime,
+      )
+      const GroupPlotColor = SwitchGroupPlotColor(
+        EcoSimGroupPlot.EcoSim_Group_Plots[0],
+        GroupFleetColor,
+      )
+      EcoSim_data.GroupPlot = {
+        Option: GroupPlotOption,
+        Color: GroupPlotColor,
+        GroupColor,
+      }
+      const FleetPlotOption = SwitchFleetPlot(
+        EcoSimFleetPlot.EcoSim_Fleet_Plots[0],
+        GroupFleetColor,
+        ModelParameters.StartTime,
+      )
+      const FleetPlotColor = SwitchFleetPlotColor(
+        EcoSimFleetPlot.EcoSim_Fleet_Plots[0],
+        GroupFleetColor,
+      )
+      EcoSim_data.FleetPlot = {
+        Option: FleetPlotOption,
+        Color: FleetPlotColor,
+        FleetColor,
+      }
+      result.EcoSim = EcoSim_data
+      /// /////////////////////EcoSpace////////////////////////////////////////
+      try {
+        let EcoSpace_Result = JSON.parse(fs.readFileSync(outfilepath+"\\"+'EcoSpace_Result_'+ Modeltype[0] +'.json', 'utf-8'))
+        let DataPlot = JSON.parse(fs.readFileSync(outfilepath+"\\"+'RunEcoSpace_Plot_'+ Modeltype[0] +'.json', 'utf-8'))
+        // 从Import里面拿数据名称
+        let Import = JSON.parse(fs.readFileSync(outfilepath+"\\"+'Import_Data.json', 'utf-8'))
+        // let ModelParameters = JSON.parse(fs.readFileSync(outfilepath+"\\"+'ModelParameters.json', 'utf-8'))
+        let SelectOption = []
+        Import.Basic_Input.forEach((el,index)=>{
+            SelectOption.push({"label":el.GroupName,"value":index+1})
+        })
+        let Option = SwitchEcoSpace(DataPlot.Relative_Biomass,EcoSpace_Result.EcoSpace_Result_Group,"Relative_Biomass",ModelParameters.StartTime);
+        let RunEcoSpace_Map = JSON.parse(fs.readFileSync(outfilepath+"\\"+'RunEcoSpace_MapColor_'+ Modeltype[0] +'.json', 'utf-8'))
+        result.EcoSpace = {
+          ResultData:EcoSpace_Result,
+          option:Option,
+          SelectOption:SelectOption,
+          FirstResultMap:{id:SelectOption[0].value,
+          data:RunEcoSpace_Map["1"][0]},
+          Time:ModelParameters.EcoSpaceTime
+        }
+      } catch (err) {
+        console.log('EcoSpace文件不存在')
+        result.EcoSpace = {}
+      }
+    } catch (error) {
+      // 处理异常情况
+      console.log('RUn之后产生的文件不存在')
+    }
+    return {
+      status: 'success',
+      EcoPath: data,
+      EcoSpace: EspaceData,
+      EcoSim: ESdata,
+      Output: result
+    }
+  } catch (error) {
+    // 处理异常情况
+    return { status: 'error', message: 'Mloading' }
+  }
+  
+}
+
 const Import_Model = async (req, res) => {
   const projectInfo = await orm.project.getProjectByProjectID(
     req.body.projectID,
@@ -2284,6 +2538,7 @@ export const eweService = {
   UploadForcing,
   UploadMeasured,
   Import_Model,
+  Load_Model,
   Run_Model,
   RunEcoPath,
   RunEcoSim,

@@ -240,6 +240,22 @@ export const modelRoute = async (app: FastifyTypebox) => {
 
   app.route({
     method: 'post',
+    url: '/ewe/Load',
+    schema: {},
+    handler: async (req, res) => {
+      try {
+        res.status(200).send(await eweService.Load_Model(req, res))
+      } catch (error) {
+        if (error instanceof Error) {
+          res.status(200).send({ status: 'fail', content: error.message })
+        } else;
+        console.log(error)
+      }
+    },
+  })
+
+  app.route({
+    method: 'post',
     url: '/ewe/Import',
     schema: {},
     handler: async (req, res) => {

@@ -282,6 +282,42 @@ export const postModelActionAPI = async (params: ModelActionBodyType) => {
   return response
 }
 
+export const postEWEModelLoadAPI = async (params: EWEParamBodyType) => {
+  const url = `/api/v1/model/ewe/Load`
+  const response = await extendFetch(url, {
+    method: 'post',
+    headers: new Headers({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify(params),
+  })
+    .then((res) => {
+      if (res.status === 200) {
+        return res.json()
+      } else {
+        console.log('ERROE')
+        throw Error()
+      }
+    })
+    .then((result) => {
+      if (result.status === 'success') {
+        return result
+      } else {
+        throw Error()
+      }
+    })
+    .catch(() => {
+      const result = {
+        status: 'error',
+        data: null,
+        message: 'Mloading',
+      }
+      return result
+    })
+
+  return response
+}
+
 export const postEWEModelImportAPI = async (params: EWEParamBodyType) => {
   const url = `/api/v1/model/ewe/Import`
   const response = await extendFetch(url, {

@@ -28,7 +28,7 @@ function Map(props){
         else
         {
           const gridSize = Math.max(gridData.length,gridData[0].length);;
-          const cellSize = Math.floor(canvas.width / gridSize);;
+          const cellSize = canvas.width / gridSize;
           // console.log(cellSize,gridData.length,gridData[0].length)
           for (let i = 0; i < gridData.length; i++) {
             for (let j = 0; j < gridData[0].length; j++) {
@@ -53,7 +53,7 @@ function Map(props){
       drawGrid()
     },[props.data.id,props.data.time,props.data.type])//eslint-disable-line
     return <>
-            <div><canvas id="Run_gridCanvas" width="600px" height="600px"></canvas></div>
+            <div><canvas id="Run_gridCanvas" width="500px" height="500px"></canvas></div>
           </>
   }
   export default function EcoSpaceMaps(){
@@ -83,27 +83,29 @@ function Map(props){
       }
     }
     function drawGrids(){
-      let i = 1
-      function test(){
-        if(i<Time)
-        {
-          // console.log(i)
-          SwitchRunEcoSpaceMap(DefaultSelect,i,ModelType)
-          setprogress((i+1)*Math.ceil(100/Time));
-          setTimeout(test, 250);
-          i+=1
+      if(MapData.data.length>1)
+      {
+        let i = 1
+        function test(){
+          if(i<Time)
+          {
+            // console.log(i)
+            SwitchRunEcoSpaceMap(DefaultSelect,i,ModelType)
+            setprogress((i+1)*Math.ceil(100/Time));
+            setTimeout(test, 250);
+            i+=1
+          }
         }
+        test()
       }
-      test()
-      
     }
     return(
       <div style={{display:'flex'}}>
         <div style={{marginLeft:"150px"}}>
-          <h1 style={{fontSize:20,fontWeight:"bold",paddingBottom:"5px",textAlign:"center",width:"600px"}}>Relative Biomass</h1>
+          <h1 style={{fontSize:20,fontWeight:"bold",paddingBottom:"5px",textAlign:"center",width:"500px"}}>Relative Biomass</h1>
           <Map data={MapData}></Map>
           <Button onClick={drawGrids} type="primary" shape="circle" icon={<PlayCircleFilled />} size={'small'} />
-          <Progress percent={progress} style={{width:"600px"}} size={[600, 20]} />
+          <Progress percent={progress} style={{width:"500px"}} size={[500, 20]} />
         </div>
         <div style={{paddingTop:"30px"}}>
           <div style={{marginBottom:"5px"}}>

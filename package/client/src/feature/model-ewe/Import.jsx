@@ -207,6 +207,111 @@ export default function EWE(props) {
     setRunEcoSpace_PlotMap({ id: 'none', data: [[0]] })
     setRunEcoSpace_DefaultSelect('')
   }
+  const LoadModel = async (response) => {
+    if (Object.keys(response).length !== 0) {
+      if (response.status === 'success') {
+        //设置一下文件路径
+        // setFilePath(filepath);
+        //设置TimeSeries ForcingFunction Measured可以上传
+        RefreshInit() 
+        setUPflag(false)
+        //先设置Ecopath运行状态
+        setImportFlag(true)
+        setStanzeOption(response.EcoPath.StanzeSelect)
+        setStanzeGroup(response.EcoPath.StanzeGroup)
+        // 有些没有Stanze数组
+        if (response.EcoPath.StanzeSelect.length > 0) {
+          const value = response.EcoPath.StanzeSelect[0].value
+          setStanzeSelectedValue(value)
+          setStanzeTable(response.EcoPath.StanzeGroup[value].LifeStageTable)
+          setStanzePlotOption(response.EcoPath.StanzeGroup[value].option)
+        }
+        //有些直接没有EcoSim的整个输入
+        if (Object.keys(response.EcoSim).length !== 0) {
+          setTimeOption(response.EcoSim.TimeSelect)
+          setTimeSeries(response.EcoSim.TimeSeries)
+          setTimeYearData(response.EcoSim.TimeYears)
+          // 有些没有TimeSeries数据
+          if (response.EcoSim.TimeSelect.length > 0) {
+            const value2 = response.EcoSim.TimeSelect[0].value
+            setTimeSelected(value2)
+            setTimeSeriesPlot(response.EcoSim.TimeSeries[value2])
+          }
+          if (Object.keys(response.EcoSim.ForcingFunction).length !== 0) {
+            setForcingFunctionData(
+              Object.values(response.EcoSim.ForcingFunction)[0].slice(1),
+            )
+          }
+          if (Object.keys(response.EcoSim.EggProduction).length !== 0) {
+            setEggProductionData(
+              Object.values(response.EcoSim.EggProduction)[0].slice(1),
+            )
+          }
+        }
+
+        setBasicData(response.EcoPath.Basic_Input)
+        setDietC(response.EcoPath.DietCloumns)
+        setDiet(response.EcoPath.DietComp)
+        setFleetC(response.EcoPath.FleetCloumn)
+        setLanding(response.EcoPath.Landings)
+        setTableF(true)
+        if(Object.keys(response.EcoSpace).length>0)
+        {
+          setEcoSpace_Depth(response.EcoSpace.MapDepth)
+          setEcoSpace_DepthColor(response.EcoSpace.MapDepthColor)
+          setEcoSpace_Habitat (response.EcoSpace.MapHabitat);
+          setEcoSpace_HabitatLegend(response.EcoSpace.HabitType);
+          setEcoSpace_Flow(response.EcoSpace.MapFlow);
+          setEcoSpace_FlowColor(response.EcoSpace.MapFlowColor);
+          setEcoSpace_Dispersal(response.EcoSpace.Input.Dispersal)
+        }
+        ////////////Output/////////////////////////////////////
+        if(Object.keys(response.Output).length>0)
+        {
+          // EcoPath
+          setBasic_EData(response.Output.EcoPath.Basic_Estimate)
+          setFlowD(response.Output.EcoPath.FlowDiagram)
+          setNetworkData(response.Output.EcoPath.LindmanSpine)
+          setFromEvery(response.Output.EcoPath.LindmanSpine.fromevery)
+          setMortalitiesData(response.Output.EcoPath.Mortality)
+          setMixedTrophicData(response.Output.EcoPath.MixedTrophic)
+          setOutTableF(true)
+
+          // EcoSim
+          setERGroup(response.Output.EcoSim.EcoSim_Result_Group)
+          setERFleet(response.Output.EcoSim.EcoSim_Result_Fleet)
+          setERIndice(response.Output.EcoSim.EcoSim_Result_Indice)
+          setEROption(response.Output.EcoSim.option)
+          setERvalidate(response.Output.EcoSim.option_validate)
+          setERGroupOption(response.Output.EcoSim.GroupPlot.Option)
+          setERGroupColor(response.Output.EcoSim.GroupPlot.GroupColor)
+          setERGroupPred(response.Output.EcoSim.GroupPlot.Color.Predatorsranked)
+          setERGroupPrey(response.Output.EcoSim.GroupPlot.Color.Preyranked)
+          setERGroupFleet(response.Output.EcoSim.GroupPlot.Color.Fleets)
+          setERFleetOption(response.Output.EcoSim.FleetPlot.Option)
+          setERFleetColor(response.Output.EcoSim.FleetPlot.FleetColor)
+          setERFleetGroup(response.Output.EcoSim.FleetPlot.Color)
+
+          // EcoSpace
+          if(Object.keys(response.Output.EcoSpace).length>0)
+          {
+            setEcoSpaceFlag(true)
+            setEcoSpaceResult_Group(response.Output.EcoSpace.ResultData.EcoSpace_Result_Group);
+            setEcoSpaceResult_Fleet(response.Output.EcoSpace.ResultData.EcoSpace_Result_Fleet);
+            setEcoSpaceResult_Region(response.Output.EcoSpace.ResultData.EcoSpace_Result_Region);
+            setEcoSpcae_Option(response.Output.EcoSpace.option);
+            setEcoSpace_SelectOption(response.Output.EcoSpace.SelectOption)
+            setRunEcoSpace_PlotMap(response.Output.EcoSpace.FirstResultMap)
+            setRunEcoSpace_DefaultSelect(response.Output.EcoSpace.FirstResultMap.id)
+            setEcoSpaceTime(response.Output.EcoSpace.Time)
+          }
+        }
+        
+      } else {
+        console.log(`EWE数据加载失败,没有数据,模型未运行`)
+      }
+    }
+  }
   const ImportModel = async (response) => {
     if (Object.keys(response).length !== 0) {
       if (response.status === 'success') {
@@ -430,6 +535,8 @@ export default function EWE(props) {
       ImportModel(props.data)
     } else if (props.flag == 'Run') {
       RunModel(props.data)
+    } else if (props.flag == 'Load') {
+      LoadModel(props.data)
     }
   }, [props.flag]) // 传入 response 作为依赖项，当其变化时执行 effect
 

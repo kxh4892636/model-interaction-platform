@@ -76,17 +76,17 @@ function Map(props){
     }
     drawGrid();
   })
-  return <canvas id="habitatCanvas" width="600px" height="600px"></canvas>
+  return <canvas id="habitatCanvas" width="500px" height="500px"></canvas>
 }
 export default function MapHabitat() {
   const HabitatData = EcoSpaceMap_Habitat((state)=>state.Data)
   const HabitatType = EcoSpaceMap_HabitatLegend((state)=>state.Data)
   return (
     <div style={{marginLeft:"100px"}}>
-      <h1 style={{fontSize:20,fontWeight:"bold",paddingBottom:"5px",textAlign:"center",width:"600px"}}>栖息地类型</h1>
+      <h1 style={{fontSize:20,fontWeight:"bold",paddingBottom:"5px",textAlign:"center",width:"500px"}}>栖息地类型</h1>
       <div style={{display:"flex"}}>
         <Map data={HabitatData}></Map>
-        <div style={{width:"200px",height:"600px",marginLeft:"10px"}}>
+        <div style={{width:"200px",height:"500px",marginLeft:"10px"}}>
             <Legend data={HabitatType}></Legend>
         </div>
       </div>

@@ -71,14 +71,14 @@ function Map(props){
     drawGrid();
 
   })
-  return <canvas id="flowCanvas" width="600px" height="600px"></canvas>
+  return <canvas id="flowCanvas" width="500px" height="500px"></canvas>
 }
 export default function MapFlow() {
   const FlowData = EcoSpaceMap_Flow((state)=>state.Data)
   const FlowColor = EcoSpaceMap_FlowColor((state)=>state.Data)
   return (
     <div style={{marginLeft:"100px"}}>
-      <h1 style={{fontSize:20,fontWeight:"bold",paddingBottom:"5px",textAlign:"center",width:"600px"}}>单元流速</h1>
+      <h1 style={{fontSize:20,fontWeight:"bold",paddingBottom:"5px",textAlign:"center",width:"500px"}}>单元流速</h1>
       <div style={{display:"flex"}}>
         <Map data={{"data":FlowData,"color":FlowColor}}></Map>
       </div>
