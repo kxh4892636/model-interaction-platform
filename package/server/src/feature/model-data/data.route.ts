@@ -204,7 +204,6 @@ export const dataRoute = async (app: FastifyTypebox) => {
       },
     },
     handler: async (req): Promise<DataUploadResponseType> => {
-      // NOTE
       const options = { limits: { fileSize: 1073741824 } }
       const file = await req.file(options)
       if (!file) throw Error()

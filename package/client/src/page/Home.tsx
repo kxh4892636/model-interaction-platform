@@ -2,6 +2,7 @@ import { LayerPanel } from '@/feature/layer'
 import { MapView } from '@/feature/map'
 import { Model } from '@/feature/model'
 import { ModelSelect } from '@/feature/model-select'
+import { ModelStatus } from '@/feature/model/ModelStatus'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
 import { WaterModelTypeType } from '@/type'
@@ -10,6 +11,7 @@ export const Home = () => {
   const modal = useModalStore((state) => state.modal)
   const isModalDisplay = useModalStore((state) => state.isModalDisplay)
   const intervalIDMap = useMetaStore((state) => state.intervalIDMap)
+  const areaName = useMetaStore((state) => state.areaName)
 
   const testClick = async () => {
     console.log(intervalIDMap)
@@ -52,6 +54,14 @@ export const Home = () => {
         <div className="relative flex flex-auto bg-green-50">
           <div className="flex w-[24rem] flex-col bg-slate-200 px-1">
             <div className="my-0.5">
+              <div
+                className="flex h-10 items-center border border-slate-300
+                  bg-white px-2"
+              >
+                <div>{`当前研究区域： ${areaName || '未选择研究区域'}`}</div>
+              </div>
+            </div>
+            <div className="mb-0.5">
               <ModelSelect options={options}></ModelSelect>
             </div>
             <div className="mb-0.5">
@@ -59,7 +69,10 @@ export const Home = () => {
             </div>
             <LayerPanel></LayerPanel>
           </div>
-          <MapView></MapView>
+          <div className="relative h-full w-full">
+            <ModelStatus></ModelStatus>
+            <MapView></MapView>
+          </div>
         </div>
       </div>
       {isModalDisplay && modal}

@@ -34,6 +34,7 @@ export const WaterModelTypeSchema = Type.Union([
   Type.Literal('water-3d'),
   Type.Literal('quality-wasp'),
   Type.Literal('quality-phreec'),
+  Type.Literal('quality-phreec-3d'),
   Type.Literal('sand'),
   Type.Literal('mud'),
   Type.Literal('ewe'),

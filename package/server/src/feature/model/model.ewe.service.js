@@ -86,10 +86,10 @@ const FleetPlotName = [
   'Discad mortality',
   'Discard survival',
 ]
-const Modeltype = {   
-    0:"Basic PDE",
-    1:"IBM",
-    2:"Multi-stanza"
+const Modeltype = {
+  0: 'Basic PDE',
+  1: 'IBM',
+  2: 'Multi-stanza',
 }
 // 处理一下Stanze用到的图表
 const StanzePlotOption = (data) => {
@@ -1526,73 +1526,84 @@ const Load_Model = async (req, res) => {
     // Stanze画图option
     StanzePlotOption(data.StanzeGroup)
 
-    let EspaceData = {};
-    //fs.access是一个异步方法。当调用这个方法时，Node.js将继续执行代码，而不会等到文件检查完成
+    const EspaceData = {}
+    // fs.access是一个异步方法。当调用这个方法时，Node.js将继续执行代码，而不会等到文件检查完成
     try {
-        fs.accessSync(outfilepath+"\\"+'EcoSpaceInput.json');
-        console.log("EcoSpaceInput.json文件存在");
-        const EcospaceInput = JSON.parse(fs.readFileSync(outfilepath+"\\"+'EcoSpaceInput.json', 'utf-8'))
-        EspaceData["Input"] = EcospaceInput
+      fs.accessSync(outfilepath + '\\' + 'EcoSpaceInput.json')
+      console.log('EcoSpaceInput.json文件存在')
+      const EcospaceInput = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'EcoSpaceInput.json', 'utf-8'),
+      )
+      EspaceData.Input = EcospaceInput
     } catch (err) {
-        console.log("EcoSpaceInput.json文件不存在");
+      console.log('EcoSpaceInput.json文件不存在')
     }
     try {
-        fs.accessSync(outfilepath+"\\"+'MapDepth.json');
-        console.log("MapDepth.json文件存在");
-        const DepthData = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapDepth.json', 'utf-8'))
-        EspaceData["MapDepth"] = DepthData["MapDepth"]
-        EspaceData["MapHabitat"] = DepthData["MapHabitat"]
+      fs.accessSync(outfilepath + '\\' + 'MapDepth.json')
+      console.log('MapDepth.json文件存在')
+      const DepthData = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'MapDepth.json', 'utf-8'),
+      )
+      EspaceData.MapDepth = DepthData.MapDepth
+      EspaceData.MapHabitat = DepthData.MapHabitat
     } catch (err) {
-        console.log("MapDepth.json文件不存在");
+      console.log('MapDepth.json文件不存在')
     }
     try {
-        fs.accessSync(outfilepath+"\\"+'MapDepthColor.json');
-        console.log("MapDepthColor文件存在");
-        const MapDepthColor = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapDepthColor.json', 'utf-8'))
-        EspaceData["MapDepthColor"] = MapDepthColor
+      fs.accessSync(outfilepath + '\\' + 'MapDepthColor.json')
+      console.log('MapDepthColor文件存在')
+      const MapDepthColor = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'MapDepthColor.json', 'utf-8'),
+      )
+      EspaceData.MapDepthColor = MapDepthColor
     } catch (err) {
-        console.log("MapDepthColor文件不存在");
+      console.log('MapDepthColor文件不存在')
     }
     try {
-        fs.accessSync(outfilepath+"\\"+'ModelParameters.json');
-        console.log("ModelParameters文件存在");
-        const ModelParameters = JSON.parse(fs.readFileSync(outfilepath+"\\"+'ModelParameters.json', 'utf-8'))
-        EspaceData["HabitType"] = ModelParameters.MapHabitatIndex
+      fs.accessSync(outfilepath + '\\' + 'ModelParameters.json')
+      console.log('ModelParameters文件存在')
+      const ModelParameters = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'ModelParameters.json', 'utf-8'),
+      )
+      EspaceData.HabitType = ModelParameters.MapHabitatIndex
     } catch (err) {
-        console.log("ModelParameters文件不存在");
+      console.log('ModelParameters文件不存在')
     }
     // Flow
     try {
-        fs.accessSync(outfilepath+"\\"+'MapFlow.json');
-        console.log("MapFlow文件存在");
-        const MapFlow = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapFlow.json', 'utf-8'))
-        EspaceData["MapFlow"] = MapFlow["1"]
+      fs.accessSync(outfilepath + '\\' + 'MapFlow.json')
+      console.log('MapFlow文件存在')
+      const MapFlow = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'MapFlow.json', 'utf-8'),
+      )
+      EspaceData.MapFlow = MapFlow['1']
     } catch (err) {
-        console.log("MapFlow文件不存在");
+      console.log('MapFlow文件不存在')
     }
     try {
-        fs.accessSync(outfilepath+"\\"+'MapFlowColor.json');
-        console.log("MapFlowColor文件存在");
-        const MapFlowColor = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapFlowColor.json', 'utf-8'))
-        EspaceData["MapFlowColor"] = MapFlowColor["1"]
+      fs.accessSync(outfilepath + '\\' + 'MapFlowColor.json')
+      console.log('MapFlowColor文件存在')
+      const MapFlowColor = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'MapFlowColor.json', 'utf-8'),
+      )
+      EspaceData.MapFlowColor = MapFlowColor['1']
     } catch (err) {
-        console.log("MapFlowColor文件不存在");
+      console.log('MapFlowColor文件不存在')
     }
 
     // EcoSim输入相关 TimeSeries
     let ESdata = {}
     const TimeSelect = []
     try {
-        fs.accessSync(outfilepath + '\\' + 'EcoSimInput.json')
-        ESdata = JSON.parse(
-          fs.readFileSync(outfilepath + '\\' + 'EcoSimInput.json', 'utf-8'),
-        )
-        Object.keys(ESdata.TimeSeries).forEach((item) => {
-          TimeSelect.push({ value: item, label: item })
-        })
-        ESdata.TimeSelect = TimeSelect
-    } 
-    catch (err) {
+      fs.accessSync(outfilepath + '\\' + 'EcoSimInput.json')
+      ESdata = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'EcoSimInput.json', 'utf-8'),
+      )
+      Object.keys(ESdata.TimeSeries).forEach((item) => {
+        TimeSelect.push({ value: item, label: item })
+      })
+      ESdata.TimeSelect = TimeSelect
+    } catch (err) {
       console.log('EcoSimInput文件不存在')
     }
     // RUn之后产生的文件
@@ -1621,10 +1632,16 @@ const Load_Model = async (req, res) => {
         fs.readFileSync(outfilepath + '\\' + 'RunEcosim_Plot.json', 'utf-8'),
       )
       const EcoSimGroupPlot = JSON.parse(
-        fs.readFileSync(outfilepath + '\\' + 'EcoSim_Group_Plots.json', 'utf-8'),
+        fs.readFileSync(
+          outfilepath + '\\' + 'EcoSim_Group_Plots.json',
+          'utf-8',
+        ),
       )
       const EcoSimFleetPlot = JSON.parse(
-        fs.readFileSync(outfilepath + '\\' + 'EcoSim_Fleet_Plots.json', 'utf-8'),
+        fs.readFileSync(
+          outfilepath + '\\' + 'EcoSim_Fleet_Plots.json',
+          'utf-8',
+        ),
       )
       const ModelParameters = JSON.parse(
         fs.readFileSync(outfilepath + '\\' + 'ModelParameters.json', 'utf-8'),
@@ -1709,24 +1726,52 @@ const Load_Model = async (req, res) => {
       result.EcoSim = EcoSim_data
       /// /////////////////////EcoSpace////////////////////////////////////////
       try {
-        let EcoSpace_Result = JSON.parse(fs.readFileSync(outfilepath+"\\"+'EcoSpace_Result_'+ Modeltype[0] +'.json', 'utf-8'))
-        let DataPlot = JSON.parse(fs.readFileSync(outfilepath+"\\"+'RunEcoSpace_Plot_'+ Modeltype[0] +'.json', 'utf-8'))
+        const EcoSpace_Result = JSON.parse(
+          fs.readFileSync(
+            outfilepath + '\\' + 'EcoSpace_Result_' + Modeltype[0] + '.json',
+            'utf-8',
+          ),
+        )
+        const DataPlot = JSON.parse(
+          fs.readFileSync(
+            outfilepath + '\\' + 'RunEcoSpace_Plot_' + Modeltype[0] + '.json',
+            'utf-8',
+          ),
+        )
         // 从Import里面拿数据名称
-        let Import = JSON.parse(fs.readFileSync(outfilepath+"\\"+'Import_Data.json', 'utf-8'))
+        const Import = JSON.parse(
+          fs.readFileSync(outfilepath + '\\' + 'Import_Data.json', 'utf-8'),
+        )
         // let ModelParameters = JSON.parse(fs.readFileSync(outfilepath+"\\"+'ModelParameters.json', 'utf-8'))
-        let SelectOption = []
-        Import.Basic_Input.forEach((el,index)=>{
-            SelectOption.push({"label":el.GroupName,"value":index+1})
+        const SelectOption = []
+        Import.Basic_Input.forEach((el, index) => {
+          SelectOption.push({ label: el.GroupName, value: index + 1 })
         })
-        let Option = SwitchEcoSpace(DataPlot.Relative_Biomass,EcoSpace_Result.EcoSpace_Result_Group,"Relative_Biomass",ModelParameters.StartTime);
-        let RunEcoSpace_Map = JSON.parse(fs.readFileSync(outfilepath+"\\"+'RunEcoSpace_MapColor_'+ Modeltype[0] +'.json', 'utf-8'))
+        const Option = SwitchEcoSpace(
+          DataPlot.Relative_Biomass,
+          EcoSpace_Result.EcoSpace_Result_Group,
+          'Relative_Biomass',
+          ModelParameters.StartTime,
+        )
+        const RunEcoSpace_Map = JSON.parse(
+          fs.readFileSync(
+            outfilepath +
+              '\\' +
+              'RunEcoSpace_MapColor_' +
+              Modeltype[0] +
+              '.json',
+            'utf-8',
+          ),
+        )
         result.EcoSpace = {
-          ResultData:EcoSpace_Result,
-          option:Option,
-          SelectOption:SelectOption,
-          FirstResultMap:{id:SelectOption[0].value,
-          data:RunEcoSpace_Map["1"][0]},
-          Time:ModelParameters.EcoSpaceTime
+          ResultData: EcoSpace_Result,
+          option: Option,
+          SelectOption,
+          FirstResultMap: {
+            id: SelectOption[0].value,
+            data: RunEcoSpace_Map['1'][0],
+          },
+          Time: ModelParameters.EcoSpaceTime,
         }
       } catch (err) {
         console.log('EcoSpace文件不存在')
@@ -1741,13 +1786,12 @@ const Load_Model = async (req, res) => {
       EcoPath: data,
       EcoSpace: EspaceData,
       EcoSim: ESdata,
-      Output: result
+      Output: result,
     }
   } catch (error) {
     // 处理异常情况
     return { status: 'error', message: 'Mloading' }
   }
-  
 }
 
 const Import_Model = async (req, res) => {
@@ -1780,57 +1824,69 @@ const Import_Model = async (req, res) => {
     // Stanze画图option
     StanzePlotOption(data.StanzeGroup)
 
-    let EspaceData = {};
-    //fs.access是一个异步方法。当调用这个方法时，Node.js将继续执行代码，而不会等到文件检查完成
+    const EspaceData = {}
+    // fs.access是一个异步方法。当调用这个方法时，Node.js将继续执行代码，而不会等到文件检查完成
     try {
-        fs.accessSync(outfilepath+"\\"+'EcoSpaceInput.json');
-        console.log("EcoSpaceInput.json文件存在");
-        const EcospaceInput = JSON.parse(fs.readFileSync(outfilepath+"\\"+'EcoSpaceInput.json', 'utf-8'))
-        EspaceData["Input"] = EcospaceInput
+      fs.accessSync(outfilepath + '\\' + 'EcoSpaceInput.json')
+      console.log('EcoSpaceInput.json文件存在')
+      const EcospaceInput = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'EcoSpaceInput.json', 'utf-8'),
+      )
+      EspaceData.Input = EcospaceInput
     } catch (err) {
-        console.log("EcoSpaceInput.json文件不存在");
+      console.log('EcoSpaceInput.json文件不存在')
     }
     try {
-        fs.accessSync(outfilepath+"\\"+'MapDepth.json');
-        console.log("MapDepth.json文件存在");
-        const DepthData = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapDepth.json', 'utf-8'))
-        EspaceData["MapDepth"] = DepthData["MapDepth"]
-        EspaceData["MapHabitat"] = DepthData["MapHabitat"]
+      fs.accessSync(outfilepath + '\\' + 'MapDepth.json')
+      console.log('MapDepth.json文件存在')
+      const DepthData = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'MapDepth.json', 'utf-8'),
+      )
+      EspaceData.MapDepth = DepthData.MapDepth
+      EspaceData.MapHabitat = DepthData.MapHabitat
     } catch (err) {
-        console.log("MapDepth.json文件不存在");
+      console.log('MapDepth.json文件不存在')
     }
     try {
-        fs.accessSync(outfilepath+"\\"+'MapDepthColor.json');
-        console.log("MapDepthColor文件存在");
-        const MapDepthColor = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapDepthColor.json', 'utf-8'))
-        EspaceData["MapDepthColor"] = MapDepthColor
+      fs.accessSync(outfilepath + '\\' + 'MapDepthColor.json')
+      console.log('MapDepthColor文件存在')
+      const MapDepthColor = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'MapDepthColor.json', 'utf-8'),
+      )
+      EspaceData.MapDepthColor = MapDepthColor
     } catch (err) {
-        console.log("MapDepthColor文件不存在");
+      console.log('MapDepthColor文件不存在')
     }
     try {
-        fs.accessSync(outfilepath+"\\"+'ModelParameters.json');
-        console.log("ModelParameters文件存在");
-        const ModelParameters = JSON.parse(fs.readFileSync(outfilepath+"\\"+'ModelParameters.json', 'utf-8'))
-        EspaceData["HabitType"] = ModelParameters.MapHabitatIndex
+      fs.accessSync(outfilepath + '\\' + 'ModelParameters.json')
+      console.log('ModelParameters文件存在')
+      const ModelParameters = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'ModelParameters.json', 'utf-8'),
+      )
+      EspaceData.HabitType = ModelParameters.MapHabitatIndex
     } catch (err) {
-        console.log("ModelParameters文件不存在");
+      console.log('ModelParameters文件不存在')
     }
     // Flow
     try {
-        fs.accessSync(outfilepath+"\\"+'MapFlow.json');
-        console.log("MapFlow文件存在");
-        const MapFlow = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapFlow.json', 'utf-8'))
-        EspaceData["MapFlow"] = MapFlow["1"]
+      fs.accessSync(outfilepath + '\\' + 'MapFlow.json')
+      console.log('MapFlow文件存在')
+      const MapFlow = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'MapFlow.json', 'utf-8'),
+      )
+      EspaceData.MapFlow = MapFlow['1']
     } catch (err) {
-        console.log("MapFlow文件不存在");
+      console.log('MapFlow文件不存在')
     }
     try {
-        fs.accessSync(outfilepath+"\\"+'MapFlowColor.json');
-        console.log("MapFlowColor文件存在");
-        const MapFlowColor = JSON.parse(fs.readFileSync(outfilepath+"\\"+'MapFlowColor.json', 'utf-8'))
-        EspaceData["MapFlowColor"] = MapFlowColor["1"]
+      fs.accessSync(outfilepath + '\\' + 'MapFlowColor.json')
+      console.log('MapFlowColor文件存在')
+      const MapFlowColor = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'MapFlowColor.json', 'utf-8'),
+      )
+      EspaceData.MapFlowColor = MapFlowColor['1']
     } catch (err) {
-        console.log("MapFlowColor文件不存在");
+      console.log('MapFlowColor文件不存在')
     }
 
     // EcoSim输入相关 TimeSeries
@@ -1994,30 +2050,63 @@ const Run_Model = async (req, res) => {
     /// /////////////////////EcoSpace////////////////////////////////////////
     const outputString = output.toString().trim()
     console.log(outputString)
-    if(outputString.includes("NoneEcoSpace"))
-    {
+    if (outputString.includes('NoneEcoSpace')) {
       result.EcoSpace = {}
-    }
-    else
-    {
-      let EcoSpace_Result = JSON.parse(fs.readFileSync(outfilepath+"\\"+'EcoSpace_Result_'+ Modeltype[req.body.modeltype] +'.json', 'utf-8'))
-      let DataPlot = JSON.parse(fs.readFileSync(outfilepath+"\\"+'RunEcoSpace_Plot_'+ Modeltype[req.body.modeltype] +'.json', 'utf-8'))
+    } else {
+      const EcoSpace_Result = JSON.parse(
+        fs.readFileSync(
+          outfilepath +
+            '\\' +
+            'EcoSpace_Result_' +
+            Modeltype[req.body.modeltype] +
+            '.json',
+          'utf-8',
+        ),
+      )
+      const DataPlot = JSON.parse(
+        fs.readFileSync(
+          outfilepath +
+            '\\' +
+            'RunEcoSpace_Plot_' +
+            Modeltype[req.body.modeltype] +
+            '.json',
+          'utf-8',
+        ),
+      )
       // 从Import里面拿数据名称
-      let Import = JSON.parse(fs.readFileSync(outfilepath+"\\"+'Import_Data.json', 'utf-8'))
+      const Import = JSON.parse(
+        fs.readFileSync(outfilepath + '\\' + 'Import_Data.json', 'utf-8'),
+      )
       // let ModelParameters = JSON.parse(fs.readFileSync(outfilepath+"\\"+'ModelParameters.json', 'utf-8'))
-      let SelectOption = []
-      Import.Basic_Input.forEach((el,index)=>{
-          SelectOption.push({"label":el.GroupName,"value":index+1})
+      const SelectOption = []
+      Import.Basic_Input.forEach((el, index) => {
+        SelectOption.push({ label: el.GroupName, value: index + 1 })
       })
-      let Option = SwitchEcoSpace(DataPlot.Relative_Biomass,EcoSpace_Result.EcoSpace_Result_Group,"Relative_Biomass",ModelParameters.StartTime);
-      let RunEcoSpace_Map = JSON.parse(fs.readFileSync(outfilepath+"\\"+'RunEcoSpace_MapColor_'+ Modeltype[req.body.modeltype] +'.json', 'utf-8'))
+      const Option = SwitchEcoSpace(
+        DataPlot.Relative_Biomass,
+        EcoSpace_Result.EcoSpace_Result_Group,
+        'Relative_Biomass',
+        ModelParameters.StartTime,
+      )
+      const RunEcoSpace_Map = JSON.parse(
+        fs.readFileSync(
+          outfilepath +
+            '\\' +
+            'RunEcoSpace_MapColor_' +
+            Modeltype[req.body.modeltype] +
+            '.json',
+          'utf-8',
+        ),
+      )
       result.EcoSpace = {
-        ResultData:EcoSpace_Result,
-        option:Option,
-        SelectOption:SelectOption,
-        FirstResultMap:{id:SelectOption[0].value,
-        data:RunEcoSpace_Map["1"][0]},
-        Time:ModelParameters.EcoSpaceTime
+        ResultData: EcoSpace_Result,
+        option: Option,
+        SelectOption,
+        FirstResultMap: {
+          id: SelectOption[0].value,
+          data: RunEcoSpace_Map['1'][0],
+        },
+        Time: ModelParameters.EcoSpaceTime,
       }
     }
     result.status = 'success'
@@ -2444,10 +2533,24 @@ const RunEcoSpace_Switch = async (req, res) => {
   // console.log(outfilepath)
   // 辅助变量 data 取Group里面的名字Name
   const data = JSON.parse(
-    fs.readFileSync(outfilepath + '\\' +'EcoSpace_Result_'+ Modeltype[req.body.modeltype] +'.json', 'utf-8'),
+    fs.readFileSync(
+      outfilepath +
+        '\\' +
+        'EcoSpace_Result_' +
+        Modeltype[req.body.modeltype] +
+        '.json',
+      'utf-8',
+    ),
   )
   const RunEcoSpacePlot = JSON.parse(
-    fs.readFileSync(outfilepath + '\\' +'RunEcoSpace_Plot_'+ Modeltype[req.body.modeltype] +'.json', 'utf-8'),
+    fs.readFileSync(
+      outfilepath +
+        '\\' +
+        'RunEcoSpace_Plot_' +
+        Modeltype[req.body.modeltype] +
+        '.json',
+      'utf-8',
+    ),
   )
   const ModelParameters = JSON.parse(
     fs.readFileSync(outfilepath + '\\' + 'ModelParameters.json', 'utf-8'),
@@ -2459,8 +2562,8 @@ const RunEcoSpace_Switch = async (req, res) => {
       'Relative_Biomass',
       ModelParameters.StartTime,
     )
-    option["type"] = req.body.modeltype 
-    option["status"] = 'success'
+    option.type = req.body.modeltype
+    option.status = 'success'
     return option
   } else if (req.body.id === 'Relative_Fishing_Mortality') {
     const option = SwitchEcoSpace(
@@ -2469,8 +2572,8 @@ const RunEcoSpace_Switch = async (req, res) => {
       'FishingMort',
       ModelParameters.StartTime,
     )
-    option["type"] = req.body.modeltype 
-    option["status"] = 'success'
+    option.type = req.body.modeltype
+    option.status = 'success'
     return option
   } else if (req.body.id === 'Relative_predation_mortasality') {
     const option = SwitchEcoSpace(
@@ -2479,8 +2582,8 @@ const RunEcoSpace_Switch = async (req, res) => {
       'PredMortRate',
       ModelParameters.StartTime,
     )
-    option["type"] = req.body.modeltype 
-    option["status"] = 'success'
+    option.type = req.body.modeltype
+    option.status = 'success'
     return option
   } else if (req.body.id === 'Relative_Consumption') {
     const option = SwitchEcoSpace(
@@ -2489,8 +2592,8 @@ const RunEcoSpace_Switch = async (req, res) => {
       'ConsumptRate',
       ModelParameters.StartTime,
     )
-    option["type"] = req.body.modeltype 
-    option["status"] = 'success'
+    option.type = req.body.modeltype
+    option.status = 'success'
     return option
   } else if (req.body.id === 'Relative_Catch') {
     const option = SwitchEcoSpace(
@@ -2499,8 +2602,8 @@ const RunEcoSpace_Switch = async (req, res) => {
       'Relative_Catch',
       ModelParameters.StartTime,
     )
-    option["type"] = req.body.modeltype 
-    option["status"] = 'success'
+    option.type = req.body.modeltype
+    option.status = 'success'
     return option
   }
 }
@@ -2519,16 +2622,34 @@ const RunEcoSpace_SwitchMap = async (req, res) => {
     '/ewe/' +
     req.body.name.split('.')[0]
   console.log(outfilepath)
-  let RunEcoSpace_Map = JSON.parse(fs.readFileSync(outfilepath+"\\"+'RunEcoSpace_MapColor_'+ Modeltype[req.body.modeltype] +'.json', 'utf-8'))
-  let RunEcoSpace_Stanze = JSON.parse(fs.readFileSync(outfilepath+"\\"+'RunEcoSpace_StanzaDS_'+ Modeltype[req.body.modeltype] +'.json', 'utf-8'))
+  const RunEcoSpace_Map = JSON.parse(
+    fs.readFileSync(
+      outfilepath +
+        '\\' +
+        'RunEcoSpace_MapColor_' +
+        Modeltype[req.body.modeltype] +
+        '.json',
+      'utf-8',
+    ),
+  )
+  const RunEcoSpace_Stanze = JSON.parse(
+    fs.readFileSync(
+      outfilepath +
+        '\\' +
+        'RunEcoSpace_StanzaDS_' +
+        Modeltype[req.body.modeltype] +
+        '.json',
+      'utf-8',
+    ),
+  )
 
   return {
-    status:"success",
-    id:req.body.id,
-    data:RunEcoSpace_Map[req.body.id][req.body.time],
-    time:req.body.time,
-    type:req.body.modeltype,
-    stanze:RunEcoSpace_Stanze[req.body.id][req.body.time]
+    status: 'success',
+    id: req.body.id,
+    data: RunEcoSpace_Map[req.body.id][req.body.time],
+    time: req.body.time,
+    type: req.body.modeltype,
+    stanze: RunEcoSpace_Stanze[req.body.id][req.body.time],
   }
 }
 

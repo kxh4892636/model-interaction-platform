@@ -27,7 +27,7 @@ import Dispersal from './EcoSpace/Dispersal'
 import EcoSpaceResult from './EcoSpace/EcoSpaceResult'
 import EcoSpaceGraph from './EcoSpace/EcoSpaceGraph'
 import EcoSpaceMaps from './EcoSpace/EcoSpaceMap'
-
+import { CloseOutlined } from '@ant-design/icons'
 
 interface Routes {
   [key: string]: JSX.Element
@@ -41,13 +41,13 @@ const Container = (props: any) => {
         rounded-xl border border-slate-300 bg-white shadow-lg shadow-slate-300"
     >
       <div
-        className="absolute right-4 top-3 bg-slate-400"
+        className="absolute right-4 top-3 text-xl"
         onClick={() => {
           closeModal()
           // forceUpdateLayerTree()
         }}
       >
-        关闭
+        <CloseOutlined />
       </div>
 
       <div
@@ -98,7 +98,7 @@ const eweroutes: Routes = {
     </Container>
   ),
   AntvG6T: (
-    <Container name="营养剂流动">
+    <Container name="营养级流动">
       <AntvG6T />
     </Container>
   ),

@@ -22,12 +22,14 @@ import Meta from 'antd/es/card/Meta'
 import { produce } from 'immer'
 import { useEffect, useState } from 'react'
 import { useModeStore } from './model.store'
+import { CloseOutlined } from '@ant-design/icons'
 
 const NewArea = () => {
   const closeModal = useModalStore((state) => state.closeModal)
   const map = useMapStore((state) => state.map)
   const setModelArea = useModeStore((state) => state.setModelArea)
   const setProjectID = useMetaStore((state) => state.setProjectID)
+  const setAreaName = useMetaStore((state) => state.setAreaName)
   const setModelType = useMetaStore((state) => state.setModelType)
   const [modelStatus, setModelStatus] = useState<(number | string)[]>([])
   const inputList = ['最小经度', '最小纬度', '最大经度', '最大纬度'].map(
@@ -65,6 +67,7 @@ const NewArea = () => {
       setModelArea('defined')
       map!.fitBounds(modelStatus.slice(1) as any)
       setProjectID(result.data)
+      setAreaName(modelStatus[0] as string)
       setModelType('water-2d')
       closeModal()
     } else {
@@ -110,6 +113,7 @@ const NewArea = () => {
 const HistoryArea = () => {
   const projectID = useMetaStore((state) => state.projectID)
   const setProjectID = useMetaStore((state) => state.setProjectID)
+  const setAreaName = useMetaStore((state) => state.setAreaName)
   const setModelType = useMetaStore((state) => state.setModelType)
   const closeModal = useModalStore((state) => state.closeModal)
   const map = useMapStore((state) => state.map)
@@ -128,6 +132,7 @@ const HistoryArea = () => {
     setModelArea('defined')
     map!.fitBounds(projectInfo.projectExtent as any)
     setProjectID(projectInfo.projectId)
+    setAreaName(projectInfo.projectName)
     setModelType('water-2d')
     closeModal()
   }
@@ -142,6 +147,7 @@ const HistoryArea = () => {
     forceUpdate()
     if (projectInfo.projectId === projectID) {
       setProjectID(null)
+      setAreaName(null)
       setModelType('water-2d')
       setModelArea('undefined')
     }
@@ -243,10 +249,10 @@ export const AreaSelect = () => {
   return (
     <div
       className="relative left-[15vw] top-[10vh] flex h-[80vh] w-[66vw] flex-col
-        rounded-xl border border-slate-300 bg-white shadow-lg shadow-slate-300"
+        rounded-xl border border-slate-300 bg-white"
     >
-      <div className="absolute right-4 top-3 bg-slate-400" onClick={closeModal}>
-        关闭
+      <div className="absolute right-4 top-3 text-xl" onClick={closeModal}>
+        <CloseOutlined />
       </div>
       <div
         className="flex h-12 items-center border-0 border-b border-slate-300

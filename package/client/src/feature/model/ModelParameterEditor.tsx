@@ -8,6 +8,7 @@ import {
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
 import { WaterModelTypeType } from '@/type'
+import { CloseOutlined } from '@ant-design/icons'
 import { Button, InputNumber, message } from 'antd'
 import { useState } from 'react'
 
@@ -273,10 +274,10 @@ export const ModelParamEditor = () => {
   return (
     <div
       className="relative left-[15vw] top-[10vh] flex h-[80vh] w-[66vw] flex-col
-        rounded-xl border border-slate-300 bg-white shadow-lg shadow-slate-300"
+        rounded-xl border border-slate-300 bg-white"
     >
-      <div className="absolute right-4 top-3 bg-slate-400" onClick={closeModal}>
-        关闭
+      <div className="absolute right-4 top-3 text-xl" onClick={closeModal}>
+        <CloseOutlined />
       </div>
 
       <div

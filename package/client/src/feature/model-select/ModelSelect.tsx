@@ -20,36 +20,35 @@ export const ModelSelect = ({ options }: ModelSelectProps) => {
   const projectID = useMetaStore((state) => state.projectID)
   const setModelType = useMetaStore((state) => state.setModelType)
   const [EWEresponse, setEWEresponse] = useState({})
-  const [EWEflag, setEWEflag] = useState("")
+  const [EWEflag, setEWEflag] = useState('')
   const setewefile = eweFile((state) => state.setData)
-  const LoadEwEModel = async ()=>{
-    let modelname = ""
-    if(projectID)
-      {
-          const response = await getProjectTreeAPI(projectID)
-          if(response['data']){
-            response['data'].forEach(element=>{
-              if(element["modelType"]==="ewe")
-              {
-                element.children.forEach(item=>{
-                  if(item["layerName"].split(".")[1]==="eweaccdb" || item["layerName"].split(".")[1]==="EwEmdb")  
-                  {
-                    modelname = item["layerName"]
-                  }
-                })
+  const LoadEwEModel = async () => {
+    let modelname = ''
+    if (projectID) {
+      const response = await getProjectTreeAPI(projectID)
+      if (response.data) {
+        response.data.forEach((element) => {
+          if (element.modelType === 'ewe') {
+            element.children.forEach((item) => {
+              if (
+                item.layerName.split('.')[1] === 'eweaccdb' ||
+                item.layerName.split('.')[1] === 'EwEmdb'
+              ) {
+                modelname = item.layerName
               }
             })
           }
+        })
       }
-    if(modelname !== "")
-    {
+    }
+    if (modelname !== '') {
       const LoadResponse = await postEWEModelLoadAPI({
         projectID: projectID as string,
         name: modelname,
       })
       setewefile(modelname)
       setEWEresponse(LoadResponse)
-      setEWEflag("Load")
+      setEWEflag('Load')
     }
   }
   return (
@@ -63,12 +62,12 @@ export const ModelSelect = ({ options }: ModelSelectProps) => {
         style={{ width: 160 }}
         listHeight={600}
         onChange={(value) => {
-          if(value==="ewe") LoadEwEModel()
+          if (value === 'ewe') LoadEwEModel()
           setModelType(value)
         }}
         options={options}
       />
-      <EWE data={EWEresponse} flag={EWEflag} ></EWE>
+      <EWE data={EWEresponse} flag={EWEflag}></EWE>
     </div>
   )
 }

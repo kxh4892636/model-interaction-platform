@@ -635,76 +635,70 @@ const EcoSpaceMap_Depth = create((set, get) => ({
   },
 }))
 const EcoSpaceMap_DepthColor = create((set, get) => ({
-  Data:[[0]],
-  setData: (newData) =>
-  {
-      // console.log("EcoSpaceMap_Depth")
-      set((state) => ({
-          Data: [...newData]
-      }))
-  }
-}));
+  Data: [[0]],
+  setData: (newData) => {
+    // console.log("EcoSpaceMap_Depth")
+    set((state) => ({
+      Data: [...newData],
+    }))
+  },
+}))
 //Habitat
 const EcoSpaceMap_Habitat = create((set, get) => ({
-  Data:[[0]],
-  setData: (newData) =>
-  {
-      // console.log("EcoSpaceMap_Depth")
-      set((state) => ({
-          Data: [...newData]
-      }))
-  }
-}));
+  Data: [[0]],
+  setData: (newData) => {
+    // console.log("EcoSpaceMap_Depth")
+    set((state) => ({
+      Data: [...newData],
+    }))
+  },
+}))
 const EcoSpaceMap_HabitatLegend = create((set, get) => ({
-  Data:{},
-  setData: (newData) =>
-  {
-      // console.log("EcoSpaceMap_Depth")
-      set((state) => ({
-          Data: {...newData}
-      }))
-  }
-}));
+  Data: {},
+  setData: (newData) => {
+    // console.log("EcoSpaceMap_Depth")
+    set((state) => ({
+      Data: { ...newData },
+    }))
+  },
+}))
 //Flow
 const EcoSpaceMap_Flow = create((set, get) => ({
-  Data:[[0]],
-  setData: (newData) =>
-  {
-      // console.log("EcoSpaceMap_Depth")
-      set((state) => ({
-          Data: [...newData]
-      }))
-  }
-}));
+  Data: [[0]],
+  setData: (newData) => {
+    // console.log("EcoSpaceMap_Depth")
+    set((state) => ({
+      Data: [...newData],
+    }))
+  },
+}))
 const EcoSpaceMap_FlowColor = create((set, get) => ({
-  Data:[[0]],
-  setData: (newData) =>
-  {
-      // console.log(newData)
-      set((state) => ({
-          Data: [...newData]
-      }))
-  }
-}));
+  Data: [[0]],
+  setData: (newData) => {
+    // console.log(newData)
+    set((state) => ({
+      Data: [...newData],
+    }))
+  },
+}))
 // 迁移速率
 const EcoSpaceMap_Dispersal = create((set, get) => ({
-  Data:[],
-  setData: (newData) =>
-  {
-      // console.log(newData)
-      set((state) => ({
-          Data: [...newData]
-      }))
-  }
-}));
+  Data: [],
+  setData: (newData) => {
+    // console.log(newData)
+    set((state) => ({
+      Data: [...newData],
+    }))
+  },
+}))
 // ModelType
 const RunEcoSpacae_ModelType = create((set, get) => ({
-  Data:0,
+  Data: 0,
   setData: (newData) =>
-      set((state) => ({
-          Data: newData
-  })),
-}));
+    set((state) => ({
+      Data: newData,
+    })),
+}))
 // 用于选择群组的SelectOption
 const RunEcoSpacae_SelectOption = create((set, get) => ({
   Data: [],

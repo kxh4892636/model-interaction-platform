@@ -5,7 +5,7 @@ import { useLayersStore } from '@/store/layerStore'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
 import { WaterModelTypeType } from '@/type'
-import { UploadOutlined } from '@ant-design/icons'
+import { CloseOutlined, UploadOutlined } from '@ant-design/icons'
 import { Button, Upload, message } from 'antd'
 import { UploadChangeParam } from 'antd/es/upload'
 import { useState } from 'react'
@@ -170,7 +170,7 @@ const EWEUpload = () => {
   const projectID = useMetaStore((state) => state.projectID)
   const setewefile = eweFile((state) => state.setData)
   const [EWEresponse, setEWEresponse] = useState({})
-  const [EWEflag, setEWEflag] = useState("")
+  const [EWEflag, setEWEflag] = useState('')
   return (
     <div>
       <div className="m-3">
@@ -191,12 +191,12 @@ const EWEUpload = () => {
                 name: info.file.name,
               })
               setEWEresponse(result)
-              setEWEflag("Import_"+info.file.name)
+              setEWEflag('Import_' + info.file.name)
             }
           }}
         ></UploadButton>
       </div>
-      <EWE data={EWEresponse} flag={EWEflag} ></EWE>
+      <EWE data={EWEresponse} flag={EWEflag}></EWE>
     </div>
   )
 }
@@ -212,6 +212,7 @@ export const DataUpload = () => {
     'water-3d': <Water3DUpload></Water3DUpload>,
     'quality-wasp': <QualityWasmUpload></QualityWasmUpload>,
     'quality-phreec': <></>,
+    'quality-phreec-3d': <></>,
     sand: <SandUpload></SandUpload>,
     mud: <MudUpload></MudUpload>,
     ewe: <EWEUpload></EWEUpload>,
@@ -221,16 +222,16 @@ export const DataUpload = () => {
   return (
     <div
       className="relative left-[15vw] top-[10vh] flex h-[80vh] w-[66vw] flex-col
-        rounded-xl border border-slate-300 bg-white shadow-lg shadow-slate-300"
+        rounded-xl border border-slate-300 bg-white"
     >
       <div
-        className="absolute right-4 top-3 bg-slate-400"
+        className="absolute right-4 top-3 text-xl"
         onClick={() => {
           closeModal()
           forceUpdateLayerTree()
         }}
       >
-        关闭
+        <CloseOutlined />
       </div>
 
       <div
