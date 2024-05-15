@@ -231,7 +231,9 @@ export const DataUpload = () => {
           forceUpdateLayerTree()
         }}
       >
-        <CloseOutlined />
+        <button className="px-1 hover:bg-slate-200">
+          <CloseOutlined />
+        </button>
       </div>
 
       <div

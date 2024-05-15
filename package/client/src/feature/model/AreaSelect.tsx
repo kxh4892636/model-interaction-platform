@@ -252,7 +252,9 @@ export const AreaSelect = () => {
         rounded-xl border border-slate-300 bg-white"
     >
       <div className="absolute right-4 top-3 text-xl" onClick={closeModal}>
-        <CloseOutlined />
+        <button className="px-1 hover:bg-slate-200">
+          <CloseOutlined />
+        </button>
       </div>
       <div
         className="flex h-12 items-center border-0 border-b border-slate-300
