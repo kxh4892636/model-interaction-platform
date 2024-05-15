@@ -379,8 +379,8 @@ export const LayerPanel = () => {
     <div className=" flex h-full flex-col">
       <div className=" flex flex-auto flex-col ">
         <div
-          className="mb-0.5 flex max-h-[40vh] flex-1 flex-col border
-            border-slate-300 bg-white"
+          className="mb-0.5 flex flex-1 flex-col border border-slate-300
+            bg-white"
         >
           <div
             className="flex h-10 items-center border-0 border-b

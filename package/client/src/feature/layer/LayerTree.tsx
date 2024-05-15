@@ -19,7 +19,8 @@ export const LayerTree = ({ type, treeData }: LayerTreePropsInterface) => {
 
   return (
     <Tree
-      className="flex-auto overflow-auto p-2"
+      className="h-[30vh] w-[300px] flex-auto overflow-y-auto overflow-x-clip
+        p-2"
       checkable={type === 'map'}
       onCheck={(checkedKeys, info) => {
         setLayersChecked(checkedKeys as string[], type)

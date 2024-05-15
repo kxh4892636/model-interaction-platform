@@ -93,6 +93,8 @@ export const Model = () => {
   const forceUpdateLayerTree = useLayersStore(
     (state) => state.forceUpdateLayerTree,
   )
+
+  const getModelStatus = useModelStore((state) => state.getModelStatus)
   const updateModelProgress = useModelStore(
     (state) => state.updateModelProgress,
   )
@@ -157,6 +159,11 @@ export const Model = () => {
             }
           } else {
             if (!projectID) return
+            const info = getModelStatus(modelType)
+            if (info.status === 'pending') {
+              message.error({ content: '模型正在计算中', duration: 3 })
+              return
+            }
             runModelAction(
               projectID,
               modelType,
