@@ -110,6 +110,7 @@ export const useLayerActions = () => {
       uvet: addUVETLayerToMap,
       geojson: addGeoJsonLayerToMap,
       tnd: addImageSequenceLayerToMap,
+      ph: addImageSequenceLayerToMap,
       snd: addImageSequenceLayerToMap,
       yuji: addImageSequenceLayerToMap,
       mud: addImageSequenceLayerToMap,
@@ -190,6 +191,7 @@ export const useLayerActions = () => {
   const deleteDataLayer = async () => {
     if (!layersSelected.data) return
 
+    console.log(layersSelected.data.layerKey)
     if (!layersSelected.data.isGroup) {
       // delete single layer
       const response = await postDataActonAPI({

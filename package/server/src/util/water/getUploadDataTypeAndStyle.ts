@@ -21,7 +21,6 @@ export const getUploadDataTypeAndStyle = (
       ['vgridzsh.in', ['text', 'text']],
       ['param.in', ['text', 'text']],
       ['pollutant.dat', ['text', 'text']],
-      ['vgridzsh.in', ['text', 'text']],
       ['south20080410.th', ['text', 'text']],
       ['vgrid3d.in', ['text', 'text']],
       ['west20080410.th', ['text', 'text']],
@@ -29,6 +28,10 @@ export const getUploadDataTypeAndStyle = (
       ['in_node.dat', ['geojson', 'circle']],
       ['cedian.dat', ['geojson', 'circle']],
       ['toufang.dat', ['geojson', 'circle']],
+      ['wuran-gongkuang1.dat', ['text', 'text']],
+      ['Sea Water2.pqi', ['text', 'text']],
+      ['llnl.dat', ['text', 'text']],
+      ['phreeqc.dat', ['text', 'text']],
       // ['uvet.dat', ['uvet', 'uvet']],
       // ['tnd.dat', ['tnd', 'raster']],
       // ['snd.dat', ['snd', 'raster']],
@@ -47,7 +50,7 @@ export const getUploadDataTypeAndStyle = (
   if (result0) {
     return result0
   } else {
-    return ['none', 'none']
+    return ['text', 'text']
   }
 }
 
@@ -91,7 +94,9 @@ export const getUploadDataExtentAndVisualization = async (
       const { stdout } = await execa(
         `conda activate gis && python ${[
           path.join(process.cwd(), '/src/util/water/fo.py'),
-          path.join(path.dirname(path.dirname(filePath))),
+          relativeFilePath.includes('inputfile')
+            ? path.join(path.dirname(path.dirname(filePath)))
+            : path.join(path.dirname(filePath)),
         ].join(' ')}`,
         { shell: true, windowsHide: true },
       )

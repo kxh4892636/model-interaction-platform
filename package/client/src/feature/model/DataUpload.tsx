@@ -50,10 +50,12 @@ const Water2DUpload = () => {
     <div>
       <div className="m-3">
         <div className="mb-3">上传水动力2D模型文件</div>
-        <UploadButton
-          modelType="water-2d"
-          datasetType="water-2d-input"
-        ></UploadButton>
+        <div className="max-h-[50vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="water-2d"
+            datasetType="water-2d-input"
+          ></UploadButton>
+        </div>
       </div>
     </div>
   )
@@ -64,10 +66,12 @@ const Water3DUpload = () => {
     <div>
       <div className="m-3">
         <div className="mb-3">上传水动力3D模型文件</div>
-        <UploadButton
-          modelType="water-3d"
-          datasetType="water-3d-input"
-        ></UploadButton>
+        <div className="max-h-[50vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="water-3d"
+            datasetType="water-3d-input"
+          ></UploadButton>
+        </div>
       </div>
     </div>
   )
@@ -79,26 +83,100 @@ const QualityWasmUpload = () => {
     <div>
       <div className="m-3">
         <div className="mb-3">上传水动力模型文件</div>
-        <UploadButton
-          modelType="quality-wasp"
-          datasetType="water-2d-input"
-          handleChange={(info) => {
-            if (
-              info.file.status === 'done' &&
-              info.file.name?.includes('mesh')
-            ) {
-              setIsWaterUpload(false)
-            }
-          }}
-        ></UploadButton>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="quality-wasp"
+            datasetType="water-2d-input"
+            handleChange={(info) => {
+              if (
+                info.file.status === 'done' &&
+                info.file.name?.includes('mesh')
+              ) {
+                setIsWaterUpload(false)
+              }
+            }}
+          ></UploadButton>
+        </div>
       </div>
       <div className="m-3">
         <div className="mb-3">上传水质wasp模型文件</div>
-        <UploadButton
-          modelType="quality-wasp"
-          datasetType="quality-wasp-input"
-          disable={isMeshUpload}
-        ></UploadButton>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="quality-wasp"
+            datasetType="quality-wasp-input"
+            disable={isMeshUpload}
+          ></UploadButton>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const QualityPhreecUpload = () => {
+  const [isMeshUpload, setIsWaterUpload] = useState(true)
+  return (
+    <div>
+      <div className="m-3">
+        <div className="mb-3">上传水动力模型文件</div>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="quality-phreec"
+            datasetType="water-2d-input"
+            handleChange={(info) => {
+              if (
+                info.file.status === 'done' &&
+                info.file.name?.includes('mesh')
+              ) {
+                setIsWaterUpload(false)
+              }
+            }}
+          ></UploadButton>
+        </div>
+      </div>
+      <div className="m-3">
+        <div className="mb-3">上传水质phreec模型文件</div>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="quality-phreec"
+            datasetType="quality-phreec-input"
+            disable={isMeshUpload}
+          ></UploadButton>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const QualityPhreec3DUpload = () => {
+  const [isMeshUpload, setIsWaterUpload] = useState(true)
+  return (
+    <div>
+      <div className="m-3">
+        <div className="mb-3 ">上传水动力模型文件</div>
+        <div className="max-h-[25vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="quality-phreec-3d"
+            datasetType="water-2d-input"
+            handleChange={(info) => {
+              if (
+                info.file.status === 'done' &&
+                info.file.name?.includes('mesh')
+              ) {
+                setIsWaterUpload(false)
+              }
+            }}
+          ></UploadButton>
+        </div>
+      </div>
+      <div className="m-3">
+        <div className="mb-3">上传水质phreec模型文件</div>
+        <div className="max-h-[25vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="quality-phreec-3d"
+            datasetType="quality-phreec-3d-input"
+            disable={isMeshUpload}
+          ></UploadButton>
+        </div>
       </div>
     </div>
   )
@@ -110,26 +188,30 @@ const SandUpload = () => {
     <div>
       <div className="m-3">
         <div className="mb-3">上传水动力模型文件</div>
-        <UploadButton
-          modelType="sand"
-          datasetType="water-2d-input"
-          handleChange={(info) => {
-            if (
-              info.file.status === 'done' &&
-              info.file.name?.includes('mesh')
-            ) {
-              setIsWaterUpload(false)
-            }
-          }}
-        ></UploadButton>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="sand"
+            datasetType="water-2d-input"
+            handleChange={(info) => {
+              if (
+                info.file.status === 'done' &&
+                info.file.name?.includes('mesh')
+              ) {
+                setIsWaterUpload(false)
+              }
+            }}
+          ></UploadButton>
+        </div>
       </div>
       <div className="m-3">
         <div className="mb-3">上传泥沙模型文件</div>
-        <UploadButton
-          modelType="sand"
-          datasetType="sand-input"
-          disable={isMeshUpload}
-        ></UploadButton>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="sand"
+            datasetType="sand-input"
+            disable={isMeshUpload}
+          ></UploadButton>
+        </div>
       </div>
     </div>
   )
@@ -141,26 +223,30 @@ const MudUpload = () => {
     <div>
       <div className="m-3">
         <div className="mb-3">上传水动力模型文件</div>
-        <UploadButton
-          modelType="mud"
-          datasetType="water-2d-input"
-          handleChange={(info) => {
-            if (
-              info.file.status === 'done' &&
-              info.file.name?.includes('mesh')
-            ) {
-              setIsWaterUpload(false)
-            }
-          }}
-        ></UploadButton>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="mud"
+            datasetType="water-2d-input"
+            handleChange={(info) => {
+              if (
+                info.file.status === 'done' &&
+                info.file.name?.includes('mesh')
+              ) {
+                setIsWaterUpload(false)
+              }
+            }}
+          ></UploadButton>
+        </div>
       </div>
       <div className="m-3">
         <div className="mb-3">上传抛泥模型文件</div>
-        <UploadButton
-          modelType="mud"
-          datasetType="mud-input"
-          disable={isMeshUpload}
-        ></UploadButton>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="mud"
+            datasetType="mud-input"
+            disable={isMeshUpload}
+          ></UploadButton>
+        </div>
       </div>
     </div>
   )
@@ -175,26 +261,28 @@ const EWEUpload = () => {
     <div>
       <div className="m-3">
         <div className="mb-3">上传生态模型文件</div>
-        <UploadButton
-          modelType="ewe"
-          datasetType="ewe-input"
-          handleChange={async (info) => {
-            if (info.file.status === 'done') {
-              message.loading({
-                content: '模型加载中',
-                key: 'Mloading',
-                duration: 0,
-              })
-              setewefile(info.file.name)
-              const result = await postEWEModelImportAPI({
-                projectID: projectID as string,
-                name: info.file.name,
-              })
-              setEWEresponse(result)
-              setEWEflag('Import_' + info.file.name)
-            }
-          }}
-        ></UploadButton>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="ewe"
+            datasetType="ewe-input"
+            handleChange={async (info) => {
+              if (info.file.status === 'done') {
+                message.loading({
+                  content: '模型加载中',
+                  key: 'Mloading',
+                  duration: 0,
+                })
+                setewefile(info.file.name)
+                const result = await postEWEModelImportAPI({
+                  projectID: projectID as string,
+                  name: info.file.name,
+                })
+                setEWEresponse(result)
+                setEWEflag('Import_' + info.file.name)
+              }
+            }}
+          ></UploadButton>
+        </div>
       </div>
       <EWE data={EWEresponse} flag={EWEflag}></EWE>
     </div>
@@ -211,8 +299,8 @@ export const DataUpload = () => {
     'water-2d': <Water2DUpload></Water2DUpload>,
     'water-3d': <Water3DUpload></Water3DUpload>,
     'quality-wasp': <QualityWasmUpload></QualityWasmUpload>,
-    'quality-phreec': <></>,
-    'quality-phreec-3d': <></>,
+    'quality-phreec': <QualityPhreecUpload></QualityPhreecUpload>,
+    'quality-phreec-3d': <QualityPhreec3DUpload></QualityPhreec3DUpload>,
     sand: <SandUpload></SandUpload>,
     mud: <MudUpload></MudUpload>,
     ewe: <EWEUpload></EWEUpload>,

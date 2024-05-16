@@ -21,12 +21,18 @@ const runModelAction = async (
   projectID: string,
   modelType: WaterModelTypeType,
   forceUpdateLayerTree: () => void,
+  getModelStatus: (modelType: WaterModelTypeType) => {
+    modelID: string | null
+    name: WaterModelTypeType
+    progress: number
+    status: null | 'pending' | 'success' | 'error'
+  },
   updateModelProgress: (
     modelName: WaterModelTypeType,
     progress: number,
   ) => void,
   setInitStatus: (modelType: WaterModelTypeType) => void,
-  setRunStatus: (modelType: WaterModelTypeType) => void,
+  setRunStatus: (modelType: WaterModelTypeType, modelID: string) => void,
   setSuccessStatus: (modelType: WaterModelTypeType) => void,
   setErrorStatus: (modelType: WaterModelTypeType) => void,
 ) => {
@@ -44,7 +50,7 @@ const runModelAction = async (
   })
   if (result.data === null) return false
   const modelID = result.data
-  setRunStatus(modelType)
+  setRunStatus(modelType, modelID)
   message.info('模型开始运行')
   let errorTimes = 0
   const intervalID = setInterval(async () => {
@@ -63,10 +69,17 @@ const runModelAction = async (
 
     if (result.status === 'success') {
       if (result.data === null) {
-        setErrorStatus(modelType)
-        message.error('模型运行失败')
         clearInterval(intervalID)
         forceUpdateLayerTree()
+
+        const info = getModelStatus(modelType)
+        if (info.status === null) {
+          return
+        }
+
+        setErrorStatus(modelType)
+        message.error('模型运行失败')
+
         return
       }
       if (result.data.modelStatus === 'pending') {
@@ -79,7 +92,7 @@ const runModelAction = async (
         forceUpdateLayerTree()
       }
     }
-  }, 5000)
+  }, 3000)
 }
 
 export const Model = () => {
@@ -168,6 +181,7 @@ export const Model = () => {
               projectID,
               modelType,
               forceUpdateLayerTree,
+              getModelStatus,
               updateModelProgress,
               setInitStatus,
               setRunStatus,

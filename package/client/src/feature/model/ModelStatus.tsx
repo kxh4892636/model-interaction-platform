@@ -1,12 +1,14 @@
+import { postModelActionAPI } from '@/api/model/model.api'
 import { useModalStore } from '@/store/modalStore'
 import { useModelStore } from '@/store/modelStore'
 import { WaterModelTypeType } from '@/type'
 import { CloseOutlined, PlayCircleOutlined } from '@ant-design/icons'
-import { Card, Progress } from 'antd'
+import { Button, Card, Popconfirm, Progress, message } from 'antd'
 
 const ModelStatusInfo = () => {
   const closeModal = useModalStore((state) => state.closeModal)
   const modelStatusRecord = useModelStore((state) => state.modelStatusRecord)
+  const setInitStatus = useModelStore((state) => state.setInitStatus)
 
   const cardList = (() => {
     const result = []
@@ -19,6 +21,20 @@ const ModelStatusInfo = () => {
       sand: '泥沙模型',
       mud: '抛泥模型',
       ewe: 'ewe模型',
+    }
+
+    const confirm = async (model: WaterModelTypeType, modelID: string) => {
+      const response = await postModelActionAPI({
+        modelID,
+        action: 'stop',
+        modelInit: null,
+      })
+      if (response.status === 'success') {
+        message.info('模型终止成功')
+        setInitStatus(model)
+      } else {
+        message.error('模型终止失败')
+      }
     }
     for (const modelName in modelStatusRecord) {
       if (Object.prototype.hasOwnProperty.call(modelStatusRecord, modelName)) {
@@ -33,15 +49,33 @@ const ModelStatusInfo = () => {
           >
             {info.status === null && <div>模型尚未运行</div>}
             {info.status === 'pending' && (
-              <Progress percent={Number((info.progress * 100).toFixed(2))} />
+              <>
+                <Progress
+                  percent={Number((info.progress * 100).toFixed(2))}
+                  className="pb-4"
+                />
+                <Popconfirm
+                  title=""
+                  description="确认终止模型"
+                  onConfirm={() => {
+                    confirm(info.name, info.modelID!)
+                  }}
+                  okText="Yes"
+                  cancelText="No"
+                >
+                  <Button danger>终止模型</Button>
+                </Popconfirm>
+              </>
             )}
             {info.status === 'success' && (
               <>
                 <Progress percent={100} className="pb-4" />
-                <div>模型运行完成</div>
+                <div className="text-green-600">模型运行完成</div>
               </>
             )}
-            {info.status === 'error' && <div>模型运行失败</div>}
+            {info.status === 'error' && (
+              <div className="text-red-600">模型运行失败</div>
+            )}
           </Card>,
         )
       }
@@ -51,7 +85,7 @@ const ModelStatusInfo = () => {
 
   return (
     <div
-      className="relative left-[35vw] top-[20vh] flex h-[50vh] w-[30vw] flex-col
+      className="relative left-[30vw] top-[20vh] flex h-[60vh] w-[40vw] flex-col
         rounded-xl border border-slate-300 bg-white"
     >
       <div
@@ -72,7 +106,7 @@ const ModelStatusInfo = () => {
         模型运行状态
       </div>
       <div
-        className="m-6 my-4 h-[40vh] flex-col overflow-auto rounded-2xl border
+        className="m-6 my-4 h-[50vh] flex-col overflow-auto rounded-2xl border
           border-slate-300 bg-slate-300/5 p-6 shadow-xl *:mb-2"
       >
         {cardList}

@@ -44,6 +44,22 @@ export const QualityWaspParamBodySchema = Type.Object({
   hours: Type.Integer(),
 })
 export type QualityWaspParamBodyType = Static<typeof QualityWaspParamBodySchema>
+// /model/param/quality-phreec
+export const QualityPhreecParamBodySchema = Type.Object({
+  projectID: Type.String(),
+  hours: Type.Integer(),
+})
+export type QualityPhreecParamBodyType = Static<
+  typeof QualityPhreecParamBodySchema
+>
+// /model/param/quality-phreec-3d
+export const QualityPhreec3DParamBodySchema = Type.Object({
+  projectID: Type.String(),
+  hours: Type.Integer(),
+})
+export type QualityPhreec3DParamBodyType = Static<
+  typeof QualityPhreec3DParamBodySchema
+>
 // /model/param/sand
 export const SandParamBodySchema = Type.Object({
   projectID: Type.String(),

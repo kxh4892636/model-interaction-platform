@@ -34,6 +34,7 @@ export const projectService = {
       ['water-3d', ['water-3d']],
       ['quality-wasp', ['water-2d', 'quality-wasp']],
       ['quality-phreec', ['water-2d', 'quality-phreec']],
+      ['quality-phreec-3d', ['water-2d', 'quality-phreec-3d']],
       ['sand', ['water-2d', 'sand']],
       ['mud', ['water-2d', 'mud']],
       ['ewe', ['ewe']],

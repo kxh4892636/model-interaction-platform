@@ -1,4 +1,3 @@
-import { DATA_FOLDER_PATH } from '@/config/env'
 import { WaterModelTypeType } from '@/type'
 import path from 'path'
 
@@ -70,13 +69,14 @@ export const getModelDataVisualization = (
     'quality-phreec': () => {
       const result: string[] = []
       for (let index = 0; index < hours; index++) {
-        result.push(
-          path.join(
-            DATA_FOLDER_PATH,
-            datasetPath,
-            `tnd-${identifier}-${index}.png`,
-          ),
-        )
+        result.push(path.join(datasetPath, `ph-${identifier}-${index}.png`))
+      }
+      return result
+    },
+    'quality-phreec-3d': () => {
+      const result: string[] = []
+      for (let index = 0; index < hours; index++) {
+        result.push(path.join(datasetPath, `ph-${identifier}-${index}.png`))
       }
       return result
     },
@@ -98,6 +98,9 @@ export const getModelDataVisualization = (
         }
       }
       return result
+    },
+    ewe: () => {
+      return []
     },
   }
 

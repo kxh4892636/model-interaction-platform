@@ -1,3 +1,4 @@
+import os
 import sys
 from os import path
 
@@ -220,6 +221,8 @@ if __name__ == "__main__":
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
     projectPath = sys.argv[1]
     meshPath = path.join(projectPath, "inputfile", "f0.gr3")
+    if not os.path.exists(meshPath):
+        meshPath = path.join(projectPath, "f0.gr3")
     csvPath = path.join(projectPath, "f0.csv")
     maskPath = path.join(projectPath, "f0.shp")
     pngPath = path.join(projectPath, "f0.png")

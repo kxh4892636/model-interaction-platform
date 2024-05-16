@@ -260,7 +260,7 @@ export const postDataActonAPI = async (params: DataActionBodyType) => {
     'Content-Type': 'application/json',
   })
   const response: DataFetchAPIInterface<DataActionResponseType> =
-    await extendFetch(`/api/v1/dataset/action`, {
+    await extendFetch(`/api/v1/data/action`, {
       method: 'POST',
       body: JSON.stringify(params),
       headers: jsonHeaders,

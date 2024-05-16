@@ -28,6 +28,14 @@ export const Home = () => {
       label: '水质模型-wasp',
     },
     {
+      value: 'quality-phreec',
+      label: '醋酸2D模型',
+    },
+    {
+      value: 'quality-phreec-3d',
+      label: '醋酸3D模型',
+    },
+    {
       value: 'sand',
       label: '泥沙模型',
     },

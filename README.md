@@ -6,30 +6,35 @@
 
 ### 数据清单
 
-| 数据                | type    | style  |
-| ------------------- | ------- | ------ |
-| mesh31.gr3          | mesh    | raster |
-|                     |         |        |
-| paramhk.in          | text    | text   |
-| gongkuang.dat       | text    | text   |
-| sanshawan.th        | text    | text   |
-| vgridhk.in          | text    | text   |
-| wudaodi.dat         | text    | text   |
-| wuran-gongkuang.dat | text    | text   |
-| 初始浓度.dat        | text    | text   |
-| wqm_para.dat        | text    | text   |
-| vgridzsh.in         | text    | text   |
-|                     |         |        |
-| tang_info.dat       | geojson | circle |
-| in_node.dat         | geojson | circle |
-| cedian.dat          | geojson | circle |
-| toufang.dat         | geojson | circle |
-|                     |         |        |
-| uvet.dat            | geojson | circle |
-| tcd.dat             | none    | none   |
-| tnd.dat             | geojson | circle |
-| snd.dat             | snd     | raster |
-| yuji.dat            | yuji    | raster |
+| 数据                 | type    | style  |
+| -------------------- | ------- | ------ |
+| mesh31.gr3           | mesh    | raster |
+|                      |         |        |
+| paramhk.in           | text    | text   |
+| gongkuang.dat        | text    | text   |
+| sanshawan.th         | text    | text   |
+| vgridhk.in           | text    | text   |
+| wudaodi.dat          | text    | text   |
+| wuran-gongkuang.dat  | text    | text   |
+| 初始浓度.dat         | text    | text   |
+| wqm_para.dat         | text    | text   |
+| vgridzsh.in          | text    | text   |
+| phreecqc.dat         | text    | text   |
+| wuran-gongkuang1.dat | text    | text   |
+| Sea Water2.pqi       | text    | text   |
+| llnl.dat             | text    | text   |
+|                      |         |        |
+| tang_info.dat        | geojson | circle |
+| in_node.dat          | geojson | circle |
+| cedian.dat           | geojson | circle |
+| toufang.dat          | geojson | circle |
+|                      |         |        |
+| uvet.dat             | geojson | uvet   |
+| tcd.dat              | none    | none   |
+| tnd.dat              | geojson | raster |
+| PH.DAT               | geojson | raster |
+| snd.dat              | snd     | raster |
+| yuji.dat             | yuji    | raster |
 
 ### 模型详解
 
@@ -163,6 +168,23 @@
 ##### 模型输出
 
 - ph.dat;
+
+### 水质模型-phreec-3d
+
+##### 执行文件
+
+- quality-phreec-3d.exe;
+
+##### 模型输入
+
+- inputfile 文件夹;
+  - fo.gr3;
+  - param.in: rnday 一行第一个数字为模拟时间 (day);
+  - vgrid3d.in;
+  - pollutant.dat;
+  - west20080410.th;
+  - south20080410.th;
+- outfile 文件夹;
 
 ### 泥沙模型
 

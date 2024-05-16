@@ -12,6 +12,8 @@ import {
   ModelParamResponseSchema,
   ModelParamResponseType,
   MudParamBodySchema,
+  QualityPhreec3DParamBodySchema,
+  QualityPhreecParamBodySchema,
   QualityWaspParamBodySchema,
   SandParamBodySchema,
   Water2DParamBodySchema,
@@ -93,6 +95,42 @@ export const modelRoute = async (app: FastifyTypebox) => {
 
   app.route({
     method: 'post',
+    url: '/param/quality-phreec',
+    schema: {
+      tags: ['model'],
+      body: QualityPhreecParamBodySchema,
+      response: {
+        200: ModelParamResponseSchema,
+      },
+    },
+    handler: async (req): Promise<ModelParamResponseType> => {
+      const body = req.body
+      await modelService.setQualityPhreecParam(body.projectID, body.hours)
+      const response = generateResponse('success', '', null)
+      return response
+    },
+  })
+
+  app.route({
+    method: 'post',
+    url: '/param/quality-phreec-3d',
+    schema: {
+      tags: ['model'],
+      body: QualityPhreec3DParamBodySchema,
+      response: {
+        200: ModelParamResponseSchema,
+      },
+    },
+    handler: async (req): Promise<ModelParamResponseType> => {
+      const body = req.body
+      await modelService.setQualityPhreec3DParam(body.projectID, body.hours)
+      const response = generateResponse('success', '', null)
+      return response
+    },
+  })
+
+  app.route({
+    method: 'post',
     url: '/param/sand',
     schema: {
       tags: ['model'],
@@ -162,6 +200,20 @@ export const modelRoute = async (app: FastifyTypebox) => {
         } else if (init.modelType === 'quality-wasp') {
           modelService
             .runQualityWaspModel(init.modelName, init.projectID, modelID)
+            .catch(() => {
+              console.log('stop model')
+              modelService.stopModel(modelID)
+            })
+        } else if (init.modelType === 'quality-phreec') {
+          modelService
+            .runQualityPhreecModel(init.modelName, init.projectID, modelID)
+            .catch(() => {
+              console.log('stop model')
+              modelService.stopModel(modelID)
+            })
+        } else if (init.modelType === 'quality-phreec-3d') {
+          modelService
+            .runQualityPhreec3DModel(init.modelName, init.projectID, modelID)
             .catch(() => {
               console.log('stop model')
               modelService.stopModel(modelID)

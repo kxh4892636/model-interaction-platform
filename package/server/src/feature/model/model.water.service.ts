@@ -884,6 +884,294 @@ const runQualityWaspModel = async (
 }
 
 /**
+ * quality-phreec model
+ */
+const setQualityPhreecParam = async (projectID: string, hours: number) => {
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  // modify model param by hours
+  const qualityPhreecPath = path.join(
+    DATA_FOLDER_PATH,
+    projectInfo.project_folder_path,
+    'quality-phreec',
+  )
+  // modify water-2d
+  const paramhkPath = path.join(qualityPhreecPath, 'paramhk.in')
+  const isPramhkExist = await existsPromise(paramhkPath)
+  if (!isPramhkExist) throw Error()
+  const paramhkContent = (await readFile(paramhkPath))
+    .toString()
+    .replace(/.*3.5.*2.5/, `${hours / 24} 3.5 2.5`)
+  await writeFile(paramhkPath, paramhkContent)
+}
+
+const preQualityPhreec = async (
+  modelID: string,
+  datasetID: string,
+  modelFolderPath: string,
+  identifier: string,
+) => {
+  // create model record
+  await orm.model.createModel(modelID, datasetID, -9999, 0, 'pending')
+
+  // get mesh extent
+  const isMeshExist = await existsPromise(
+    path.join(DATA_FOLDER_PATH, modelFolderPath, 'mesh31.gr3'),
+  )
+  if (!isMeshExist) throw Error()
+  const meshInfo = await modelDao.getMeshInfo(
+    path.join(modelFolderPath, 'mesh31.gr3'),
+  )
+  if (!meshInfo) throw Error()
+  const extent = meshInfo.data_extent
+
+  // get hours
+  const paramhkPath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'paramhk.in')
+  const isExist = await existsPromise(paramhkPath)
+  if (!isExist) throw Error()
+  const paramContent = (await readFile(paramhkPath))
+    .toString()
+    .match(/[\d.]*(?=.*3.5.*2.5)/)
+  if (!paramContent) throw Error()
+  const hours = Math.round(Number(paramContent[0]) * 24)
+
+  // create data record and dataset_data record
+  const visualization = getModelDataVisualization(
+    'quality-phreec',
+    modelFolderPath,
+    hours,
+    identifier,
+  )
+  const phID = randomUUID()
+  const phPath = path.join(modelFolderPath, `PH.DAT`)
+  await dataDao.createData(
+    datasetID,
+    phID,
+    `PH值`,
+    'ph',
+    'raster',
+    extent,
+    identifier,
+    phPath,
+    'quality-phreec',
+    visualization.slice(0, hours),
+    'valid',
+  )
+
+  return { hours }
+}
+
+const postQualityPhreec = async (
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  progress.current += progress.per * 1
+  orm.model.updateModelByModelID(modelID, {
+    modelProgress: progress.current / progress.total,
+  })
+}
+
+const runQualityPhreecModel = async (
+  modelName: string,
+  projectID: string,
+  modelID: string,
+) => {
+  const identifier = Date.now().toString()
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  const modelFolderPath = path.join(
+    projectInfo.project_folder_path,
+    'quality-phreec',
+  )
+  const datasetID = randomUUID()
+  await datasetService.createDataset(
+    projectID,
+    'quality-phreec',
+    'quality-phreec-output',
+    datasetID,
+    modelName,
+    'pending',
+  )
+
+  console.time(identifier)
+  // preprocess quality-phreec.exe
+  console.timeLog(identifier, 'preprocess quality-phreec.exe')
+  const { hours } = await preQualityPhreec(
+    modelID,
+    datasetID,
+    modelFolderPath,
+    identifier,
+  )
+
+  // pre water-2d.exe
+  const progress = {
+    current: 0,
+    per: 1,
+    total: 17 * hours + 1,
+  }
+  console.timeLog(identifier, 'preprocess water-2d.exe')
+  await preRunWater2DModel(modelID, modelFolderPath, progress)
+
+  // postprocess quality-phreec.exe
+  await postQualityPhreec(modelID, progress)
+
+  await orm.model.updateModelByModelID(modelID, {
+    status: 'valid',
+  })
+  await orm.dataset.updateDatasetByDatasetID(datasetID, {
+    status: 'valid',
+  })
+}
+
+/**
+ * quality-phreec-3d model
+ */
+const setQualityPhreec3DParam = async (projectID: string, hours: number) => {
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  // modify model param by hours
+  const qualityPhreec3DPath = path.join(
+    DATA_FOLDER_PATH,
+    projectInfo.project_folder_path,
+    'quality-phreec-3d',
+  )
+  // modify water-2d
+  const paramhkPath = path.join(qualityPhreec3DPath, 'paramhk.in')
+  const isPramhkExist = await existsPromise(paramhkPath)
+  if (!isPramhkExist) throw Error()
+  const paramhkContent = (await readFile(paramhkPath))
+    .toString()
+    .replace(/.*3.5.*2.5/, `${hours / 24} 3.5 2.5`)
+  await writeFile(paramhkPath, paramhkContent)
+}
+
+const preQualityPhreec3D = async (
+  modelID: string,
+  datasetID: string,
+  modelFolderPath: string,
+  identifier: string,
+) => {
+  // create model record
+  await orm.model.createModel(modelID, datasetID, -9999, 0, 'pending')
+
+  // get mesh extent
+  const isMeshExist = await existsPromise(
+    path.join(DATA_FOLDER_PATH, modelFolderPath, 'mesh31.gr3'),
+  )
+  if (!isMeshExist) throw Error()
+  const meshInfo = await modelDao.getMeshInfo(
+    path.join(modelFolderPath, 'mesh31.gr3'),
+  )
+  if (!meshInfo) throw Error()
+  const extent = meshInfo.data_extent
+
+  // get hours
+  const paramhkPath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'paramhk.in')
+  const isExist = await existsPromise(paramhkPath)
+  if (!isExist) throw Error()
+  const paramContent = (await readFile(paramhkPath))
+    .toString()
+    .match(/[\d.]*(?=.*3.5.*2.5)/)
+  if (!paramContent) throw Error()
+  const hours = Math.round(Number(paramContent[0]) * 24)
+
+  // create data record and dataset_data record
+  const visualization = getModelDataVisualization(
+    'quality-phreec-3d',
+    modelFolderPath,
+    hours,
+    identifier,
+  )
+  const phID = randomUUID()
+  const phPath = path.join(modelFolderPath, `PH.DAT`)
+  await dataDao.createData(
+    datasetID,
+    phID,
+    `PH值`,
+    'ph',
+    'raster',
+    extent,
+    identifier,
+    phPath,
+    'quality-phreec-3d',
+    visualization.slice(0, hours),
+    'valid',
+  )
+
+  return { hours }
+}
+
+const postQualityPhreec3D = async (
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  progress.current += progress.per * 1
+  orm.model.updateModelByModelID(modelID, {
+    modelProgress: progress.current / progress.total,
+  })
+}
+
+const runQualityPhreec3DModel = async (
+  modelName: string,
+  projectID: string,
+  modelID: string,
+) => {
+  const identifier = Date.now().toString()
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  const modelFolderPath = path.join(
+    projectInfo.project_folder_path,
+    'quality-phreec-3d',
+  )
+  const datasetID = randomUUID()
+  await datasetService.createDataset(
+    projectID,
+    'quality-phreec-3d',
+    'quality-phreec-3d-output',
+    datasetID,
+    modelName,
+    'pending',
+  )
+
+  console.time(identifier)
+  // preprocess quality-phreec.exe
+  console.timeLog(identifier, 'preprocess quality-phreec-3d.exe')
+  const { hours } = await preQualityPhreec3D(
+    modelID,
+    datasetID,
+    modelFolderPath,
+    identifier,
+  )
+
+  // pre water-2d.exe
+  const progress = {
+    current: 0,
+    per: 1,
+    total: 17 * hours + 1,
+  }
+  console.timeLog(identifier, 'preprocess water-2d.exe')
+  // await preRunWater2DModel(modelID, modelFolderPath, progress)
+
+  // postprocess quality-phreec-3d.exe
+  await postQualityPhreec3D(modelID, progress)
+
+  await orm.model.updateModelByModelID(modelID, {
+    status: 'valid',
+  })
+  await orm.dataset.updateDatasetByDatasetID(datasetID, {
+    status: 'valid',
+  })
+}
+
+/**
  * sand model
  */
 const setSandParam = async (projectID: string, hours: number) => {
@@ -1366,11 +1654,15 @@ export const modelService = {
   setWater2DParam,
   setWater3DParam,
   setQualityWaspParam,
+  setQualityPhreecParam,
+  setQualityPhreec3DParam,
   setSandParam,
   setMudParam,
   runWater2DModel,
   runWater3DModel,
   runQualityWaspModel,
+  runQualityPhreecModel,
+  runQualityPhreec3DModel,
   runSandModel,
   runMudModel,
   stopModel,
