@@ -68,6 +68,7 @@ export const getModelDataVisualization = (
     },
     'quality-phreec': () => {
       const result: string[] = []
+      result.push(path.join(datasetPath, 'mesh20231218.png'))
       for (let index = 0; index < hours; index++) {
         result.push(path.join(datasetPath, `ph-${identifier}-${index}.png`))
       }
@@ -75,8 +76,17 @@ export const getModelDataVisualization = (
     },
     'quality-phreec-3d': () => {
       const result: string[] = []
-      for (let index = 0; index < hours; index++) {
-        result.push(path.join(datasetPath, `ph-${identifier}-${index}.png`))
+      const nameMap = ['surface', 'middle', 'bottom']
+      result.push(path.join(datasetPath, 'mesh20231218.png'))
+      for (let i = 0; i < 3; i++) {
+        for (let index = 0; index < hours; index++) {
+          result.push(
+            path.join(
+              datasetPath,
+              `ph-${nameMap[i]}-${identifier}-${index}.png`,
+            ),
+          )
+        }
       }
       return result
     },

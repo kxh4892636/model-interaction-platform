@@ -390,7 +390,9 @@ export const LayerPanel = () => {
           </div>
           {/*  modelType==="ewe"的话，直接换成我的组件EWEPanel */}
           {modelType === 'ewe' ? (
-            <EWEPanel />
+            <div className="h-[34vh] overflow-y-auto">
+              <EWEPanel />
+            </div>
           ) : (
             <LayerTree
               type="data"

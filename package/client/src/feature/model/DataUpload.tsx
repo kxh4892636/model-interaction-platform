@@ -113,33 +113,14 @@ const QualityWasmUpload = () => {
 }
 
 const QualityPhreecUpload = () => {
-  const [isMeshUpload, setIsWaterUpload] = useState(true)
   return (
     <div>
       <div className="m-3">
-        <div className="mb-3">上传水动力模型文件</div>
-        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
-          <UploadButton
-            modelType="quality-phreec"
-            datasetType="water-2d-input"
-            handleChange={(info) => {
-              if (
-                info.file.status === 'done' &&
-                info.file.name?.includes('mesh')
-              ) {
-                setIsWaterUpload(false)
-              }
-            }}
-          ></UploadButton>
-        </div>
-      </div>
-      <div className="m-3">
         <div className="mb-3">上传水质phreec模型文件</div>
-        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+        <div className="max-h-[50vh] overflow-y-auto overflow-x-clip">
           <UploadButton
             modelType="quality-phreec"
             datasetType="quality-phreec-input"
-            disable={isMeshUpload}
           ></UploadButton>
         </div>
       </div>
@@ -148,33 +129,14 @@ const QualityPhreecUpload = () => {
 }
 
 const QualityPhreec3DUpload = () => {
-  const [isMeshUpload, setIsWaterUpload] = useState(true)
   return (
     <div>
       <div className="m-3">
-        <div className="mb-3 ">上传水动力模型文件</div>
-        <div className="max-h-[25vh] overflow-y-auto overflow-x-clip">
-          <UploadButton
-            modelType="quality-phreec-3d"
-            datasetType="water-2d-input"
-            handleChange={(info) => {
-              if (
-                info.file.status === 'done' &&
-                info.file.name?.includes('mesh')
-              ) {
-                setIsWaterUpload(false)
-              }
-            }}
-          ></UploadButton>
-        </div>
-      </div>
-      <div className="m-3">
         <div className="mb-3">上传水质phreec模型文件</div>
-        <div className="max-h-[25vh] overflow-y-auto overflow-x-clip">
+        <div className="max-h-[50vh] overflow-y-auto overflow-x-clip">
           <UploadButton
             modelType="quality-phreec-3d"
             datasetType="quality-phreec-3d-input"
-            disable={isMeshUpload}
           ></UploadButton>
         </div>
       </div>

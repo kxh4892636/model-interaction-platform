@@ -80,6 +80,7 @@ export const getUploadDataExtentAndVisualization = async (
         `conda activate gis && python ${[
           path.join(process.cwd(), '/src/util/water/mesh.py'),
           path.join(path.dirname(filePath)),
+          'mesh31',
         ].join(' ')}`,
         { shell: true, windowsHide: true },
       )

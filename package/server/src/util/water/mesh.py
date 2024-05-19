@@ -98,7 +98,7 @@ def mesh2mask(srcPath, dstPath: str) -> None:
         del point
     feature.SetField("id", 0)
     # create concaveHull
-    feature.SetGeometry(multiPoint.ConcaveHull(0.01, True))
+    feature.SetGeometry(multiPoint.ConcaveHull(0.02, True))
     layer.CreateFeature(feature)
     del driver, ds
 
@@ -223,12 +223,12 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
 
 if __name__ == "__main__":
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
-    projectPath = sys.argv[1]
-    meshPath = path.join(projectPath, "mesh31.gr3")
-    csvPath = path.join(projectPath, "mesh31.csv")
-    trianglePath = path.join(projectPath, "mesh31-triangle.csv")
-    maskPath = path.join(projectPath, "mesh31.shp")
-    pngPath = path.join(projectPath, "mesh31.png")
+    [projectPath, meshName] = sys.argv[1:3]
+    meshPath = path.join(projectPath, f"{meshName}.gr3")
+    csvPath = path.join(projectPath, f"{meshName}.csv")
+    trianglePath = path.join(projectPath, f"{meshName}-triangle.csv")
+    maskPath = path.join(projectPath, f"{meshName}.shp")
+    pngPath = path.join(projectPath, f"{meshName}.png")
     dataList = Mesh2CSV(meshPath, csvPath, trianglePath)
     mesh2mask(csvPath, maskPath)
     extent: tuple = mesh2png(csvPath, pngPath, maskPath)

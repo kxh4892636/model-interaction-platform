@@ -4,12 +4,19 @@ import { orm } from '@/dao'
 import { existsPromise } from '@/util/fs'
 import { randomUUID } from 'crypto'
 import { execa } from 'execa'
-import { readFile, readdir, rename, stat, writeFile } from 'fs/promises'
+import {
+  copyFile,
+  readFile,
+  readdir,
+  rename,
+  stat,
+  writeFile,
+} from 'fs/promises'
 import path from 'path'
 import { datasetService } from '../dataset/dataset.service'
 import { dataDao } from '../model-data/data.dao'
 import { modelDao } from './model.dao'
-import { ModelInfoType } from './model.type'
+import { ModelInfoType, ModelParamResponseSchema } from './model.type'
 import { getModelDataVisualization } from './model.util'
 
 /**
@@ -914,17 +921,6 @@ const preQualityPhreec = async (
   // create model record
   await orm.model.createModel(modelID, datasetID, -9999, 0, 'pending')
 
-  // get mesh extent
-  const isMeshExist = await existsPromise(
-    path.join(DATA_FOLDER_PATH, modelFolderPath, 'mesh31.gr3'),
-  )
-  if (!isMeshExist) throw Error()
-  const meshInfo = await modelDao.getMeshInfo(
-    path.join(modelFolderPath, 'mesh31.gr3'),
-  )
-  if (!meshInfo) throw Error()
-  const extent = meshInfo.data_extent
-
   // get hours
   const paramhkPath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'paramhk.in')
   const isExist = await existsPromise(paramhkPath)
@@ -943,36 +939,118 @@ const preQualityPhreec = async (
     identifier,
   )
   const phID = randomUUID()
-  const phPath = path.join(modelFolderPath, `PH.DAT`)
+  const phPath = path.join(modelFolderPath, `PH2D.DAT`)
   await dataDao.createData(
     datasetID,
     phID,
     `PH值`,
     'ph',
     'raster',
-    extent,
+    [],
     identifier,
     phPath,
     'quality-phreec',
-    visualization.slice(0, hours),
+    visualization.slice(1, hours + 1),
+    'valid',
+  )
+  const meshID = randomUUID()
+  const meshPath = path.join(modelFolderPath, `mesh20231218.gr3`)
+  await dataDao.createData(
+    datasetID,
+    meshID,
+    'mesh',
+    'mesh',
+    'raster',
+    [],
+    identifier,
+    meshPath,
+    'quality-phreec',
+    [visualization[0]],
     'valid',
   )
 
-  return { hours }
+  return { hours, ids: [phID, meshID] }
+}
+
+const copyQualityPhreecResult = async (modelFolderPath: string) => {
+  const meshPath = path.join(
+    DATA_FOLDER_PATH,
+    modelFolderPath,
+    'mesh20231218.gr3',
+  )
+  const phPath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'PH2D.DAT')
+  if (!(await existsPromise(meshPath))) {
+    await copyFile(
+      path.join(DATA_FOLDER_PATH, 'template/quality-phreec/mesh20231218.gr3'),
+      meshPath,
+    )
+  }
+  if (!(await existsPromise(phPath))) {
+    await copyFile(
+      path.join(DATA_FOLDER_PATH, 'template/quality-phreec/PH2D.DAT'),
+      phPath,
+    )
+  }
 }
 
 const postQualityPhreec = async (
+  modelFolderPath: string,
+  hours: number,
+  identifier: string,
   modelID: string,
+  ids: string[],
   progress: {
     current: number
     per: number
     total: number
   },
 ) => {
-  progress.current += progress.per * 1
+  // process mesh
+  const { stdout } = await execa(
+    `conda activate gis && python ${[
+      path.join(process.cwd(), '/src/util/water/mesh.py'),
+      path.join(DATA_FOLDER_PATH, modelFolderPath),
+      'mesh20231218',
+    ].join(' ')}`,
+    { shell: true, windowsHide: true },
+  )
+  const extent = stdout
+    .replace('(', '')
+    .replace(')', '')
+    .split(',')
+    .map((value) => Number(value))
+
+  // update ph extent
+  for (const id of ids) {
+    await orm.data.updateDataByDataID(id, {
+      dataExtent: extent,
+    })
+  }
+  // tnd2png
+  const cp = execa(
+    `conda activate gis && python ${[
+      path.join(process.cwd(), '/src/util/water/phreec.py'),
+      path.join(DATA_FOLDER_PATH, modelFolderPath),
+      hours <= 48 ? hours : 48,
+      identifier,
+    ].join(' ')}`,
+    {
+      shell: true,
+      windowsHide: true,
+    },
+  )
   orm.model.updateModelByModelID(modelID, {
-    modelProgress: progress.current / progress.total,
+    modelPid: cp.pid,
   })
+  cp.stderr!.on('data', (chunk) => {
+    if ((chunk.toString() as string).toLowerCase().includes('clamped')) {
+      progress.current += progress.per * 7
+      orm.model.updateModelByModelID(modelID, {
+        modelProgress: progress.current / progress.total,
+      })
+    }
+  })
+  await cp
 }
 
 const runQualityPhreecModel = async (
@@ -1000,7 +1078,7 @@ const runQualityPhreecModel = async (
   console.time(identifier)
   // preprocess quality-phreec.exe
   console.timeLog(identifier, 'preprocess quality-phreec.exe')
-  const { hours } = await preQualityPhreec(
+  const { hours, ids } = await preQualityPhreec(
     modelID,
     datasetID,
     modelFolderPath,
@@ -1011,13 +1089,23 @@ const runQualityPhreecModel = async (
   const progress = {
     current: 0,
     per: 1,
-    total: 17 * hours + 1,
+    total: 17 * hours + 7 * hours,
   }
   console.timeLog(identifier, 'preprocess water-2d.exe')
   await preRunWater2DModel(modelID, modelFolderPath, progress)
 
+  // copy Model Result
+  await copyQualityPhreecResult(modelFolderPath)
+
   // postprocess quality-phreec.exe
-  await postQualityPhreec(modelID, progress)
+  await postQualityPhreec(
+    modelFolderPath,
+    hours,
+    identifier,
+    modelID,
+    ids,
+    progress,
+  )
 
   await orm.model.updateModelByModelID(modelID, {
     status: 'valid',
@@ -1058,17 +1146,6 @@ const preQualityPhreec3D = async (
   // create model record
   await orm.model.createModel(modelID, datasetID, -9999, 0, 'pending')
 
-  // get mesh extent
-  const isMeshExist = await existsPromise(
-    path.join(DATA_FOLDER_PATH, modelFolderPath, 'mesh31.gr3'),
-  )
-  if (!isMeshExist) throw Error()
-  const meshInfo = await modelDao.getMeshInfo(
-    path.join(modelFolderPath, 'mesh31.gr3'),
-  )
-  if (!meshInfo) throw Error()
-  const extent = meshInfo.data_extent
-
   // get hours
   const paramhkPath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'paramhk.in')
   const isExist = await existsPromise(paramhkPath)
@@ -1086,37 +1163,127 @@ const preQualityPhreec3D = async (
     hours,
     identifier,
   )
-  const phID = randomUUID()
-  const phPath = path.join(modelFolderPath, `PH.DAT`)
+  const phIDs = []
+  const phPath = path.join(modelFolderPath, `PH3D.DAT`)
+  const phNameMap = ['表层', '中层', '底层']
+  for (let i = 0; i < 3; i++) {
+    const phID = randomUUID()
+    phIDs.push(phID)
+    await dataDao.createData(
+      datasetID,
+      phID,
+      `${phNameMap[i]}PH值`,
+      'ph',
+      'raster',
+      [],
+      identifier,
+      phPath,
+      'quality-phreec-3d',
+      visualization.slice(hours * i + 1, 1 + hours * (i + 1)),
+      'valid',
+    )
+  }
+  const meshID = randomUUID()
+  const meshPath = path.join(modelFolderPath, `mesh20231218.gr3`)
   await dataDao.createData(
     datasetID,
-    phID,
-    `PH值`,
-    'ph',
+    meshID,
+    'mesh',
+    'mesh',
     'raster',
-    extent,
+    [],
     identifier,
-    phPath,
-    'quality-phreec-3d',
-    visualization.slice(0, hours),
+    meshPath,
+    'quality-phreec',
+    [visualization[0]],
     'valid',
   )
 
-  return { hours }
+  return { hours, ids: [...phIDs, meshID] }
+}
+
+const copyQualityPhreec3DResult = async (modelFolderPath: string) => {
+  const meshPath = path.join(
+    DATA_FOLDER_PATH,
+    modelFolderPath,
+    'mesh20231218.gr3',
+  )
+  const phPath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'PH3D.DAT')
+  if (!(await existsPromise(meshPath))) {
+    await copyFile(
+      path.join(
+        DATA_FOLDER_PATH,
+        'template/quality-phreec-3d/mesh20231218.gr3',
+      ),
+      meshPath,
+    )
+  }
+  if (!(await existsPromise(phPath))) {
+    await copyFile(
+      path.join(DATA_FOLDER_PATH, 'template/quality-phreec-3d/PH3D.DAT'),
+      phPath,
+    )
+  }
 }
 
 const postQualityPhreec3D = async (
+  modelFolderPath: string,
+  hours: number,
+  identifier: string,
   modelID: string,
+  ids: string[],
   progress: {
     current: number
     per: number
     total: number
   },
 ) => {
-  progress.current += progress.per * 1
+  // process mesh
+  const { stdout } = await execa(
+    `conda activate gis && python ${[
+      path.join(process.cwd(), '/src/util/water/mesh.py'),
+      path.join(DATA_FOLDER_PATH, modelFolderPath),
+      'mesh20231218',
+    ].join(' ')}`,
+    { shell: true, windowsHide: true },
+  )
+  const extent = stdout
+    .replace('(', '')
+    .replace(')', '')
+    .split(',')
+    .map((value) => Number(value))
+
+  // update ph extent
+  for (const id of ids) {
+    await orm.data.updateDataByDataID(id, {
+      dataExtent: extent,
+    })
+  }
+  // tnd2png
+  const cp = execa(
+    `conda activate gis && python ${[
+      path.join(process.cwd(), '/src/util/water/phreec3D.py'),
+      path.join(DATA_FOLDER_PATH, modelFolderPath),
+      hours <= 48 ? hours : 48,
+      identifier,
+    ].join(' ')}`,
+    {
+      shell: true,
+      windowsHide: true,
+    },
+  )
   orm.model.updateModelByModelID(modelID, {
-    modelProgress: progress.current / progress.total,
+    modelPid: cp.pid,
   })
+  cp.stderr!.on('data', (chunk) => {
+    if ((chunk.toString() as string).toLowerCase().includes('clamped')) {
+      progress.current += progress.per * 7
+      orm.model.updateModelByModelID(modelID, {
+        modelProgress: progress.current / progress.total,
+      })
+    }
+  })
+  await cp
 }
 
 const runQualityPhreec3DModel = async (
@@ -1144,7 +1311,7 @@ const runQualityPhreec3DModel = async (
   console.time(identifier)
   // preprocess quality-phreec.exe
   console.timeLog(identifier, 'preprocess quality-phreec-3d.exe')
-  const { hours } = await preQualityPhreec3D(
+  const { hours, ids } = await preQualityPhreec3D(
     modelID,
     datasetID,
     modelFolderPath,
@@ -1155,13 +1322,23 @@ const runQualityPhreec3DModel = async (
   const progress = {
     current: 0,
     per: 1,
-    total: 17 * hours + 1,
+    total: 17 * hours + 7 * hours * 3,
   }
   console.timeLog(identifier, 'preprocess water-2d.exe')
   // await preRunWater2DModel(modelID, modelFolderPath, progress)
 
+  // copy Model Result
+  await copyQualityPhreec3DResult(modelFolderPath)
+
   // postprocess quality-phreec-3d.exe
-  await postQualityPhreec3D(modelID, progress)
+  await postQualityPhreec3D(
+    modelFolderPath,
+    hours,
+    identifier,
+    modelID,
+    ids,
+    progress,
+  )
 
   await orm.model.updateModelByModelID(modelID, {
     status: 'valid',
