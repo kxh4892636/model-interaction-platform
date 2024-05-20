@@ -893,6 +893,37 @@ const runQualityWaspModel = async (
 /**
  * quality-phreec model
  */
+const fakeQualityPhreecExe = async (
+  modelID: string,
+  modelFolderPath: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  const paramhkPath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'paramhk.in')
+  const isExist = await existsPromise(paramhkPath)
+  if (!isExist) throw Error()
+
+  const exePath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'water-2d.exe')
+  const cp = execa(`cd ${path.dirname(exePath)} && ${exePath}`, {
+    shell: true,
+    windowsHide: true,
+  })
+  orm.model.updateModelByModelID(modelID, {
+    modelPid: cp.pid,
+  })
+  cp.stdout!.on('data', (chunk) => {
+    if ((chunk.toString() as string).includes('nt,it')) {
+      progress.current += progress.per * 17
+      orm.model.updateModelByModelID(modelID, {
+        modelProgress: progress.current / progress.total,
+      })
+    }
+  })
+  await cp
+}
 const setQualityPhreecParam = async (projectID: string, hours: number) => {
   const projectInfo = await orm.project.getProjectByProjectID(projectID)
   if (!projectInfo) throw Error()
@@ -1092,12 +1123,14 @@ const runQualityPhreecModel = async (
     total: 17 * hours + 7 * hours,
   }
   console.timeLog(identifier, 'preprocess water-2d.exe')
-  await preRunWater2DModel(modelID, modelFolderPath, progress)
+  await fakeQualityPhreecExe(modelID, modelFolderPath, progress)
 
   // copy Model Result
+  console.timeLog(identifier, 'copy model result')
   await copyQualityPhreecResult(modelFolderPath)
 
   // postprocess quality-phreec.exe
+  console.timeLog(identifier, 'postprocess quality-phreec.exe')
   await postQualityPhreec(
     modelFolderPath,
     hours,
@@ -1325,12 +1358,14 @@ const runQualityPhreec3DModel = async (
     total: 17 * hours + 7 * hours * 3,
   }
   console.timeLog(identifier, 'preprocess water-2d.exe')
-  // await preRunWater2DModel(modelID, modelFolderPath, progress)
+  await fakeQualityPhreecExe(modelID, modelFolderPath, progress)
 
   // copy Model Result
+  console.timeLog(identifier, 'copy model result')
   await copyQualityPhreec3DResult(modelFolderPath)
 
   // postprocess quality-phreec-3d.exe
+  console.timeLog(identifier, 'postprocess quality-phreec-3d.exe')
   await postQualityPhreec3D(
     modelFolderPath,
     hours,
