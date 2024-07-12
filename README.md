@@ -302,39 +302,15 @@ git clone https://github.com/Microsoft/vcpkg.git
 
 ### 环境配置
 
-##### postgresql
+#### postgresql
 
 - 安装 postgresql;
 - 端口设置为 5432;
 - 密码设置为 123456;
 - 创建 model 数据库;
-  - 使用 template_model.sql 恢复备份;
-- pg_hba.conf 文件中全部设置为 'trust';
+  - 使用 template.sql 恢复备份;
 
-##### R 语言
-
-- 安装 R 语言;
-- 安装 R 包;
-  - 本地安装;
-    - 将 R.zip 解压至 `c:\Users\KXH\AppData\Local\`;
-  - 在线安装;
-    - 安装 Rtools;
-    - 输入下列命令;
-
-```bash
-install.packages('stringr')
-install.packages('rjson')
-install.packages('data.table')
-install.packages("RPostgreSQL")
-# RTools 安装
-devtools::install_local("Rpath-master.zip")
-```
-
-##### Access
-
-- 安装 AccessDatabaseEngine_X64.exe 或 AccessDatabaseEngine.exe;
-
-##### conda
+#### conda
 
 **安装步骤**
 
@@ -357,64 +333,26 @@ conda install -c conda-forge gdal
 conda init cmd.exe
 ```
 
-##### nginx
+#### nginx
 
 - 解压至 nginx.zip 至任意文件夹;
 - 启动 nginx 服务;
 
-##### 项目文件夹
+#### 代码
 
-**data**
+##### 前端
 
-- 创建 `D:\project\001_model_interaction_platform\data\`;
-- 复制 template 至 data 文件夹下;
-- 复制 project 至 data 文件夹下;
+- 复制 dist 文件夹;
 
-**config**
+##### 后端
 
-- 创建 `d:\project\001_model_interaction_platform\config\`;
-- 创建并复制 `D:\project\001_model_interaction_platform\config\vcpkg\packages\`;
-
-##### 前端代码
-
-- 解压 build.zip 至 `d:\project\001_model_interaction_platform\client\build\`;
-- 需要根据 ip 地址重新 build 一遍;
-
-##### 后端代码
-
-**npm**
-
-- 在线安装;
-- 本地复制;
-
-**prisma**
-
-```bash
-npx prisma init # 设置 .env 文件
-npx prisma db pull
-npx prisma generate
-```
-
-**部署**
-
-```bash
-npm run build
-npm run start:prod
-```
+- prisma;
+  - 初始化 prisma;
+  - 修改 .env 文件;
+  ```bash
+  pnpm prisma init
+  pnpm db
+  ```
+- config: 创建并修改 config 文件夹;
 
 ## memo
-
-- project;
-  - r;
-  - d;
-- dataset;
-  - c;
-  - r;
-  - d;
-- data;
-  - c;
-  - r;
-  - d;
-  - 可视化;
-- model;
-  - run;

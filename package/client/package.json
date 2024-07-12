@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite --port 5678",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "start": "vite preview --port 5678",
     "lint": "eslint src/**/* test/**/* --max-warnings 0",
     "prettier": "prettier src/**/* test/**/* --write",

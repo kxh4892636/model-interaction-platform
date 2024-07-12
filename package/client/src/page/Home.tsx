@@ -56,7 +56,7 @@ export const Home = () => {
           tracking-widest text-white"
       >
         港口水环境与生态动力学精细化模拟平台
-        <button className="h-4 w-4 bg-red-400" onClick={testClick}></button>
+        {/* <button className="h-4 w-4 bg-red-400" onClick={testClick}></button> */}
       </div>
       <div className="flex flex-auto bg-pink-50">
         <div className="relative flex flex-auto bg-green-50">
