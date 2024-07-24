@@ -1,3 +1,4 @@
+import { useMetaStore } from '@/store/metaStore'
 import { WaterModelTypeType } from '@/type'
 import { Button } from 'antd'
 import { NavigateFunction, useNavigate } from 'react-router-dom'
@@ -8,7 +9,11 @@ interface CardInfo {
   modelDescription: string
   modelType: WaterModelTypeType
 }
-const generateCardList = (infoList: CardInfo[], link: NavigateFunction) => {
+const generateCardList = (
+  infoList: CardInfo[],
+  link: NavigateFunction,
+  setModelType: (modelType: WaterModelTypeType) => void,
+) => {
   const cardList = infoList.map((value, index) => {
     return (
       <div key={index} className="flex flex-1 justify-center">
@@ -28,6 +33,7 @@ const generateCardList = (infoList: CardInfo[], link: NavigateFunction) => {
             className="group-hover:border-blue-400 group-hover:text-blue-400"
             onClick={() => {
               link('/model')
+              setModelType(value.modelType)
             }}
           >
             进入模型
@@ -51,7 +57,9 @@ export const Feature = ({
   cardInfoList,
 }: AppProps) => {
   const link = useNavigate()
-  const cardList = generateCardList(cardInfoList, link)
+  const setModelType = useMetaStore((state) => state.setModelType)
+  const cardList = generateCardList(cardInfoList, link, setModelType)
+
   return (
     <div className="w-screen">
       <div className="flex h-screen justify-center bg-[url('/item-bg.png')]">
@@ -61,7 +69,7 @@ export const Feature = ({
               bg-[url(/title-bg.png)] bg-[center_top_10rem] bg-no-repeat"
           >
             <div
-              className="relative left-[-2vw] top-[-4vh] text-lg text-[#0f4a8a]"
+              className="relative left-[-2vw] top-[-4vh] text-lg text-[#135eb0]"
             >
               <div className="mb-4 text-5xl font-semibold tracking-widest">
                 {modelTitle}

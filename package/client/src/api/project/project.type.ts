@@ -24,6 +24,10 @@ export const ProjectInfoResponseSchema =
 export type ProjectInfoResponseType = Static<typeof ProjectInfoResponseSchema>
 
 // /api/v1/project/list
+export const ProjectListQueryStringSchema = Type.Object({
+  modelType: WaterModelTypeSchema,
+})
+export type ProjectListQueryString = Static<typeof ProjectListQueryStringSchema>
 export const ProjectListSchema = Type.Array(ProjectInfoSchema)
 export type ProjectListType = Static<typeof ProjectListSchema>
 export const ProjectListResponseSchema =
@@ -63,6 +67,7 @@ export const ProjectActionBodySchema = Type.Object({
   projectID: Type.Union([Type.String(), Type.Null()]),
   projectName: Type.Union([Type.String(), Type.Null()]),
   projectExtent: Type.Union([Type.Null(), Type.Array(Type.Number())]),
+  modelType: WaterModelTypeSchema,
 })
 export type ProjectActionBodyType = Static<typeof ProjectActionBodySchema>
 export const ProjectActionResponseSchema =

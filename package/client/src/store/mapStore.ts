@@ -7,7 +7,7 @@ interface MapStore {
   setMapPosition: (value: [number, number, number]) => void
 }
 
-export const useMapStore = create<MapStore>((set) => ({
+export const useMapStore = create<MapStore>((set, get) => ({
   map: null,
   mapPosition: [119.8618, 26.7011, 7],
   setMap: (value) => set({ map: value }),

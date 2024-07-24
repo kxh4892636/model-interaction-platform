@@ -2,23 +2,13 @@ import { getProjectTreeAPI } from '@/api/project/project.api'
 import { postEWEModelLoadAPI } from '@/api/model/model.api'
 import { useMetaStore } from '@/store/metaStore'
 import { WaterModelTypeType } from '@/type'
-import { Select } from 'antd'
 import EWE from '../model-ewe/Import'
 import { eweFile } from '@/store/eweStore'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-interface OptionInterface {
-  value: WaterModelTypeType
-  label: string
-}
-
-interface ModelSelectProps {
-  options: OptionInterface[]
-}
-export const ModelSelect = ({ options }: ModelSelectProps) => {
+export const ModelSelect = () => {
   const modelType = useMetaStore((state) => state.modelType)
   const projectID = useMetaStore((state) => state.projectID)
-  const setModelType = useMetaStore((state) => state.setModelType)
   const [EWEresponse, setEWEresponse] = useState({})
   const [EWEflag, setEWEflag] = useState('')
   const setewefile = eweFile((state) => state.setData)
@@ -51,22 +41,27 @@ export const ModelSelect = ({ options }: ModelSelectProps) => {
       setEWEflag('Load')
     }
   }
+
+  const map: Record<WaterModelTypeType, string> = {
+    'water-2d': '水动力2D模型',
+    'water-3d': '水动力3D模型',
+    'quality-wasp': '水质模型-wasp',
+    'quality-phreec': '醋酸2D模型',
+    'quality-phreec-3d': '醋酸3D模型',
+    sand: '泥沙模型',
+    mud: '抛泥模型',
+    ewe: '生态模型',
+    'water-ewe': '水环境ewe耦合模型',
+  }
+
+  useEffect(() => {
+    if (modelType === 'ewe') LoadEwEModel()
+  }, [])
+
   return (
     <div className="flex h-10 items-center border border-slate-300 bg-white px-2">
-      <div>模型类型</div>
-      <Select
-        className="relative left-4 text-blue-500"
-        size="small"
-        disabled={projectID === null}
-        value={projectID === null ? null : modelType}
-        style={{ width: 160 }}
-        listHeight={600}
-        onChange={(value) => {
-          if (value === 'ewe') LoadEwEModel()
-          setModelType(value)
-        }}
-        options={options}
-      />
+      <div>模型类型: </div>
+      <div className="relative left-4 text-blue-500">{map[modelType!]}</div>
       <EWE data={EWEresponse} flag={EWEflag}></EWE>
     </div>
   )

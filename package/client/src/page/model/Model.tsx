@@ -1,59 +1,20 @@
 import { ModelSelect } from '@/page/model/model-select'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
-import { WaterModelTypeType } from '@/type'
 import { LayerPanel } from './layer'
 import { MapView } from './map'
 import { ModelStatus } from './model/ModelStatus'
 import { Model } from './model/Model'
-import { Header } from '@/component/layout'
 
 export const ModelPage = () => {
   const modal = useModalStore((state) => state.modal)
   const isModalDisplay = useModalStore((state) => state.isModalDisplay)
-  const intervalIDMap = useMetaStore((state) => state.intervalIDMap)
   const areaName = useMetaStore((state) => state.areaName)
-
-  const testClick = async () => {
-    console.log(intervalIDMap)
-  }
-
-  const options: {
-    value: WaterModelTypeType
-    label: string
-  }[] = [
-    { value: 'water-2d', label: '水动力2D模型' },
-    { value: 'water-3d', label: '水动力3D模型' },
-    {
-      value: 'quality-wasp',
-      label: '水质模型-wasp',
-    },
-    {
-      value: 'quality-phreec',
-      label: '醋酸2D模型',
-    },
-    {
-      value: 'quality-phreec-3d',
-      label: '醋酸3D模型',
-    },
-    {
-      value: 'sand',
-      label: '泥沙模型',
-    },
-    {
-      value: 'mud',
-      label: '抛泥模型',
-    },
-    {
-      value: 'ewe',
-      label: '生态模型',
-    },
-  ]
 
   return (
     <div className="relative flex h-screen w-screen flex-col">
       <div
-        className="z--1 h-16 w-screen bg-[#0f4a8a] p-5 text-xl tracking-widest
+        className="z--1 h-16 w-screen bg-[#135eb0] p-5 text-xl tracking-widest
           text-white"
       >
         111
@@ -66,11 +27,11 @@ export const ModelPage = () => {
                 className="flex h-10 items-center border border-slate-300
                   bg-white px-2"
               >
-                <div>{`当前研究区域： ${areaName || '未选择研究区域'}`}</div>
+                <div>{`当前研究区域： ${areaName == null ? '未选择研究区域' : areaName}`}</div>
               </div>
             </div>
             <div className="mb-0.5">
-              <ModelSelect options={options}></ModelSelect>
+              <ModelSelect></ModelSelect>
             </div>
             <div className="mb-0.5">
               <Model></Model>

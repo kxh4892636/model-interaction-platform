@@ -1,12 +1,11 @@
 import { Header } from '@/component/layout'
-import { routes } from '@/router'
+import { Router } from '@/router'
 import { useEffect, useRef } from 'react'
-import { useLocation, useNavigate, useRoutes } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export const App = () => {
   const link = useNavigate()
   const homeRef = useRef<HTMLDivElement | null>(null)
-  const element = useRoutes(routes)
   const location = useLocation()
 
   const scroll = (index: number) => {
@@ -28,6 +27,7 @@ export const App = () => {
       <div
         className="absolute right-8 top-1 z-10 flex h-[4rem] items-center
           text-lg text-white *:m-6"
+        id="header-button"
       >
         <div>
           <button
@@ -37,7 +37,7 @@ export const App = () => {
                 scroll(0)
               }, 0)
             }}
-            className="hover:text-blue-200"
+            className="hover:text-blue-400"
           >
             首页
           </button>
@@ -95,7 +95,7 @@ export const App = () => {
           </button>
         </div>
       </div>
-      {element}
+      <Router></Router>
     </>
   )
 }

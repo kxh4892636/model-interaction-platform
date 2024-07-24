@@ -6,6 +6,7 @@ import {
   ProjectActionBodySchema,
   ProjectActionResponseSchema,
   ProjectActionResponseType,
+  ProjectListQueryStringSchema,
   ProjectListResponseSchema,
   ProjectListResponseType,
   ProjectTreeQueryStringSchema,
@@ -14,31 +15,17 @@ import {
 } from './project.type'
 
 export const projectRoute = async (app: FastifyTypebox) => {
-  // app.route({
-  //   method: 'get',
-  //   url: '/info',
-  //   schema: {
-  //     tags: ['project'],
-  //     querystring: ProjectInfoQueryStringSchema,
-  //     response: { 200: ProjectInfoResponseSchema },
-  //   },
-  //   handler: async (req): Promise<ProjectInfoResponseType> => {
-  //     const { projectID } = req.query
-  //     const result = await projectService.getProjectByProjectID(projectID)
-  //     const response = generateResponse('success', '', result)
-  //     return response
-  //   },
-  // })
-
   app.route({
     method: 'get',
     url: '/list',
     schema: {
       tags: ['project'],
+      querystring: ProjectListQueryStringSchema,
       response: { 200: ProjectListResponseSchema },
     },
-    handler: async (): Promise<ProjectListResponseType> => {
-      const result = await projectService.getAllProject()
+    handler: async (req): Promise<ProjectListResponseType> => {
+      const { modelType } = req.query
+      const result = await projectService.getAllProject(modelType)
       const response = generateResponse('success', '', result)
       return response
     },
@@ -69,7 +56,8 @@ export const projectRoute = async (app: FastifyTypebox) => {
       response: { 200: ProjectActionResponseSchema },
     },
     handler: async (req): Promise<ProjectActionResponseType> => {
-      const { action, projectID, projectName, projectExtent } = req.body
+      const { action, projectID, projectName, projectExtent, modelType } =
+        req.body
       const actionFnMap = {
         create: async () => {
           const projectID = randomUUID()
@@ -81,6 +69,7 @@ export const projectRoute = async (app: FastifyTypebox) => {
             projectExtent,
             identifier,
             'valid',
+            modelType,
           )
           return projectID
         },

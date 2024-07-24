@@ -13,34 +13,38 @@ import eweWater from '@/assert/ewe-water.png'
 
 export const Home = () => {
   const homeRef = useRef<HTMLDivElement | null>(null)
+  let start = 0
 
   useEffect(() => {
-    if (homeRef.current) {
-      let index = 0
-      const viewHeight = window.innerHeight
-      let start = 0
-      homeRef.current.addEventListener('wheel', (e) => {
-        if (Date.now() - start > 200) {
-          start = Date.now()
-          if (e.deltaY > 0) {
-            scrollScreen('down')
-          } else {
-            scrollScreen('up')
-          }
-        }
-      })
-
-      const scrollScreen = (direction: 'up' | 'down' = 'down') => {
-        if (direction === 'down') {
-          if (index === 4) return
-          index++
-          homeRef.current!.style.top = -index * viewHeight + 'px'
+    const handler = (e: WheelEvent) => {
+      if (Date.now() - start > 200) {
+        start = Date.now()
+        if (e.deltaY > 0) {
+          scrollScreen('down')
         } else {
-          if (index === 0) return
-          index--
-          homeRef.current!.style.top = -index * viewHeight + 'px'
+          scrollScreen('up')
         }
-        console.log(index)
+      }
+    }
+
+    const scrollScreen = (direction: 'up' | 'down' = 'down') => {
+      const viewHeight = window.innerHeight
+      const value = Math.abs(
+        Number(homeRef.current!.style.top.replace('px', '')),
+      )
+      if (direction === 'down') {
+        if (value >= 4 * viewHeight) return
+        homeRef.current!.style.top = -(value + viewHeight) + 'px'
+      } else {
+        if (value <= 0) return
+        homeRef.current!.style.top = -(value - viewHeight) + 'px'
+      }
+    }
+    homeRef.current!.addEventListener('wheel', handler)
+
+    return () => {
+      if (homeRef.current) {
+        homeRef.current.removeEventListener('wheel', handler)
       }
     }
   }, [])
@@ -126,7 +130,7 @@ export const Home = () => {
             {
               image: eweWater,
               modelDescription: '水环境-ewe耦合模型简介',
-              modelTitle: '水环境-ewe耦合模型简介',
+              modelTitle: '水环境-ewe耦合模型',
               modelType: 'water-ewe',
             },
           ]}

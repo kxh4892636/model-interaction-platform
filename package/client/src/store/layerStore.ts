@@ -10,6 +10,7 @@
 import { LayerType } from '@/type'
 import { produce } from 'immer'
 import { create } from 'zustand'
+import mapboxgl from 'mapbox-gl'
 
 interface LayersStore {
   layers: { data: LayerType[]; map: LayerType[] }
@@ -20,6 +21,7 @@ interface LayersStore {
     map: LayerType | null
   }
   layerTreeTag: number
+  init: (map: mapboxgl.Map | null) => void
   setLayers: (value: LayerType[], type: 'data' | 'map') => void
   addLayer: (layer: LayerType, type: 'data' | 'map') => void
   getLayer: (key: string, type: 'data' | 'map') => LayerType | null
@@ -46,6 +48,22 @@ export const useLayersStore = create<LayersStore>((set, get) => ({
   layersExpanded: { data: [], map: [] },
   layersSelected: { data: null, map: null },
   layerTreeTag: 0,
+  init: (map: mapboxgl.Map | null = null) => {
+    if (map) {
+      get().layers.map.forEach((layer) => {
+        const layerKey = layer.layerKey
+        if (map.getLayer(layerKey)) map.removeLayer(layerKey)
+        if (map.getSource(layerKey)) map.removeSource(layerKey)
+      })
+    }
+    set({
+      layers: { data: [], map: [] },
+      layersChecked: { data: [], map: [] },
+      layersExpanded: { data: [], map: [] },
+      layersSelected: { data: null, map: null },
+      layerTreeTag: 0,
+    })
+  },
   setLayers: (value, type) =>
     set(
       produce((draft: LayersStore) => {

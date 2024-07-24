@@ -1,4 +1,4 @@
-import { DBStatusType } from '@/type'
+import { DBStatusType, WaterModelTypeType } from '@/type'
 import { prisma } from '@/util/db/prisma'
 
 export const projectDao = {
@@ -8,6 +8,7 @@ export const projectDao = {
     projectExtent: number[],
     projectIdentifier: string,
     projectFolderPath: string,
+    modelType: WaterModelTypeType,
     status: DBStatusType,
   ) => {
     const timeStamp = Date.now().toString()
@@ -19,6 +20,7 @@ export const projectDao = {
         project_id: projectID,
         project_identifier: projectIdentifier,
         project_name: projectName,
+        model_type: modelType,
         status,
         update_time: timeStamp,
       },
@@ -33,6 +35,7 @@ export const projectDao = {
       projectExtent?: number[]
       projectIdentifier?: string
       projectFolderPath?: string
+      modelType?: WaterModelTypeType
       status?: DBStatusType
     },
   ) => {
@@ -48,6 +51,7 @@ export const projectDao = {
         status: init.status,
         update_time: timeStamp,
         project_extent: init.projectExtent,
+        model_type: init.modelType,
       },
     })
   },
@@ -62,8 +66,12 @@ export const projectDao = {
     return result
   },
 
-  getAllProject: async () => {
-    const result = await prisma.project.findMany()
+  getAllProject: async (modelType: WaterModelTypeType) => {
+    const result = await prisma.project.findMany({
+      where: {
+        model_type: modelType,
+      },
+    })
     return result
   },
 

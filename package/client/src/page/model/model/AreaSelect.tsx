@@ -7,7 +7,11 @@ import { useForceUpdate } from '@/hook/useForceUpdate'
 import { useMapStore } from '@/store/mapStore'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
-import { DataFetchHookInterface } from '@/type'
+import {
+  DataFetchHookInterface,
+  WaterModelTypeSchema,
+  WaterModelTypeType,
+} from '@/type'
 import {
   Button,
   Card,
@@ -21,16 +25,16 @@ import {
 import Meta from 'antd/es/card/Meta'
 import { produce } from 'immer'
 import { useEffect, useState } from 'react'
-import { useModeStore } from './model.store'
 import { CloseOutlined } from '@ant-design/icons'
+import { useLayersStore } from '@/store/layerStore'
 
 const NewArea = () => {
   const closeModal = useModalStore((state) => state.closeModal)
   const map = useMapStore((state) => state.map)
-  const setModelArea = useModeStore((state) => state.setModelArea)
+  const setModelArea = useMetaStore((state) => state.setAreaName)
   const setProjectID = useMetaStore((state) => state.setProjectID)
   const setAreaName = useMetaStore((state) => state.setAreaName)
-  const setModelType = useMetaStore((state) => state.setModelType)
+  const modelType = useMetaStore((state) => state.modelType)
   const [modelStatus, setModelStatus] = useState<(number | string)[]>([])
   const inputList = ['最小经度', '最小纬度', '最大经度', '最大纬度'].map(
     (value, index) => {
@@ -61,6 +65,7 @@ const NewArea = () => {
       projectID: null,
       projectName: modelStatus[0] as string,
       projectExtent: modelStatus.slice(1) as number[],
+      modelType: modelType as WaterModelTypeType,
     })
     if (result.status === 'success') {
       message.info('创建区域成功', 5)
@@ -68,7 +73,6 @@ const NewArea = () => {
       map!.fitBounds(modelStatus.slice(1) as any)
       setProjectID(result.data)
       setAreaName(modelStatus[0] as string)
-      setModelType('water-2d')
       closeModal()
     } else {
       message.error('创建区域失败, 经纬度输入错误', 5)
@@ -114,10 +118,11 @@ const HistoryArea = () => {
   const projectID = useMetaStore((state) => state.projectID)
   const setProjectID = useMetaStore((state) => state.setProjectID)
   const setAreaName = useMetaStore((state) => state.setAreaName)
+  const modelType = useMetaStore((state) => state.modelType)
   const setModelType = useMetaStore((state) => state.setModelType)
   const closeModal = useModalStore((state) => state.closeModal)
+  const layerInit = useLayersStore((state) => state.init)
   const map = useMapStore((state) => state.map)
-  const setModelArea = useModeStore((state) => state.setModelArea)
   const [updateTag, forceUpdate] = useForceUpdate()
   const [historyAreaList, setHistoryAreaList] = useState<
     DataFetchHookInterface<ProjectListType>
@@ -128,12 +133,16 @@ const HistoryArea = () => {
   })
 
   const handleLoad = async (projectInfo: ProjectInfoType) => {
+    if (map) {
+      layerInit(map)
+    }
+    if (modelType) {
+      setModelType(modelType)
+    }
     message.info('进入历史区域成功', 5)
-    setModelArea('defined')
     map!.fitBounds(projectInfo.projectExtent as any)
     setProjectID(projectInfo.projectId)
     setAreaName(projectInfo.projectName)
-    setModelType('water-2d')
     closeModal()
   }
 
@@ -143,13 +152,12 @@ const HistoryArea = () => {
       projectID: projectInfo.projectId,
       projectName: null,
       projectExtent: null,
+      modelType: modelType as WaterModelTypeType,
     })
     forceUpdate()
     if (projectInfo.projectId === projectID) {
       setProjectID(null)
       setAreaName(null)
-      setModelType('water-2d')
-      setModelArea('undefined')
     }
     if (result.status === 'success') {
       message.info('删除区域成功', 5)
@@ -159,7 +167,7 @@ const HistoryArea = () => {
   }
 
   useEffect(() => {
-    getProjectListAPI().then((response) => {
+    getProjectListAPI(modelType as WaterModelTypeType).then((response) => {
       if (response.status === 'success') {
         setHistoryAreaList({
           status: 'success',

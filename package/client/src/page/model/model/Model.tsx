@@ -11,7 +11,6 @@ import { Button, message } from 'antd'
 import { AreaSelect } from './AreaSelect'
 import { DataUpload } from './DataUpload'
 import { ModelParamEditor } from './ModelParameterEditor'
-import { useModeStore } from './model.store'
 import { eweFile } from '@/store/eweStore'
 import EWE from '../model-ewe/Import'
 import { useState } from 'react'
@@ -20,23 +19,28 @@ import { useModelStore } from '@/store/modelStore'
 const runModelAction = async (
   projectID: string,
   modelType: WaterModelTypeType,
+  areaName: string,
   forceUpdateLayerTree: () => void,
-  getModelStatus: (modelType: WaterModelTypeType) => {
-    modelID: string | null
-    name: WaterModelTypeType
+  getModelStatus: (projectID: string) => {
+    modelID: string
+    name: string
     progress: number
     status: null | 'pending' | 'success' | 'error'
   },
-  updateModelProgress: (
-    modelName: WaterModelTypeType,
-    progress: number,
+  updateModelProgress: (projectID: string, progress: number) => void,
+  setInitStatus: (
+    projectID: string,
+    modelID: string,
+    modelName: string,
   ) => void,
-  setInitStatus: (modelType: WaterModelTypeType) => void,
-  setRunStatus: (modelType: WaterModelTypeType, modelID: string) => void,
-  setSuccessStatus: (modelType: WaterModelTypeType) => void,
-  setErrorStatus: (modelType: WaterModelTypeType) => void,
+  setRunStatus: (projectID: string) => void,
+  setErrorStatus: (projectID: string) => void,
+  setSuccessStatus: (projectID: string) => void,
 ) => {
-  setInitStatus(modelType)
+  const info = getModelStatus(projectID)
+  if (info && info.status !== null && info.status !== 'success') {
+    return -1
+  }
   const result = await postModelActionAPI({
     modelID: null,
     action: 'run',
@@ -50,14 +54,15 @@ const runModelAction = async (
   })
   if (result.data === null) return false
   const modelID = result.data
-  setRunStatus(modelType, modelID)
+  setInitStatus(projectID, modelID, `${areaName}-${modelType}`)
+  setRunStatus(projectID)
   message.info('模型开始运行')
   let errorTimes = 0
   const intervalID = setInterval(async () => {
     const result = await getModelInfoAPI(modelID)
     if (result.status === 'error') {
       if (errorTimes > 3) {
-        setErrorStatus(modelType)
+        setErrorStatus(projectID)
         message.error('模型运行失败')
         clearInterval(intervalID)
         forceUpdateLayerTree()
@@ -72,33 +77,33 @@ const runModelAction = async (
         clearInterval(intervalID)
         forceUpdateLayerTree()
 
-        const info = getModelStatus(modelType)
+        const info = getModelStatus(projectID)
         if (info.status === null) {
           return
         }
 
-        setErrorStatus(modelType)
+        setErrorStatus(projectID)
         message.error('模型运行失败')
 
         return
       }
       if (result.data.modelStatus === 'pending') {
-        updateModelProgress(modelType, result.data.modelProgress)
+        updateModelProgress(projectID, result.data.modelProgress)
       }
       if (result.data.modelStatus === 'valid') {
-        setSuccessStatus(modelType)
+        setSuccessStatus(projectID)
         message.info('模型运行完成')
         clearInterval(intervalID)
         forceUpdateLayerTree()
       }
     }
-  }, 3000)
+  }, 1000)
 }
 
 export const Model = () => {
   const projectID = useMetaStore((state) => state.projectID)
   const modelType = useMetaStore((state) => state.modelType)
-  const modelArea = useModeStore((state) => state.modelArea)
+  const modelArea = useMetaStore((state) => state.areaName)
   const ewefile = eweFile((state) => state.Data)
   const [EWEresponse, setEWEresponse] = useState({})
   const [EWEflag, setEWEflag] = useState('')
@@ -106,7 +111,6 @@ export const Model = () => {
   const forceUpdateLayerTree = useLayersStore(
     (state) => state.forceUpdateLayerTree,
   )
-
   const getModelStatus = useModelStore((state) => state.getModelStatus)
   const updateModelProgress = useModelStore(
     (state) => state.updateModelProgress,
@@ -121,7 +125,7 @@ export const Model = () => {
       label: string
       action: () => void
     }[] = []
-    if (modelArea === 'undefined') {
+    if (modelArea === null) {
       arr.push({
         label: '确定研究区域',
         action: () => {
@@ -172,22 +176,24 @@ export const Model = () => {
             }
           } else {
             if (!projectID) return
-            const info = getModelStatus(modelType)
-            if (info.status === 'pending') {
-              message.error({ content: '模型正在计算中', duration: 3 })
-              return
-            }
-            runModelAction(
+            const tag = await runModelAction(
               projectID,
-              modelType,
+              modelType as WaterModelTypeType,
+              modelArea,
               forceUpdateLayerTree,
               getModelStatus,
               updateModelProgress,
               setInitStatus,
               setRunStatus,
-              setSuccessStatus,
               setErrorStatus,
+              setSuccessStatus,
             )
+            if (tag === -1) {
+              message.error({
+                content: '该研究区域模型正在计算中',
+                duration: 3,
+              })
+            }
           }
         },
       })

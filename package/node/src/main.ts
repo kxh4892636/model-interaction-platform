@@ -5,9 +5,9 @@ import { exec, spawn } from 'child_process'
 // print()
 
 console.log(process.cwd())
-process.chdir('C:/Users/kxh48/Downloads/ouhe/')
+process.chdir('d:/dev/water-ewe/')
 console.log(process.cwd())
-const cp = spawn('C:/Users/kxh48/Downloads/ouhe/wuran.exe')
+const cp = spawn('d:/dev/water-ewe/quality-wasp.exe')
 
 cp.stdout.on('data', (chunk) => {
   console.log(chunk.toString())

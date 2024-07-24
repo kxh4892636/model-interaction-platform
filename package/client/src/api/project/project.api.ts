@@ -1,5 +1,5 @@
 import { extendFetch } from '@/api/api.util'
-import { DataFetchAPIInterface } from '@/type'
+import { DataFetchAPIInterface, WaterModelTypeType } from '@/type'
 import {
   ProjectActionBodyType,
   ProjectActionResponseType,
@@ -9,9 +9,12 @@ import {
   ProjectTreeType,
 } from './project.type'
 
-export const getProjectListAPI = async () => {
+export const getProjectListAPI = async (modelType: WaterModelTypeType) => {
   const response: DataFetchAPIInterface<ProjectListType> = await extendFetch(
-    `/api/v1/project/list`,
+    `/api/v1/project/list?` +
+      new URLSearchParams({
+        modelType,
+      }),
     {
       method: 'GET',
     },
@@ -92,6 +95,7 @@ export const postProjectActionAPI = async (params: ProjectActionBodyType) => {
       projectID: params.projectID,
       projectName: params.projectName,
       projectExtent: params.projectExtent,
+      modelType: params.modelType,
     }),
   })
     .then((res) => {

@@ -18,6 +18,7 @@ export const projectService = {
     projectExtent: number[],
     identifier: string,
     projectStatus: DBStatusType,
+    modelType: WaterModelTypeType,
   ) => {
     const projectPath = path.join('/project', identifier)
     // create db records
@@ -27,6 +28,7 @@ export const projectService = {
       projectExtent,
       identifier,
       projectPath,
+      modelType,
       projectStatus,
     )
     const projectDatasetMap = [
@@ -65,8 +67,10 @@ export const projectService = {
     )
   },
 
-  getAllProject: async (): Promise<ProjectListType> => {
-    const projectList = await orm.project.getAllProject()
+  getAllProject: async (
+    modelType: WaterModelTypeType,
+  ): Promise<ProjectListType> => {
+    const projectList = await orm.project.getAllProject(modelType)
     const result: ProjectListType = projectList.map((value) => {
       return {
         projectExtent: value.project_extent,

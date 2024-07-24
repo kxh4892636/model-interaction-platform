@@ -1,7 +1,6 @@
 import { postModelActionAPI } from '@/api/model/model.api'
 import { useModalStore } from '@/store/modalStore'
 import { useModelStore } from '@/store/modelStore'
-import { WaterModelTypeType } from '@/type'
 import { CloseOutlined, PlayCircleOutlined } from '@ant-design/icons'
 import { Button, Card, Popconfirm, Progress, message } from 'antd'
 
@@ -12,18 +11,8 @@ const ModelStatusInfo = () => {
 
   const cardList = (() => {
     const result = []
-    const nameMap: Record<WaterModelTypeType, string> = {
-      'water-2d': '水动力2D模型',
-      'water-3d': '水动力3D模型',
-      'quality-wasp': '水质模型-wasp',
-      'quality-phreec': '醋酸模型',
-      'quality-phreec-3d': '醋酸模型-3d',
-      sand: '泥沙模型',
-      mud: '抛泥模型',
-      ewe: 'ewe模型',
-    }
 
-    const confirm = async (model: WaterModelTypeType, modelID: string) => {
+    const confirm = async (modelID: string, projectID: string) => {
       const response = await postModelActionAPI({
         modelID,
         action: 'stop',
@@ -31,23 +20,17 @@ const ModelStatusInfo = () => {
       })
       if (response.status === 'success') {
         message.info('模型终止成功')
-        setInitStatus(model)
+        setInitStatus(projectID, modelID, modelStatusRecord[projectID].name)
       } else {
         message.error('模型终止失败')
       }
     }
-    for (const modelName in modelStatusRecord) {
-      if (Object.prototype.hasOwnProperty.call(modelStatusRecord, modelName)) {
-        if (modelName === 'ewe') {
-          continue
-        }
-        const info = modelStatusRecord[modelName as WaterModelTypeType]
+    for (const projectID in modelStatusRecord) {
+      if (Object.prototype.hasOwnProperty.call(modelStatusRecord, projectID)) {
+        const info = modelStatusRecord[projectID]
         result.push(
-          <Card
-            title={nameMap[info.name]}
-            className="w-full border border-slate-300"
-          >
-            {info.status === null && <div>模型尚未运行</div>}
+          <Card title={info.name} className="w-full border border-slate-300">
+            {info.status === null && <div>模型停止运行</div>}
             {info.status === 'pending' && (
               <>
                 <Progress
@@ -58,7 +41,7 @@ const ModelStatusInfo = () => {
                   title=""
                   description="确认终止模型"
                   onConfirm={() => {
-                    confirm(info.name, info.modelID!)
+                    confirm(info.modelID, projectID)
                   }}
                   okText="Yes"
                   cancelText="No"
@@ -74,7 +57,7 @@ const ModelStatusInfo = () => {
               </>
             )}
             {info.status === 'error' && (
-              <div className="text-red-600">模型运行失败</div>
+              <div className="text-red-600">{info.status}</div>
             )}
           </Card>,
         )

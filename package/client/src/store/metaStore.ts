@@ -5,8 +5,9 @@ import { create } from 'zustand'
 interface MetaInterface {
   projectID: string | null
   areaName: string | null
-  modelType: WaterModelTypeType
+  modelType: WaterModelTypeType | null
   intervalIDMap: Record<string, NodeJS.Timeout>
+  init: () => void
   setProjectID: (id: string | null) => void
   setAreaName: (name: string | null) => void
   setModelType: (type: WaterModelTypeType) => void
@@ -18,8 +19,19 @@ interface MetaInterface {
 export const useMetaStore = create<MetaInterface>((set, get) => ({
   projectID: null,
   areaName: null,
-  modelType: 'water-2d',
+  modelType: null,
   intervalIDMap: {},
+  init: () => {
+    Object.values(get().intervalIDMap).forEach((value) => {
+      clearInterval(value)
+    })
+    set({
+      projectID: null,
+      areaName: null,
+      modelType: null,
+      intervalIDMap: {},
+    })
+  },
   setProjectID: (value) => set({ projectID: value }),
   setAreaName: (value) => set({ areaName: value }),
   setModelType: (value) => set({ modelType: value }),

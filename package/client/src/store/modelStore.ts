@@ -1,90 +1,40 @@
-import { WaterModelTypeType } from '@/type'
 import { produce } from 'immer'
 import { create } from 'zustand'
 
 interface IModelStatus {
-  modelID: string | null
-  name: WaterModelTypeType
+  modelID: string
+  name: string
   progress: number
   status: null | 'pending' | 'success' | 'error'
 }
 
 interface IModelStore {
-  modelStatusRecord: Record<WaterModelTypeType, IModelStatus>
-  getModelStatus: (model: WaterModelTypeType) => IModelStatus
-  updateModelProgress: (model: WaterModelTypeType, progress: number) => void
-  setInitStatus: (model: WaterModelTypeType) => void
-  setRunStatus: (model: WaterModelTypeType, modelID: string) => void
-  setErrorStatus: (model: WaterModelTypeType) => void
-  setSuccessStatus: (model: WaterModelTypeType) => void
+  modelStatusRecord: Record<string, IModelStatus>
+  getModelStatus: (projectID: string) => IModelStatus
+  updateModelProgress: (projectID: string, progress: number) => void
+  setInitStatus: (projectID: string, modelID: string, modelName: string) => void
+  setRunStatus: (projectID: string) => void
+  setErrorStatus: (projectID: string) => void
+  setSuccessStatus: (projectID: string) => void
 }
 
 export const useModelStore = create<IModelStore>((set, get) => ({
-  modelStatusRecord: {
-    'water-2d': {
-      modelID: null,
-      name: 'water-2d',
-      progress: 0,
-      status: null,
-    },
-    'water-3d': {
-      modelID: null,
-      name: 'water-3d',
-      progress: 0,
-      status: null,
-    },
-    'quality-wasp': {
-      modelID: null,
-      name: 'quality-wasp',
-      progress: 0,
-      status: null,
-    },
-    'quality-phreec': {
-      modelID: null,
-      name: 'quality-phreec',
-      progress: 0,
-      status: null,
-    },
-    'quality-phreec-3d': {
-      modelID: null,
-      name: 'quality-phreec-3d',
-      progress: 0,
-      status: null,
-    },
-    sand: {
-      modelID: null,
-      name: 'sand',
-      progress: 0,
-      status: null,
-    },
-    mud: {
-      modelID: null,
-      name: 'mud',
-      progress: 0,
-      status: null,
-    },
-    ewe: {
-      modelID: null,
-      name: 'ewe',
-      progress: 0,
-      status: null,
-    },
+  modelStatusRecord: {},
+  getModelStatus: (projectID: string) => {
+    return get().modelStatusRecord[projectID]
   },
-  getModelStatus: (modelName: WaterModelTypeType) => {
-    return get().modelStatusRecord[modelName]
-  },
-  updateModelProgress: (modelName: WaterModelTypeType, progress: number) => {
+  updateModelProgress: (projectID: string, progress: number) => {
     set(
       produce((draft: IModelStore) => {
-        draft.modelStatusRecord[modelName].progress = progress
+        draft.modelStatusRecord[projectID].progress = progress
       }),
     )
   },
-  setInitStatus: (modelName: WaterModelTypeType) => {
+  setInitStatus: (projectID: string, modelID: string, modelName: string) => {
     set(
       produce((draft: IModelStore) => {
-        draft.modelStatusRecord[modelName] = {
-          modelID: null,
+        draft.modelStatusRecord[projectID] = {
+          modelID,
           name: modelName,
           progress: 0,
           status: null,
@@ -92,35 +42,27 @@ export const useModelStore = create<IModelStore>((set, get) => ({
       }),
     )
   },
-  setRunStatus: (modelName: WaterModelTypeType, modelID: string) => {
+  setRunStatus: (projectID: string) => {
     set(
       produce((draft: IModelStore) => {
-        draft.modelStatusRecord[modelName] = {
-          modelID,
-          name: modelName,
-          progress: 0,
-          status: 'pending',
-        }
+        draft.modelStatusRecord[projectID].progress = 0
+        draft.modelStatusRecord[projectID].status = 'pending'
       }),
     )
   },
-  setErrorStatus: (modelName: WaterModelTypeType) => {
+  setErrorStatus: (projectID: string) => {
     set(
       produce((draft: IModelStore) => {
-        draft.modelStatusRecord[modelName] = {
-          modelID: null,
-          name: modelName,
-          progress: 0,
-          status: 'error',
-        }
+        draft.modelStatusRecord[projectID].progress = 0
+        draft.modelStatusRecord[projectID].status = 'error'
       }),
     )
   },
-  setSuccessStatus: (modelName: WaterModelTypeType) => {
+  setSuccessStatus: (projectID: string) => {
     set(
       produce((draft: IModelStore) => {
-        draft.modelStatusRecord[modelName].progress = 100
-        draft.modelStatusRecord[modelName].status = 'success'
+        draft.modelStatusRecord[projectID].progress = 100
+        draft.modelStatusRecord[projectID].status = 'success'
       }),
     )
   },
