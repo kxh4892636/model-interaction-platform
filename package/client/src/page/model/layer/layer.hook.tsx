@@ -2,6 +2,7 @@ import { postDatasetActonAPI } from '@/api/dataset/dataset.api'
 import {
   getDataInfoAPI,
   getImageAPI,
+  getJsonAPI,
   getTextAPI,
   postDataActonAPI,
 } from '@/api/model-data/data.api'
@@ -9,7 +10,7 @@ import { DataInfoType } from '@/api/model-data/data.type'
 import { useLayersStore } from '@/store/layerStore'
 import { useMapStore } from '@/store/mapStore'
 import { useMetaStore } from '@/store/metaStore'
-import { LayerType } from '@/type'
+import { LayerType, WaterDataStyleType, WaterModelTypeType } from '@/type'
 import { addImageSequenceToMap } from '@/util/mapbox.util'
 import {
   addGeoJsonLayerToMap,
@@ -17,6 +18,8 @@ import {
   addUVETLayerToMap,
   getLayerKeys,
 } from './layer.util'
+import { useModalStore } from '@/store/modalStore'
+import { EweVisualization, VisualizationModal } from './VisualizationModal'
 
 export const useLayerActions = () => {
   const map = useMapStore((state) => state.map)
@@ -40,6 +43,7 @@ export const useLayerActions = () => {
   const removeInterValIDByLayerID = useMetaStore(
     (state) => state.removeInterValIDByLayerID,
   )
+  const openModal = useModalStore((state) => state.openModal)
 
   const downloadText = async () => {
     if (!layersSelected.data) return false
@@ -60,19 +64,30 @@ export const useLayerActions = () => {
     a.click()
   }
 
-  // const visualizeData = async () => {
-  //   if (!layersSelected.data) return null
-  //   const dataID = layersSelected.data.key
-  //   const info = await getDataInfo(dataID)
-  //   if (!info) return null
-
-  //   const fnMap: Record<string, (info: DataInfoType) => Promise<JSX.Element>> =
-  //     {
-  //       //
-  //     }
-
-  //   return true
-  // }
+  const visualizeData = async () => {
+    if (!layersSelected.data) return null
+    const dataID = layersSelected.data.layerKey
+    const info = (await getDataInfoAPI(dataID)).data
+    if (!info) return null
+    const fnMap: Record<string, () => Promise<JSX.Element>> = {
+      ewe: async () => {
+        const response = await getJsonAPI(
+          info.dataID,
+          info.visualizationNumber - 1,
+        )
+        const data = response.data as Record<string, number[]>
+        return <EweVisualization data={data}></EweVisualization>
+      },
+    }
+    const element = await fnMap[info.dataStyle]()
+    openModal(
+      <VisualizationModal
+        title={info.dataName}
+        element={element}
+      ></VisualizationModal>,
+    )
+    return true
+  }
 
   const addImageSequenceLayerToMap = async (
     map: mapboxgl.Map,
@@ -225,6 +240,7 @@ export const useLayerActions = () => {
 
   return {
     downloadText,
+    visualizeData,
     addDataToMap,
     showMapLayer,
     deleteDataLayer,

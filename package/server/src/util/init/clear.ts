@@ -1,5 +1,5 @@
 import { mkdir, rm } from 'fs/promises'
-import { prisma } from './prisma'
+import { prisma } from '../db/prisma'
 
 await prisma.project.deleteMany({})
 await prisma.dataset.deleteMany({})

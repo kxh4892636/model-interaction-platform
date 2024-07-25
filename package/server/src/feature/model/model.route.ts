@@ -17,6 +17,7 @@ import {
   QualityWaspParamBodySchema,
   SandParamBodySchema,
   Water2DParamBodySchema,
+  WaterEweBodySchema,
 } from './model.type'
 import { modelService } from './model.water.service'
 
@@ -167,6 +168,24 @@ export const modelRoute = async (app: FastifyTypebox) => {
 
   app.route({
     method: 'post',
+    url: '/param/water-ewe',
+    schema: {
+      tags: ['model'],
+      body: WaterEweBodySchema,
+      response: {
+        200: ModelParamResponseSchema,
+      },
+    },
+    handler: async (req): Promise<ModelParamResponseType> => {
+      const body = req.body
+      await modelService.setWaterEweParam(body.projectID, body.hours)
+      const response = generateResponse('success', '', null)
+      return response
+    },
+  })
+
+  app.route({
+    method: 'post',
     url: '/water/action',
     schema: {
       tags: ['model'],
@@ -228,6 +247,13 @@ export const modelRoute = async (app: FastifyTypebox) => {
         } else if (init.modelType === 'mud') {
           modelService
             .runMudModel(init.modelName, init.projectID, modelID)
+            .catch(() => {
+              console.log('stop model')
+              modelService.stopModel(modelID)
+            })
+        } else if (init.modelType === 'water-ewe') {
+          modelService
+            .runWaterEweModel(init.modelName, init.projectID, modelID)
             .catch(() => {
               console.log('stop model')
               modelService.stopModel(modelID)

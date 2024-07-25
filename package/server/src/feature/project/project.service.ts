@@ -40,8 +40,10 @@ export const projectService = {
       ['sand', ['water-2d', 'sand']],
       ['mud', ['water-2d', 'mud']],
       ['ewe', ['ewe']],
+      ['water-ewe', ['water-2d', 'quality-wasp', 'ewe']],
     ]
     const promiseList = projectDatasetMap.map(async (value) => {
+      if (value[0] !== modelType) return
       ;(value[1] as string[]).map(async (paramType) => {
         const datasetID = randomUUID()
         const datasetName = paramType + '参数'

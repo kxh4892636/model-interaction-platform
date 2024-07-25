@@ -14,7 +14,9 @@ export const globalErrorHandler = fp(async (app: FastifyTypebox) => {
     ) {
       res.code(200).send(generateResponse('error', 'db error', null))
     } else {
-      res.code(200).send(generateResponse('error', 'server error', null))
+      res
+        .code(200)
+        .send(generateResponse('error', 'unhandler server error', null))
     }
     console.trace(error)
   })

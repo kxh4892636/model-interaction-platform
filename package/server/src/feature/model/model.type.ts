@@ -67,6 +67,12 @@ export const MudParamBodySchema = Type.Object({
   hours: Type.Integer(),
 })
 export type MudParamBodyType = Static<typeof MudParamBodySchema>
+// /model/param/water-ewe
+export const WaterEweBodySchema = Type.Object({
+  projectID: Type.String(),
+  hours: Type.Integer(),
+})
+export type TWaterEweBody = Static<typeof WaterEweBodySchema>
 
 // /model/action
 export const ModelActionSchema = Type.Union([Type.String(), Type.Null()])

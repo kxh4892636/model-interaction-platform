@@ -1829,6 +1829,188 @@ const runMudModel = async (
   })
 }
 
+/**
+ * water-ewe model
+ */
+const setWaterEweParam = async (projectID: string, hours: number) => {
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  // modify model param by hours
+  const qualityWaspPath = path.join(
+    DATA_FOLDER_PATH,
+    projectInfo.project_folder_path,
+    'water-ewe',
+  )
+  // modify water-2d
+  const paramhkPath = path.join(qualityWaspPath, 'paramhk.in')
+  const isPramhkExist = await existsPromise(paramhkPath)
+  if (!isPramhkExist) throw Error()
+  const paramhkContent = (await readFile(paramhkPath))
+    .toString()
+    .replace(/.*3.5.*2.5/, `${(120 * hours + 24) / 24} 3.5 2.5`)
+  await writeFile(paramhkPath, paramhkContent)
+
+  // modify quality-wasp
+  const wuRanGongKuangPath = path.join(qualityWaspPath, 'wuran-gongkuang.dat')
+  const isExist = await existsPromise(wuRanGongKuangPath)
+  if (!isExist) throw Error()
+  const paramContent = (await readFile(wuRanGongKuangPath))
+    .toString()
+    .replace(/.*30.*hour/, `${hours} 30 耦合时间 hour`)
+    .replace(/.*60.*31/, `${(120 * hours) / 24} 60 31`)
+  await writeFile(wuRanGongKuangPath, paramContent)
+}
+
+const preQualityWaspOfWaterEwe = async (
+  modelID: string,
+  datasetID: string,
+  modelFolderPath: string,
+  identifier: string,
+) => {
+  // create model record
+  await orm.model.createModel(modelID, datasetID, -9999, 0, 'pending')
+
+  // get mesh extent
+  const isMeshExist = await existsPromise(
+    path.join(DATA_FOLDER_PATH, modelFolderPath, 'mesh31.gr3'),
+  )
+  if (!isMeshExist) throw Error()
+  const meshInfo = await modelDao.getMeshInfo(
+    path.join(modelFolderPath, 'mesh31.gr3'),
+  )
+  if (!meshInfo) throw Error()
+  const extent = meshInfo.data_extent
+
+  // get hours
+  const wuRanGongKuangPath = path.join(
+    DATA_FOLDER_PATH,
+    modelFolderPath,
+    'wuran-gongkuang.dat',
+  )
+  const isExist = await existsPromise(wuRanGongKuangPath)
+  if (!isExist) throw Error()
+  const paramContent = (await readFile(wuRanGongKuangPath))
+    .toString()
+    .match(/[\d.]*(?=.*30.*hour)/)
+  if (!paramContent) throw Error()
+  const hours = Math.floor(Number(paramContent[0]))
+
+  // create data record and dataset_data record
+  const titles: string[] = [
+    '溶解氧',
+    'BOD',
+    '浮游植物',
+    '氨氮',
+    '硝酸盐氮',
+    '有机氮',
+    '无机磷',
+    '有机磷',
+  ]
+  const visualization = getModelDataVisualization(
+    'quality-wasp',
+    modelFolderPath,
+    hours,
+    identifier,
+  )
+  for (let index = 1; index <= 8; index++) {
+    const tndID = randomUUID()
+    const tndPath = path.join(modelFolderPath, `tnd${index}.dat`)
+    await dataDao.createData(
+      datasetID,
+      tndID,
+      `${index}_${titles[index - 1]}`,
+      'tnd',
+      'raster',
+      extent,
+      identifier,
+      tndPath,
+      'water-ewe',
+      visualization.slice(0 + hours * (index - 1), hours + hours * (index - 1)),
+      'valid',
+    )
+  }
+  const eweID = randomUUID()
+  const ewePath = path.join(
+    modelFolderPath,
+    `EcoSim_Couple_Result-${identifier}.json`,
+  )
+  await dataDao.createData(
+    datasetID,
+    eweID,
+    `ewe输出数据`,
+    'text',
+    'ewe',
+    [],
+    identifier,
+    ewePath,
+    'water-ewe',
+    [ewePath],
+    'valid',
+  )
+
+  return { hours }
+}
+
+const runWaterEweModel = async (
+  modelName: string,
+  projectID: string,
+  modelID: string,
+) => {
+  const identifier = Date.now().toString()
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  const modelFolderPath = path.join(
+    projectInfo.project_folder_path,
+    'water-ewe',
+  )
+  const datasetID = randomUUID()
+  await datasetService.createDataset(
+    projectID,
+    'water-ewe',
+    'water-ewe-output',
+    datasetID,
+    modelName,
+    'pending',
+  )
+
+  console.time(identifier)
+  // preprocess quality-wasp.exe
+  console.timeLog(identifier, 'preprocess quality-wasp.exe')
+  const { hours } = await preQualityWaspOfWaterEwe(
+    modelID,
+    datasetID,
+    modelFolderPath,
+    identifier,
+  )
+
+  // pre water-2d.exe
+  const progress = {
+    current: 0,
+    per: 1,
+    total: 11160 * hours + 408,
+  }
+  console.timeLog(identifier, 'preprocess water-2d.exe')
+  await preRunWater2DModel(modelID, modelFolderPath, progress)
+
+  // run quality model
+  console.timeLog(identifier, 'run quality-wasp.exe')
+  await runQualityWaspEXE(modelFolderPath, modelID, progress)
+  console.timeLog(identifier, 'quality-wasp.exe finish')
+
+  // postProcess quality
+  console.timeLog(identifier, 'run qualityWasp.py')
+  await postQualityWasp(modelFolderPath, hours, identifier, modelID, progress)
+  console.timeLog(identifier, 'model finish')
+
+  console.log(progress)
+  await orm.model.updateModelByModelID(modelID, {
+    status: 'valid',
+  })
+  await orm.dataset.updateDatasetByDatasetID(datasetID, {
+    status: 'valid',
+  })
+}
+
 const stopModel = async (modelID: string) => {
   try {
     const modelInfo = await orm.model.getModelByModelID(modelID)
@@ -1870,6 +2052,7 @@ export const modelService = {
   setQualityPhreec3DParam,
   setSandParam,
   setMudParam,
+  setWaterEweParam,
   runWater2DModel,
   runWater3DModel,
   runQualityWaspModel,
@@ -1877,6 +2060,7 @@ export const modelService = {
   runQualityPhreec3DModel,
   runSandModel,
   runMudModel,
+  runWaterEweModel,
   stopModel,
   getModelInfo,
 }

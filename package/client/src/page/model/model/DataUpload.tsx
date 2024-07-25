@@ -214,6 +214,51 @@ const MudUpload = () => {
   )
 }
 
+const WaterEweUpload = () => {
+  const [isMeshUpload, setIsWaterUpload] = useState(true)
+  return (
+    <div>
+      <div className="m-3 ">
+        <div className="mb-3">上传水动力模型文件</div>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="water-ewe"
+            datasetType="water-2d-input"
+            handleChange={(info) => {
+              if (
+                info.file.status === 'done' &&
+                info.file.name?.includes('mesh')
+              ) {
+                setIsWaterUpload(false)
+              }
+            }}
+          ></UploadButton>
+        </div>
+      </div>
+      <div className="m-3">
+        <div className="mb-3">上传水质wasp模型文件</div>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="water-ewe"
+            datasetType="quality-wasp-input"
+            disable={isMeshUpload}
+          ></UploadButton>
+        </div>
+      </div>
+      <div className="m-3">
+        <div className="mb-3">上传ewe模型文件</div>
+        <div className="max-h-[30vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="water-ewe"
+            datasetType="ewe-input"
+            disable={isMeshUpload}
+          ></UploadButton>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const EWEUpload = () => {
   const projectID = useMetaStore((state) => state.projectID)
   const setewefile = eweFile((state) => state.setData)
@@ -266,8 +311,9 @@ export const DataUpload = () => {
     sand: <SandUpload></SandUpload>,
     mud: <MudUpload></MudUpload>,
     ewe: <EWEUpload></EWEUpload>,
+    'water-ewe': <WaterEweUpload></WaterEweUpload>,
   }
-  const uploadPanel = componentMap[modelType]
+  const uploadPanel = componentMap[modelType!]
 
   return (
     <div
@@ -293,8 +339,8 @@ export const DataUpload = () => {
         上传模型文件
       </div>
       <div
-        className="m-8 h-[70vh] rounded-2xl border border-slate-300
-          bg-slate-300/5 p-4 shadow-xl"
+        className="m-8 h-[70vh] overflow-y-scroll rounded-2xl border
+          border-slate-300 bg-slate-300/5 p-4 shadow-xl"
       >
         {uploadPanel}
       </div>

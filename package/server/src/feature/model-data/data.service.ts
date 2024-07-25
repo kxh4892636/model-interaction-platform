@@ -39,6 +39,7 @@ export const dataService = {
     const datasetType = datasetTypeField.value as WaterModelTypeType
     const modelType = modelTypeField.value as WaterModelTypeType
     const projectID = projectIDField.value as string
+    console.log(modelType)
 
     // validate
     const projectInfo = await orm.project.getProjectByProjectID(projectID)

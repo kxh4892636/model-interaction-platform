@@ -14,6 +14,7 @@ import { LayerMenuItemType } from './layer.type'
 
 import { DownOutlined } from '@ant-design/icons'
 import eweroutes from '../model-ewe/route'
+import { k } from 'vitest/dist/reporters-P7C2ytIv.js'
 
 // ewe的树，写死了
 const EWEPanel = () => {
@@ -208,11 +209,12 @@ const filterLayerMenuItems = (
   const result: LayerMenuItemType[] = []
   if (layerType === 'data') {
     if (!layer.isGroup) {
-      if (layer.layerType === 'text') {
+      if (layer.layerStyle === 'ewe') {
+        const temp = layerMenuItems.visualization
+        result.push(temp)
+      } else if (layer.layerType === 'text') {
         const temp = layerMenuItems.download
         result.push(temp)
-      } else if (layer.layerType === 'ewe') {
-        //
       } else {
         const temp = layerMenuItems.map
         result.push(temp)
@@ -312,7 +314,7 @@ const useLayerTreeData = () => {
   const modelType = useMetaStore((state) => state.modelType)
 
   useEffect(() => {
-    generateProjectTreeData(projectID, modelType)
+    generateProjectTreeData(projectID, modelType!)
       .then((value) => {
         setLayer(value || [], 'data')
       })
@@ -343,7 +345,7 @@ export const LayerPanel = () => {
       key: 'visualization',
       label: '可视化',
       action: () => {
-        //
+        layerActions.visualizeData()
       },
     },
     download: {

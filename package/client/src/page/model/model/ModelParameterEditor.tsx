@@ -6,6 +6,7 @@ import {
   postSandParamAPI,
   postWater2DParamAPI,
   postWater3DParamAPI,
+  postWaterEweParamAPI,
 } from '@/api/model/model.api'
 import { useMetaStore } from '@/store/metaStore'
 import { useModalStore } from '@/store/modalStore'
@@ -357,6 +358,55 @@ const MudParamEditor = () => {
   )
 }
 
+const WaterEweParamEditor = () => {
+  const [hours, setHours] = useState<null | number>(null)
+  const projectID = useMetaStore((state) => state.projectID)
+  const closeModal = useModalStore((state) => state.closeModal)
+
+  const handleClick = async () => {
+    const result = await postWaterEweParamAPI({
+      projectID: projectID!,
+      hours: hours!,
+    })
+    if (result.status === 'success') {
+      message.info('设置参数成功', 5)
+      closeModal()
+    } else {
+      message.error('设置参数失败', 5)
+      closeModal()
+    }
+  }
+
+  return (
+    <div>
+      <div className="mx-4 w-[40%] min-w-72">
+        <div className="">耦合时间 (小时)</div>
+        <InputNumber
+          defaultValue={undefined}
+          step={24}
+          min={0}
+          value={hours}
+          onChange={(value: any) => {
+            setHours(Number(value))
+          }}
+          className="my-3 w-full"
+        />
+      </div>
+      <div className="mx-4 w-[40%] min-w-72">
+        <div className="my-2 flex justify-end">
+          <Button
+            type="primary"
+            disabled={hours === null}
+            onClick={handleClick}
+          >
+            确定
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export const ModelParamEditor = () => {
   const modelType = useMetaStore((state) => state.modelType)
   const closeModal = useModalStore((state) => state.closeModal)
@@ -371,8 +421,9 @@ export const ModelParamEditor = () => {
     sand: <SandParamEditor></SandParamEditor>,
     mud: <MudParamEditor></MudParamEditor>,
     ewe: <></>,
+    'water-ewe': <WaterEweParamEditor></WaterEweParamEditor>,
   }
-  const uploadPanel = componentMap[modelType]
+  const uploadPanel = componentMap[modelType!]
 
   return (
     <div

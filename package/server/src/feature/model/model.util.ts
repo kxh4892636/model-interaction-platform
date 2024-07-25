@@ -112,6 +112,9 @@ export const getModelDataVisualization = (
     ewe: () => {
       return []
     },
+    'water-ewe': () => {
+      return []
+    },
   }
 
   const result = fnMap[modelType]()
