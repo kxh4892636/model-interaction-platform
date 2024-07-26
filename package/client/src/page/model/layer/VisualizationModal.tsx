@@ -13,13 +13,18 @@ export const EweVisualization = ({ data }: EweProps) => {
     if (!echartRef.current) return
     const myChart = echart.init(echartRef.current)
     const series = []
+    let min = Infinity
+    let max = -Infinity
     for (const key in data) {
       series.push({
         name: key,
         type: 'line',
         data: data[key],
       })
+      min = Math.min(min, Math.min(...data[key]))
+      max = Math.max(max, Math.max(...data[key]))
     }
+    const range = max - min
     const option = {
       title: {
         text: 'OUHE',
@@ -32,7 +37,8 @@ export const EweVisualization = ({ data }: EweProps) => {
       yAxis: {
         type: 'value',
         // 设置y轴范围
-        min: 0.6,
+        min: (min - 0.2 * range).toFixed(1),
+        max: (max + 0.2 * range).toFixed(1),
       },
       tooltip: {
         trigger: 'axis',
@@ -53,6 +59,10 @@ export const EweVisualization = ({ data }: EweProps) => {
       series,
     }
     option && myChart.setOption(option)
+
+    return () => {
+      myChart.dispose()
+    }
   })
   return <div ref={echartRef} className="h-full w-full"></div>
 }

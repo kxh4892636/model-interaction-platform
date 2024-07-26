@@ -1,19 +1,36 @@
-// import { print } from '@/fn'
+import { createReadStream } from 'fs'
+import { createInterface } from 'readline'
 
-import { exec, spawn } from 'child_process'
+const getMeshDataByCoord = async (
+  lng: number,
+  lat: number,
+  meshPath: string,
+): Promise<number | null> => {
+  let minD2 = Infinity
+  let res = null
+  const rl = createInterface(createReadStream(meshPath))
 
-// print()
+  for await (const line of rl) {
+    const list = line.split(',').map((value) => Number(value))
+    if (list.length === 2) continue
+    if (list.length === 3) break
+    const curLng = list[1]
+    const curLat = list[2]
+    const value = list[3]
+    const curD2 = (curLng - lng) ** 2 + (curLat - lat) ** 2
+    if (curD2 < minD2) {
+      res = value
+      minD2 = curD2
+    }
+  }
 
-console.log(process.cwd())
-process.chdir('d:/dev/water-ewe/')
-console.log(process.cwd())
-const cp = spawn('d:/dev/water-ewe/quality-wasp.exe')
+  return res
+}
 
-cp.stdout.on('data', (chunk) => {
-  console.log(chunk.toString())
-})
-
-cp.stderr.on('data', (chunk) => {
-  console.log('error')
-  console.log(chunk.toString())
-})
+const start = Date.now()
+await getMeshDataByCoord(
+  118.94,
+  25.01,
+  'D:/project/fine-grained-simulation/package/node/src/mesh31.csv',
+)
+console.log(Date.now() - start)

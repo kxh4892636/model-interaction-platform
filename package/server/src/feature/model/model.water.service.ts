@@ -16,7 +16,7 @@ import path from 'path'
 import { datasetService } from '../dataset/dataset.service'
 import { dataDao } from '../model-data/data.dao'
 import { modelDao } from './model.dao'
-import { ModelInfoType, ModelParamResponseSchema } from './model.type'
+import { ModelInfoType } from './model.type'
 import { getModelDataVisualization } from './model.util'
 
 /**
@@ -803,6 +803,16 @@ const postQualityWasp = async (
     total: number
   },
 ) => {
+  // rename
+  await rename(
+    path.join(DATA_FOLDER_PATH, modelFolderPath, 'EcoSim_Couple_Result.json'),
+    path.join(
+      DATA_FOLDER_PATH,
+      modelFolderPath,
+      `EcoSim_Couple_Result-${identifier}.json`,
+    ),
+  )
+
   // tnd2png
   const cp = execa(
     `conda activate gis && python ${[
@@ -1893,7 +1903,7 @@ const preQualityWaspOfWaterEwe = async (
     .toString()
     .match(/[\d.]*(?=.*30.*hour)/)
   if (!paramContent) throw Error()
-  const hours = Math.floor(Number(paramContent[0]))
+  const hours = Math.floor(Number(paramContent[0])) * 120
 
   // create data record and dataset_data record
   const titles: string[] = [
@@ -1948,7 +1958,7 @@ const preQualityWaspOfWaterEwe = async (
     'valid',
   )
 
-  return { hours }
+  return { hours: hours / 120 }
 }
 
 const runWaterEweModel = async (
@@ -1999,7 +2009,13 @@ const runWaterEweModel = async (
 
   // postProcess quality
   console.timeLog(identifier, 'run qualityWasp.py')
-  await postQualityWasp(modelFolderPath, hours, identifier, modelID, progress)
+  await postQualityWasp(
+    modelFolderPath,
+    hours * 120,
+    identifier,
+    modelID,
+    progress,
+  )
   console.timeLog(identifier, 'model finish')
 
   console.log(progress)
