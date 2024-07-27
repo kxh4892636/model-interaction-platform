@@ -5,6 +5,9 @@ import {
   DataActionBodySchema,
   DataActionResponseSchema,
   DataActionResponseType,
+  DataInfoCoordQueryStringSchema,
+  DataInfoCoordResponse,
+  DataInfoCoordResponseSchema,
   DataInfoQueryStringSchema,
   DataInfoResponseSchema,
   DataInfoResponseType,
@@ -27,6 +30,27 @@ export const dataRoute = async (app: FastifyTypebox) => {
     handler: async (req): Promise<DataInfoResponseType> => {
       const queryString = req.query
       const result = await dataService.getDataInfo(queryString.dataID)
+      const response = generateResponse('success', '', result)
+      return response
+    },
+  })
+
+  app.route({
+    method: 'get',
+    url: '/info/coord',
+    schema: {
+      tags: ['data'],
+      querystring: DataInfoCoordQueryStringSchema,
+      response: {
+        200: DataInfoCoordResponseSchema,
+      },
+    },
+    handler: async (req): Promise<DataInfoCoordResponse> => {
+      const queryString = req.query
+      const result = await dataService.getDataInfoOfCoord(queryString.dataID, [
+        queryString.lng,
+        queryString.lat,
+      ])
       const response = generateResponse('success', '', result)
       return response
     },

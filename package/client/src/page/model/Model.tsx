@@ -5,6 +5,7 @@ import { LayerPanel } from './layer'
 import { MapView } from './map'
 import { ModelStatus } from './model/ModelStatus'
 import { Model } from './model/Model'
+import { DataInfoTool } from './data-info'
 
 export const ModelPage = () => {
   const modal = useModalStore((state) => state.modal)
@@ -39,6 +40,7 @@ export const ModelPage = () => {
             <LayerPanel></LayerPanel>
           </div>
           <div className="relative h-full w-full">
+            <DataInfoTool></DataInfoTool>
             <ModelStatus></ModelStatus>
             <MapView></MapView>
           </div>

@@ -3,7 +3,7 @@ import { MODEL_TYPE_LIST } from '@/config/constant'
 import { DATA_FOLDER_PATH } from '@/config/env'
 import { orm } from '@/dao'
 import { DataInfoType } from '@/feature/model-data/data.type'
-import { WaterModelTypeType } from '@/type'
+import { WaterDataTypeType, WaterModelTypeType } from '@/type'
 import { prisma } from '@/util/db/prisma'
 import {
   getModelDataExtentAndVisualization,
@@ -16,6 +16,7 @@ import { rm } from 'fs/promises'
 import path from 'path'
 import { pipeline } from 'stream/promises'
 import { dataDao } from './data.dao'
+import { getDataOfCoord } from './data.util'
 
 export const dataService = {
   isUpload: async (filePath: string) => {
@@ -157,5 +158,26 @@ export const dataService = {
     const cs = createReadStream(filePath)
 
     return cs
+  },
+
+  getDataInfoOfCoord: async (dataID: string, coord: [number, number]) => {
+    const dataInfo = await orm.data.getDataByDataID(dataID)
+    if (!dataInfo) return null
+    const dataType = dataInfo.data_type as WaterDataTypeType
+    const modelType = dataInfo.model_type as WaterModelTypeType
+    const modelFolder = path.join(
+      DATA_FOLDER_PATH,
+      path.dirname(dataInfo.data_file_path),
+    )
+    const data = await getDataOfCoord(
+      coord[0],
+      coord[1],
+      dataType,
+      modelType,
+      modelFolder,
+      path.basename(dataInfo.data_file_path),
+      dataInfo.data_identifier,
+    )
+    return data
   },
 }

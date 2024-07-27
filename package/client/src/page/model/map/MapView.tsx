@@ -30,6 +30,7 @@ export const MapView = () => {
   const setMap = useMapStore((state) => state.setMap)
   const position = useMapStore((state) => state.mapPosition)
   const setPosition = useMapStore((state) => state.setMapPosition)
+  const setClickPosition = useMapStore((state) => state.setClickPosition)
 
   useEffect(() => {
     // init map
@@ -52,6 +53,10 @@ export const MapView = () => {
           Number(mapRef.current.getZoom().toFixed(2)),
         ])
       }
+    })
+
+    mapRef.current.on('click', (e) => {
+      setClickPosition(e.lngLat.toArray() as [number, number])
     })
   }, [])
 
