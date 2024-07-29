@@ -6,6 +6,20 @@ import {
 } from '@/api/model/model.api'
 import { useMetaStore } from '@/store/metaStore'
 import { create } from 'zustand'
+const EWEresponse = create((set, get) => ({
+  Data: {},
+  setData: (newData) =>
+    set((state) => ({
+      Data: newData,
+    })),
+}))
+const EWEflag = create((set, get) => ({
+  Data: '',
+  setData: (newData) =>
+    set((state) => ({
+      Data: newData,
+    })),
+}))
 const eweFile = create((set, get) => ({
   Data: '',
   setData: (newData) =>
@@ -780,6 +794,8 @@ export {
   TimeSeriesPlot,
   TimeYearData,
   UploadFlag,
+  EWEresponse,
+  EWEflag,
   eweFile,
   EcoSpaceResult_Fleet,
   EcoSpaceResult_Group,

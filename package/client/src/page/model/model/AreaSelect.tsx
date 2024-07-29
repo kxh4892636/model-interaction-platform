@@ -1,5 +1,6 @@
 import {
   getProjectListAPI,
+  getProjectTreeAPI,
   postProjectActionAPI,
 } from '@/api/project/project.api'
 import { ProjectInfoType, ProjectListType } from '@/api/project/project.type'
@@ -28,6 +29,8 @@ import { useEffect, useState } from 'react'
 import { CloseOutlined } from '@ant-design/icons'
 import { useLayersStore } from '@/store/layerStore'
 
+import { eweFile,EWEresponse,EWEflag } from '@/store/eweStore'
+import { postEWEModelLoadAPI } from '@/api/model/model.api'
 const NewArea = () => {
   const closeModal = useModalStore((state) => state.closeModal)
   const map = useMapStore((state) => state.map)
@@ -132,12 +135,49 @@ const HistoryArea = () => {
     message: '',
   })
 
+  const setewefile = eweFile((state) => state.setData)
+  const setEWEresponse = EWEresponse((state) => state.setData)
+  const setEWEflag = EWEflag((state) => state.setData)
+
+  const LoadEwEModel = async (projectID: string | null= null) => {
+    let modelname = ''
+    if (projectID) {
+      const response = await getProjectTreeAPI(projectID)
+      if (response.data) {
+        response.data.forEach((element) => {
+          if (element.modelType === 'ewe') {
+            element.children.forEach((item) => {
+              if (
+                item.layerName.split('.')[1] === 'eweaccdb' ||
+                item.layerName.split('.')[1] === 'EwEmdb'
+              ) {
+                modelname = item.layerName
+              }
+            })
+          }
+        })
+      }
+    }
+    if (modelname !== '') {
+      const LoadResponse = await postEWEModelLoadAPI({
+        projectID: projectID as string,
+        name: modelname,
+      })
+      setewefile(modelname)
+      setEWEresponse(LoadResponse)
+      setEWEflag('Load')
+    }
+  }
   const handleLoad = async (projectInfo: ProjectInfoType) => {
     if (map) {
       layerInit(map)
     }
     if (modelType) {
       setModelType(modelType)
+    }
+    if (modelType === 'ewe') 
+    {
+      LoadEwEModel(projectInfo.projectId)
     }
     message.info('进入历史区域成功', 5)
     map!.fitBounds(projectInfo.projectExtent as any)
