@@ -3,6 +3,8 @@ import { extendFetch } from '../api.util'
 import {
   DataActionBodyType,
   DataActionResponseType,
+  DataInfoCoordResponse,
+  DataInfoCoordType,
   DataInfoResponseType,
   DataInfoType,
 } from './data.type'
@@ -32,6 +34,49 @@ export const getDataInfoAPI = async (dataID: string) => {
     })
     .catch(() => {
       const result: DataFetchAPIInterface<DataInfoType> = {
+        status: 'error',
+        data: null,
+        message: '',
+      }
+      return result
+    })
+
+  return response
+}
+
+export const getDataInfoOfCoordAPI = async (
+  dataID: string,
+  coord: [number, number],
+) => {
+  const url =
+    '/api/v1/data/info/coord?' +
+    new URLSearchParams({
+      dataID,
+      lng: coord[0].toString(),
+      lat: coord[1].toString(),
+    })
+  const response: DataFetchAPIInterface<DataInfoCoordType> = await extendFetch(
+    url,
+    {
+      method: 'GET',
+    },
+  )
+    .then((res) => {
+      if (res.status === 200) {
+        return res.json()
+      } else {
+        throw Error()
+      }
+    })
+    .then((result: DataInfoCoordResponse) => {
+      if (result.status === 'success') {
+        return result
+      } else {
+        throw Error()
+      }
+    })
+    .catch(() => {
+      const result: DataFetchAPIInterface<DataInfoCoordType> = {
         status: 'error',
         data: null,
         message: '',

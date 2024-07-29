@@ -173,6 +173,44 @@ def tnd2png(
     return extent
 
 
+def dataToTextOfCoord(tndPath: str, dstPath: str, dataDict: dict, hours: int):
+    dataList: list[str] = []
+    tinNum = dataDict["num"]
+    data = dataDict["data"]
+    # NOTE 二进制读取
+    for num in range(hours):
+        with open(tndPath, "rb") as f:
+            f.seek((4 + 8 * tinNum) * num)
+            id: tuple = struct.unpack("i", f.read(4))
+            for i in range(0, tinNum):
+                value: tuple = struct.unpack("d", f.read(8))
+                if num == 0:
+                    dataList.append(
+                        " ".join(
+                            [
+                                data[i][0],
+                                data[i][1],
+                                data[i][2],
+                                str(round(value[0], 6)),
+                            ]
+                        )
+                    )
+                else:
+                    dataList[i] += " "
+                    dataList[i] += " ".join(
+                        [
+                            str(round(value[0], 6)),
+                        ]
+                    )
+                if num == hours - 1:
+                    dataList[i] += "\n"
+
+    with open(dstPath, "w", encoding="utf8") as ff:
+        ff.write(f"{tinNum}\n")
+        ff.write("id x y value\n")
+        ff.writelines(dataList)
+
+
 if __name__ == "__main__":
     # os.environ['PROJ_LIB'] = r"C:\Users\kxh\AppData\Local\Programs\Python\Python310\Lib\site-packages\osgeo\data\proj"
     # sys.argv
@@ -187,6 +225,15 @@ if __name__ == "__main__":
     suffixList = ["down", "middle", "up"]
     for i in range(1, 4):
         sndPath = os.path.join(modelFolderPath, f"snd{i}.dat")
+        dataToTextOfCoord(
+            sndPath,
+            os.path.join(
+                dstPath,
+                f"snd-{i}-{identifier}-total.txt",
+            ),
+            dataDict,
+            int(hours),
+        )
         print(sndPath)
         for j in range(0, int(hours)):
             pngPath = os.path.join(

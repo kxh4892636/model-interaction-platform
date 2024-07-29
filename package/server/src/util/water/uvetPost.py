@@ -84,30 +84,42 @@ def uvet2txt(uvetPath: str, dstPath: str, dataDict: dict, num: int):
         ff.writelines(uvet)
 
 
-def uvet2txtOfCoord(uvetPath: str, dstPath: str, dataDict: dict, num: int):
+def uvet2txtOfCoord(uvetPath: str, dstPath: str, dataDict: dict, hours: int):
     gridNum = dataDict["num"]
     data = dataDict["data"]
     uvet: list[str] = []
-    with open(uvetPath, "rb") as f:
-        f.seek((4 + 24 * gridNum) * num)
-        id: tuple = struct.unpack("i", f.read(4))
-        for i in range(0, gridNum):
-            petak: tuple = struct.unpack("d", f.read(8))
-            uu2k: tuple = struct.unpack("d", f.read(8))
-            vv2k: tuple = struct.unpack("d", f.read(8))
-            uvet.append(
-                " ".join(
-                    [
-                        data[i][0],
-                        data[i][1],
-                        data[i][2],
-                        str(round(petak[0], 6)),
-                        str(round(uu2k[0], 6)),
-                        str(round(vv2k[0], 6)),
-                    ]
-                )
-                + "\n"
-            )
+    for num in range(hours):
+        with open(uvetPath, "rb") as f:
+            f.seek((4 + 24 * gridNum) * num)
+            id: tuple = struct.unpack("i", f.read(4))
+            for i in range(0, gridNum):
+                petak: tuple = struct.unpack("d", f.read(8))
+                uu2k: tuple = struct.unpack("d", f.read(8))
+                vv2k: tuple = struct.unpack("d", f.read(8))
+                if num == 0:
+                    uvet.append(
+                        " ".join(
+                            [
+                                data[i][0],
+                                data[i][1],
+                                data[i][2],
+                                str(round(petak[0], 6)),
+                                str(round(uu2k[0], 6)),
+                                str(round(vv2k[0], 6)),
+                            ]
+                        )
+                    )
+                else:
+                    uvet[i] += " "
+                    uvet[i] += " ".join(
+                        [
+                            str(round(petak[0], 6)),
+                            str(round(uu2k[0], 6)),
+                            str(round(vv2k[0], 6)),
+                        ]
+                    )
+                if num == hours - 1:
+                    uvet[i] += "\n"
 
     with open(dstPath, "w", encoding="utf8") as ff:
         ff.write(f"{gridNum}\n")
@@ -131,6 +143,12 @@ if __name__ == "__main__":
         print(i)
     descriptionPath = os.path.join(
         modelFolderPath, f"description-{identifier}.json"
+    )
+    uvet2txtOfCoord(
+        uvetPath,
+        os.path.join(modelFolderPath, f"uvet-{identifier}-total.txt"),
+        dataDict,
+        int(hours),
     )
     maskPath = os.path.join(modelFolderPath, "mesh31.shp")
     createDescription(

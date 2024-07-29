@@ -811,7 +811,7 @@ const postQualityWasp = async (
       modelFolderPath,
       `EcoSim_Couple_Result-${identifier}.json`,
     ),
-  )
+  ).catch(() => null)
 
   // tnd2png
   const cp = execa(

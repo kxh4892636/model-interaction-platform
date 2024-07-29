@@ -25,6 +25,21 @@ export type DataInfoQueryStringType = Static<typeof DataInfoQueryStringSchema>
 export const DataInfoResponseSchema = generateResponseSchema(DataInfoSchema)
 export type DataInfoResponseType = Static<typeof DataInfoResponseSchema>
 
+// /api/v1/data/info/coord
+export const DataInfoCoordSchema = Type.Array(Type.Number())
+export type DataInfoCoordType = Static<typeof DataInfoCoordSchema>
+export const DataInfoCoordQueryStringSchema = Type.Object({
+  dataID: Type.String(),
+  lng: Type.Number(),
+  lat: Type.Number(),
+})
+export type DataInfoQueryStringCoord = Static<
+  typeof DataInfoCoordQueryStringSchema
+>
+export const DataInfoCoordResponseSchema =
+  generateResponseSchema(DataInfoCoordSchema)
+export type DataInfoCoordResponse = Static<typeof DataInfoCoordResponseSchema>
+
 // /api/v1/data/visualization
 export const DataVisualizationQueryStringSchema = Type.Object({
   dataID: Type.String(),

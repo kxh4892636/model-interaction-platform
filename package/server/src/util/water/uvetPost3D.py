@@ -87,6 +87,49 @@ def uvet2txt(uvetPath: str, dstPath: str, dataDict: dict, num: int):
         ff.writelines(uvet)
 
 
+def uvet2txtOfCoord(uvetPath: str, dstPath: str, dataDict: dict, hours: int):
+    gridNum = dataDict["num"]
+    data = dataDict["data"]
+    uvet: list[str] = []
+    for num in range(hours):
+        with open(uvetPath, "rb") as f:
+            f.seek((4 + 24 * gridNum) * num)
+            id: tuple = struct.unpack("i", f.read(4))
+            for i in range(0, gridNum):
+                petak: tuple = struct.unpack("d", f.read(8))
+                uu2k: tuple = struct.unpack("d", f.read(8))
+                vv2k: tuple = struct.unpack("d", f.read(8))
+                if num == 0:
+                    uvet.append(
+                        " ".join(
+                            [
+                                data[i][0],
+                                data[i][1],
+                                data[i][2],
+                                str(round(petak[0], 6)),
+                                str(round(uu2k[0], 6)),
+                                str(round(vv2k[0], 6)),
+                            ]
+                        )
+                    )
+                else:
+                    uvet[i] += " "
+                    uvet[i] += " ".join(
+                        [
+                            str(round(petak[0], 6)),
+                            str(round(uu2k[0], 6)),
+                            str(round(vv2k[0], 6)),
+                        ]
+                    )
+                if num == hours - 1:
+                    uvet[i] += "\n"
+
+    with open(dstPath, "w", encoding="utf8") as ff:
+        ff.write(f"{gridNum}\n")
+        ff.write("id x y p u v\n")
+        ff.writelines(uvet)
+
+
 if __name__ == "__main__":
     [modelFolderPath, extent, hours, identifier] = sys.argv[1:5]
     csvPath = os.path.join(modelFolderPath, "f0.csv")
@@ -106,6 +149,14 @@ if __name__ == "__main__":
                 j,
             )
             print(j)
+        uvet2txtOfCoord(
+            uvetPath,
+            os.path.join(
+                modelFolderPath, f"uvet-{suffixList[i]}-{identifier}-total.txt"
+            ),
+            dataDict,
+            int(hours),
+        )
         descriptionPath = os.path.join(
             modelFolderPath, f"description-{suffixList[i]}-{identifier}.json"
         )
