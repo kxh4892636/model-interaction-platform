@@ -73,6 +73,12 @@ export const WaterEweBodySchema = Type.Object({
   hours: Type.Integer(),
 })
 export type TWaterEweBody = Static<typeof WaterEweBodySchema>
+// /model/param/spoil
+export const SpoilBodySchema = Type.Object({
+  projectID: Type.String(),
+  hours: Type.Integer(),
+})
+export type TSpoilBody = Static<typeof SpoilBodySchema>
 
 // /model/action
 export const ModelActionSchema = Type.Union([Type.String(), Type.Null()])

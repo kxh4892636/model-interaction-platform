@@ -16,6 +16,7 @@ import {
   QualityPhreecParamBodySchema,
   QualityWaspParamBodySchema,
   SandParamBodySchema,
+  SpoilBodySchema,
   Water2DParamBodySchema,
   WaterEweBodySchema,
 } from './model.type'
@@ -184,6 +185,25 @@ export const modelRoute = async (app: FastifyTypebox) => {
     },
   })
 
+  // NOTE 保留接口
+  app.route({
+    method: 'post',
+    url: '/param/spoil',
+    schema: {
+      tags: ['model'],
+      body: SpoilBodySchema,
+      response: {
+        200: ModelParamResponseSchema,
+      },
+    },
+    handler: async (req): Promise<ModelParamResponseType> => {
+      const body = req.body
+      await modelService.setWaterEweParam(body.projectID, body.hours)
+      const response = generateResponse('success', '', null)
+      return response
+    },
+  })
+
   app.route({
     method: 'post',
     url: '/water/action',
@@ -254,6 +274,13 @@ export const modelRoute = async (app: FastifyTypebox) => {
         } else if (init.modelType === 'water-ewe') {
           modelService
             .runWaterEweModel(init.modelName, init.projectID, modelID)
+            .catch(() => {
+              console.log('stop model')
+              modelService.stopModel(modelID)
+            })
+        } else if (init.modelType === 'spoil') {
+          modelService
+            .runSpoilModel(init.modelName, init.projectID, modelID)
             .catch(() => {
               console.log('stop model')
               modelService.stopModel(modelID)

@@ -115,6 +115,7 @@ export const useLayerActions = () => {
     const dataID = layersSelected.data.layerKey
     if (getLayerKeys(layers.map).includes(dataID)) return false
     const info = await getDataInfoAPI(dataID)
+    console.log(info)
     if (!info.data) return false
 
     const fnMap: Record<
@@ -129,6 +130,7 @@ export const useLayerActions = () => {
       snd: addImageSequenceLayerToMap,
       yuji: addImageSequenceLayerToMap,
       mud: addImageSequenceLayerToMap,
+      spoil: addImageSequenceLayerToMap,
     }
 
     const tag = await fnMap[info.data.dataType](map, info.data)

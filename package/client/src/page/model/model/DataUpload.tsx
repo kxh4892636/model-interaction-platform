@@ -296,6 +296,22 @@ const EWEUpload = () => {
   )
 }
 
+const SpoilUpload = () => {
+  return (
+    <div>
+      <div className="m-3">
+        <div className="mb-3">上传扩散模型文件</div>
+        <div className="max-h-[50vh] overflow-y-auto overflow-x-clip">
+          <UploadButton
+            modelType="spoil"
+            datasetType="spoil-input"
+          ></UploadButton>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export const DataUpload = () => {
   const modelType = useMetaStore((state) => state.modelType)
   const closeModal = useModalStore((state) => state.closeModal)
@@ -312,6 +328,7 @@ export const DataUpload = () => {
     mud: <MudUpload></MudUpload>,
     ewe: <EWEUpload></EWEUpload>,
     'water-ewe': <WaterEweUpload></WaterEweUpload>,
+    spoil: <SpoilUpload></SpoilUpload>,
   }
   const uploadPanel = componentMap[modelType!]
 

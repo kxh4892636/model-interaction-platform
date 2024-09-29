@@ -18,6 +18,7 @@ import { dataDao } from '../model-data/data.dao'
 import { modelDao } from './model.dao'
 import { ModelInfoType } from './model.type'
 import { getModelDataVisualization } from './model.util'
+import { createWriteStream } from 'fs'
 
 /**
  * Water model
@@ -2027,6 +2028,185 @@ const runWaterEweModel = async (
   })
 }
 
+const preSpoil = async (
+  modelID: string,
+  datasetID: string,
+  modelFolderPath: string,
+  identifier: string,
+) => {
+  // create model record
+  await orm.model.createModel(modelID, datasetID, -9999, 0, 'pending')
+
+  const hours = 10
+  // create data record and dataset_data record
+  const visualization = getModelDataVisualization(
+    'spoil',
+    modelFolderPath,
+    hours,
+    identifier,
+  )
+  const cID = randomUUID()
+  const cPath = path.join(modelFolderPath, `outputC.txt`)
+  await dataDao.createData(
+    datasetID,
+    cID,
+    `outputC`,
+    'spoil',
+    'raster',
+    [],
+    identifier,
+    cPath,
+    'spoil',
+    visualization.slice(0 + hours * (1 - 1), hours + hours * (1 - 1)),
+    'valid',
+  )
+  const dID = randomUUID()
+  const dPath = path.join(modelFolderPath, `outputC.txt`)
+  await dataDao.createData(
+    datasetID,
+    dID,
+    `outputD`,
+    'spoil',
+    'raster',
+    [],
+    identifier,
+    dPath,
+    'spoil',
+    visualization.slice(0 + hours * (2 - 1), hours + hours * (2 - 1)),
+    'valid',
+  )
+
+  return { hours, cID, dID }
+}
+
+const runSpoilEXE = async (
+  modelFolderPath: string,
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  const modelPath = path.join(DATA_FOLDER_PATH, modelFolderPath, 'spoil.exe')
+  const cp = execa(`cd ${path.dirname(modelPath)} && ${modelPath}`, {
+    shell: true,
+    windowsHide: true,
+  })
+  orm.model.updateModelByModelID(modelID, {
+    modelPid: cp.pid,
+  })
+  await cp
+}
+
+const postSpoil = async (
+  modelFolderPath: string,
+  hours: number,
+  identifier: string,
+  modelID: string,
+  progress: {
+    current: number
+    per: number
+    total: number
+  },
+) => {
+  // mud2png, same as quality-wasp.py
+  const cp = execa(
+    `conda activate gis && python ${[
+      path.join(process.cwd(), '/src/util/water/spoil.py'),
+      path.join(DATA_FOLDER_PATH, modelFolderPath),
+      hours,
+      identifier,
+    ].join(' ')}`,
+    {
+      shell: true,
+      windowsHide: true,
+    },
+  )
+  orm.model.updateModelByModelID(modelID, {
+    modelPid: cp.pid,
+  })
+  cp.stderr!.on('data', (chunk) => {
+    if ((chunk.toString() as string).toLowerCase().includes('clamped')) {
+      progress.current += progress.per * 7
+      orm.model.updateModelByModelID(modelID, {
+        modelProgress: progress.current / progress.total,
+      })
+    }
+  })
+  await cp
+}
+
+const runSpoilModel = async (
+  modelName: string,
+  projectID: string,
+  modelID: string,
+) => {
+  const identifier = Date.now().toString()
+  const projectInfo = await orm.project.getProjectByProjectID(projectID)
+  if (!projectInfo) throw Error()
+  const modelFolderPath = path.join(projectInfo.project_folder_path, 'spoil')
+  const datasetID = randomUUID()
+  await datasetService.createDataset(
+    projectID,
+    'spoil',
+    'spoil-output',
+    datasetID,
+    modelName,
+    'pending',
+  )
+
+  console.time(identifier)
+  // preprocess spoil.exe
+  console.timeLog(identifier, 'preprocess spoil.exe')
+  const { hours, cID, dID } = await preSpoil(
+    modelID,
+    datasetID,
+    modelFolderPath,
+    identifier,
+  )
+
+  // pre spoil.exe
+  const progress = {
+    current: 0,
+    per: 1,
+    total: 71 * hours + 204,
+  }
+
+  // run mud model
+  console.timeLog(identifier, 'run spoil.exe')
+  await runSpoilEXE(modelFolderPath, modelID, progress)
+  console.timeLog(identifier, 'spoil.exe finish')
+
+  // postProcess quality
+  console.timeLog(identifier, 'run spoil.py')
+  await postSpoil(modelFolderPath, hours, identifier, modelID, progress)
+  console.timeLog(identifier, 'model finish')
+
+  console.log(progress)
+  const content = (
+    await readFile(path.join(DATA_FOLDER_PATH, modelFolderPath, 'extent.txt'))
+  )
+    .toString()
+    .replace('(', '')
+    .replace(')', '')
+    .split(',')
+    .map(Number)
+  console.log(content)
+  await orm.data.updateDataByDataID(cID, {
+    dataExtent: content,
+  })
+  await orm.data.updateDataByDataID(dID, {
+    dataExtent: content,
+  })
+  await orm.model.updateModelByModelID(modelID, {
+    status: 'valid',
+  })
+  await orm.dataset.updateDatasetByDatasetID(datasetID, {
+    status: 'valid',
+  })
+}
+
 const stopModel = async (modelID: string) => {
   try {
     const modelInfo = await orm.model.getModelByModelID(modelID)
@@ -2077,6 +2257,7 @@ export const modelService = {
   runSandModel,
   runMudModel,
   runWaterEweModel,
+  runSpoilModel,
   stopModel,
   getModelInfo,
 }

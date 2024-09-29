@@ -17,6 +17,7 @@ import {
   QualityPhreecParamBodyType,
   QualityPhreec3DParamBodyType,
   WaterEweBodyType,
+  SpoilBodyType,
 } from './model.type'
 
 export const getModelInfoAPI = async (modelID: string) => {
@@ -329,6 +330,44 @@ export const postMudParamAPI = async (params: MudParamBodyType) => {
 
 export const postWaterEweParamAPI = async (params: WaterEweBodyType) => {
   const url = `/api/v1/model/param/water-ewe`
+  const response: DataFetchAPIInterface<ModelParamType> = await extendFetch(
+    url,
+    {
+      method: 'post',
+      headers: new Headers({
+        'Content-Type': 'application/json',
+      }),
+      body: JSON.stringify(params),
+    },
+  )
+    .then((res) => {
+      if (res.status === 200) {
+        return res.json()
+      } else {
+        throw Error()
+      }
+    })
+    .then((result: ModelParamResponseType) => {
+      if (result.status === 'success') {
+        return result
+      } else {
+        throw Error()
+      }
+    })
+    .catch(() => {
+      const result: DataFetchAPIInterface<ModelParamType> = {
+        status: 'error',
+        data: null,
+        message: '',
+      }
+      return result
+    })
+
+  return response
+}
+
+export const postSpoilParamAPI = async (params: SpoilBodyType) => {
+  const url = `/api/v1/model/param/spoil`
   const response: DataFetchAPIInterface<ModelParamType> = await extendFetch(
     url,
     {

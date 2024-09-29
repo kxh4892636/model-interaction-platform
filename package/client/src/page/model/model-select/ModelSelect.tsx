@@ -1,13 +1,12 @@
 import { useMetaStore } from '@/store/metaStore'
 import { WaterModelTypeType } from '@/type'
 import EWE from '../model-ewe/Import'
-import { EWEresponse,EWEflag } from '@/store/eweStore'
+import { EWEresponse, EWEflag } from '@/store/eweStore'
 
 export const ModelSelect = () => {
   const modelType = useMetaStore((state) => state.modelType)
   const EWEresponseD = EWEresponse((state) => state.Data)
   const EWEflagD = EWEflag((state) => state.Data)
-
 
   const map: Record<WaterModelTypeType, string> = {
     'water-2d': '水动力2D模型',
@@ -19,8 +18,8 @@ export const ModelSelect = () => {
     mud: '抛泥模型',
     ewe: '生态模型',
     'water-ewe': '水环境ewe耦合模型',
+    spoil: '扩散模型',
   }
-
 
   return (
     <div className="flex h-10 items-center border border-slate-300 bg-white px-2">

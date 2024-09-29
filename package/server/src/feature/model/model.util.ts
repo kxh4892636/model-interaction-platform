@@ -115,6 +115,20 @@ export const getModelDataVisualization = (
     'water-ewe': () => {
       return []
     },
+    spoil: () => {
+      const result: string[] = []
+      for (let index = 0; index < hours; index++) {
+        result.push(
+          path.join(datasetPath, `outputC-${identifier}-${index}.png`),
+        )
+      }
+      for (let index = 0; index < hours; index++) {
+        result.push(
+          path.join(datasetPath, `outputD-${identifier}-${index}.png`),
+        )
+      }
+      return result
+    },
   }
 
   const result = fnMap[modelType]()

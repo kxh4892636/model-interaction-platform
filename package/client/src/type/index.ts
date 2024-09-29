@@ -39,6 +39,7 @@ export const WaterModelTypeSchema = Type.Union([
   Type.Literal('mud'),
   Type.Literal('ewe'),
   Type.Literal('water-ewe'),
+  Type.Literal('spoil'),
 ])
 export type WaterModelTypeType = Static<typeof WaterModelTypeSchema>
 
@@ -53,6 +54,7 @@ export const WaterDataTypeSchema = Type.Union([
   Type.Literal('yuji'),
   Type.Literal('mud'),
   Type.Literal('ewe'),
+  Type.Literal('spoil'),
   Type.Literal('none'),
 ])
 export type WaterDataTypeType = Static<typeof WaterDataTypeSchema>

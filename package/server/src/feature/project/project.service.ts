@@ -41,6 +41,7 @@ export const projectService = {
       ['mud', ['water-2d', 'mud']],
       ['ewe', ['ewe']],
       ['water-ewe', ['water-2d', 'quality-wasp', 'ewe']],
+      ['spoil', ['spoil']],
     ]
     const promiseList = projectDatasetMap.map(async (value) => {
       if (value[0] !== modelType) return
