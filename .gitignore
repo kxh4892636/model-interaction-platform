@@ -2,6 +2,7 @@
 /data
 /config
 /doc
+/deploy
 
 # Temporary file
 *demo*

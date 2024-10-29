@@ -6,6 +6,7 @@ import { FastifyTypebox } from '@/type'
 import { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 import { fastify } from 'fastify'
 import { globalErrorHandler } from './app.handler'
+import { DATA_FOLDER_PATH } from '@/config/env'
 
 const initializeFastifyPlugin = async (app: FastifyTypebox) => {
   // cors
@@ -16,19 +17,6 @@ const initializeFastifyPlugin = async (app: FastifyTypebox) => {
   app.register(import('@fastify/formbody'))
   // parse multipart/*
   app.register(import('@fastify/multipart'))
-  // swagger
-  app.register(import('@fastify/swagger'), {
-    openapi: {
-      openapi: '3.0.3',
-      info: {
-        title: 'openapi',
-        version: '0.1.0',
-      },
-    },
-  })
-  app.register(import('@fastify/swagger-ui'), {
-    routePrefix: '/api-doc',
-  })
 }
 
 const initializeCustomPlugin = async (app: FastifyTypebox) => {
@@ -56,9 +44,9 @@ export const startApp = async (port: number) => {
     logger: {
       level: 'info',
       file:
-        process.env.NODE_ENV === 'production'
-          ? process.cwd() + '/log/info.txt'
-          : undefined,
+        process.env.NODE_ENV === 'dev'
+          ? undefined
+          : process.cwd() + '/log/info.txt',
     },
   }).withTypeProvider<TypeBoxTypeProvider>()
 
@@ -68,7 +56,7 @@ export const startApp = async (port: number) => {
 
   try {
     await app.listen({ port })
-    console.log('current working directory:', process.cwd())
+    console.log(process.cwd(), port, DATA_FOLDER_PATH, process.env.NODE_ENV)
   } catch (err) {
     app.log.error(err)
   }

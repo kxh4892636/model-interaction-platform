@@ -8,9 +8,9 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "dev": "tsx watch src/main.ts",
+    "dev": "cross-env NODE_ENV=dev  tsx watch src/main.ts",
     "build": "node ./esbuild.config.js",
-    "start": "cross-env NODE_ENV=production node ./dist/main.js",
+    "start": "node ./dist/main.js",
     "lint": "eslint src/**/* test/**/* --max-warnings 0",
     "prettier": "prettier src/**/* test/**/* --write",
     "format": "pnpm prettier && pnpm lint",

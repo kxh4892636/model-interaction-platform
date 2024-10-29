@@ -254,7 +254,7 @@ export default function AtvG6T() {
     const height = container.scrollHeight || 500
     flagnum += 1
     // console.log("flagnum  ",flagnum,Object.keys(NetworkData).length>0 && flagnum%2===0)
-    if (Object.keys(NetworkData).length > 0 && flagnum % 2 === 0) {
+    if (Object.keys(NetworkData).length > 0) {
       const graph = new G6.Graph({
         container: 'container',
         width,
