@@ -10,6 +10,7 @@ import sand from '@/assert/sand.png'
 import mud from '@/assert/mud.png'
 import ewe from '@/assert/ewe.png'
 import eweWater from '@/assert/ewe-water.png'
+import spoil from '@/assert/spoil.png'
 
 export const Home = () => {
   const homeRef = useRef<HTMLDivElement | null>(null)
@@ -123,9 +124,9 @@ export const Home = () => {
               modelType: 'mud',
             },
             {
-              image: mud,
+              image: spoil,
               modelDescription:
-                '这是一个针对特定抛泥点的泥沙迁移模型。通过分析区域网格数据和抛泥点，该模型可以预测泥沙在海洋中的迁移路径和分布，对于海洋环境管理和泥沙资源利用具有指导意义',
+                '这是一个泥沙倾倒的扩散模型。通过分析区域网格数据和抛泥船位置和抛泥量，该模型可以预测泥沙在海洋中的迁移路径和分布，对于海洋环境管理和泥沙资源利用具有指导意义',
               modelTitle: '扩散模型简介',
               modelType: 'spoil',
             },

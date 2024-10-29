@@ -38,7 +38,7 @@ const runModelAction = async (
   setSuccessStatus: (projectID: string) => void,
 ) => {
   const info = getModelStatus(projectID)
-  if (info && info.status !== null && info.status !== 'success') {
+  if (info && info.status !== null && info.status === 'pending') {
     return -1
   }
   const result = await postModelActionAPI({

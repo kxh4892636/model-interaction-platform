@@ -3,6 +3,7 @@
 /config
 /doc
 /deploy
+/log
 
 # Temporary file
 *demo*
