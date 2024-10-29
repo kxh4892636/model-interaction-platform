@@ -184,6 +184,7 @@ const uvetProcess = async (
     {
       shell: true,
       windowsHide: true,
+      cwd: path.join(process.cwd(), '/src/util/flowField'),
     },
   )
   orm.model.updateModelByModelID(modelID, {
