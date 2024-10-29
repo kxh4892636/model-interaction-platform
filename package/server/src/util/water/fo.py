@@ -138,7 +138,7 @@ def mesh2png(srcPath, dstPath: str, maskPath: str) -> tuple:
         algorithm="invdist:power=2.0:smoothing=0.0:radius1=0.0:radius2=0.0:angle=0.0:max_points=100:min_points=30:nodata=-9999",
         zfield="Z",
         width=1024,
-        height=ratio * 1024,
+        height=int(1024 * ratio),
     )
     gdal.Grid("/vsimem/temp_grid.tif", "/vsimem/temp.shp", options=gridOptions)
     ds: gdal.Dataset = gdal.Open("/vsimem/temp_grid.tif")
