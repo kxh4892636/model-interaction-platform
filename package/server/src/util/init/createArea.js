@@ -1,6 +1,4 @@
-import { WaterModelTypeType } from '@/type'
-
-const init = async (infoList: CreateArea[]) => {
+const init = async (infoList) => {
   const promiseList = []
   for (let i = 0; i < infoList.length; i++) {
     const info = infoList[i]
@@ -23,13 +21,7 @@ const init = async (infoList: CreateArea[]) => {
   await Promise.all(promiseList)
 }
 
-interface CreateArea {
-  name: string
-  extent: [number, number, number, number]
-  modelType: WaterModelTypeType
-}
-
-const info: CreateArea[] = [
+const info = [
   {
     name: '三沙湾',
     extent: [
@@ -60,7 +52,6 @@ const info: CreateArea[] = [
       118.8040599362434, 24.5099315255016, 119.55330804196885,
       25.38875622206073,
     ],
-
     modelType: 'quality-phreec',
   },
   {
@@ -102,6 +93,11 @@ const info: CreateArea[] = [
       27.278875622206073,
     ],
     modelType: 'water-ewe',
+  },
+  {
+    name: '斯基克达',
+    extent: [7.0, 36.8, 7.40330804196885, 37.227822206073],
+    modelType: 'spoil',
   },
 ]
 

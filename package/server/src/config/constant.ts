@@ -7,5 +7,6 @@ export const MODEL_TYPE_LIST = [
     'sand',
     'mud',
     'ewe',
-    'water-ewe'
+    'water-ewe',
+    'spoil'
 ]
