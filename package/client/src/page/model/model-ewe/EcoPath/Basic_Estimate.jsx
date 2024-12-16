@@ -3,32 +3,32 @@ import { Table, Empty } from 'antd'
 import { Basic_Estimate, EcopathResultFlag } from '../../../../store/eweStore'
 const columns = [
   {
-    title: 'GroupName',
+    title: '功能组名称',
     dataIndex: 'Name',
     key: 'GroupName',
   },
   {
-    title: 'TL',
+    title: '营养等级',
     dataIndex: 'TL',
     key: 'TL',
   },
   {
-    title: 'Biomass',
+    title: '生物量',
     dataIndex: 'Biomass',
     key: 'Biomass',
   },
   {
-    title: 'PB',
+    title: '生产量/生物量',
     dataIndex: 'PB',
     key: 'PB',
   },
   {
-    title: 'QB',
+    title: '消耗量/生物量',
     dataIndex: 'QB',
     key: 'QB',
   },
   {
-    title: 'EE',
+    title: '营养效率',
     dataIndex: 'EE',
     key: 'EE',
   },

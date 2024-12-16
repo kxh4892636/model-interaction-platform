@@ -14,9 +14,6 @@ export const Overview = () => {
         <div className="mr-2 self-end">
           实现水沙动力、水环境和生态模型的计算、可视化呈现和数据管理
         </div>
-        <div className="mr-2 self-end py-2">
-          完成多组分生源物质模拟，典型生物识别精度达到0.8
-        </div>
       </div>
     </div>
   )

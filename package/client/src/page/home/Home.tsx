@@ -66,14 +66,14 @@ export const Home = () => {
               image: water2D,
               modelDescription:
                 '专门用于模拟和分析海面水动力的二维水文模型。它通过处理区域网格数据，能够计算出特定区域海面水动力的演变情况，为海洋工程、环境评估和灾害预防提供重要信息。',
-              modelTitle: '水动力2D模型',
+              modelTitle: '水动力二维模型',
               modelType: 'water-2d',
             },
             {
               image: water3D,
               modelDescription:
-                '水动力2D模型的扩展，它增加了对海中部和海底水动力的三维分析。通过这种模型，可以更全面地理解海洋水动力在不同深度的变化，对海洋资源开发和海洋环境研究具有重要意义。',
-              modelTitle: '水动力3D模型',
+                '水动力三维模型的扩展，它增加了对海中部和海底水动力的三维分析。通过这种模型，可以更全面地理解海洋水动力在不同深度的变化，对海洋资源开发和海洋环境研究具有重要意义。',
+              modelTitle: '水动力三维模型',
               modelType: 'water-3d',
             },
           ]}
@@ -86,21 +86,21 @@ export const Home = () => {
               image: wasp,
               modelDescription:
                 '综合性的水质模型，能够通过区域网格数据来模拟和预测海水中的多个水质指标，如溶解氧、BOD、浮游植物等。这些指标对于评估海洋生态系统的健康状况和进行水质管理至关重要。',
-              modelTitle: 'wasp水质模型',
+              modelTitle: 'Wasp水质模型',
               modelType: 'quality-wasp',
             },
             {
               image: phreec2D,
               modelDescription:
                 '该模型专注于计算和预测海水的pH值，这是衡量水质酸碱度的关键指标。通过分析区域网格数据，phreec模型可以帮助研究人员和决策者了解海洋酸化的趋势和影响。',
-              modelTitle: '醋酸2D模型',
+              modelTitle: 'Phreec二维水质模型',
               modelType: 'quality-phreec',
             },
             {
               image: phreec3D,
               modelDescription:
                 '作为phreec模型的三维版本，它不仅预测海面pH值，还能提供海中部和海底的pH分布情况。这种模型对于深入研究海洋酸化在不同深度的影响具有重要价值。',
-              modelTitle: '醋酸3D模型',
+              modelTitle: 'Phreec三维水质模型',
               modelType: 'quality-phreec-3d',
             },
           ]}
@@ -120,14 +120,14 @@ export const Home = () => {
               image: mud,
               modelDescription:
                 '这是一个针对特定抛泥点的泥沙迁移模型。通过分析区域网格数据和抛泥点，该模型可以预测泥沙在海洋中的迁移路径和分布，对于海洋环境管理和泥沙资源利用具有指导意义',
-              modelTitle: '抛泥模型简介',
+              modelTitle: '抛泥计算模型',
               modelType: 'mud',
             },
             {
               image: spoil,
               modelDescription:
                 '这是一个泥沙倾倒的扩散模型。通过分析区域网格数据和抛泥船位置和抛泥量，该模型可以预测泥沙在海洋中的迁移路径和分布，对于海洋环境管理和泥沙资源利用具有指导意义',
-              modelTitle: '扩散模型简介',
+              modelTitle: '抛泥扩散与沉积快速计算模型',
               modelType: 'spoil',
             },
           ]}
@@ -140,14 +140,14 @@ export const Home = () => {
               image: ewe,
               modelDescription:
                 'EWE模型是一种生态模型，用于定量分析水生态系统中的食物网结构和能量流动。通过模拟不同生物群落之间的相互作用，为生态保护和资源管理提供科学依据。',
-              modelTitle: 'ewe模型',
+              modelTitle: 'EWE模型',
               modelType: 'ewe',
             },
             {
               image: eweWater,
               modelDescription:
                 'WATER-EWE模型将水质模型与EWE生态模型相结合，能够更加精确全面地解释生态系统中的能量流动特征，揭示该区域的生态系统健康状况和生物多样性，为环境管理和生态恢复提供重要信息。',
-              modelTitle: '水环境-ewe耦合模型',
+              modelTitle: '水环境-EWE耦合模型',
               modelType: 'water-ewe',
             },
           ]}

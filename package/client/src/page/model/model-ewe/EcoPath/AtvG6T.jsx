@@ -254,7 +254,7 @@ export default function AtvG6T() {
     const height = container.scrollHeight || 500
     flagnum += 1
     // console.log("flagnum  ",flagnum,Object.keys(NetworkData).length>0 && flagnum%2===0)
-    if (Object.keys(NetworkData).length > 0) {
+    if (Object.keys(NetworkData).length > 0 && flagnum % 2 === 0) {
       const graph = new G6.Graph({
         container: 'container',
         width,
@@ -296,56 +296,56 @@ export default function AtvG6T() {
           scroll={{ x: 1500, y: 300 }}
           style={{ height: '400px' }}
         >
-          <Column title="TL\Flow" dataIndex="TLFlow" key="TL\Flow" />
-          <ColumnGroup title="Import">
-            <Column title="From PP" dataIndex="Import_PP" key="From_PP" />
+          <Column title="营养等级/流动" dataIndex="TLFlow" key="TL\Flow" />
+          <ColumnGroup title="输入">
+            <Column title="主要生产者" dataIndex="Import_PP" key="From_PP" />
             <Column
-              title="From Detritus"
+              title="碎屑"
               dataIndex="Import_D"
               key="From Detritus"
             />
             {/* <Column title="From All" dataIndex="Import_All" key="From All" /> */}
           </ColumnGroup>
-          <ColumnGroup title="Consumption by predators">
-            <Column title="From PP" dataIndex="CP_PP" key="From_PP" />
+          <ColumnGroup title="捕食者消耗">
+            <Column title="主要生产者" dataIndex="CP_PP" key="From_PP" />
             <Column
-              title="From Detritus"
+              title="碎屑"
               dataIndex="CP_D"
               key="From Detritus"
             />
             {/* <Column title="From All" dataIndex="CP_All" key="From All" /> */}
           </ColumnGroup>
-          <ColumnGroup title="Export">
-            <Column title="From PP" dataIndex="Export_PP" key="From_PP" />
+          <ColumnGroup title="输出">
+            <Column title="主要生产者" dataIndex="Export_PP" key="From_PP" />
             <Column
-              title="From Detritus"
+              title="碎屑"
               dataIndex="Export_D"
               key="From Detritus"
             />
             {/* <Column title="From All" dataIndex="Export_All" key="From All" /> */}
           </ColumnGroup>
-          <ColumnGroup title="Flow to Detritus">
-            <Column title="From PP" dataIndex="FD_PP" key="From_PP" />
+          <ColumnGroup title="流向碎屑">
+            <Column title="主要生产者" dataIndex="FD_PP" key="From_PP" />
             <Column
-              title="From Detritus"
+              title="碎屑"
               dataIndex="FD_D"
               key="From Detritus"
             />
             {/* <Column title="From All" dataIndex="FD_All" key="From All" /> */}
           </ColumnGroup>
-          <ColumnGroup title="Resporation">
-            <Column title="From PP" dataIndex="Respiration_PP" key="From_PP" />
+          <ColumnGroup title="呼吸">
+            <Column title="主要生产者" dataIndex="Respiration_PP" key="From_PP" />
             <Column
-              title="From Detritus"
+              title="碎屑"
               dataIndex="Respiration_D"
               key="From Detritus"
             />
             {/* <Column title="From All" dataIndex="Respiration_All" key="From All" /> */}
           </ColumnGroup>
-          <ColumnGroup title="Throughput">
-            <Column title="From PP" dataIndex="Throughput_PP" key="From_PP" />
+          <ColumnGroup title="通量">
+            <Column title="主要生产者" dataIndex="Throughput_PP" key="From_PP" />
             <Column
-              title="From Detritus"
+              title="碎屑"
               dataIndex="Throughput_D"
               key="From Detritus"
             />
